@@ -1,0 +1,36 @@
+<div class="monks-enhanced-journal flexcol">
+    <div class="mainbar flexcol">
+        <div class="bookmark-bar flexrow">
+            {{#each bookmarks}}
+            <div class="bookmark-button" title="{{this.text}}">{{this.text}}</div>
+            {{/each}}
+        </div>
+        <div class="tab-bar flexrow">
+            {{#each tabs}}
+            <div class="tab-button" title="{{this.text}}">{{this.text}}</div>
+            {{/each}}
+        </div>
+        <div class="navigation flexrow">
+            <a class="backward" title="{{localize 'MonksEnhancedJournal.BackTooltip'}}">
+                <i class="fas fa-caret-left"></i>
+            </a>
+            <a class="forward" title="{{localize 'MonksEnhancedJournal.ForwardTooltip'}}">
+                <i class="fas fa-caret-right"></i>
+            </a>
+            <a class="edit" title="{{localize 'MonksEnhancedJournal.EditTooltip'}}">
+                <i class="fas fa-pencil"></i>
+            </a>
+            <div class="title">
+                {{title}}
+            </div>
+            <input class="search" />
+        </div>
+    </div>
+    <div class="body flexcol">
+        <div class="content"></div>
+        <div class="sidebar"></div>
+        <div class="sidebar-toggle" title="{{localize 'MonksEnhancedJournal.Sidebar'}}">
+            <i class="far fa-window-maximize"></i>
+        </div>
+    </div>
+</div>
