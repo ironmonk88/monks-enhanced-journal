@@ -1,5 +1,17 @@
 {
   "MonksEnhancedJournal.BackTooltip": "",
   "MonksEnhancedJournal.ForwardTooltip": "",
-  "MonksEnhancedJournal.Sidebar": ""
+  "MonksEnhancedJournal.Sidebar": "",
+
+  "MonksTokenBar.allow-player.name": "Allow Players",
+  "MonksTokenBar.allow-player.hint": "Allow Players to use the enhanced journal",
+
+  "MonksEnhancedJournal.journalentry": "Journal Entry",
+  "MonksEnhancedJournal.actor": "Actor",
+  "MonksEnhancedJournal.slideshow": "Slideshow",
+  "MonksEnhancedJournal.picture": "Picture",
+  "MonksEnhancedJournal.person": "Person",
+  "MonksEnhancedJournal.place": "Place",
+  "MonksEnhancedJournal.quest": "Quest",
+  "MonksEnhancedJournal.encounter": "Encounter"
 }

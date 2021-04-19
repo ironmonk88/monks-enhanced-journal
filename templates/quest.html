@@ -1,0 +1,45 @@
+<div class="flexcol quest-container">
+    <header class="sheet-header journal-header flexrow">
+        <img class="profile" src="{{entity.img}}" data-edit="entity.img" onerror="this.src='modules/monks-enhanced-journal/assets/quest.png'">
+        <section class="header-details">
+            <h1 class="questname"><input name="name" type="text" value="{{name}}" placeholder="Quest Name"></h1>
+            <div class="form-group">
+                <label>Source</label>
+                <input type="text" name="entity.source" placeholder="Source" value="{{entity.source}}" />
+            </div>
+            <div class="form-group">
+                <label>Seen</label>
+                <input type="checkbox" name="entity.seen" checked="{{entity.seen}}" />
+            </div>
+            <div class="form-group">
+                <label>Completed</label>
+                <input type="checkbox" name="entity.completed" checked="{{entity.completed}}" />
+            </div>
+        </section>
+    </header>
+    <nav class="sheet-navigation tabs" data-group="primary">
+        <a class="item active" data-tab="description">Description</a>
+        <a class="item" data-tab="rewards">Rewards</a>
+        <a class="item" data-tab="notes">Notes</a>
+    </nav>
+    <section class="sheet-body">
+        <div class="tab description flexrow active" data-group="primary" data-tab="description">
+            <div class="editor-content" data-edit="entity.summary">
+                {{{entity.summary}}}
+            </div>
+            <a class="editor-edit" style="display:none;"><i class="fas fa-edit"></i></a>
+        </div>
+        <div class="tab rewards flexrow active" data-group="primary" data-tab="rewards">
+            XP, or Items
+        </div>
+        <div class="tab notes flexcol active" data-group="primary" data-tab="notes">
+            <div style="flex: 0 0 20px;">These will only be viewable by you.</div>
+            <div>
+                <textarea name="userdata.notes" style="width: calc(100% - 4px);height: calc(100% - 4px)">
+                    {{userdata.notes}}
+                </textarea>
+            </div>
+        </div>
+    </section>
+    <!-- Picture, Name, Source, Task/Description, Completion, Reward(XP, Items), Notes, isSeen, isComplete-->
+</div>
