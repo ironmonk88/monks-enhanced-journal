@@ -3,26 +3,153 @@
         <input name="name" type="text" value="{{name}}" placeholder="Encounter Name">
     </div>
     <div class="encounter-content">
-        <div class="editor-content" data-edit="entity.summary">
-            {{{entity.summary}}}
-        </div>
-        <a class="editor-edit" style="display:none;"><i class="fas fa-edit"></i></a>
-    </div>
-    <div class="encounter-sidebar flexcol">
         <div>
-            <h2>Monsters</h2>
-            <!-- -->
+            {{editor target="content.summary" content=content.summary editable=true button=true}}
         </div>
-        <div>
-            <h2>Items</h2>
-            Drag drop? But just a regular list with image and name<br/>
-            Select items
-        </div>
-        <div>
-            <h2>DCs</h2>
-        </div>
-        <div>
-            <h2>Traps</h2>
+        <div class="encounter-sidebar flexcol">
+            <div style="height:100%;">
+                <ol class="items-list encounter-monsters">
+                    <li class="items-header flexrow">
+                        <h3 class="item-name flexrow">Monsters</h3>
+
+                        <div class="item-controls flexrow">
+                        </div>
+                    </li>
+
+                    <ol class="item-list">
+                        {{#each content.monsters}}
+                        <li class="item flexrow " data-item-id="{{this.id}}" draggable="true">
+                            <div class="item-name flexrow">
+                                <div class="item-image" style="background-image: url('{{this.img}}')"></div>
+                                <h4>{{this.name}}</h4>
+                            </div>
+
+                            <div class="item-controls flexrow">
+                                <a class="item-control item-edit" title="Edit Monster"><i class="fas fa-edit"></i></a>
+                                <a class="item-control item-delete" title="Delete Monster"><i class="fas fa-trash"></i></a>
+                            </div>
+                        </li>
+                        {{/each}}
+                    </ol>
+                </ol>
+            </div>
+            <div>
+                <ol class="items-list encounter-items">
+                    <li class="items-header flexrow">
+                        <h3 class="item-name flexrow">Items</h3>
+
+                        <div class="item-controls item-qty">Qty</div>
+
+                        <div class="item-controls flexrow">
+                            <a class="item-control item-create" title="Create Item" data-type="loot">
+                                <i class="fas fa-plus"></i> Add
+                            </a>
+                        </div>
+                    </li>
+
+                    <ol class="item-list">
+                        {{#each content.items}}
+                        <li class="item flexrow " data-item-id="{{this.id}}" draggable="true">
+                            <div class="item-name flexrow">
+                                <div class="item-image" style="background-image: url('{{this.img}}')"></div>
+                                <h4>{{this.name}}</h4>
+                            </div>
+
+                            <div class="item-controls item-qty">
+                                <input type="text" name="qty" value="{{this.qty}}" style="text-align:center;" />
+                            </div>
+
+                            <div class="item-controls flexrow">
+                                <a class="item-control item-edit" title="Edit Item"><i class="fas fa-edit"></i></a>
+                                <a class="item-control item-delete" title="Delete Item"><i class="fas fa-trash"></i></a>
+                            </div>
+                        </li>
+                        {{/each}}
+                    </ol>
+                </ol>
+            </div>
+            <div>
+                <ol class="items-list encounter-dcs">
+                    <li class="items-header flexrow">
+                        <h3 class="item-name flexrow">DCs</h3>
+
+                        <div class="item-detail item-attribute">Attribute</div>
+                        <div class="item-detail item-dc">DC</div>
+
+                        <div class="item-controls flexrow">
+                            <a class="item-control dc-create" title="Create DC" data-type="dc">
+                                <i class="fas fa-plus"></i> Add
+                            </a>
+                        </div>
+                    </li>
+
+                    <ol class="item-list">
+                        {{#each content.dcs}}
+                        <li class="item flexrow " data-item-id="{{this.id}}" draggable="false">
+                            <div class="item-name flexrow rollable">
+                                <div class="item-image" style="background-image: url('{{this.img}}')"></div>
+                                <h4>{{this.name}}</h4>
+                            </div>
+
+                            <div class="item-detail item-attribute">
+                                {{this.label}}
+                            </div>
+                            <div class="item-detail item-dc">
+                                DC {{this.dc}}
+                            </div>
+
+                            <div class="item-controls flexrow">
+                                <a class="item-control dc-edit" title="Edit DC"><i class="fas fa-edit"></i></a>
+                                <a class="item-control dc-delete" title="Delete DC"><i class="fas fa-trash"></i></a>
+                            </div>
+                        </li>
+                        {{/each}}
+                    </ol>
+                </ol>
+            </div>
+            <div>
+                <ol class="items-list encounter-traps">
+                    <li class="items-header flexrow">
+                        <h3 class="item-name flexrow">Traps</h3>
+
+                        <div class="item-detail item-find">Find</div>
+                        <div class="item-detail item-disarm">Disarm</div>
+                        <div class="item-detail item-avoid">Avoid</div>
+
+                        <div class="item-controls flexrow">
+                            <a class="item-control trap-create" title="Create Trap" data-type="dc">
+                                <i class="fas fa-plus"></i> Add
+                            </a>
+                        </div>
+                    </li>
+
+                    <ol class="item-list">
+                        {{#each content.traps}}
+                        <li class="item flexrow " data-item-id="{{this.id}}" draggable="false">
+                            <div class="item-name flexrow rollable">
+                                <div class="item-image" style="background-image: url('{{this.img}}')"></div>
+                                <h4>{{this.name}}</h4>
+                            </div>
+
+                            <div class="item-detail item-find">
+                                {{this.finddc}}
+                            </div>
+                            <div class="item-detail item-disarm">
+                                {{this.disarmdc}}
+                            </div>
+                            <div class="item-detail item-avoid">
+                                {{this.avoiddc}}
+                            </div>
+
+                            <div class="item-controls flexrow">
+                                <a class="item-control trap-edit" title="Edit Trap"><i class="fas fa-edit"></i></a>
+                                <a class="item-control trap-delete" title="Delete Trap"><i class="fas fa-trash"></i></a>
+                            </div>
+                        </li>
+                        {{/each}}
+                    </ol>
+                </ol>
+            </div>
         </div>
     </div>
 </div>

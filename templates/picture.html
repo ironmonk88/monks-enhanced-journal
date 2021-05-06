@@ -2,5 +2,8 @@
     <div class="header-name">
         <input name="name" type="text" value="{{name}}" placeholder="Picture Name">
     </div>
-    <img class="picture-img" src="{{entity.img}}" data-edit="entity.img" onerror="this.src = 'icons/svg/mystery-man.svg'" />
+    <div class="flexcol" style="overflow:hidden;">
+        <!--<div class="img-background" style="background-image: url('{{content.img}}')"></div>-->
+        <img class="picture-img" src="{{content.img}}" data-edit="content.img" onerror="this.src = 'icons/svg/mystery-man.svg'" />
+    </div>
 </div>

@@ -2,9 +2,40 @@
     <div class="header-name">
         <input name="name" type="text" value="{{name}}" placeholder="Encounter Name">
     </div>
-    <div class="slide-body">
-        <div class="slide"><img src="" /></div>
-        <!-- list of pictures, transition, top text, middle text, bottom text,
-        fade delay, fade in length, fade wait, fade out length, sound effect, background music, cover everything/cover just the canvas -->
+    <div class="slideshow-edit">
+        <div class="flexcol" style="flex-grow:0;padding:0px 8px;">
+            <div class="form-group" style="flex: 0 0 30px;">
+                <label for="content.showas">Show As</label>
+                <div class="form-fields">
+                    <select name="content.showas">
+                        {{ selectOptions showasOptions selected=content.showas }}
+                    </select>
+                </div>
+            </div>
+            <div class="form-group" style="flex: 0 0 30px;">
+                <label for="sound">Audio File</label>
+                <div class="form-fields">
+                    {{ filePicker type="audio" target="content.audio" }}
+                    <input class="image" type="text" name="content.audio" placeholder="path/audio.mp3" value="{{content.audio}}">
+                </div>
+            </div>
+        </div>
+        <div style="display: flex; overflow: hidden; max-height: 100%;">
+            <div class="slideshow-body">
+                {{#each content.slides}}
+                <div class="slide" data-slide-id="{{this.id}}">
+                    <div class="slide-background"><div style="{{this.background}}"></div></div>
+                    <img src="{{this.img}}" style="object-fit:{{this.sizing}}" />
+                    <div class="slide-text flexcol" style="text-align:{{this.text.align}};color:{{this.text.color}};">
+                        <div class="text-upper"><div style="background-color:{{this.textbackground}};">{{this.topText}}</div></div>
+                        <div class="text-middle"><div style="background-color:{{this.textbackground}};">{{this.middleText}}</div></div>
+                        <div class="text-lower"><div style="background-color:{{this.textbackground}};">{{this.bottomText}}</div></div>
+                    </div>
+                </div>
+                {{/each}}
+            </div>
+        </div>
+    </div>
+    <div class="slideshow-edit">
     </div>
 </div>

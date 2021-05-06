@@ -3,8 +3,20 @@
   "MonksEnhancedJournal.ForwardTooltip": "",
   "MonksEnhancedJournal.Sidebar": "",
 
-  "MonksTokenBar.allow-player.name": "Allow Players",
-  "MonksTokenBar.allow-player.hint": "Allow Players to use the enhanced journal",
+  "MonksEnhancedJournal.allow-player.name": "Allow Players",
+  "MonksEnhancedJournal.allow-player.hint": "Allow Players to use the enhanced journal",
+  "MonksEnhancedJournal.rolling-module.name": "Dice Rolling Module",
+  "MonksEnhancedJournal.rolling-module.hint": "Module to use when requesting a dice roll",
+
+  "MonsEnhancedJournal.SlideConfiguration": "Slide Configuration",
+  "MonsEnhancedJournal.DCConfiguration": "DC Configuration",
+  "MonsEnhancedJournal.TrapConfiguration": "Trap Configuration",
+  "MonksEnhancedJournal.Update": "Update",
+  "MonksEnhancedJournal.Ability": "Ability",
+  "MonksEnhancedJournal.Skill": "Skill",
+
+  "MonksEnhancedJournal.NewTab": "New Tab",
+  "MonksEnhancedJournal.OpenEntry": "Open an Entry",
 
   "MonksEnhancedJournal.journalentry": "Journal Entry",
   "MonksEnhancedJournal.actor": "Actor",

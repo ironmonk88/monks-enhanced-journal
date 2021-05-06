@@ -1,5 +1,6 @@
-import { EnhancedDirectory } from "./enhanced-directory.js"
+import { makeid } from "../monks-enhanced-journal.js";
 import { MonksEnhancedJournal, log, i18n, setting } from "../monks-enhanced-journal.js"
+import { SubSheet, ActorSubSheet } from "../classes/EnhancedJournalEntry.js"
 
 export class EnhancedJournalSheet extends JournalSheet {
     tabs = [];
@@ -8,9 +9,17 @@ export class EnhancedJournalSheet extends JournalSheet {
     constructor(object, options = {}) {
         super(object, options);
 
-        this.tabs = duplicate(game.user.getFlag('monks-enhanced-journal', 'tabs') || []);
+        this.tabs = duplicate(game.user.getFlag('monks-enhanced-journal', 'tabs') || [])
+            /*.map(t => {
+            if(t.entityId != undefined)
+                t.history = [t.entityId];
+            return t;
+        });*/
         this.tabs.active = () => {
-            return this.tabs.find(t => t.active);
+            let tab = this.tabs.find(t => t.active);
+            if (tab == undefined && this.tabs.length > 0)
+                tab = this.tabs[0];
+            return tab;
         };
         this.bookmarks = duplicate(game.user.getFlag('monks-enhanced-journal', 'bookmarks') || []);
 
@@ -22,17 +31,20 @@ export class EnhancedJournalSheet extends JournalSheet {
         this.document = null;
 
         MonksEnhancedJournal.journal = this;
+
+        this.sheettabs = new Tabs({ navSelector: ".tabs", contentSelector: ".sheet-body", initial: "description", callback: function () { } });
     }
 
     static get defaultOptions() {
+        let expanded = game.user.isGM || setting('allow-player');
         return mergeObject(super.defaultOptions, {
             title: "Monk's Enhanced Journal",
-            classes: ["sheet", "journal-sheet", "monks-journal-sheet", `${game.system.id}`, (game.user.isGM || setting('allow-player') ? '' : 'condensed')],
+            classes: ["sheet", "journal-sheet", "monks-journal-sheet", `${game.system.id}`, (expanded? '' : 'condensed')],
             popOut: true,
-            width: 1025,
-            height: 700,
+            width: (expanded ? 1025 : 700),
+            height: (expanded ? 700 : 650),
             resizable: true,
-            dragDrop: [{ dragSelector: ".actor", dropSelector: "#MonksEnhancedJournal .body" }],
+            dragDrop: [{ dragSelector: ".entity.actor,.entity.item", dropSelector: "#MonksEnhancedJournal .body" }],
             closeOnSubmit: false,
             submitOnClose: false,
             submitOnChange: true,
@@ -54,8 +66,28 @@ export class EnhancedJournalSheet extends JournalSheet {
         );
     }
 
+    checkForm() {
+        let that = this;
+        window.setInterval(function () {
+            if (that.form == undefined)
+                debugger;
+        }, 10);
+    }
+
     _render(force, options = {}) {
         MonksEnhancedJournal.journal = this;
+        if (options.data) {
+            return new Promise((resolve, reject) => {
+                if (this.subsheet != undefined)
+                    this.subsheet.refresh();
+
+                if (this.form == undefined)
+                    this.form = $('.monks-enhanced-journal .body > .content form', this.element).get(0);
+                //this is an entity update, but we don't want to update the entire window because of it.
+                //this.display(this.object); //+++is this needed?
+            });
+        }
+
         return super._render(force, options).then(() => {
             /*if (!this.directory.rendered) {
                 this.directory._render(true).then(() => {
@@ -74,18 +106,13 @@ export class EnhancedJournalSheet extends JournalSheet {
         })
     }
 
-    renderDirectory() {
-
+    async _renderInner(...args) {
+        log('render inner:', ...args);
+        return super._renderInner(...args);
     }
 
-    makeid() {
-        var result = '';
-        var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-        var charactersLength = characters.length;
-        for (var i = 0; i < 16; i++) {
-            result += characters.charAt(Math.floor(Math.random() * charactersLength));
-        }
-        return result;
+    renderDirectory() {
+
     }
 
     get id() {
@@ -96,7 +123,14 @@ export class EnhancedJournalSheet extends JournalSheet {
         return "modules/monks-enhanced-journal/templates/main.html";
     }
 
-    get entrytype() {
+    get getEntityTypes() {
+        return mergeObject(MonksEnhancedJournal.getEntityTypes(), {
+            actor: ActorSubSheet,
+            blank: SubSheet
+        });
+    }
+
+    get entitytype() {
         if (this.object instanceof Actor)
             return 'actor';
 
@@ -104,10 +138,6 @@ export class EnhancedJournalSheet extends JournalSheet {
         let type = (flags != undefined ? flags['monks-enhanced-journal']?.type : null) || 'journalentry';
 
         return type;
-    }
-
-    get content() {
-        return JSON.parse(this.object.data.content);
     }
 
     get title() {
@@ -128,18 +158,42 @@ export class EnhancedJournalSheet extends JournalSheet {
         log('tab change', tab, event);
     }
 
+    canBack(tab) {
+        return tab.history.length > 1 && (tab.historyIdx == undefined || tab.historyIdx < tab.history.length - 1);
+    }
+
+    canForward(tab) {
+        return tab.history.length > 1 && tab.historyIdx && tab.historyIdx > 0;
+    }
+
+    findEntity(entityId, text) {
+        if (entityId == undefined)
+            return { apps: {}, data: { flags: { 'monks-enhanced-journal': { type: 'blank' } }, content: { msg: "MonksEnhancedJournal.OpenEntry" } } };
+        else {
+            let entity = game.journal.get(entityId);
+            if (entity == undefined)
+                entity = game.actors.get(entityId);
+            if (entity == undefined)
+                entity = { apps: {}, data: { name: text, flags: { 'monks-enhanced-journal': { type: 'blank' } }, content: { msg: `Cannot find the entity: ${text}` } } };
+
+            return entity;
+        }
+    }
+
     addTab(entity) {
         if (entity?.currentTarget != undefined)
             entity = null;
 
         let tab = {
-            id: this.makeid(),
+            id: makeid(),
             text: entity?.data.name || 'New Tab',
             active: false,
             entityId: entity?.id,
-            entity: entity || { data: { name: '', content: '<div class="journal-message">Open an article</div>' } },
+            entity: entity || { apps: {}, data: { flags: { 'monks-enhanced-journal': { type: 'blank' } }, content: { msg: "MonksEnhancedJournal.OpenEntry"} } },
             history: []
         };
+        if (tab.entityId != undefined)
+            tab.history.push(tab.entityId);
         this.tabs.push(tab);
         $('<div>')
             .addClass('journal-tab')
@@ -153,9 +207,14 @@ export class EnhancedJournalSheet extends JournalSheet {
             .on('click', $.proxy(this.activateTab, this, tab))
             .insertBefore($('.tab-add', this.element));
         this.activateTab(tab);  //activating the tab should save it
+
+        return tab;
     }
 
     activateTab(tab, event) {
+        if (tab == undefined)
+            tab = this.addTab();
+
         if (event != undefined)
             event.preventDefault();
 
@@ -172,26 +231,32 @@ export class EnhancedJournalSheet extends JournalSheet {
         if (currentTab?.id != tab.id || this.document == undefined) {
             if (tab.entity == undefined) {
                 //try to find the entity
+                tab.entity = this.findEntity(tab.entityId, tab.text);
+                /*
                 if (tab.entityId == undefined)
-                    tab.entity = { data: { name: '', content: `<div class="journal-message">Open an article</div>` } };
+                    tab.entity = { apps: {}, data: { flags: { 'monks-enhanced-journal': { type: 'blank' } }, content: { msg: "MonksEnhancedJournal.OpenEntry"} } };
                 else {
                     tab.entity = game.journal.get(tab.entityId);
                     if (tab.entity == undefined)
                         tab.entity = game.actors.get(tab.entityId);
                     if (tab.entity == undefined)
-                        tab.entity = { data: { name: tab.text, content: `<div class="journal-message">Cannot find the entity: ${tab.text}</div>` } };
-                }
+                        tab.entity = { apps: {}, data: { name: tab.text, flags: { 'monks-enhanced-journal': { type: 'blank' } }, content: { msg: `Cannot find the entity: ${tab.text}` } } };
+                }*/
             }
             this.display(tab.entity);
         }
 
+        $('.back-button', this.element).toggleClass('disabled', !this.canBack(tab));
+        $('.forward-button', this.element).toggleClass('disabled', !this.canForward(tab));
+
         if (currentTab?.id == tab.id)
             return false;
 
+        log('activateTab JournalID', this.appId, this.tabs);
         if (currentTab != undefined)
             currentTab.active = false;
         tab.active = true;
-        $('.journal-tab[data-tabid="' + tab.id + '"]', this.element).addClass('active').siblings().removeClass('active');
+        $(`.journal-tab[data-tabid="${tab.id}"]`, this.element).addClass('active').siblings().removeClass('active');
         this.saveTabs();
 
         return true;
@@ -200,20 +265,32 @@ export class EnhancedJournalSheet extends JournalSheet {
     updateTab(tab, entity) {
         if (tab != undefined) {
             if (tab.entityId != entity.data._id) {
-                if (game.user.isGM || setting('allow-player')) {    //only save the history if the player is a GM or they get the full journal experience
-                    if (tab.history == undefined)
-                        tab.history = [];
-                    tab.history.push(tab.entityId);
-                }
                 tab.text = entity.data.name;
                 tab.entityId = entity.data._id;
                 tab.entity = entity;
+
+                if ((game.user.isGM || setting('allow-player')) && tab.entityId != undefined) {    //only save the history if the player is a GM or they get the full journal experience... and if it's not a blank tab
+                    if (tab.history == undefined)
+                        tab.history = [];
+                    if (tab.historyIdx != undefined) {
+                        tab.history = tab.history.slice(tab.historyIdx);
+                        tab.historyIdx = 0;
+                    }
+                    tab.history.unshift(tab.entityId);
+
+                    if (tab.history.length > 10)
+                        tab.history = tab.history.slice(0, 9);
+                }
+
                 this.saveTabs();
 
-                $('.journal-tab[data-tabid="' + tab.id + '"]', this.element).attr('title', tab.text).find('.tab-content span').html(tab.text);
+                $(`.journal-tab[data-tabid="${tab.id}"]`, this.element).attr('title', tab.text).find('.tab-content span').html(tab.text);
             } else if (tab.entity == undefined) {
                 tab.entity = entity;
             }
+
+            $('.back-button', this.element).toggleClass('disabled', !this.canBack(tab));
+            $('.forward-button', this.element).toggleClass('disabled', !this.canForward(tab));
         }
 
         this.display(tab.entity);
@@ -246,13 +323,99 @@ export class EnhancedJournalSheet extends JournalSheet {
 
     saveTabs() {
         let update = this.tabs.map(t => {
+            let entity = t.entity;
+            delete t.entity;
             let tab = duplicate(t);
+            t.entity = entity;
+            delete tab.element;
             delete tab.entity;
-            delete tab.history;
+            //delete tab.history;  //technically we could save the history if it's just an array of ids
+            //delete tab.historyIdx;
             delete tab.userdata;
             return tab;
         });
         game.user.setFlag('monks-enhanced-journal', 'tabs', update);
+    }
+
+    changeHistory(event) {
+        if (!$(event.currentTarget).hasClass('disabled')) {
+            let dir = event.currentTarget.dataset.history;
+            let tab = this.tabs.active();
+
+            if (tab.history.length > 1) {
+                tab.historyIdx = clampNumber(((tab.historyIdx == undefined ? 0 : tab.historyIdx) + (dir == 'back' ? 1 : -1)), 0, (tab.history.length - 1));
+
+                tab.entityId = tab.history[tab.historyIdx];
+                tab.entity = this.findEntity(tab.entityId, tab.text);
+                /*
+                tab.entity = game.journal.get(tab.entityId);
+                if (tab.entity == undefined)
+                    tab.entity = game.actors.get(tab.entityId);
+                if (tab.entity == undefined)
+                    tab.entity = { apps: {}, data: { name: tab.text, flags: { 'monks-enhanced-journal': { type: 'blank' } }, content: { msg: `Cannot find the entity: ${tab.text}` } } };
+                    */
+
+                this.saveTabs();
+
+                this.display(tab.entity);
+
+                $('.back-button', this.element).toggleClass('disabled', !this.canBack(tab));
+                $('.forward-button', this.element).toggleClass('disabled', !this.canForward(tab));
+            }
+        }
+    }
+
+    addBookmark() {
+        //get the current tab and save the entity and name
+        let tab = this.tabs.active();
+
+        let entitytype = function(entity) {
+            if (entity instanceof Actor)
+                return 'actor';
+
+            let flags = entity.data?.flags;
+            let type = (flags != undefined ? flags['monks-enhanced-journal']?.type : null) || 'journalentry';
+
+            return type;
+        }
+
+        let bookmark = {
+            id: makeid(),
+            entityId: tab.entityId,
+            text: tab.entity.name,
+            icon: MonksEnhancedJournal.getIcon(entitytype(tab.entity))
+        }
+
+        this.bookmarks.push(bookmark);
+
+        $('<div>')
+            .addClass('bookmark-button')
+            .attr({ title: bookmark.text, 'data-bookmark-id': bookmark.id, 'data-entity-id': bookmark.entityId })
+            .html(`<i class="fas ${bookmark.icon}"></i> ${bookmark.text}`)
+            .appendTo('.bookmark-bar', this.element).get(0).click(this.activateBookmark.bind(this));
+
+        this.saveBookmarks();
+    }
+
+    activateBookmark(event) {
+        let id = event.currentTarget.dataset.bookmarkId;
+        let bookmark = this.bookmarks.find(b => b.id == id);
+        let entity = this.findEntity(bookmark.entityId, bookmark.text);
+        this.open(entity);
+    }
+
+    removeBookmark(bookmark) {
+        this.bookmarks.findSplice(b => b.id == bookmark.id);
+        $(`.bookmark-button[data-bookmark-id="${bookmark.id}"]`, this.element).remove();
+        this.saveBookmarks();
+    }
+
+    saveBookmarks() {
+        let update = this.bookmarks.map(b => {
+            let bookmark = duplicate(b);
+            return bookmark;
+        });
+        game.user.setFlag('monks-enhanced-journal', 'bookmarks', update);
     }
 
     async open(entity, newtab) {
@@ -276,24 +439,34 @@ export class EnhancedJournalSheet extends JournalSheet {
         }
     }
 
+    /*
     gotoURL(event) {
         let ctrl = $(event.currentTarget);
         let url = ctrl.val();
 
         $('.content iframe', this.element).attr('src', url);
-    }
+    }*/
 
     async display(entity) {
         this.object = entity;
 
+        //make sure that it sticks to one EnhancedJournal, and calling sheet() has a habit of creating a new one, if this one isn't added manually
+        if (this.object.apps[this.appId] == undefined)
+            this.object.apps[this.appId] = this;
+
         $('.title input', this.element).val(entity.data.name);
 
-        if (entity instanceof Actor) {
+        let types = this.getEntityTypes;
+        let type = (entity instanceof Actor ? 'actor' : this.entitytype);
+
+        /*if (entity instanceof Actor) {
             const sheet = entity.sheet;
             await sheet._render(true);
             $(sheet.element).hide();
 
-
+            sheet._onChangeTab = function (event, tabs, active) {
+                log('clicking tab');
+            }
 
             this.document = $('<div>').addClass(sheet.options.classes);
             this.document.append($('.window-content', sheet.element));
@@ -303,48 +476,21 @@ export class EnhancedJournalSheet extends JournalSheet {
             this.activateDocumentListeners($('.content form > *', this.element).get(0), 'actor');
 
             sheet.close();
-        } else {
-            let types = MonksEnhancedJournal.getEntityTypes();
-            let flags = entity.data?.flags;
-            let type = (flags != undefined ? flags['monks-enhanced-journal']?.type : null) || 'journalentry';
+        } else {*/
+            //let types = MonksEnhancedJournal.getEntityTypes();
+            //let type = this.entitytype;
 
-            let data = {};
-            if (Object.keys(types).includes(type)) {
-                data = entity.data;
-                try {
-                    data.entity = JSON.parse(entity.data.content);
-                } catch (err) {
-                }
+            let subsheet = types[type] || JournalEntrySubSheet;
 
-                //set the defaults
-                let defValues = {};
-                switch (type) {
-                    case 'person':
-                        defValues = { img: 'modules/monks-enhanced-journal/assets/person.png' };
-                        break;
-                    case 'place':
-                        defValues = { img: 'modules/monks-enhanced-journal/assets/place.png' };
-                        break;
-                }
+            this.subsheet = new subsheet(this.object);
 
-                data.entity = mergeObject(defValues, data.entity, { recursive: false });
-                data.userid = game.user.id;
+            this.document = await this.subsheet.render();
 
-                if (data[game.user.id])
-                    data.userdata = data[game.user.id];
+            $('.content', this.element).attr('entity-type', type).attr('entity-id', this.object.id);
+            $('.content form', this.element).empty().append(this.document);
 
-                //+++ if this is an actor then we need to find the template for that actor and use it instead
-                let template = (types[type].template || `modules/monks-enhanced-journal/templates/${type}.html`);
-                this.document = await renderTemplate(template, data);
-            } else {
-                data = entity.data.content;
-                this.document = entity.data.content;
-            }
-
-            $('.content', this.element).attr('entity-type', type);
-            $('.content form', this.element).html(this.document);
-            this.activateDocumentListeners($('.content form > *', this.element).get(0), type);
-        }
+        this.subsheet.activateControls($('#journal-buttons', this.element).empty());
+        //}
         log('Open entity', entity);
     }
 
@@ -354,16 +500,6 @@ export class EnhancedJournalSheet extends JournalSheet {
 
     collapseSidebar() {
 
-    }
-
-    _onDragLeftDrop(event) {
-        log('drag left drop event', event);
-        return super._onDragLeftDrop(event);
-    }
-
-    _onHandleDragDrop(event) {
-        log('handle drag drop event', event);
-        return super._onHandleDragDrop(event);
     }
 
     _onDrop(event) {
@@ -378,15 +514,29 @@ export class EnhancedJournalSheet extends JournalSheet {
 
         if (data.type == 'Actor') {
             let actor = game.actors.get(data.id);
-            this.open(actor);
+            if (this.entitytype == 'encounter') {
+                let content = this.object.data.content;
+                if (content.monsters == undefined)
+                    content.monsters = [];
+                content.monsters.push({ id: actor.id, img: actor.img, name: actor.name });
+                this.object.update({ content: JSON.stringify(content) });
+
+                this.display(this.object); //+++this is really inefficient
+            }else
+                this.open(actor);
+        } else if (data.type == 'Item' && this.entitytype == 'encounter') {
+            let item = game.items.get(data.id);
+
+            let content = this.object.data.content;
+            if (content.items == undefined)
+                content.items = [];
+            content.items.push({ id: item.id, img: item.img, name: item.name, qty: 1 });
+            this.object.update({ content: JSON.stringify(content) });
+
+            this.display(this.object); //+++this is really inefficient
         }
 
         log('drop data', event, data);
-    }
-
-    _canDragDrop(selector) {
-        log('can drag drop', selector);
-        return super._canDragDrop(selector);
     }
 
     _handleDropData(event, data) {
@@ -405,57 +555,57 @@ export class EnhancedJournalSheet extends JournalSheet {
     }
 
     async _onSwapMode(event, mode) {
-        //don't do anything
-    }
-
-    _onEditImage(event) {
-        const fp = new FilePicker({
-            type: "image",
-            current: this.object.data.img,
-            callback: path => {
-                event.currentTarget.src = path;
-                this._onSubmit(event, { preventClose: true });
-            },
-            top: this.position.top + 40,
-            left: this.position.left + 10
-        })
-        return fp.browse();
-    }
-
-    onEditDescription(html) {
-        if ($('div.tox-tinymce', html).length > 0) {
-            //close the editor
-            const name = $('.editor-content', html).attr("data-edit");
-            const editor = this.editors[name];
-            if (!editor || !editor.mce) throw new Error(`${name} is not an active editor name!`);
-            editor.active = false;
-            editor.changed = false;
-            const mce = editor.mce;
-            mce.remove();
-            mce.destroy();
-            editor.mce = null;
-            $('.sheet-body', html).removeClass('editing');
-        } else {
-            $('.sheet-body .editor-edit', html).click();
-            $('.sheet-body', html).addClass('editing');
-        }
+        //don't do anything, but leave this here to prevent the regular journal page from doing anything
     }
 
     _onSubmit(ev) {
-        let type = this.entrytype;
+        let type = this.entitytype;
 
-        if (type == 'encounter')
-            $('.sheet-body', this.element).removeClass('editing');
+        //if (type == 'encounter')
+        //    $('.sheet-body', this.element).removeClass('editing');
+
+        let update = {};
             
-        const formData = this._getSubmitData();
-        let content = this.content;
-        content = mergeObject(content, formData.entity, { recursive: false }); 
-        if (formData.userdata)
-            content[game.user.id] = formData.userdata;
+        const formData = expandObject(this._getSubmitData());
 
-        return this.object.update({ name: formData.name, content: JSON.stringify(content) }).then(() => {
-            this.display(this.object);
-        });
+        if (formData.name)
+            update.name = formData.name;
+
+        if (formData.content) {
+            if (this.entitytype == 'journalentry') {
+                update.content = formData.content;
+            } else {
+                update.content = this.object.data.content;
+                update.content = mergeObject(update.content, formData.content, { recursive: false });
+                if (formData.userdata) {
+                    update.content[game.user.id] = formData.userdata;
+                }
+
+                if (update.content.items) {
+                    for (let item of update.content.items) {
+                        delete item.item;
+                    }
+                }
+
+                update.content = JSON.stringify(update.content);
+            }
+        }
+
+        if (!this.isEditable && formData.userdata) {
+            //need to have the GM update this, but only the user notes
+            game.socket.emit(MonksEnhancedJournal.SOCKET, {
+                action: "saveUserData",
+                entityId: this.object.id,
+                userId: game.user.id,
+                userdata: formData.userdata
+            });
+            return new Promise(() => { });
+        }else
+            return this.object.update(update);
+    }
+
+    saveData() {
+        this.object.update({ content: JSON.stringify(this.object.data.content) });
     }
 
     _getHeaderButtons() {
@@ -465,42 +615,8 @@ export class EnhancedJournalSheet extends JournalSheet {
         return buttons;
     }
 
-    getEntityControls(type) {
-        //{ id: 'show', text: '', icon: '', callback: function () { }}
-        let ctrls = [];
-        switch (type) {
-            case 'person':
-            case 'place':
-            case 'quest':
-                ctrls =
-                [
-                    { id: 'show', text: 'Show to Players', icon: 'fa-eye', conditional: game.user.isGM, callback: this._onShowPlayers },
-                    { id: 'edit', text: 'Edit Description', icon: 'fa-pencil-alt', conditional: (entity) => { return entity.permission == ENTITY_PERMISSIONS.OWNER }, callback: this.onEditDescription }
-                ];
-            case 'picture': ctrls = [
-                { id: 'show', text: 'Show to Players', icon: 'fa-eye', conditional: game.user.isGM, callback: this._onShowPlayers }
-            ];
-            case 'slideshow': ctrls = [
-                { id: 'add', text: 'Add Slide', icon: 'fa-plus', conditional: game.user.isGM, callback: function () { } },
-                { id: 'clear', text: 'Clear All', icon: 'fa-trash', conditional: game.user.isGM, callback: function () { } },
-                { id: 'play', text: 'Play', icon: 'fa-play', conditional: game.user.isGM, callback: function () { } },
-                { id: 'pause', text: 'Pause', icon: 'fa-pause', conditional: game.user.isGM, callback: function () { } },
-                { id: 'stop', text: 'Stop', icon: 'fa-stop', conditional: game.user.isGM, callback: function () { } }
-            ];
-            case 'encounter':
-            case 'journalentry':
-                ctrls = [
-                    { id: 'search', text: 'Search', icon: 'fa-search', callback: function () { } },
-                    { id: 'show', text: 'Show to Players', icon: 'fa-eye', conditional: game.user.isGM, callback: this._onShowPlayers },
-                    { id: 'edit', text: 'Edit Description', icon: 'fa-pencil-alt', conditional: (entity) => { return entity.permission == ENTITY_PERMISSIONS.OWNER }, callback: this.onEditDescription }
-                ];
-        }
-
-        return ctrls;
-    }
-
     async _onShowPlayers(event) {
-        if (this.entrytype == 'picture') {
+        if (this.entitytype == 'picture') {
             game.socket.emit("shareImage", {
                 image: this.content.img,
                 title: this.object.name,
@@ -511,62 +627,43 @@ export class EnhancedJournalSheet extends JournalSheet {
                 title: this.object.name,
                 which: "all"
             }));
-        } else if (this.entrytype == 'slideshow') {
+        } else if (this.entitytype == 'slideshow') {
             //start a slideshow?
         } else
             super._onShowPlayers(event);
     }
 
-    deleteSlide(slide) {
+    _onEditImage(event) {
+        if (this.object.permission < ENTITY_PERMISSIONS.OWNER)
+            return null;
 
-    }
-
-    cloneSlide(slide) {
-    }
-
-    editSlide(slide, options) {
-        //new FolderConfig(folder, options).render(true);
-    }
-
-    _getSlideshowContextOptions() {
-        return [
-            {
-                name: "Edit Slideshow",
-                icon: '<i class="fas fa-edit"></i>',
-                condition: game.user.isGM,
-                callback: header => {
-                    const slide = this.content.slides.get(li.data("entityId"));
-                    const options = { top: li.offsetTop, left: window.innerWidth - 310 - FolderConfig.defaultOptions.width };
-                    this.editSlide(slide, options);
-                }
+        const fp = new FilePicker({
+            type: "image",
+            current: this.object.data.content.img,
+            callback: path => {
+                event.currentTarget.src = path;
+                //I have no idea why the form gets deleted sometimes, but add it back.
+                if (this.form == undefined)
+                    this.form = $('.monks-enhanced-journal .body > .content form', this.element).get(0);
+                this._onSubmit(event, { preventClose: true });
             },
+            top: this.position.top + 40,
+            left: this.position.left + 10
+        })
+        return fp.browse();
+    }
+
+    _contextMenu(html) {
+        this._contextMenu = new ContextMenu(html, ".bookmark-button", [
             {
-                name: "SIDEBAR.Duplicate",
-                icon: '<i class="far fa-copy"></i>',
-                condition: () => game.user.isGM,
-                callback: li => {
-                    const slide = this.content.slides.get(li.data("entityId"));
-                    return this.cloneSlide(entity);
-                }
-            },
-            {
-                name: "SIDEBAR.Delete",
+                name: "Delete",
                 icon: '<i class="fas fa-trash"></i>',
-                condition: () => game.user.isGM,
                 callback: li => {
-                    const slide = this.content.slides.get(li.data("entityId"));
-                    Dialog.confirm({
-                        title: `${game.i18n.localize("SIDEBAR.Delete")} slide`,
-                        content: game.i18n.localize("SIDEBAR.DeleteConfirm"),
-                        yes: this.deleteSlide.bind(slide),
-                        options: {
-                            top: Math.min(li[0].offsetTop, window.innerHeight - 350),
-                            left: window.innerWidth - 720
-                        }
-                    });
+                    const bookmark = this.bookmarks.find(b => b.id === li[0].dataset.bookmarkId);
+                    this.removeBookmark(bookmark);
                 }
             }
-        ];
+        ]);
     }
 
     activateListeners(html) {   
@@ -574,14 +671,19 @@ export class EnhancedJournalSheet extends JournalSheet {
 
         var that = this;
 
+        this._contextMenu(html);
+
         $('.sidebar-toggle', html).on('click', function () { if (this._collapsed) this.expandSidebar(); else this.collapseSidebar(); });
+
+        html.find('.add-bookmark').click(this.addBookmark.bind(this));
+        html.find('.bookmark-button:not(.add-bookmark)').click(this.activateBookmark.bind(this));
 
         html.find('.tab-add').click(this.addTab.bind(this));
         html.find('.journal-tab').click(this.activateTab.bind(this));
         html.find('.journal-tab .close').click(this.removeTab.bind(this));
 
-        html.find('.navigation .show').click(this._onShowPlayers.bind(this));
-
+        //html.find('.navigation .show').click(this._onShowPlayers.bind(this));
+        /*
         html.find('.navigation .edit').click(function () {
             if ($('div.tox-tinymce', html).length > 0) {
                 //close the editor
@@ -599,7 +701,7 @@ export class EnhancedJournalSheet extends JournalSheet {
                 $('.sheet-body .editor-edit', html).click();
                 $('.sheet-body', html).addClass('editing');
             }
-        });
+        });*/
 
         ui.journal._contextMenu.call(ui.journal, html);
 
@@ -617,61 +719,17 @@ export class EnhancedJournalSheet extends JournalSheet {
         directory.on("click", ".folder-header", ui.journal._toggleFolder.bind(this));
         //this._contextMenu(html);
 
+        $('.back-button, .forward-button').toggle(game.user.isGM || setting('allow-player')).on('click', $.proxy(this.changeHistory, this));
+
         // Intersection Observer
         const observer = new IntersectionObserver(ui.journal._onLazyLoadImage.bind(this), { root: directory[0] });
         entries.each((i, li) => observer.observe(li));
-    }
-
-    activateDocumentListeners(html, type) {
-        if (html != undefined) {
-            let container = $('#journal-buttons', this.element).empty();
-            let ctrls = this.getEntityControls(type);
-            if (ctrls) {
-                for (let ctrl of ctrls) {
-                    if (ctrl.conditional != undefined) {
-                        if (typeof ctrl.conditional == 'function') {
-                            if (!ctrl.conditional.call(this, this.entity))
-                                continue;
-                        }
-                        else if (!ctrl.conditional)
-                            continue;
-                    }
-                    container.append(
-                        $('<div>')
-                            .addClass('nav-button ' + ctrl.id)
-                            .attr('title', ctrl.text)
-                            .append($('<i>').addClass('fas ' + ctrl.icon))
-                            .on('click', $.proxy(ctrl.callback, this, html)));
-                    //<div class="nav-button search" title="Search"><i class="fas fa-search"></i><input class="search" type="text" name="search-entry" autocomplete="off"></div>
-                }
-            }
-
-            $('.back-button, .forward-button').toggle(game.user.isGM || setting('allow-player'));
-
-            $('img[data-edit]', html).on('click', $.proxy(this._onEditImage, this))
-            let editor = $(".editor-content", html).get(0);
-            if(editor != undefined)
-                this._activateEditor(editor);
-
-            this.sheettabs.bind(html);
-
-            if (type == 'encounter') {
-                new ResizeObserver(function (obs) {
-                    log('resize observer', obs);
-                    $(obs[0].target).toggleClass('flexcol', obs[0].contentRect.width < 900).toggleClass('flexrow', obs[0].contentRect.width >= 900);
-                }).observe(html);
-            } else if (type == 'slideshow') {
-                const slideshowOptions = this._getSlideshowContextOptions();
-                Hooks.call(`getMonksEnhancedJournalSlideshowContext`, html, slideshowOptions);
-                if (slideshowOptions) new ContextMenu($(html), ".slide", slideshowOptions);
-            }
-        }
     }
 
     addResizeObserver(html) {
         new ResizeObserver(function (obs) {
             log('resize observer', obs);
             $(obs[0].target).toggleClass('flexcol', obs[0].contentRect.width < 900).toggleClass('flexrow', obs[0].contentRect.width >= 900);
-        }).observe(html);
+        }).observe($('.encounter-content', html).get(0));
     }
 }

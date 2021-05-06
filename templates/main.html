@@ -40,14 +40,14 @@
                 </div>
             </div>
             <div class="bookmark-bar flexrow">
+                <div class="bookmark-button add-bookmark" title="Add Bookmark"><i class="fas fa-star"></i></div>
                 {{#each bookmarks}}
-                <div class="bookmark-button" title="{{this.text}}">{{this.text}}</div>
+                <div class="bookmark-button" title="{{this.text}}" data-bookmark-id="{{this.id}}" data-entity-id="{{this.entityId}}"><div><i class="fas {{this.icon}}"></i> {{this.text}}</div></div>
                 {{/each}}
             </div>
             <div class="navigation flexrow">
-                <div class="nav-button back-button" title="Back"><i class="fas fa-chevron-left"></i></div>
-                <div class="nav-button forward-button disabled" title="Forward"><i class="fas fa-chevron-right"></i></div>
-                <div class="filler" style="margin-right:auto;"></div>
+                <div class="nav-button back-button" title="Back" data-history="back"><i class="fas fa-chevron-left"></i></div>
+                <div class="nav-button forward-button disabled" title="Forward" data-history="forward"><i class="fas fa-chevron-right"></i></div>
                 <div class="button-group flexrow" id="journal-buttons">
                     <div class="nav-button search" title="Search"><i class="fas fa-search"></i><input class="search" type="text" name="search-entry" autocomplete="off" /></div>
                     <div class="nav-button show" title="Show Players"><i class="fas fa-eye"></i></div>

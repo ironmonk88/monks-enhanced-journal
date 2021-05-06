@@ -1,0 +1,84 @@
+<form class="slide-config" autocomplete="off" onsubmit="event.preventDefault();">
+    <header class="form-header">
+        <h3><i class="far fa-image"></i> Details</h3>
+    </header>
+    <div class="form-group">
+        <label for="img">Slide Image</label>
+        <div class="form-fields">
+            {{ filePicker type="image/video" target="img" }}
+            <input class="image" type="text" name="img" placeholder="path/image.png" value="{{object.img}}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="sizing">Sizing</label>
+        <div class="form-fields">
+            <select name="sizing">
+                {{ selectOptions sizingOptions selected=object.sizing }}
+            </select>
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="background.color">Background Colour</label>
+        <div class="form-fields">
+            <input type="text" name="background.color" data-dtype="String" value="{{object.background.color}}">
+            <input type="color" data-edit="background.color" value="{{object.background.color}}">
+        </div>
+    </div>
+    <header class="form-header">
+        <h3><i class="far fa-image"></i> Text</h3>
+    </header>
+    <div class="form-group">
+        <label for="text.content">Text</label>
+        <div class="form-fields">
+            <textarea name="text.content">{{object.text.content}}</textarea>
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="text.color">Text Colour</label>
+        <div class="form-fields">
+            <input type="text" name="text.color" data-dtype="String" value="{{object.text.color}}">
+            <input type="color" data-edit="text.color" value="{{object.text.color}}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="text.background">Background Colour</label>
+        <div class="form-fields">
+            <input type="text" name="text.background" data-dtype="String" value="{{object.text.background}}">
+            <input type="color" data-edit="text.background" value="{{object.text.background}}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="text.align">Justification</label>
+        <div class="form-fields">
+            <select name="text.align">
+                {{ selectOptions alignOptions selected=object.text.align }}
+            </select>
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="text.valign">V-Align</label>
+        <div class="form-fields">
+            <select name="text.valign">
+                {{ selectOptions vAlignOptions selected=object.text.valign }}
+            </select>
+        </div>
+    </div>
+    <header class="form-header">
+        <h3><i class="far fa-image"></i> Transition</h3>
+    </header>
+    <div class="form-group">
+        <label for="transition.duration">Duration</label>
+        <div class="form-fields">
+            <input type="number" name="transition.duration" placeholder="seconds" value="2">
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="transition.effect">Effect</label>
+        <div class="form-fields">
+            <select name="transition.effect">
+                <option value="fade">Fade</option>
+            </select>
+        </div>
+    </div>
+    <button type="submit" name="submit" value="1"><i class="far fa-save"></i> {{localize "MonksEnhancedJournal.Update"}}</button>
+</form>

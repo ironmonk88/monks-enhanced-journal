@@ -2,8 +2,5 @@
     <div class="header-name">
         <input name="name" type="text" value="{{name}}" placeholder="Entry Name">
     </div>
-    <div class="editor-content" data-edit="content">
-        {{{content}}}
-    </div>
-    <a class="editor-edit" style="display:none;"><i class="fas fa-edit"></i></a>
+    {{editor target="content" content=content editable=true button=true}}
 </div>

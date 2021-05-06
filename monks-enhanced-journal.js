@@ -1,6 +1,6 @@
 import { registerSettings } from "./settings.js";
 import { EnhancedJournalSheet } from "./apps/enhanced-journal.js"
-import { EnhancedDirectory } from "./apps/enhanced-directory.js"
+import { SubSheet, ActorSubSheet, EncounterSubSheet, JournalEntrySubSheet, PersonSubSheet, PictureSubSheet, PlaceSubSheet, QuestSubSheet, SlideshowSubSheet } from "./classes/EnhancedJournalEntry.js"
 
 export let debug = (...args) => {
     if (debugEnabled > 1) console.log("DEBUG: monks-enhanced-journal | ", ...args);
@@ -17,6 +17,16 @@ export let setting = key => {
     return game.settings.get("monks-enhanced-journal", key);
 };
 
+export let makeid = () => {
+    var result = '';
+    var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    var charactersLength = characters.length;
+    for (var i = 0; i < 16; i++) {
+        result += characters.charAt(Math.floor(Math.random() * charactersLength));
+    }
+    return result;
+}
+
 export let oldSheetClass = () => {
     return MonksEnhancedJournal._oldSheetClass;
 };
@@ -30,14 +40,25 @@ export class MonksEnhancedJournal {
 
     static getEntityTypes() {
         return {
-            "journalentry": "MonksEnhancedJournal.journalentry",
-            "actor": "MonksEnhancedJournal.actor",
-            "slideshow": "MonksEnhancedJournal.slideshow",
-            "picture": "MonksEnhancedJournal.picture",
-            "person": "MonksEnhancedJournal.person",
-            "place": "MonksEnhancedJournal.place",
-            "quest": "MonksEnhancedJournal.quest",
-            "encounter": "MonksEnhancedJournal.encounter"
+            journalentry: JournalEntrySubSheet,
+            slideshow: SlideshowSubSheet,
+            picture: PictureSubSheet,
+            person: PersonSubSheet,
+            place: PlaceSubSheet,
+            quest: QuestSubSheet,
+            encounter: EncounterSubSheet
+        };
+    }
+
+    static getTypeLabels() {
+        return {
+            journalentry: "MonksEnhancedJournal.journalentry",
+            slideshow: "MonksEnhancedJournal.slideshow",
+            picture: "MonksEnhancedJournal.picture",
+            person: "MonksEnhancedJournal.person",
+            place: "MonksEnhancedJournal.place",
+            quest: "MonksEnhancedJournal.quest",
+            encounter: "MonksEnhancedJournal.encounter"
         };
     }
 
@@ -45,12 +66,14 @@ export class MonksEnhancedJournal {
         log('Initializing Monks Enhanced Journal');
         registerSettings();
 
+        MonksEnhancedJournal.SOCKET = "module.monks-enhanced-journal";
+
         MonksEnhancedJournal._oldSheetClass = CONFIG.JournalEntry.sheetClass;
         CONFIG.JournalEntry.sheetClass = EnhancedJournalSheet;
 
         let types = MonksEnhancedJournal.getEntityTypes();
         game.system.entityTypes.JournalEntry = Object.keys(types);
-        CONFIG.JournalEntry.typeLabels = types;
+        CONFIG.JournalEntry.typeLabels = MonksEnhancedJournal.getTypeLabels();
 
         const oldOnClickEntityName = JournalDirectory._onClickEntityName;
         function onClickEntityName(event) {
@@ -60,8 +83,10 @@ export class MonksEnhancedJournal {
             const entity = this.constructor.collection.get(entityId);
 
             //if the enhanced journal is already open, then just pass it the new object, if not then let it render as normal
-            if (MonksEnhancedJournal.journal != undefined)
+            if (MonksEnhancedJournal.journal != undefined) {
+                log('JournalID', MonksEnhancedJournal.journal.appId, MonksEnhancedJournal.journal.tabs);
                 MonksEnhancedJournal.journal.open(entity);
+            }
             else {
                 const sheet = entity.sheet;
 
@@ -82,6 +107,37 @@ export class MonksEnhancedJournal {
         }
 
         Journal.prototype.constructor._showEntry = MonksEnhancedJournal._showEntry;
+
+        Handlebars.registerHelper({ selectGroups: MonksEnhancedJournal.selectGroups});
+    }
+
+    static selectGroups(choices, options) {
+        const localize = options.hash['localize'] ?? false;
+        let selected = options.hash['selected'] ?? null;
+        let blank = options.hash['blank'] || null;
+        selected = selected instanceof Array ? selected.map(String) : [String(selected)];
+
+        // Create an option
+        const option = (key, label) => {
+            if (localize) label = game.i18n.localize(label);
+            let isSelected = selected.includes(key);
+            html += `<option value="${key}" ${isSelected ? "selected" : ""}>${label}</option>`
+        };
+
+        // Create the options
+        let html = "";
+        if (blank) option("", blank);
+        if (choices instanceof Array) {
+            for (let group of choices) {
+                let label = (localize ? game.i18n.localize(group.text) : group.text);
+                html += `<optgroup label="${label}">`;
+                Object.entries(group.groups).forEach(e => option(...e));
+                html += `</optgroup>`;
+            }
+        } else {
+            Object.entries(group.groups).forEach(e => option(...e));
+        }
+        return new Handlebars.SafeString(html);
     }
 
     static async _showEntry(entryId, mode = "text", force = true) {
@@ -99,6 +155,7 @@ export class MonksEnhancedJournal {
     }
 
     static async ready() {
+        game.socket.on(MonksEnhancedJournal.SOCKET, MonksEnhancedJournal.onMessage);
         //this.journal = new EnhancedJournal();
         //this.hookSwapMode();
         //Hooks.on("closeJournalSheet", (app, html, data) => {
@@ -139,6 +196,20 @@ export class MonksEnhancedJournal {
                 return 'fa-book-open';
         }
     }
+
+    static onMessage(data) {
+        switch (data.action) {
+            case 'saveUserData': {
+                if (game.user.isGM) {
+                    let entity = game.journal.get(data.entityId);
+                    let content = JSON.parse(entity.data.content);
+                    content[data.userId] = data.userdata;
+
+                    entity.update({content: JSON.stringify(content)});
+                }
+            } break;
+        }
+    }
 }
 
 Hooks.on("renderJournalDirectory", (app, html, options) => {
@@ -152,8 +223,9 @@ Hooks.on("renderJournalDirectory", (app, html, options) => {
 
         $('.entity-name', this).prepend($('<i>').addClass('fas fa-fw ' + icon));
     });
-    if (MonksEnhancedJournal.journal)
-        MonksEnhancedJournal.journal.render(true);
+    //if (MonksEnhancedJournal.journal)
+    //    MonksEnhancedJournal.journal.render(true);    //this is causing an uneccessary refresh
+    //+++ this should call a refresh to the side bar only
 });
 
 Hooks.on("renderJournalSheet", (app, html) => {

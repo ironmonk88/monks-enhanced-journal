@@ -1,19 +1,19 @@
 <div class="flexcol quest-container">
     <header class="sheet-header journal-header flexrow">
-        <img class="profile" src="{{entity.img}}" data-edit="entity.img" onerror="this.src='modules/monks-enhanced-journal/assets/quest.png'">
+        <img class="profile" src="{{content.img}}" data-edit="content.img" onerror="this.src='modules/monks-enhanced-journal/assets/quest.png'">
         <section class="header-details">
             <h1 class="questname"><input name="name" type="text" value="{{name}}" placeholder="Quest Name"></h1>
             <div class="form-group">
                 <label>Source</label>
-                <input type="text" name="entity.source" placeholder="Source" value="{{entity.source}}" />
+                <input type="text" name="content.source" placeholder="Source" value="{{content.source}}" />
             </div>
             <div class="form-group">
                 <label>Seen</label>
-                <input type="checkbox" name="entity.seen" checked="{{entity.seen}}" />
+                <input type="checkbox" name="content.seen" checked="{{checked content.seen}}" />
             </div>
             <div class="form-group">
                 <label>Completed</label>
-                <input type="checkbox" name="entity.completed" checked="{{entity.completed}}" />
+                <input type="checkbox" name="content.completed" checked="{{checked content.completed}}" />
             </div>
         </section>
     </header>
@@ -24,10 +24,7 @@
     </nav>
     <section class="sheet-body">
         <div class="tab description flexrow active" data-group="primary" data-tab="description">
-            <div class="editor-content" data-edit="entity.summary">
-                {{{entity.summary}}}
-            </div>
-            <a class="editor-edit" style="display:none;"><i class="fas fa-edit"></i></a>
+            {{editor target="content.summary" content=content.summary editable=true button=true}}
         </div>
         <div class="tab rewards flexrow active" data-group="primary" data-tab="rewards">
             XP, or Items
@@ -35,9 +32,7 @@
         <div class="tab notes flexcol active" data-group="primary" data-tab="notes">
             <div style="flex: 0 0 20px;">These will only be viewable by you.</div>
             <div>
-                <textarea name="userdata.notes" style="width: calc(100% - 4px);height: calc(100% - 4px)">
-                    {{userdata.notes}}
-                </textarea>
+                <textarea name="userdata.notes" style="width: calc(100% - 4px);height: calc(100% - 4px)">{{userdata.notes}}</textarea>
             </div>
         </div>
     </section>

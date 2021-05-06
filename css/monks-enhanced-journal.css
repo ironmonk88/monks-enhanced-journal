@@ -1,5 +1,6 @@
-.monks-enhanced-journal{
-    height:100%;
+.monks-enhanced-journal {
+    height: 100%;
+    flex-wrap: nowrap;
 }
 
 .monks-enhanced-journal .sidebar {
@@ -101,9 +102,11 @@
 }
 
 .monks-enhanced-journal .mainbar .navigation .button-group {
+    /*
     flex-shrink: 1;
     flex-basis: auto;
-    flex-grow: 0;
+    flex-grow: 0;*/
+    justify-content: flex-end;
 }
 
 .monks-enhanced-journal .mainbar .navigation .nav-button {
@@ -127,6 +130,18 @@
 
 .monks-enhanced-journal .mainbar .navigation .nav-button.disabled {
     color: #C0C0C0;
+}
+
+.monks-enhanced-journal .mainbar .navigation .nav-input {
+    margin-right: 4px;
+    margin-top: 2px;
+}
+
+.monks-enhanced-journal .mainbar .navigation .nav-text {
+    flex-shrink: 1;
+    flex-basis: auto;
+    flex-grow: 0;
+    padding: 4px;
 }
 
 .monks-enhanced-journal .mainbar .navigation .title input {
@@ -172,6 +187,7 @@
 
 .monks-enhanced-journal .content form .editor{
     height:100% !important;
+    overflow:visible;
 }
 
 .monks-enhanced-journal .content form div[role="application"] {
@@ -275,30 +291,52 @@
     border-top: 1px solid rgba(0, 0, 0, 0.1);
 }
 
-.monks-enhanced-journal .content.editing .encounter-body.flexcol .encounter-sidebar {
+.monks-enhanced-journal .content.editing .encounter-body .encounter-sidebar {
     display: none;
 }
 
-.monks-enhanced-journal .encounter-body.flexrow .encounter-content {
+.monks-enhanced-journal .encounter-body .encounter-content {
     height: 100%;
+    overflow:hidden;
 }
 
-.monks-enhanced-journal .encounter-sidebar > div{
+.monks-enhanced-journal .encounter-body .encounter-content.condensed {
+    overflow-y: auto;
+}
+
+.monks-enhanced-journal .encounter-body .encounter-content:not(.condensed) {
+    display: flex;
+    flex-direction: row-reverse;
+    flex-wrap: nowrap;
+}
+
+.monks-enhanced-journal .encounter-body .encounter-content:not(.condensed) > * {
+    height: 100%;
+    overflow-y: auto;
+    flex:1;
+} 
+
+.monks-enhanced-journal .encounter-body .encounter-content > *:first-child {
+    margin-left: 8px;
+} 
+
+.monks-enhanced-journal .encounter-body .encounter-content.condensed *:first-child {
+    margin-left: 0px;
+} 
+
+.monks-enhanced-journal .encounter-sidebar > div {
     flex-grow: 0;
-}
+} 
 
-.person-container,
-.place-container {
+.person-container, .place-container {
     height: 100%;
-}
+} 
 
 .sheet header.sheet-header.journal-header {
     align-items: flex-start;
-}
+} 
 
-.sheet .person-container .sheet-header img.profile,
-.sheet .place-container .sheet-header img.profile,
-.sheet .quest-container .sheet-header img.profile {
+.sheet .person-container .sheet-header img.profile, .sheet .place-container .sheet-header img.profile, .sheet .quest-container .sheet-header img.profile {
     flex: 0 0 160px;
     max-width: 160px;
     height: 160px;
@@ -320,50 +358,172 @@
     border: 1px solid #111;
     box-shadow: 0 0 8px red;
 }*/
-
-#journal .entity-name > i,
-#journal-directory .entity-name > i {
+#journal .entity-name > i, #journal-directory .entity-name > i {
     margin-right: 10px;
-}
-
-.monks-enhanced-journal .picture-container{
+} .monks-enhanced-journal .picture-container{
     width:100%;
-    height:100%;
     justify-content: center;
     position:relative;
-}
-
-.monks-enhanced-journal .picture-container img,
-.monks-enhanced-journal .slide img {
-    width: 100%;
-    height: 100%;
+    overflow:hidden;
+} .monks-enhanced-journal .picture-container img, .monks-enhanced-journal .slide img {
+    height:100%;
+    width:100%;
     object-fit: contain;
     border: 0px;
-}
-
-.slide{
-    margin:8px;
-    border:1px solid #C0C0C0;
-    border-radius:4px;
-    width:200px;
-    height:150px;
-}
-
-.monks-enhanced-journal .header-name {
+    z-index:1;
+} .monks-enhanced-journal .picture-container .img-background {
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    top: 0px;
+    left: 0px;
+    z-index: 0;
+    overflow: hidden;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    -webkit-filter: blur(3px);
+    -moz-filter: blur(3px);
+    -o-filter: blur(3px);
+    -ms-filter: blur(3px);
+    filter: blur(3px);
+    opacity: 0.4;
+} .monks-enhanced-journal .encounter-content .editor-content {
+    padding-top: 8px;
+} .monks-enhanced-journal .slideshow-container {
+    max-height: 100%;
+} .monks-enhanced-journal .slideshow-body {
+    overflow-y: auto;
+    max-height: 100%;
+} .monks-enhanced-journal .slide {
+    margin: 8px;
+    border: 1px solid #C0C0C0;
+    border-radius: 4px;
+    width: 200px;
+    height: 150px;
+    display: inline-block;
+    position:relative;
+} .monks-enhanced-journal .slide img{
+    position:relative;
+    z-index:10;
+} .monks-journal-sheet .slide-background {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0px;
+    left: 0px;
+    z-index: 0;
+    overflow: hidden;
+} .monks-journal-sheet .slide-background > div {
+    width: 100%;
+    height: 100%;
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
+    -webkit-filter: blur(3px);
+    -moz-filter: blur(3px);
+    -o-filter: blur(3px);
+    -ms-filter: blur(3px);
+    filter: blur(3px);
+    object-fit: cover;
+} .monks-journal-sheet .slide-text {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0px;
+    left: 0px;
+    z-index: 20;
+    overflow: hidden;
+} .monks-journal-sheet .slide-text > div {
+    font-size: 12px;
+    align-items: center;
+    justify-content: center;
+    display: flex;
+} .monks-journal-sheet .slide-text > div > div {
+    width: 100%;
+    padding: 4px 15px;
+} .monks-journal-sheet .slide-text > div > div:empty{
+    display:none;
+} .monks-enhanced-journal .header-name {
     flex: 0 0 30px;
     border-bottom: 2px solid #782e22;
-}
-
-.monks-enhanced-journal .encounter-content{
+    z-index: 1;
+} .monks-enhanced-journal .encounter-content{
     padding:8px;
-}
-
-.monks-journal-sheet.condensed .tab-bar,
-.monks-journal-sheet.condensed .bookmark-bar,
-.monks-journal-sheet.condensed .sidebar{
+} .monks-journal-sheet.condensed .tab-bar, .monks-journal-sheet.condensed .bookmark-bar, .monks-journal-sheet.condensed .sidebar{
     display: none;
+} .monks-journal-sheet.condensed .mainbar {
+    flex: 0 0 30px;
+} .monks-journal-sheet.sheet .items-list .item .item-name .item-image {
+    background-repeat: no-repeat;
+    background-position: center;
+} .monks-journal-sheet.sheet .sheet-navigation .item {
+    max-width: 150px;
+} .monks-journal-sheet.sheet .editor .tox-toolbar-overlord {
+    background-color: rgba(255, 255, 255, 0.4);
+} .slide-sheet .form-header {
+    border-top: 1px solid #b5b3a4;
+    border-bottom: 1px solid #f0f0e0;
+    margin-bottom: 5px;
+} .slide-sheet .form-header h3 {
+    line-height: 28px;
+    margin: 0;
+    border-top: 1px solid #f0f0e0;
+    border-bottom: 1px solid #b5b3a4;
+} .slide-sheet form .form-group .form-fields > label {
+    flex: 1;
+    text-align: right;
+    font-size: 13px;
+} .monks-journal-sheet.sheet form .form-group .form-fields button {
+    flex: 0;
+    margin: -2px 0;
+    line-height: 22px;
+} .monks-journal-sheet.sheet .item-detail{
+    text-align:center;
+} .monks-journal-sheet.sheet .items-list .item .item-name.rollable:hover .item-image {
+    background-image: url("../../../icons/svg/d20-grey.svg") !important;
+} .monks-journal-sheet.sheet .items-list .item .item-name.rollable .item-image:hover {
+    background-image: url("../../../icons/svg/d20-black.svg") !important;
 }
 
-.monks-journal-sheet.condensed .mainbar {
-    flex: 0 0 30px;
+.monks-journal-sheet .bookmark-bar .bookmark-button {
+    height: 24px;
+    border-radius: 28px;
+    max-width: 125px;
+    margin-left: 4px;
+    margin-top: 2px;
+    line-height: 24px;
+    padding: 0px 8px;
+    font-size: 14px;
+    cursor: pointer;
+    flex-wrap: nowrap;
+}
+
+.monks-journal-sheet .bookmark-bar .bookmark-button > div {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    width: 100%;
+}
+
+.monks-journal-sheet .bookmark-bar .bookmark-button:not(.add-bookmark) i {
+    margin-top: 4px;
+    margin-right: 4px;
+}
+
+.monks-journal-sheet .bookmark-bar .bookmark-button:hover{
+    background-color: rgba(0, 0, 0, 0.1);
+}
+
+.monks-journal-sheet .bookmark-bar .bookmark-button.add-bookmark {
+    border-radius: 4px;
+    flex: 0 0 24px;
+    margin-top: 2px;
+    font-size: 16px;
+    padding-left: 2px;
+    line-height: 22px;
+    border: 1px solid #C0C0C0;
+    text-overflow: clip;
+    margin-left: 0px;
+    overflow: hidden;
 }
