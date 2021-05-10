@@ -1,4 +1,4 @@
-import { makeid, log } from "../monks-enhanced-journal.js";
+import { MonksEnhancedJournal, makeid, log, i18n } from "../monks-enhanced-journal.js";
 import { SlideConfig } from "../apps/slideconfig.js"
 import { DCConfig } from "../apps/dc-config.js"
 import { TrapConfig } from "../apps/trap-config.js"
@@ -78,21 +78,27 @@ export class SubSheet {
                     else if (!ctrl.conditional)
                         continue;
                 }
+                let div = '';
                 switch (ctrl.type || 'button') {
                     case 'button':
-                        html.append(
-                            $('<div>')
+                        div = $('<div>')
                                 .addClass('nav-button ' + ctrl.id)
                                 .attr('title', ctrl.text)
                                 .append($('<i>').addClass('fas ' + ctrl.icon))
-                                .on('click', $.proxy(ctrl.callback, this.object.sheet)));
+                                .on('click', $.proxy(ctrl.callback, this.object.sheet));
                         break;
                     case 'input':
-                        html.append($('<input>').addClass('nav-input ' + ctrl.id).attr(mergeObject({ 'type': 'text', 'autocomplete': 'off', 'placeholder': ctrl.text }, (ctrl.attributes || {}))));
+                        div = $('<input>').addClass('nav-input ' + ctrl.id).attr(mergeObject({ 'type': 'text', 'autocomplete': 'off', 'placeholder': ctrl.text }, (ctrl.attributes || {})));
                         break;
                     case 'text':
-                        html.append($('<div>').addClass('nav-text ' + ctrl.id).html(ctrl.text));
+                        div = $('<div>').addClass('nav-text ' + ctrl.id).html(ctrl.text);
                         break;
+                }
+
+                if (div != '') {
+                    if (ctrl.visible === false)
+                        div.hide();
+                    html.append(div);
                 }
                 //<div class="nav-button search" title="Search"><i class="fas fa-search"></i><input class="search" type="text" name="search-entry" autocomplete="off"></div>
             }
@@ -110,17 +116,24 @@ export class SubSheet {
         if ($('div.tox-tinymce', this.element).length > 0) {
             //close the editor
             const name = $('.editor-content', this.element).attr("data-edit");
-            this.saveEditor(name);
-            /*
+            //this.saveEditor(name);
             const editor = this.editors[name];
             if (!editor || !editor.mce) throw new Error(`${name} is not an active editor name!`);
             editor.active = false;
-            editor.changed = false;
             const mce = editor.mce;
+
+            const submit = this._onSubmit(new Event("mcesave"));
+
             mce.remove();
-            mce.destroy();
-            editor.mce = null;
-            $('.sheet-body', this.element).removeClass('editing');*/
+            if (editor.hasButton) editor.button.style.display = "block";
+
+            return submit.then(() => {
+                mce.destroy();
+                editor.mce = null;
+                this.render(true, { data: {content: editor.initial}}); //need to send this so that the render looks to the subsheet instead
+                editor.changed = false;
+                $('.sheet-body', this.element).removeClass('editing');
+            });            
         } else {
             $('.sheet-body .editor-edit', this.element).click();
             $('.sheet-body', this.element).addClass('editing');
@@ -444,6 +457,7 @@ export class SlideshowSubSheet extends SubSheet {
         data = super.getData(data);
         data.showasOptions = { canvas: "Canvas", fullscreen: "Full Screen", window: "Window" };
 
+        let idx = 0;
         for (let slide of data.content.slides) {
             if (slide.background?.color == '')
                 slide.background = `background-image:url(\'${slide.img}\');`;
@@ -455,6 +469,32 @@ export class SlideshowSubSheet extends SubSheet {
             slide.topText = (slide.text?.valign == 'top' ? slide.text?.content : '');
             slide.middleText = (slide.text?.valign == 'middle' ? slide.text?.content : '');
             slide.bottomText = (slide.text?.valign == 'bottom' ? slide.text?.content : '');
+
+            slide.active = (idx == this.object.data.content.slideAt);
+
+            idx++;
+        }
+
+        if (this.object.data.content.playing) {
+            data.slideshowing = this.object.data.content.slides[this.object.data.content.slideAt];
+
+            if (data.slideshowing.background?.color == '')
+                data.slideshowing.background = `background-image:url(\'${data.slideshowing.img}\');`;
+            else
+                data.slideshowing.background = `background-color:${data.slideshowing.background.color}`;
+
+            data.slideshowing.textbackground = hexToRGBAString(colorStringToHex(data.slideshowing.text?.background || '#000000'), 0.5);
+
+            data.slideshowing.topText = (data.slideshowing.text?.valign == 'top' ? data.slideshowing.text?.content : '');
+            data.slideshowing.middleText = (data.slideshowing.text?.valign == 'middle' ? data.slideshowing.text?.content : '');
+            data.slideshowing.bottomText = (data.slideshowing.text?.valign == 'bottom' ? data.slideshowing.text?.content : '');
+
+            if (data.slideshowing.transition?.duration > 0) {
+                let time = data.slideshowing.transition.duration * 1000;
+                let timeRemaining = time - ((new Date()).getTime() - data.slideshowing.transition.startTime);
+                data.slideshowing.durprog = (timeRemaining / time) * 100;
+            }else
+                data.slideshowing.durlabel = i18n("MonksEnhancedJournal.ClickForNext");
         }
 
         return data;
@@ -462,9 +502,10 @@ export class SlideshowSubSheet extends SubSheet {
 
     get _entityControls() {
         return [
-            { id: 'add', text: 'Add Slide', icon: 'fa-plus', conditional: game.user.isGM, callback: function () { this.addSlide(); } },
-            { id: 'clear', text: 'Clear All', icon: 'fa-dumpster', conditional: game.user.isGM, callback: function () { } },
-            { id: 'play', text: 'Play', icon: 'fa-play', conditional: game.user.isGM, callback: function () { } }
+            { id: 'add', text: 'Add Slide', icon: 'fa-plus', conditional: game.user.isGM, callback: this.addSlide },
+            { id: 'clear', text: 'Clear All', icon: 'fa-dumpster', conditional: game.user.isGM, callback: this.deleteAll },
+            { id: 'play', text: 'Play', icon: 'fa-play', conditional: game.user.isGM, visible: !this.object.data.content.playing, callback: this.playSlideshow },
+            { id: 'stop', text: 'Play', icon: 'fa-stop', conditional: game.user.isGM, visible: this.object.data.content.playing, callback: this.stopSlideshow }
         ];
     }
 
@@ -473,18 +514,26 @@ export class SlideshowSubSheet extends SubSheet {
 
         const slideshowOptions = this._getSlideshowContextOptions();
         Hooks.call(`getMonksEnhancedJournalSlideshowContext`, html, slideshowOptions);
-        if (slideshowOptions) new ContextMenu($(html), ".slide", slideshowOptions);
+        if (slideshowOptions) new ContextMenu($(html), ".slideshow-body .slide", slideshowOptions);
+
+        html.find('.slideshow-body .slide').click(this.activateSlide.bind(this));
+        html.find('.slide-showing').click(this.advanceSlide.bind(this, 1)).contextmenu(this.advanceSlide.bind(this, -1));
     }
 
     addSlide(data = {}, options = { showdialog: true }) {
         if (this.object.data.content.slides == undefined)
             this.object.data.content.slides = [];
 
-        let slide = mergeObject({ sizing: 'contain', background: { color: '' } }, data);
+        let slide = mergeObject({
+            sizing: 'contain',
+            background: { color: '' },
+            text: { color: '#FFFFFF', background: '#000000', align: 'center', valign: 'middle' },
+            transition: { duration: 5, effect: 'fade' }
+        }, data);
         slide.id = makeid();
         this.object.data.content.slides.push(slide);
 
-        $('<div>').addClass("slide").attr('data-slide-id', slide.id).append($('<img>').attr('src', slide.img)).appendTo($('.slideshow-body', this.element));
+        MonksEnhancedJournal.createSlide(slide, $('.slideshow-body', this.element));
 
         if (options.showdialog)
             new SlideConfig(slide).render(true);
@@ -512,6 +561,140 @@ export class SlideshowSubSheet extends SubSheet {
         let slide = this.object.data.content.slides.find(s => s.id == id);
         if (slide != undefined)
             new SlideConfig(slide, options).render(true);
+    }
+
+    activateSlide(event) {
+        if (this.object.data.content.playing) {
+            let idx = $(event.currentTarget).index();
+            this.playSlide(idx);
+        }
+    }
+
+    playSlideshow(refresh = true) {
+        this.object.data.content.playing = true;
+        this.object.data.content.slideAt = 0;
+        this.object.data.content.sound = undefined;
+
+        $('.slide-showing .duration', this.element).show();
+        $('.slideshow-container', this.element).toggleClass('playing', this.object.data.content.playing);
+        $('.navigation .play', this.element).toggle(!this.object.data.content.playing);
+        $('.navigation .stop', this.element).toggle(this.object.data.content.playing);
+
+        if (this.object.data.content.audiofile != undefined && this.object.data.content.audiofile != '')
+            this.object.data.content.sound = AudioHelper.play({ src: this.object.data.content.audiofile }, true);
+
+        //inform players
+        game.socket.emit(
+            MonksEnhancedJournal.SOCKET,
+            {
+                action: 'playSlideshow',
+                args: { id: this.object.id, idx: 0 }
+            }
+        );
+
+        if (this.object.data.content.playing) {
+            if (refresh)
+                $('.slide-showing .slide', this.element).remove();
+            this.subsheet.playSlide(0);
+        }
+    }
+
+    stopSlideshow() {
+        this.object.data.content.playing = false;
+        this.object.data.content.slideAt = 0;
+        $('.slide-showing .slide', this.element).remove();
+        $('.slide-showing .duration', this.element).hide();
+        $('.slideshow-container', this.object.sheet.element).toggleClass('playing', this.object.data.content.playing);
+        $('.navigation .play', this.object.sheet.element).toggle(!this.object.data.content.playing);
+        $('.navigation .stop', this.object.sheet.element).toggle(this.object.data.content.playing);
+
+        if (this.object.data.content?.sound?._src != undefined) {
+            game.socket.emit("stopAudio", { src: this.object.data.content.audiofile });
+            this.object.data.content.sound.stop();
+            this.object.data.content.sound = undefined;
+        }
+
+        //inform players
+        game.socket.emit(
+            MonksEnhancedJournal.SOCKET,
+            {
+                action: 'stopSlideshow',
+                args: { }
+            }
+        );
+    }
+
+    playSlide(idx, animate = true) {
+        let slide = this.object.data.content.slides[idx];
+
+        //remove any that are still on the way out
+        $('.slide-showing .slide.out', this.element).remove();
+
+        //remove any old slides
+        let oldSlide = $('.slide-showing .slide', this.element);
+        oldSlide.addClass('out').animate({ opacity: 0 }, 1000, 'linear', function () { $(this).remove() });
+
+        //bring in the new slide
+        let newSlide = MonksEnhancedJournal.createSlide(slide, $('.slide-showing', this.element));
+        newSlide.css({ opacity: 0 }).animate({ opacity: 1 }, 1000, 'linear');
+
+        /*
+        let background = '';
+
+        this.object.data.content.slideAt = idx;
+
+        if (slide.background?.color == '')
+            background = `background-image:url(\'${slide.img}\');`;
+        else
+            background = `background-color:${slide.background?.color}`;
+
+        let textBackground = hexToRGBAString(colorStringToHex(slide.text?.background || '#000000'), 0.5);
+
+        let slideShowing = $('.slide-showing', this.element);
+        $('.slide-background > div', slideShowing).attr({ style: background });
+        $('.slide > img', slideShowing).attr('src', slide.img).css({ 'object-fit': (slide.sizing || 'contain') });
+        $('.slide-text > div', slideShowing).css({ 'text-align': slide.text?.align, color: slide.text?.color });
+        $('.text-upper > div', slideShowing).css({ 'background-color': textBackground }).html(slide.text?.valign == 'top' ? slide.text?.content : '');
+        $('.text-middle > div', slideShowing).css({ 'background-color': textBackground }).html(slide.text?.valign == 'middle' ? slide.text?.content : '');
+        $('.text-lower > div', slideShowing).css({ 'background-color': textBackground }).html(slide.text?.valign == 'bottom' ? slide.text?.content : '');
+        */
+
+        $(`.slideshow-body .slide:eq(${idx})`, this.element).addClass('active').siblings().removeClass('active');
+        $('.slideshow-body', this.element).scrollLeft((idx * 116));
+        $('.slide-showing .duration', this.element).empty();
+
+        window.clearTimeout(slide.transition.timer);
+
+        if (slide.transition?.duration > 0) {
+            //set up the transition
+            let time = slide.transition.duration * 1000;
+            slide.transition.startTime = (new Date()).getTime();
+            slide.transition.timer = window.setTimeout(this.advanceSlide.bind(this, 1), time);
+            $('.slide-showing .duration', this.element).append($('<div>').addClass('duration-bar').css({ width: '0' }).show().animate({width: '100%'}, time, 'linear'));
+        } else {
+            $('.slide-showing .duration', this.element).append($('<div>').addClass('duration-label').html(i18n("MonksEnhancedJournal.ClickForNext")));
+        }
+
+        game.socket.emit(
+            MonksEnhancedJournal.SOCKET,
+            {
+                action: 'playSlide',
+                args: {
+                    id: this.object.id,
+                    idx: idx
+                }
+            }
+        );
+    }
+
+    advanceSlide(dir, event) {
+        this.object.data.content.slideAt = this.object.data.content.slideAt + dir;
+        if (this.object.data.content.slideAt < 0)
+            this.object.data.content.slideAt = 0;
+        else if (this.object.data.content.slideAt >= this.object.data.content.slides.length)
+            this.stopSlideshow();
+        else
+            this.playSlide(this.object.data.content.slideAt, dir > 0);
     }
 
     _getSlideshowContextOptions() {

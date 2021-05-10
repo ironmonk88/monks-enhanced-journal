@@ -23,7 +23,6 @@ export class EnhancedJournalSheet extends JournalSheet {
         };
         this.bookmarks = duplicate(game.user.getFlag('monks-enhanced-journal', 'bookmarks') || []);
 
-        //this.directory = new EnhancedDirectory(this);
         this.sheettabs = new Tabs({ navSelector: ".tabs", contentSelector: ".sheet-body", initial: "description", callback: this.tabChange });
 
         this._collapsed = false;
@@ -89,12 +88,6 @@ export class EnhancedJournalSheet extends JournalSheet {
         }
 
         return super._render(force, options).then(() => {
-            /*if (!this.directory.rendered) {
-                this.directory._render(true).then(() => {
-                    $('.sidebar', this.element).empty().append(this.directory.element);
-                    $('.sidebar > section', this.element).show();
-                });
-            }*/
             $('#journal-directory .entity.journal', this.element).each(function () {
                 let id = this.dataset.entityId;
                 let entry = ui.journal.entities.find(e => e.id == id);
@@ -595,9 +588,11 @@ export class EnhancedJournalSheet extends JournalSheet {
             //need to have the GM update this, but only the user notes
             game.socket.emit(MonksEnhancedJournal.SOCKET, {
                 action: "saveUserData",
-                entityId: this.object.id,
-                userId: game.user.id,
-                userdata: formData.userdata
+                args: {
+                    entityId: this.object.id,
+                    userId: game.user.id,
+                    userdata: formData.userdata
+                }
             });
             return new Promise(() => { });
         }else
@@ -654,7 +649,7 @@ export class EnhancedJournalSheet extends JournalSheet {
     }
 
     _contextMenu(html) {
-        this._contextMenu = new ContextMenu(html, ".bookmark-button", [
+        this._context = new ContextMenu(html, ".bookmark-button", [
             {
                 name: "Delete",
                 icon: '<i class="fas fa-trash"></i>',

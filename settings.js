@@ -1,3 +1,5 @@
+import { i18n } from "./monks-enhanced-journal.js"
+
 export const registerSettings = function () {
 	// Register any custom module settings here
 	let modulename = "monks-enhanced-journal";
@@ -7,8 +9,8 @@ export const registerSettings = function () {
 	};
 
 	game.settings.register(modulename, "allow-player", {
-		name: game.i18n.localize("MonksEnhancedJournal.allow-player.name"),
-		hint: game.i18n.localize("MonksEnhancedJournal.allow-player.hint"),
+		name: i18n("MonksEnhancedJournal.allow-player.name"),
+		hint: i18n("MonksEnhancedJournal.allow-player.hint"),
 		scope: "world",
 		config: true,
 		default: false,

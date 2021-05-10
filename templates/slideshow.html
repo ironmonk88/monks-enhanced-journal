@@ -1,41 +1,54 @@
-<div class="slideshow-container flexcol">
+<div class="slideshow-container flexcol{{#if content.playing}} playing{{/if}}">
     <div class="header-name">
         <input name="name" type="text" value="{{name}}" placeholder="Encounter Name">
     </div>
-    <div class="slideshow-edit">
-        <div class="flexcol" style="flex-grow:0;padding:0px 8px;">
-            <div class="form-group" style="flex: 0 0 30px;">
-                <label for="content.showas">Show As</label>
-                <div class="form-fields">
-                    <select name="content.showas">
-                        {{ selectOptions showasOptions selected=content.showas }}
-                    </select>
-                </div>
-            </div>
-            <div class="form-group" style="flex: 0 0 30px;">
-                <label for="sound">Audio File</label>
-                <div class="form-fields">
-                    {{ filePicker type="audio" target="content.audio" }}
-                    <input class="image" type="text" name="content.audio" placeholder="path/audio.mp3" value="{{content.audio}}">
-                </div>
+    <div class="flexcol slideshow-settings">
+        <div class="form-group" style="flex: 0 0 30px;">
+            <label for="content.showas">Show As</label>
+            <div class="form-fields">
+                <select name="content.showas">
+                    {{ selectOptions showasOptions selected=content.showas }}
+                </select>
             </div>
         </div>
-        <div style="display: flex; overflow: hidden; max-height: 100%;">
-            <div class="slideshow-body">
-                {{#each content.slides}}
-                <div class="slide" data-slide-id="{{this.id}}">
-                    <div class="slide-background"><div style="{{this.background}}"></div></div>
-                    <img src="{{this.img}}" style="object-fit:{{this.sizing}}" />
-                    <div class="slide-text flexcol" style="text-align:{{this.text.align}};color:{{this.text.color}};">
-                        <div class="text-upper"><div style="background-color:{{this.textbackground}};">{{this.topText}}</div></div>
-                        <div class="text-middle"><div style="background-color:{{this.textbackground}};">{{this.middleText}}</div></div>
-                        <div class="text-lower"><div style="background-color:{{this.textbackground}};">{{this.bottomText}}</div></div>
-                    </div>
-                </div>
-                {{/each}}
+        <div class="form-group" style="flex: 0 0 30px;">
+            <label for="audiofile">Audio File</label>
+            <div class="form-fields">
+                {{ filePicker type="audio" target="content.audiofile" }}
+                <input class="image" style="border-color:#7a7971;" type="text" name="content.audiofile" placeholder="path/audio.mp3" value="{{content.audiofile}}">
             </div>
         </div>
     </div>
-    <div class="slideshow-edit">
+    <div class="slide-showing">
+        <div class="duration" {{#unless slideshowing}}style="display:none;"{{/unless}}>
+            {{#if slideshowing.durlabel}}<div class="duration-label">{{slideshowing.durlabel}}</div>{{/if}}
+            {{#if slideshowing.durprog}}<div class="duration-bar" style="width:{{slideshowing.durprog}}%"></div>{{/if}}
+        </div>
+        {{#if slideshowing}}
+        <div class="slide" data-slide-id="{{slideshowing.id}}">
+            <div class="slide-background"><div style="{{slideshowing.background}}"></div></div>
+            <img src="{{slideshowing.img}}" style="object-fit:{{slideshowing.sizing}}" />
+            <div class="slide-text flexcol" style="text-align:{{slideshowing.text.align}};color:{{slideshowing.text.color}};">
+                <div class="text-upper"><div style="background-color:{{slideshowing.textbackground}};">{{slideshowing.topText}}</div></div>
+                <div class="text-middle"><div style="background-color:{{slideshowing.textbackground}};">{{slideshowing.middleText}}</div></div>
+                <div class="text-lower"><div style="background-color:{{slideshowing.textbackground}};">{{slideshowing.bottomText}}</div></div>
+            </div>
+        </div>
+        {{/if}}
+    </div>
+    <div class="slideshow-body-outer">
+        <div class="slideshow-body">
+            {{#each content.slides}}
+            <div class="slide{{#if this.active}} active{{/if}}" data-slide-id="{{this.id}}">
+                <div class="slide-background"><div style="{{this.background}}"></div></div>
+                <img src="{{this.img}}" style="object-fit:{{this.sizing}}" />
+                <div class="slide-text flexcol" style="text-align:{{this.text.align}};color:{{this.text.color}};">
+                    <div class="text-upper"><div style="background-color:{{this.textbackground}};">{{this.topText}}</div></div>
+                    <div class="text-middle"><div style="background-color:{{this.textbackground}};">{{this.middleText}}</div></div>
+                    <div class="text-lower"><div style="background-color:{{this.textbackground}};">{{this.bottomText}}</div></div>
+                </div>
+            </div>
+            {{/each}}
+        </div>
     </div>
 </div>

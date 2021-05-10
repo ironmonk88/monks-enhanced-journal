@@ -1,5 +1,6 @@
 import { registerSettings } from "./settings.js";
 import { EnhancedJournalSheet } from "./apps/enhanced-journal.js"
+import { SlideshowDisplay } from "./apps/slideshow-display.js"
 import { SubSheet, ActorSubSheet, EncounterSubSheet, JournalEntrySubSheet, PersonSubSheet, PictureSubSheet, PlaceSubSheet, QuestSubSheet, SlideshowSubSheet } from "./classes/EnhancedJournalEntry.js"
 
 export let debug = (...args) => {
@@ -156,6 +157,9 @@ export class MonksEnhancedJournal {
 
     static async ready() {
         game.socket.on(MonksEnhancedJournal.SOCKET, MonksEnhancedJournal.onMessage);
+
+        $('<div>').attr('id', 'slideshow-canvas').addClass('monks-enhanced-journal flexrow').append($('<div>').addClass('slideshow-container flexcol playing').append($('<div>').addClass('slide-showing'))).append($('<div>').addClass('slide-padding')).appendTo($('body'));
+        new SlideshowDisplay().render(true);
         //this.journal = new EnhancedJournal();
         //this.hookSwapMode();
         //Hooks.on("closeJournalSheet", (app, html, data) => {
@@ -198,17 +202,113 @@ export class MonksEnhancedJournal {
     }
 
     static onMessage(data) {
-        switch (data.action) {
-            case 'saveUserData': {
-                if (game.user.isGM) {
-                    let entity = game.journal.get(data.entityId);
-                    let content = JSON.parse(entity.data.content);
-                    content[data.userId] = data.userdata;
+        MonksEnhancedJournal[data.action].call(MonksEnhancedJournal, data.args);
+    }
 
-                    entity.update({content: JSON.stringify(content)});
-                }
-            } break;
+    static saveUserData(data) {
+        if (game.user.isGM) {
+            let entity = game.journal.get(data.entityId);
+            let content = JSON.parse(entity.data.content);
+            content[data.userId] = data.userdata;
+
+            entity.update({ content: JSON.stringify(content) });
         }
+    }
+
+    static async playSlideshow(data) {
+        if (!game.user.isGM) {
+            //clear any old ones
+            if (MonksEnhancedJournal.slideshow != undefined)
+                MonksEnhancedJournal.stopSlideshow();
+
+            let slideshow = game.journal.find(e => e.id == data.id);
+            if (slideshow) {
+                MonksEnhancedJournal.slideshow = {
+                    id: data.id,
+                    object: slideshow,
+                    content: JSON.parse(slideshow.data.content)
+                }
+
+                let showas = MonksEnhancedJournal.slideshow.content.showas;
+                if (showas == 'window') {
+                    //if for some reason the slideshow window isn't there, recreate it
+                    if ($('#slideshow-display').length == 0) {
+                        let display = new SlideshowDisplay();
+                        await display._render(true);
+                        /*
+                         *             width: ($('body').width() * 0.75),
+            height: ($('body').height() * 0.75),
+            left: ($('body').width() * 0.125),
+            top: ($('body').height() * 0.125),*/
+                    }
+                    MonksEnhancedJournal.slideshow.element = $('#slideshow-display');
+                } else {
+                    MonksEnhancedJournal.slideshow.element = $('#slideshow-canvas');
+                    $('.slide-padding', MonksEnhancedJournal.slideshow.element).css({ flex: '0 0 ' + $('#sidebar').width() + 'px' });
+                    MonksEnhancedJournal.slideshow.element.toggleClass('fullscreen', showas == 'fullscreen');
+                }
+                MonksEnhancedJournal.slideshow.element.addClass('active');
+
+                if (data.idx != undefined)
+                    MonksEnhancedJournal.playSlide(data);
+            }
+        }
+    }
+
+    static playSlide(data) {
+        //start up a new slideshow if there isn't one
+        if (MonksEnhancedJournal.slideshow == undefined) {
+            MonksEnhancedJournal.playSlideshow(data);
+        }
+
+        if (MonksEnhancedJournal.slideshow != undefined) {
+            if (MonksEnhancedJournal.slideshow.element == undefined) {
+                MonksEnhancedJournal.slideshow.callback = data;
+            } else {
+
+                let slide = MonksEnhancedJournal.slideshow.content.slides[data.idx];
+
+                //remove any that are still on the way out
+                $('.slide-showing .slide.out', MonksEnhancedJournal.slideshow.element).remove();
+
+                //remove any old slides
+                let oldSlide = $('.slide-showing .slide', MonksEnhancedJournal.slideshow.element);
+                oldSlide.addClass('out').animate({ opacity: 0 }, 1000, 'linear', function () { $(this).remove() });
+
+                //bring in the new slide
+                let newSlide = MonksEnhancedJournal.createSlide(slide, $('.slide-showing', MonksEnhancedJournal.slideshow.element));
+                newSlide.css({ opacity: 0 }).animate({ opacity: 1 }, 1000, 'linear');
+            }
+        }
+    }
+
+    static stopSlideshow(data) {
+        if (!game.user.isGM) {
+            if (MonksEnhancedJournal.slideshow != undefined) {
+                MonksEnhancedJournal.slideshow.element.removeClass('active');
+                delete MonksEnhancedJournal.slideshow;
+            }
+        }
+    }
+
+    static createSlide(slide, container) {
+        let background = '';
+        if (slide.background?.color == '')
+            background = `background-image:url(\'${slide.img}\');`;
+        else
+            background = `background-color:${slide.background?.color}`;
+
+        let textBackground = hexToRGBAString(colorStringToHex(slide.text?.background || '#000000'), 0.5);
+
+        return $('<div>').addClass("slide").attr('data-slide-id', slide.id)
+            .append($('<div>').addClass('slide-background').append($('<div>').attr('style', background)))
+            .append($('<img>').attr('src', slide.img))
+            .append($('<div>').addClass('slide-text flexcol').css({ 'text-align': slide.text?.align, color: slide.text?.color })
+                .append($('<div>').addClass('text-upper').append($('<div>').css({ 'background-color': textBackground }).html(slide.text?.valign == 'top' ? slide.text?.content : '')))
+                .append($('<div>').addClass('text-middle').append($('<div>').css({ 'background-color': textBackground }).html(slide.text?.valign == 'middle' ? slide.text?.content : '')))
+                .append($('<div>').addClass('text-lower').append($('<div>').css({ 'background-color': textBackground }).html(slide.text?.valign == 'bottom' ? slide.text?.content : '')))
+            )
+            .appendTo(container);
     }
 }
 
