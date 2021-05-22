@@ -1,7 +1,7 @@
 import { DCConfig } from "../apps/dc-config.js";
 import { SlideConfig } from "../apps/slideconfig.js";
 import { TrapConfig } from "../apps/trap-config.js";
-import { i18n, log, makeid, MonksEnhancedJournal } from "../monks-enhanced-journal.js";
+import { setting, i18n, log, makeid, MonksEnhancedJournal } from "../monks-enhanced-journal.js";
 
 export class SubSheet {
     constructor(object) {
@@ -69,6 +69,7 @@ export class SubSheet {
     activateControls(html) {
         let ctrls = this._entityControls;
         Hooks.callAll('activateControls', this, ctrls);
+        let that = this;
         if (ctrls) {
             for (let ctrl of ctrls) {
                 if (ctrl.conditional != undefined) {
@@ -89,7 +90,15 @@ export class SubSheet {
                                 .on('click', $.proxy(ctrl.callback, this.object.sheet));
                         break;
                     case 'input':
-                        div = $('<input>').addClass('nav-input ' + ctrl.id).attr(mergeObject({ 'type': 'text', 'autocomplete': 'off', 'placeholder': ctrl.text }, (ctrl.attributes || {})));
+                        div = $('<input>')
+                            .addClass('nav-input ' + ctrl.id)
+                            .attr(mergeObject({ 'type': 'text', 'autocomplete': 'off', 'placeholder': ctrl.text }, (ctrl.attributes || {})))
+                            .on('keyup', function (event) {
+                                if (event.keyCode == '13') {
+                                    //enter key
+                                    ctrl.callback.call(that.object.sheet, this.value, event);
+                                }
+                            });
                         break;
                     case 'text':
                         div = $('<div>').addClass('nav-text ' + ctrl.id).html(ctrl.text);
@@ -138,6 +147,24 @@ export class SubSheet {
         } else {
             $('.editor .editor-edit', this.element).click();
             //$('.sheet-body', this.element).addClass('editing');
+        }
+    }
+
+    addPolyglotButton(ctrls) {
+        if (game.modules.get("polyglot")?.active) {
+            let app = $(this.object.sheet.element).closest('.app');
+            let btn = $('.polyglot-button', app);
+            let icon = $('i', btn).attr('class').replace('fas ', '');
+            ctrls.push({
+                id: 'polyglot',
+                text: 'Polyglot: ' + game.i18n.localize("POLYGLOT.ToggleRunes"),
+                icon: icon,
+                callback: function () {
+                    btn.click();
+                    let icon = $('i', btn).attr('class').replace('fas ', '');
+                    $('.nav-button.polyglot i', this.element).attr('class', 'fas ' + icon);
+                }
+            });
         }
     }
 }
@@ -213,11 +240,14 @@ export class EncounterSubSheet extends SubSheet {
     }
 
     get _entityControls() {
-        return [
-            { id: 'search', text: 'Search', icon: 'fa-search', callback: function () { } },
+        let ctrls = [
+            { text: '<i class="fas fa-search"></i>', type: 'text' },
+            { id: 'search', type: 'input', text: 'Search Encounter Description', callback: this.object.sheet.searchText },
             { id: 'show', text: 'Show to Players', icon: 'fa-eye', conditional: game.user.isGM, callback: this.object.sheet._onShowPlayers },
             { id: 'edit', text: 'Edit Description', icon: 'fa-pencil-alt', conditional: () => { return this.object.permission == ENTITY_PERMISSIONS.OWNER }, callback: this.onEditDescription }
         ];
+        this.addPolyglotButton(ctrls);
+        return ctrls;
     }
 
     activateListeners(html) {
@@ -390,12 +420,14 @@ export class JournalEntrySubSheet extends SubSheet {
     }
 
     get _entityControls() {
-        return [
+        let ctrls = [
             { text: '<i class="fas fa-search"></i>', type: 'text' },
-            { id: 'search', type:'input' },
+            { id: 'search', type: 'input', text: 'Search Journal Entry', callback: this.object.sheet.searchText },
             { id: 'show', text: 'Show to Players', icon: 'fa-eye', conditional: game.user.isGM, callback: this.object.sheet._onShowPlayers },
             { id: 'edit', text: 'Edit Description', icon: 'fa-pencil-alt', conditional: () => { return this.object.permission == ENTITY_PERMISSIONS.OWNER }, callback: this.onEditDescription }
         ];
+        this.addPolyglotButton(ctrls);
+        return ctrls;
     }
 
     refresh() {
@@ -425,12 +457,14 @@ export class PersonSubSheet extends SubSheet {
     }
 
     get _entityControls() {
-        return [
+        let ctrls = [
             { text: '<i class="fas fa-search"></i>', type: 'text' },
-            { id: 'search', type: 'input', text: 'Search Player Description' },
+            { id: 'search', type: 'input', text: 'Search Player Description', callback: this.object.sheet.searchText },
             { id: 'show', text: 'Show to Players', icon: 'fa-eye', conditional: game.user.isGM, callback: this.object.sheet._onShowPlayers },
             { id: 'edit', text: 'Edit Description', icon: 'fa-pencil-alt', conditional: () => { return this.object.permission == ENTITY_PERMISSIONS.OWNER }, callback: this.onEditDescription }
         ];
+        this.addPolyglotButton(ctrls);
+        return ctrls;
     }
 
     activateListeners(html) {
@@ -488,10 +522,14 @@ export class PlaceSubSheet extends SubSheet {
     }
 
     get _entityControls() {
-        return [
+        let ctrls = [
+            { text: '<i class="fas fa-search"></i>', type: 'text' },
+            { id: 'search', type: 'input', text: 'Search Place Description', callback: this.object.sheet.searchText },
             { id: 'show', text: 'Show to Players', icon: 'fa-eye', conditional: game.user.isGM, callback: this.object.sheet._onShowPlayers },
             { id: 'edit', text: 'Edit Description', icon: 'fa-pencil-alt', conditional: () => { return this.object.permission == ENTITY_PERMISSIONS.OWNER }, callback: this.onEditDescription }
         ];
+        this.addPolyglotButton(ctrls);
+        return ctrls;
     }
 
     activateListeners(html) {
@@ -526,10 +564,14 @@ export class QuestSubSheet extends SubSheet {
     }
 
     get _entityControls() {
-        return [
+        let ctrls = [
+            { text: '<i class="fas fa-search"></i>', type: 'text' },
+            { id: 'search', type: 'input', text: 'Search Quest Description', callback: this.object.sheet.searchText },
             { id: 'show', text: 'Show to Players', icon: 'fa-eye', conditional: game.user.isGM, callback: this.object.sheet._onShowPlayers },
             { id: 'edit', text: 'Edit Description', icon: 'fa-pencil-alt', conditional: () => { return this.object.permission == ENTITY_PERMISSIONS.OWNER }, callback: this.onEditDescription }
         ];
+        this.addPolyglotButton(ctrls);
+        return ctrls;
     }
 
     activateListeners(html) {

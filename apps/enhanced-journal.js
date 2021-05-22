@@ -1,10 +1,12 @@
 import { makeid } from "../monks-enhanced-journal.js";
 import { MonksEnhancedJournal, log, i18n, setting } from "../monks-enhanced-journal.js"
-import { SubSheet, ActorSubSheet } from "../classes/EnhancedJournalEntry.js"
+import { SubSheet, ActorSubSheet, JournalEntrySubSheet } from "../classes/EnhancedJournalEntry.js"
 
 export class EnhancedJournalSheet extends JournalSheet {
     tabs = [];
     bookmarks = [];
+    searchpos = 0;
+    lastquery = '';
 
     constructor(object, options = {}) {
         super(object, options);
@@ -75,7 +77,7 @@ export class EnhancedJournalSheet extends JournalSheet {
 
     _render(force, options = {}) {
         MonksEnhancedJournal.journal = this;
-        if (options.data) {
+        if (options.data || MonksEnhancedJournal.journal._element != null) {
             return new Promise((resolve, reject) => {
                 if (this.subsheet != undefined)
                     this.subsheet.refresh();
@@ -97,6 +99,7 @@ export class EnhancedJournalSheet extends JournalSheet {
 
                 $('.entity-name', this).prepend($('<i>').addClass('fas fa-fw ' + icon));
             });*/
+
             this.renderDirectory();
         })
     }
@@ -137,6 +140,11 @@ export class EnhancedJournalSheet extends JournalSheet {
         if (custom) {
             custom.items.push({block: "section", classes:"readaloud", title:"Read Aloud", wrapper: true});
         }
+        if (options.content_css) {
+            if (options.content_css.find(c => c == 'modules/monks-enhanced-journal/css/editor.css') == undefined)
+                options.content_css.push('modules/monks-enhanced-journal/css/editor.css');
+        } else
+            options.content_css = ['modules/monks-enhanced-journal/css/editor.css'];
         super.activateEditor(name, options, initialContent);
     }
 
@@ -160,7 +168,7 @@ export class EnhancedJournalSheet extends JournalSheet {
             return 'actor';
 
         let flags = this.object.data?.flags;
-        let type = (flags != undefined ? flags['monks-enhanced-journal']?.type : null) || 'journalentry';
+        let type = (flags != undefined ? flags['monks-enhanced-journal']?.type : null) || 'oldentry';
 
         return type;
     }
@@ -512,12 +520,20 @@ export class EnhancedJournalSheet extends JournalSheet {
 
         this.document = await this.subsheet.render();
 
-            $('.content', this.element).attr('entity-type', type).attr('entity-id', this.object.id);
+        this.searchpos = 0;
+
+        $('.content', this.element).attr('entity-type', type).attr('entity-id', this.object.id);
         $('.content form', this.element).empty().append(this.document);
 
         Hooks.callAll('displaySubSheet', this, this.object, this.document);
 
         this.subsheet.activateControls($('#journal-buttons', this.element).empty());
+        if (game.modules.get("polyglot")?.active) {
+            let btn = $('.polyglot-button', this.element);
+            if ($('i', btn).hasClass('fa-link')) {
+                btn.click().click();  //click the button off then on again so that it refreshes the text.  Change this if polyglot ever adds an API
+            }
+        }
         //}
         log('Open entity', entity);
     }
@@ -528,6 +544,22 @@ export class EnhancedJournalSheet extends JournalSheet {
 
     collapseSidebar() {
 
+    }
+
+    searchText(query) {
+        if (query != this.lastquery)
+            this.searchpos = 0;
+
+        var regex = new RegExp(query, 'i');
+
+        let match = $('.editor', this.element).html().match(regex);
+        if (pos == -1 && this.searchpos > 0)
+            pos = $('.editor', this.element).html().indexOf(query, 0);
+
+        log('Search for:', query, pos);
+
+        this.searchpos = pos + 1;
+        this.lastquery = query;
     }
 
     _onDrop(event) {
@@ -635,6 +667,7 @@ export class EnhancedJournalSheet extends JournalSheet {
         let buttons = super._getHeaderButtons();
         buttons.findSplice(b => b.class == "entry-text");
         buttons.findSplice(b => b.class == "entry-image");
+        buttons.findSplice(b => b.class == "share-image");
         return buttons;
     }
 

@@ -191,9 +191,10 @@
     overflow:visible;
 }*/
 
+/*
 .monks-enhanced-journal .content form div[role="application"] {
     height: 100% !important;
-}
+}*/
 
 .monks-enhanced-journal .sidebar > section {
     display: block !important;
@@ -344,6 +345,22 @@
 .monks-enhanced-journal .encounter-body .encounter-content .encounter-dcs .item-controls,
 .monks-enhanced-journal .encounter-body .encounter-content .encounter-traps .item-controls {
     flex: 0 0 44px;
+}
+
+.monks-enhanced-journal .journal-body {
+    height: 100%;
+    overflow: hidden;
+}
+
+.monks-enhanced-journal .journal-body .journal-content {
+    height: 100%;
+    overflow-y: auto;
+}
+
+.monks-enhanced-journal .journal-body .journal-content .editor {
+    overflow: visible;
+    max-height: unset;
+    height: fit-content;
 }
 
 .person-container, .place-container {
@@ -731,7 +748,6 @@
 .monks-journal-sheet .bookmark-bar .bookmark-button {
     height: 24px;
     border-radius: 28px;
-    max-width: 125px;
     margin-left: 4px;
     margin-top: 2px;
     line-height: 24px;
@@ -740,6 +756,7 @@
     cursor: pointer;
     flex-wrap: nowrap;
     flex-grow: 0;
+    white-space: nowrap;
 }
 
 .monks-journal-sheet .bookmark-bar .bookmark-button > div {
@@ -825,32 +842,6 @@
     display: flex !important;
 }
 
-section.readaloud {
-    padding: 5px 10px;
-    margin: 2px;
-    background: #f7efdb;
-    border-right: 2px solid #37161a;
-    border-left: 2px solid #37161a;
-    position: relative;
-    width: calc(100% - 8px);
-}
-
-section.readaloud:before, section.readaloud:after {
-    content: "";
-    position: absolute;
-    height: calc(100% + 10px);
-    width: 20px;
-    top: -5px;
-    background-image: radial-gradient(circle at center, #37161a 2px, transparent 3px), radial-gradient(circle at center, #37161a 2px, transparent 3px);
-    background-size: 10px 10px;
-    background-position: top center, bottom center;
-    background-repeat: no-repeat;
-}
-
-section.readaloud:before {
-    left: -11px;
-}
-
-section.readaloud:after {
-    right: -11px;
+.monks-journal-sheet .polyglot-button{
+    display:none;
 }

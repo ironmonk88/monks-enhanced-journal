@@ -1,0 +1,33 @@
+section.readaloud {
+    padding: 5px 10px;
+    margin: 2px;
+    background: #f7efdb;
+    border-right: 2px solid #37161a;
+    border-left: 2px solid #37161a;
+    position: relative;
+    width: calc(100% - 8px);
+}
+
+#tinymce section.readaloud {
+    width: calc(100% - 32px);
+}
+
+section.readaloud:before, section.readaloud:after {
+    content: "";
+    position: absolute;
+    height: calc(100% + 10px);
+    width: 20px;
+    top: -5px;
+    background-image: radial-gradient(circle at center, #37161a 2px, transparent 3px), radial-gradient(circle at center, #37161a 2px, transparent 3px);
+    background-size: 10px 10px;
+    background-position: top center, bottom center;
+    background-repeat: no-repeat;
+}
+
+section.readaloud:before {
+    left: -11px;
+}
+
+section.readaloud:after {
+    right: -11px;
+}

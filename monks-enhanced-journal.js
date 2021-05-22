@@ -200,7 +200,7 @@ export class MonksEnhancedJournal {
             case 'slideshow': return 'fa-photo-video';
             case 'encounter': return 'fa-toolbox';
             case 'quest': return 'fa-map-signs';
-            case 'journalentry':
+            case 'journalentry': return 'fa-book-open';
             default:
                 return 'fa-book-open';
         }
@@ -327,14 +327,19 @@ Hooks.on("renderJournalDirectory", async (app, html, options) => {
     $('.entity.journal', html).each(function () {
         let id = this.dataset.entityId;
         let entry = app.entities.find(e => e.id == id);
-        let type = entry.getFlag('monks-enhanced-journal', 'type');
+        let type = entry.getFlag('monks-enhanced-journal', 'type');// || (entry.data.img != "" && entry.data.content == "" ? 'picture' : 'journalentry'); //we'll add the picture later
         let icon = MonksEnhancedJournal.getIcon(type);
 
         $('.entity-name', this).prepend($('<i>').addClass('fas fa-fw ' + icon));
+
+        //if (entry.data.img != "" && entry.data.content != "") {
+            //this is a dual entry
+        //}
     });
 });
 
 Hooks.on("renderJournalSheet", (app, html) => {
+    html.closest('.app').find('.polyglot-button').hide();
 });
 
 Hooks.once("init", async function () {

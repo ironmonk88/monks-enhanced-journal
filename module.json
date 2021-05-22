@@ -16,7 +16,7 @@
     "monks-enhanced-journal.js",
     "settings.js"
   ],
-  "styles": [ "css/monks-enhanced-journal.css" ],
+  "styles": [ "css/monks-enhanced-journal.css", "css/editor.css" ],
   "packs": [],
   "url": "https://github.com/ironmonk88/monks-enhanced-journal",
   "download": "https://github.com/ironmonk88/monks-enhanced-journal/archive/1.0.0.zip",
