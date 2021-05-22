@@ -6,7 +6,6 @@
             <div class="form-group">
                 <label>Role</label>
                 <input type="text" name="content.role" placeholder="Role" value="{{content.role}}" />
-                <!-- Name, Role, Location, Characteristics, Description, Notes, isSeen-->
             </div>
             <div class="form-group">
                 <label>Location</label>
@@ -16,37 +15,31 @@
     </header>
     <nav class="sheet-navigation tabs" data-group="primary">
         <a class="item active" data-tab="description">Description</a>
-        <a class="item" data-tab="details">Details</a>
         <a class="item" data-tab="notes">Notes</a>
     </nav>
     <section class="sheet-body">
-        <div class="tab description flexrow active" data-group="primary" data-tab="description">
-            <div class="editor">
-                <div class="editor-content" data-edit="content.summary">
-                    {{{content.summary}}}
+        <div class="tab description flexcol active" data-group="primary" data-tab="description">
+            <div class="details">
+                <div class="form-group">
+                    <label>Race</label>
+                    <input type="text" name="content.race" placeholder="Race" value="{{content.race}}" />
                 </div>
-                <a class="editor-edit"><i class="fas fa-edit"></i></a>
+                <div class="form-group">
+                    <label>Gender</label>
+                    <input type="text" name="content.gender" placeholder="Gender" value="{{content.gender}}" />
+                </div>
+                <div class="form-group">
+                    <label>Voice</label>
+                    <input type="text" name="content.voice" placeholder="Voice" value="{{content.voice}}" />
+                </div>
+                <div class="form-group">
+                    <label>Faction</label>
+                    <input type="text" name="content.faction" placeholder="Faction" value="{{content.faction}}" />
+                </div>
             </div>
+            {{editor target="content.summary" content=content.summary editable=true button=true}}
         </div>
-        <div class="tab details flexrow active" data-group="primary" data-tab="details">
-            <div class="form-group">
-                <label>Race</label>
-                <input type="text" name="content.race" placeholder="Race" value="{{content.race}}" />
-            </div>
-            <div class="form-group">
-                <label>Gender</label>
-                <input type="text" name="content.gender" placeholder="Gender" value="{{content.gender}}" />
-            </div>
-            <div class="form-group">
-                <label>Voice</label>
-                <input type="text" name="content.voice" placeholder="Voice" value="{{content.voice}}" />
-            </div>
-            <div class="form-group">
-                <label>Faction</label>
-                <input type="text" name="content.faction" placeholder="Faction" value="{{content.faction}}" />
-            </div>
-        </div>
-        <div class="tab notes flexcol active" data-group="primary" data-tab="notes">
+        <div class="tab notes flexcol" data-group="primary" data-tab="notes">
             <div style="flex: 0 0 20px;">These will only be viewable by you.</div>
             <div>
                 <textarea name="userdata.notes" style="width: calc(100% - 4px);height: calc(100% - 4px)">{{userdata.notes}}</textarea>

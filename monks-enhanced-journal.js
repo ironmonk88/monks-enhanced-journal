@@ -86,7 +86,12 @@ export class MonksEnhancedJournal {
             //if the enhanced journal is already open, then just pass it the new object, if not then let it render as normal
             if (MonksEnhancedJournal.journal != undefined) {
                 log('JournalID', MonksEnhancedJournal.journal.appId, MonksEnhancedJournal.journal.tabs);
-                MonksEnhancedJournal.journal.open(entity);
+                if (!MonksEnhancedJournal.journal.rendered) {
+                    MonksEnhancedJournal.journal._render(true).then(() => {
+                        MonksEnhancedJournal.journal.open(entity);
+                    })
+                }else
+                    MonksEnhancedJournal.journal.open(entity);
             }
             else {
                 const sheet = entity.sheet;
@@ -312,9 +317,13 @@ export class MonksEnhancedJournal {
     }
 }
 
-Hooks.on("renderJournalDirectory", (app, html, options) => {
+Hooks.on("renderJournalDirectory", async (app, html, options) => {
     //add journal indicators
     log('rendering journal directory', app, html, options);
+    if (MonksEnhancedJournal.journal) {
+        await MonksEnhancedJournal.journal.renderDirectory();
+    }
+
     $('.entity.journal', html).each(function () {
         let id = this.dataset.entityId;
         let entry = app.entities.find(e => e.id == id);
@@ -323,9 +332,6 @@ Hooks.on("renderJournalDirectory", (app, html, options) => {
 
         $('.entity-name', this).prepend($('<i>').addClass('fas fa-fw ' + icon));
     });
-    //if (MonksEnhancedJournal.journal)
-    //    MonksEnhancedJournal.journal.render(true);    //this is causing an uneccessary refresh
-    //+++ this should call a refresh to the side bar only
 });
 
 Hooks.on("renderJournalSheet", (app, html) => {

@@ -122,6 +122,7 @@
     overflow: hidden;
     margin-top: 1px;
     background: rgba(255, 255, 240, 0.8);
+    cursor:pointer;
 }
 
 .monks-enhanced-journal .mainbar .navigation .nav-button:hover {
@@ -330,7 +331,20 @@
 
 .monks-enhanced-journal .encounter-sidebar > div {
     flex-grow: 0;
-} 
+}
+
+.monks-enhanced-journal .encounter-content .monster-icon {
+    cursor:pointer;
+}
+
+.monks-enhanced-journal .encounter-body .encounter-content .item-controls{
+    flex: 0 0 22px;
+}
+
+.monks-enhanced-journal .encounter-body .encounter-content .encounter-dcs .item-controls,
+.monks-enhanced-journal .encounter-body .encounter-content .encounter-traps .item-controls {
+    flex: 0 0 44px;
+}
 
 .person-container, .place-container {
     height: 100%;
@@ -356,6 +370,33 @@
     border: none;
     border-right: 2px groove #eeede0;
     margin-right: 6px;
+}
+
+.sheet .person-container .sheet-header .header-details .form-group label,
+.sheet .place-container .sheet-header .header-details .form-group label,
+.sheet .quest-container .sheet-header .header-details .form-group label {
+    max-width: 175px;
+}
+
+.sheet .person-container .sheet-header .header-details .form-group,
+.sheet .place-container .sheet-header .header-details .form-group,
+.sheet .quest-container .sheet-header .header-details .form-group {
+    margin-right: 8px;
+}
+
+.sheet .tab.description .details,
+.sheet .tab.rewards .form-group {
+    font-family: "Modesto Condensed", "Palatino Linotype", serif;
+    font-size: 20px;
+    font-weight: 700;
+    flex-grow: 0;
+    padding: 5px 20px;
+}
+
+.sheet .tab.description .details label,
+.sheet .tab.rewards .form-group label {
+    flex: 1;
+    max-width: 175px;
 }
 /*
 .journal-header input[type="text"] {
@@ -633,11 +674,13 @@
 
 .monks-journal-sheet.condensed .mainbar {
     flex: 0 0 30px;
-} 
+}
+
 
 .monks-journal-sheet.sheet .items-list .item .item-name .item-image {
     background-repeat: no-repeat;
     background-position: center;
+    background-size: contain;
 } 
 
 .monks-journal-sheet.sheet .sheet-navigation .item {
@@ -780,4 +823,34 @@
 
 #slideshow-canvas.active {
     display: flex !important;
+}
+
+section.readaloud {
+    padding: 5px 10px;
+    margin: 2px;
+    background: #f7efdb;
+    border-right: 2px solid #37161a;
+    border-left: 2px solid #37161a;
+    position: relative;
+    width: calc(100% - 8px);
+}
+
+section.readaloud:before, section.readaloud:after {
+    content: "";
+    position: absolute;
+    height: calc(100% + 10px);
+    width: 20px;
+    top: -5px;
+    background-image: radial-gradient(circle at center, #37161a 2px, transparent 3px), radial-gradient(circle at center, #37161a 2px, transparent 3px);
+    background-size: 10px 10px;
+    background-position: top center, bottom center;
+    background-repeat: no-repeat;
+}
+
+section.readaloud:before {
+    left: -11px;
+}
+
+section.readaloud:after {
+    right: -11px;
 }

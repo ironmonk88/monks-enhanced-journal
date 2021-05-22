@@ -7,23 +7,6 @@
                 <label>Location</label>
                 <input type="text" name="content.location" placeholder="Location" value="{{content.location}}" />
             </div>
-        </section>
-    </header>
-    <nav class="sheet-navigation tabs" data-group="primary">
-        <a class="item active" data-tab="description">Description</a>
-        <a class="item" data-tab="details">Details</a>
-        <a class="item" data-tab="notes">Notes</a>
-    </nav>
-    <section class="sheet-body">
-        <div class="tab description flexrow active" data-group="primary" data-tab="description">
-            <div class="editor">
-                <div class="editor-content" data-edit="content.summary">
-                    {{{content.summary}}}
-                </div>
-                <a class="editor-edit"><i class="fas fa-edit"></i></a>
-            </div>
-        </div>
-        <div class="tab details flexrow active" data-group="primary" data-tab="details">
             <div class="form-group">
                 <label>Government</label>
                 <input type="text" name="content.government" placeholder="Government" value="{{content.government}}" />
@@ -32,8 +15,17 @@
                 <label>Size</label>
                 <input type="text" name="content.size" placeholder="Size" value="{{content.size}}" />
             </div>
+        </section>
+    </header>
+    <nav class="sheet-navigation tabs" data-group="primary">
+        <a class="item active" data-tab="description">Description</a>
+        <a class="item" data-tab="notes">Notes</a>
+    </nav>
+    <section class="sheet-body">
+        <div class="tab description flexrow active" data-group="primary" data-tab="description">
+            {{editor target="content.summary" content=content.summary editable=true button=true}}
         </div>
-        <div class="tab notes flexcol active" data-group="primary" data-tab="notes">
+        <div class="tab notes flexcol" data-group="primary" data-tab="notes">
             <div style="flex: 0 0 20px;">These will only be viewable by you.</div>
             <div>
                 <textarea name="userdata.notes" style="width: calc(100% - 4px);height: calc(100% - 4px)">{{userdata.notes}}</textarea>

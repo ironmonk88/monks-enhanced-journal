@@ -1,7 +1,7 @@
-import { MonksEnhancedJournal, makeid, log, i18n } from "../monks-enhanced-journal.js";
-import { SlideConfig } from "../apps/slideconfig.js"
-import { DCConfig } from "../apps/dc-config.js"
-import { TrapConfig } from "../apps/trap-config.js"
+import { DCConfig } from "../apps/dc-config.js";
+import { SlideConfig } from "../apps/slideconfig.js";
+import { TrapConfig } from "../apps/trap-config.js";
+import { i18n, log, makeid, MonksEnhancedJournal } from "../monks-enhanced-journal.js";
 
 export class SubSheet {
     constructor(object) {
@@ -68,6 +68,7 @@ export class SubSheet {
 
     activateControls(html) {
         let ctrls = this._entityControls;
+        Hooks.callAll('activateControls', this, ctrls);
         if (ctrls) {
             for (let ctrl of ctrls) {
                 if (ctrl.conditional != undefined) {
@@ -125,18 +126,18 @@ export class SubSheet {
             const submit = this._onSubmit(new Event("mcesave"));
 
             mce.remove();
-            if (editor.hasButton) editor.button.style.display = "block";
+            if (editor.hasButton) editor.button.style.display = "";
 
             return submit.then(() => {
                 mce.destroy();
                 editor.mce = null;
-                this.render(true, { data: {content: editor.initial}}); //need to send this so that the render looks to the subsheet instead
+                this.render(true, { action:'update', data: {content: editor.initial, _id: this.object.id}}); //need to send this so that the render looks to the subsheet instead
                 editor.changed = false;
                 $('.sheet-body', this.element).removeClass('editing');
             });            
         } else {
-            $('.sheet-body .editor-edit', this.element).click();
-            $('.sheet-body', this.element).addClass('editing');
+            $('.editor .editor-edit', this.element).click();
+            //$('.sheet-body', this.element).addClass('editing');
         }
     }
 }
@@ -227,15 +228,100 @@ export class EncounterSubSheet extends SubSheet {
                 $(obs[0].target).toggleClass('condensed', obs[0].contentRect.width < 900);
         }).observe($('.encounter-content', html).get(0));
 
-        $('.dc-create', html).on('click', $.proxy(this.createDC, this));
-        $('.trap-create', html).on('click', $.proxy(this.createTrap, this));
+        //monster
+        $('.monster-icon', html).click(this.clickItem.bind(this));
+        $('.monster-delete', html).on('click', $.proxy(this.deleteItem, this));
+        html.on('dragstart', ".monster-icon", TextEditor._onDragEntityLink);
 
+        //item
+        $('.item-icon', html).click(this.clickItem.bind(this));
+        $('.item-delete', html).on('click', $.proxy(this.deleteItem, this));
+
+        //DCs
+        $('.dc-create', html).on('click', $.proxy(this.createDC, this));
         $('.dc-edit', html).on('click', $.proxy(this.editDC, this));
-        $('.dc-delete', html).on('click', $.proxy(this.deleteDC, this));
+        $('.dc-delete', html).on('click', $.proxy(this.deleteItem, this));
         $('.encounter-dcs .item-name', html).on('click', $.proxy(this.rollDC, this));
+
+        //Traps
+        $('.trap-create', html).on('click', $.proxy(this.createTrap, this));
         $('.trap-edit', html).on('click', $.proxy(this.editTrap, this));
-        $('.trap-delete', html).on('click', $.proxy(this.deleteTrap, this));
+        $('.trap-delete', html).on('click', $.proxy(this.deleteItem, this));
         $('.encounter-traps .item-name', html).on('click', $.proxy(this.rollTrap, this));
+    }
+
+    async addMonster(data) {
+        let actor;
+        if (data.pack) {
+            const pack = game.packs.get(data.pack);
+            let id = data.id;
+            if (data.lookup) {
+                if (!pack.index.length) await pack.getIndex();
+                const entry = pack.index.find(i => (i._id === data.lookup) || (i.name === data.lookup));
+                id = entry._id;
+            }
+            actor = id ? await pack.getEntity(id) : null;
+        } else {
+            const cls = CONFIG[data.type].entityClass;
+            actor = cls.collection.get(data.id);
+            if (actor.entity === "Scene" && actor.journal) actor = actor.journal;
+            if (!actor.hasPerm(game.user, "LIMITED")) {
+                return ui.notifications.warn(`You do not have permission to view this ${actor.entity} sheet.`);
+            }
+        }
+
+        if (this.object.data.content.monsters == undefined)
+            this.object.data.content.monsters = [];
+        let monster = {
+            id: actor.id,
+            img: actor.img,
+            name: actor.name
+        };
+
+        if (data.pack)
+            monster.pack = data.pack;
+
+        this.object.data.content.monsters.push(monster);
+        this.object.sheet.saveData();
+    }
+
+    deleteMonster(event) {
+        let item = event.currentTarget.closest('.item');
+        if (this.object.data.content.dcs.findSplice(dc => dc.id == item.dataset.id));
+        $(item).remove();
+    }
+
+    addItem(data) {
+        let item = game.items.get(data.id);
+
+        if (this.object.data.content.items == undefined)
+            this.object.data.content.items = [];
+
+        let newitem = {
+            id: item.id,
+            img: item.img,
+            name: item.name,
+            qty: 1
+        };
+
+        if (data.pack)
+            newitem.pack = data.pack;
+
+        this.object.data.content.items.push(newitem);
+        this.object.sheet.saveData();
+    }
+
+    clickItem(event) {
+        let target = event.currentTarget;
+        let li = target.closest('li');
+        event.currentTarget = li;
+        TextEditor._onClickEntityLink(event);
+    }
+
+    deleteItem(data) {
+        let item = event.currentTarget.closest('.item');
+        if (this.object.data.content[item.dataset.container].findSplice(i => i.id == item.dataset.id));
+        $(item).remove();
     }
 
     createDC() {
@@ -248,20 +334,14 @@ export class EncounterSubSheet extends SubSheet {
 
     editDC(event) {
         let item = event.currentTarget.closest('.item');
-        let dc = this.object.data.content.dcs.find(dc => dc.id == item.dataset.itemId);
+        let dc = this.object.data.content.dcs.find(dc => dc.id == item.dataset.id);
         if(dc != undefined)
             new DCConfig(dc).render(true);
     }
 
-    deleteDC(event) {
-        let item = event.currentTarget.closest('.item');
-        if(this.object.data.content.dcs.findSplice(dc => dc.id == item.dataset.itemId));
-            $(item).remove();
-    }
-
     rollDC(event) {
         let item = event.currentTarget.closest('.item');
-        let dc = this.object.data.content.dcs.find(dc => dc.id == item.dataset.itemId);
+        let dc = this.object.data.content.dcs.find(dc => dc.id == item.dataset.id);
 
         let config = (game.system.id == "tormenta20" ? CONFIG.T20 : CONFIG[game.system.id.toUpperCase()]);
         let dctype = 'ability';
@@ -283,15 +363,9 @@ export class EncounterSubSheet extends SubSheet {
 
     editTrap(event) {
         let item = event.currentTarget.closest('.item');
-        let trap = this.object.data.content.traps.find(dc => dc.id == item.dataset.itemId);
+        let trap = this.object.data.content.traps.find(dc => dc.id == item.dataset.id);
         if (trap != undefined)
             new TrapConfig(trap).render(true);
-    }
-
-    deleteTrap(event) {
-        let item = event.currentTarget.closest('.item');
-        if(this.object.data.content.traps.findSplice(t => t.id == item.dataset.itemId))
-            $(item).remove();
     }
 
     rollTrap(event) {
@@ -323,6 +397,15 @@ export class JournalEntrySubSheet extends SubSheet {
             { id: 'edit', text: 'Edit Description', icon: 'fa-pencil-alt', conditional: () => { return this.object.permission == ENTITY_PERMISSIONS.OWNER }, callback: this.onEditDescription }
         ];
     }
+
+    refresh() {
+        super.refresh();
+
+        const owner = this.object.owner;
+        const content = TextEditor.enrichHTML(this.object.data.content, { secrets: owner, entities: true });
+
+        $('.editor-content[data-edit="content"]').html(content);
+    }
 }
 
 export class PersonSubSheet extends SubSheet {
@@ -353,6 +436,15 @@ export class PersonSubSheet extends SubSheet {
     activateListeners(html) {
         super.activateListeners(html);
         this.object.sheet.sheettabs.bind(html[0]);
+    }
+
+    refresh() {
+        super.refresh();
+
+        const owner = this.object.owner;
+        const content = TextEditor.enrichHTML(this.object.data.content.summary, { secrets: owner, entities: true });
+
+        $('.editor-content[data-edit="content.summary"]', this.object.sheet.element).html(content);
     }
 }
 
@@ -406,6 +498,15 @@ export class PlaceSubSheet extends SubSheet {
         super.activateListeners(html);
         this.object.sheet.sheettabs.bind(html[0]);
     }
+
+    refresh() {
+        super.refresh();
+
+        const owner = this.object.owner;
+        const content = TextEditor.enrichHTML(this.object.data.content.summary, { secrets: owner, entities: true });
+
+        $('.editor-content[data-edit="content.summary"]', this.object.sheet.element).html(content);
+    }
 }
 
 export class QuestSubSheet extends SubSheet {
@@ -434,6 +535,15 @@ export class QuestSubSheet extends SubSheet {
     activateListeners(html) {
         super.activateListeners(html);
         this.object.sheet.sheettabs.bind(html[0]);
+    }
+
+    refresh() {
+        super.refresh();
+
+        const owner = this.object.owner;
+        const content = TextEditor.enrichHTML(this.object.data.content.summary, { secrets: owner, entities: true });
+
+        $('.editor-content[data-edit="content.summary"]', this.object.sheet.element).html(content);
     }
 }
 

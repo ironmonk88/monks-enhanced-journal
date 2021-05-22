@@ -88,6 +88,7 @@ export class EnhancedJournalSheet extends JournalSheet {
         }
 
         return super._render(force, options).then(() => {
+            /*
             $('#journal-directory .entity.journal', this.element).each(function () {
                 let id = this.dataset.entityId;
                 let entry = ui.journal.entities.find(e => e.id == id);
@@ -95,7 +96,8 @@ export class EnhancedJournalSheet extends JournalSheet {
                 let icon = MonksEnhancedJournal.getIcon(type);
 
                 $('.entity-name', this).prepend($('<i>').addClass('fas fa-fw ' + icon));
-            });
+            });*/
+            this.renderDirectory();
         })
     }
 
@@ -104,8 +106,38 @@ export class EnhancedJournalSheet extends JournalSheet {
         return super._renderInner(...args);
     }
 
-    renderDirectory() {
+    async renderDirectory() {
+        let template = "modules/monks-enhanced-journal/templates/directory.html";
+        let data = {
+            tree: ui.journal.tree,
+            canCreate: ui.journal.constructor.cls.can(game.user, "create"),
+            sidebarIcon: CONFIG[ui.journal.constructor.entity].sidebarIcon,
+            user: game.user
+        };
 
+        let html = await renderTemplate(template, data);
+        html = $(html);
+
+        $('.entity.journal', html).each(function () {
+            let id = this.dataset.entityId;
+            let entry = ui.journal.entities.find(e => e.id == id);
+            let type = entry.getFlag('monks-enhanced-journal', 'type');
+            let icon = MonksEnhancedJournal.getIcon(type);
+
+            $('.entity-name', this).prepend($('<i>').addClass('fas fa-fw ' + icon));
+        });
+
+        $('.sidebar', this.element).empty().append(html);
+
+        this.activateListeners(html);
+    }
+
+    activateEditor(name, options = {}, initialContent = "") {
+        let custom = options.style_formats.find(s => s.title == "Custom");
+        if (custom) {
+            custom.items.push({block: "section", classes:"readaloud", title:"Read Aloud", wrapper: true});
+        }
+        super.activateEditor(name, options, initialContent);
     }
 
     get id() {
@@ -306,6 +338,7 @@ export class EnhancedJournalSheet extends JournalSheet {
         if (this.tabs.length == 0)
             this.addTab();
         else {
+
             if (!this.activateTab((idx >= this.tabs.length ? idx - 1 : idx)))
                 this.saveTabs();
         }
@@ -477,10 +510,12 @@ export class EnhancedJournalSheet extends JournalSheet {
 
             this.subsheet = new subsheet(this.object);
 
-            this.document = await this.subsheet.render();
+        this.document = await this.subsheet.render();
 
             $('.content', this.element).attr('entity-type', type).attr('entity-id', this.object.id);
-            $('.content form', this.element).empty().append(this.document);
+        $('.content form', this.element).empty().append(this.document);
+
+        Hooks.callAll('displaySubSheet', this, this.object, this.document);
 
         this.subsheet.activateControls($('#journal-buttons', this.element).empty());
         //}
@@ -506,27 +541,20 @@ export class EnhancedJournalSheet extends JournalSheet {
         }
 
         if (data.type == 'Actor') {
-            let actor = game.actors.get(data.id);
             if (this.entitytype == 'encounter') {
-                let content = this.object.data.content;
-                if (content.monsters == undefined)
-                    content.monsters = [];
-                content.monsters.push({ id: actor.id, img: actor.img, name: actor.name });
-                this.object.update({ content: JSON.stringify(content) });
-
-                this.display(this.object); //+++this is really inefficient
-            }else
+                let scrollTop = $('.encounter-content', this.element).scrollTop();
+                this.subsheet.addMonster(data).then(() => {
+                    this.display(this.object).then(() => {
+                        $('.encounter-content', this.element).scrollTop(scrollTop);
+                    });
+                });
+            } else if (data.pack != undefined) {
+                let actor = game.actors.get(data.id);
                 this.open(actor);
-        } else if (data.type == 'Item' && this.entitytype == 'encounter') {
-            let item = game.items.get(data.id);
-
-            let content = this.object.data.content;
-            if (content.items == undefined)
-                content.items = [];
-            content.items.push({ id: item.id, img: item.img, name: item.name, qty: 1 });
-            this.object.update({ content: JSON.stringify(content) });
-
-            this.display(this.object); //+++this is really inefficient
+            }
+        } else if (data.type == 'Item' && (this.entitytype == 'encounter' || this.entitytype == 'quest')) {
+            this.subsheet.addItem(data);
+            this.display(this.object);
         }
 
         log('drop data', event, data);
@@ -663,8 +691,6 @@ export class EnhancedJournalSheet extends JournalSheet {
 
     activateListeners(html) {   
         super.activateListeners(html);
-
-        var that = this;
 
         this._contextMenu(html);
 

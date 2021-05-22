@@ -26,8 +26,43 @@
         <div class="tab description flexrow active" data-group="primary" data-tab="description">
             {{editor target="content.summary" content=content.summary editable=true button=true}}
         </div>
-        <div class="tab rewards flexrow active" data-group="primary" data-tab="rewards">
-            XP, or Items
+        <div class="tab rewards flexcol active" data-group="primary" data-tab="rewards">
+            <div class="form-group">
+                <label>Experience</label>
+                <button type="button" data-type="audio" data-target="content.audiofile" title="Browse Files" tabindex="-1">
+                    <i class="fas fa-file-import fa-fw"></i>
+                </button>
+                <input type="text" name="content.xp" placeholder="Experience" value="{{content.xp}}" />
+            </div>
+            <ol class="items-list encounter-items">
+                <li class="items-header flexrow">
+                    <h3 class="item-name flexrow">Items</h3>
+
+                    <div class="item-controls item-qty">Qty</div>
+
+                    <div class="item-controls flexrow">
+                    </div>
+                </li>
+
+                <ol class="item-list">
+                    {{#each content.items}}
+                    <li class="item flexrow " data-item-id="{{this.id}}" draggable="true">
+                        <div class="item-name flexrow">
+                            <div class="item-image" style="background-image: url('{{this.img}}')"></div>
+                            <h4>{{this.name}}</h4>
+                        </div>
+
+                        <div class="item-controls item-qty">
+                            <input type="text" name="qty" value="{{this.qty}}" style="text-align:center;" />
+                        </div>
+
+                        <div class="item-controls flexrow">
+                            <a class="item-control item-delete" title="Delete Item"><i class="fas fa-trash"></i></a>
+                        </div>
+                    </li>
+                    {{/each}}
+                </ol>
+            </ol>
         </div>
         <div class="tab notes flexcol active" data-group="primary" data-tab="notes">
             <div style="flex: 0 0 20px;">These will only be viewable by you.</div>
