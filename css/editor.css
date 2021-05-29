@@ -1,11 +1,11 @@
 section.readaloud {
     padding: 5px 10px;
-    margin: 2px;
+    margin: 8px 2px;
     background: #f7efdb;
     border-right: 2px solid #37161a;
     border-left: 2px solid #37161a;
     position: relative;
-    width: calc(100% - 8px);
+    width: calc(100% - 12px);
 }
 
 #tinymce section.readaloud {

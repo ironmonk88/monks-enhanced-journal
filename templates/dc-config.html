@@ -1,19 +1,19 @@
 <form class="dc-config" autocomplete="off" onsubmit="event.preventDefault();">
     <div class="form-group">
-        <label for="name">Name</label>
+        <label for="name">{{localize 'MonksEnhancedJournal.Name'}}</label>
         <div class="form-fields">
             <input type="text" name="name" placeholder="Name" value="{{object.name}}">
         </div>
     </div>
     <div class="form-group">
-        <label for="img">Image</label>
+        <label for="img">{{localize 'MonksEnhancedJournal.Image'}}</label>
         <div class="form-fields">
             {{ filePicker type="image/video" target="img" }}
             <input class="image" type="text" name="img" placeholder="path/image.png" value="{{object.img}}">
         </div>
     </div>
     <div class="form-group">
-        <label for="attribute">Attribute</label>
+        <label for="attribute">{{localize 'MonksEnhancedJournal.Attribute'}}</label>
         <div class="form-fields">
             <select name="attribute">
                 {{ selectGroups attributeOptions selected=object.attribute localize=true }}
@@ -21,7 +21,7 @@
         </div>
     </div>
     <div class="form-group">
-        <label for="dc">DC</label>
+        <label for="dc">{{localize 'MonksEnhancedJournal.DC'}}</label>
         <div class="form-fields">
             <input type="number" name="dc" placeholder="" value="{{object.dc}}">
         </div>

@@ -1,10 +1,10 @@
-<div class="slideshow-container flexcol{{#if content.playing}} playing{{/if}}">
+<div class="slideshow-container flexcol{{#if content.playing}} playing{{/if}} {{entrytype}}">
     <div class="header-name">
-        <input name="name" type="text" value="{{name}}" placeholder="Encounter Name">
+        <input name="name" type="text" value="{{name}}" placeholder="{{localize 'MonksEnhancedJournal.SlideshowName'}}">
     </div>
     <div class="flexcol slideshow-settings">
         <div class="form-group" style="flex: 0 0 30px;">
-            <label for="content.showas">Show As</label>
+            <label for="content.showas">{{localize 'MonksEnhancedJournal.ShowAs'}}</label>
             <div class="form-fields">
                 <select name="content.showas">
                     {{ selectOptions showasOptions selected=content.showas }}
@@ -12,7 +12,7 @@
             </div>
         </div>
         <div class="form-group" style="flex: 0 0 30px;">
-            <label for="audiofile">Audio File</label>
+            <label for="audiofile">{{localize 'MonksEnhancedJournal.AudioFile'}}</label>
             <div class="form-fields">
                 {{ filePicker type="audio" target="content.audiofile" }}
                 <input class="image" style="border-color:#7a7971;" type="text" name="content.audiofile" placeholder="path/audio.mp3" value="{{content.audiofile}}">

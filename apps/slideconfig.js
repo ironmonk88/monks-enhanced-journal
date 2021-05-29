@@ -19,9 +19,9 @@ export class SlideConfig extends FormApplication {
     getData(options) {
         return mergeObject(super.getData(options),
             {
-                sizingOptions: { contain: 'Contain', cover: 'Cover', fill: 'Stretch' },
-                alignOptions: { left: 'Left', center: 'Center', right: 'Right' },
-                vAlignOptions: { top: 'Top', middle: 'Middle', bottom: 'Bottom' }
+                sizingOptions: { contain: "MonksEnhancedJournal.Contain", cover: "MonksEnhancedJournal.Cover", fill: "MonksEnhancedJournal.Stretch" },
+                alignOptions: { left: "MonksEnhancedJournal.Left", center: "MonksEnhancedJournal.Center", right: "MonksEnhancedJournal.Right" },
+                vAlignOptions: { top: "MonksEnhancedJournal.Top", middle: "MonksEnhancedJournal.Middle", bottom: "MonksEnhancedJournal.Bottom" }
             }, { recursive: false }
         );
     }

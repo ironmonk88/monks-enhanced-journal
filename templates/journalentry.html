@@ -1,9 +1,17 @@
-<div class="flexcol journal-body">
-    <div class="header-name">
-        <input name="name" type="text" value="{{name}}" placeholder="Entry Name">
-    </div>
-    <div class="journal-content">
-        {{editor target="content" content=content editable=true button=true}}
-        <img class="picture-img" src="{{img}}" data-edit="img" onerror="$(this).hide();" />
-    </div>
+<div class="flexcol journal-body {{entrytype}}">
+    <header class="header-name">
+        <input name="name" type="text" value="{{name}}" placeholder="{{localize 'MonksEnhancedJournal.JournalEntryName'}}">
+    </header>
+    <nav class="sheet-navigation tabs" data-group="primary">
+        <a class="item active" data-tab="description">{{localize 'MonksEnhancedJournal.Description'}}</a>
+        <a class="item" data-tab="picture">{{localize 'MonksEnhancedJournal.Picture'}}</a>
+    </nav>
+    <section class="sheet-body">
+        <div class="tab description flexrow active" data-group="primary" data-tab="description">
+            {{editor target="content" content=content editable=true button=true}}
+        </div>
+        <div class="tab picture flexrow active" data-group="primary" data-tab="picture">
+            <img class="picture-img" src="{{img}}" data-edit="img" onerror="$(this).css({opacity:0});" />
+        </div>
+    </section>
 </div>

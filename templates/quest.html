@@ -1,26 +1,26 @@
-<div class="flexcol quest-container">
+<div class="flexcol quest-container {{entrytype}}">
     <header class="sheet-header journal-header flexrow">
         <img class="profile" src="{{content.img}}" data-edit="content.img" onerror="this.src='modules/monks-enhanced-journal/assets/quest.png'">
         <section class="header-details">
-            <h1 class="questname"><input name="name" type="text" value="{{name}}" placeholder="Quest Name"></h1>
+            <h1 class="questname"><input name="name" type="text" value="{{name}}" placeholder="{{localize 'MonksEnhancedJournal.QuestName'}}"></h1>
             <div class="form-group">
-                <label>Source</label>
-                <input type="text" name="content.source" placeholder="Source" value="{{content.source}}" />
+                <label>{{localize 'MonksEnhancedJournal.Source'}}</label>
+                <input type="text" name="content.source" placeholder="{{localize 'MonksEnhancedJournal.Source'}}" value="{{content.source}}" />
             </div>
             <div class="form-group">
-                <label>Seen</label>
+                <label>{{localize 'MonksEnhancedJournal.Seen'}}</label>
                 <input type="checkbox" name="content.seen" checked="{{checked content.seen}}" />
             </div>
             <div class="form-group">
-                <label>Completed</label>
+                <label>{{localize 'MonksEnhancedJournal.Completed'}}</label>
                 <input type="checkbox" name="content.completed" checked="{{checked content.completed}}" />
             </div>
         </section>
     </header>
     <nav class="sheet-navigation tabs" data-group="primary">
-        <a class="item active" data-tab="description">Description</a>
-        <a class="item" data-tab="rewards">Rewards</a>
-        <a class="item" data-tab="notes">Notes</a>
+        <a class="item active" data-tab="description">{{localize 'MonksEnhancedJournal.Description'}}</a>
+        <a class="item" data-tab="rewards">{{localize 'MonksEnhancedJournal.Rewards'}}</a>
+        <a class="item" data-tab="notes">{{localize 'MonksEnhancedJournal.Notes'}}</a>
     </nav>
     <section class="sheet-body">
         <div class="tab description flexrow active" data-group="primary" data-tab="description">
@@ -28,17 +28,14 @@
         </div>
         <div class="tab rewards flexcol active" data-group="primary" data-tab="rewards">
             <div class="form-group">
-                <label>Experience</label>
-                <button type="button" data-type="audio" data-target="content.audiofile" title="Browse Files" tabindex="-1">
-                    <i class="fas fa-file-import fa-fw"></i>
-                </button>
-                <input type="text" name="content.xp" placeholder="Experience" value="{{content.xp}}" />
+                <label>{{localize 'MonksEnhancedJournal.Experience'}}</label>
+                <input type="text" name="content.xp" placeholder="{{localize 'MonksEnhancedJournal.Experience'}}" value="{{content.xp}}" />
             </div>
             <ol class="items-list encounter-items">
                 <li class="items-header flexrow">
-                    <h3 class="item-name flexrow">Items</h3>
+                    <h3 class="item-name flexrow">{{localize 'MonksEnhancedJournal.Items'}}</h3>
 
-                    <div class="item-controls item-qty">Qty</div>
+                    <div class="item-controls item-qty">{{localize 'MonksEnhancedJournal.Qty'}}</div>
 
                     <div class="item-controls flexrow">
                     </div>
@@ -57,7 +54,7 @@
                         </div>
 
                         <div class="item-controls flexrow">
-                            <a class="item-control item-delete" title="Delete Item"><i class="fas fa-trash"></i></a>
+                            <a class="item-control item-delete" title="{{localize 'MonksEnhancedJournal.DeleteItem'}}"><i class="fas fa-trash"></i></a>
                         </div>
                     </li>
                     {{/each}}
@@ -65,7 +62,7 @@
             </ol>
         </div>
         <div class="tab notes flexcol active" data-group="primary" data-tab="notes">
-            <div style="flex: 0 0 20px;">These will only be viewable by you.</div>
+            <div style="flex: 0 0 20px;">{{localize 'MonksEnhancedJournal.OnlyViewable'}}</div>
             <div>
                 <textarea name="userdata.notes" style="width: calc(100% - 4px);height: calc(100% - 4px)">{{userdata.notes}}</textarea>
             </div>

@@ -81,31 +81,14 @@ export class MonksEnhancedJournal {
             event.preventDefault();
             const element = event.currentTarget;
             const entityId = element.parentElement.dataset.entityId;
-            const entity = this.constructor.collection.get(entityId);
+            const entry = this.constructor.collection.get(entityId);
 
-            //if the enhanced journal is already open, then just pass it the new object, if not then let it render as normal
-            if (MonksEnhancedJournal.journal != undefined) {
-                log('JournalID', MonksEnhancedJournal.journal.appId, MonksEnhancedJournal.journal.tabs);
-                if (!MonksEnhancedJournal.journal.rendered) {
-                    MonksEnhancedJournal.journal._render(true).then(() => {
-                        MonksEnhancedJournal.journal.open(entity);
-                    })
-                }else
-                    MonksEnhancedJournal.journal.open(entity);
-            }
-            else {
-                const sheet = entity.sheet;
-
-                if (sheet._minimized) return sheet.maximize();
-                else return sheet._render(true).then(() => {
-                    MonksEnhancedJournal.journal.open(entity);
-                });
-            }
+            MonksEnhancedJournal.openJournalEntry(entry);
         }
         JournalDirectory.prototype._onClickEntityName = onClickEntityName;
 
         JournalDirectory.prototype.renderPopout = function () {
-            let entry = new JournalEntry();
+            let entry = new JournalEntry({ name: 'temporary' }); //new JournalEntryData({name:'temporary'})
             let ejs = new EnhancedJournalSheet(entry);
             ejs._render(true).then(() => {
                 MonksEnhancedJournal.journal.activateTab(MonksEnhancedJournal.journal.tabs.active());
@@ -114,7 +97,32 @@ export class MonksEnhancedJournal {
 
         Journal.prototype.constructor._showEntry = MonksEnhancedJournal._showEntry;
 
-        Handlebars.registerHelper({ selectGroups: MonksEnhancedJournal.selectGroups});
+        Note.prototype._onClickLeft2 = function (event) {
+            if (this.entry) MonksEnhancedJournal.openJournalEntry(this.entry);
+        }
+
+        Handlebars.registerHelper({ selectGroups: MonksEnhancedJournal.selectGroups });
+    }
+
+    static openJournalEntry(entry) {
+        //if the enhanced journal is already open, then just pass it the new object, if not then let it render as normal
+        if (MonksEnhancedJournal.journal != undefined) {
+            log('JournalID', MonksEnhancedJournal.journal.appId, MonksEnhancedJournal.journal.tabs);
+            if (!MonksEnhancedJournal.journal.rendered) {
+                MonksEnhancedJournal.journal._render(true).then(() => {
+                    MonksEnhancedJournal.journal.open(entry);
+                })
+            } else
+                MonksEnhancedJournal.journal.open(entry);
+        }
+        else {
+            const sheet = entry.sheet;
+
+            if (sheet._minimized) return sheet.maximize();
+            else return sheet._render(true).then(() => {
+                MonksEnhancedJournal.journal.open(entry);
+            });
+        }
     }
 
     static selectGroups(choices, options) {
@@ -353,9 +361,7 @@ Hooks.once("ready", async function () {
     }
 });
 
-Hooks.on("preCreateJournalEntry", (data, options, userId) => {
-    data.flags = {
-        'monks-enhanced-journal': { type: data.type }
-    };
-    data.content = (data.type == 'journalentry' ? '' : '{}');
+Hooks.on("preCreateJournalEntry", (entry, data, options, userId) => {
+    entry.data._source.flags['monks-enhanced-journal'] = { type: data.type };
+    entry.data._source.content = (data.type == 'journalentry' ? '' : '{}');
 });

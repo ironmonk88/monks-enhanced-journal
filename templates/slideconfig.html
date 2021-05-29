@@ -1,16 +1,16 @@
 <form class="slide-config" autocomplete="off" onsubmit="event.preventDefault();">
     <header class="form-header">
-        <h3><i class="far fa-image"></i> Details</h3>
+        <h3><i class="far fa-image"></i> {{localize 'MonksEnhancedJournal.Details'}}</h3>
     </header>
     <div class="form-group">
-        <label for="img">Slide Image</label>
+        <label for="img">{{localize 'MonksEnhancedJournal.SlideImage'}}</label>
         <div class="form-fields">
             {{ filePicker type="image" target="img" }}
             <input class="image" type="text" name="img" placeholder="path/image.png" value="{{object.img}}">
         </div>
     </div>
     <div class="form-group">
-        <label for="sizing">Sizing</label>
+        <label for="sizing">{{localize 'MonksEnhancedJournal.Sizing'}}</label>
         <div class="form-fields">
             <select name="sizing">
                 {{ selectOptions sizingOptions selected=object.sizing }}
@@ -18,37 +18,37 @@
         </div>
     </div>
     <div class="form-group">
-        <label for="background.color">Background Colour</label>
+        <label for="background.color">{{localize 'MonksEnhancedJournal.BackgroundColour'}}</label>
         <div class="form-fields">
             <input type="text" name="background.color" data-dtype="String" value="{{object.background.color}}">
             <input type="color" data-edit="background.color" value="{{object.background.color}}">
         </div>
     </div>
     <header class="form-header">
-        <h3><i class="far fa-image"></i> Text</h3>
+        <h3><i class="far fa-image"></i> {{localize 'MonksEnhancedJournal.Text'}}</h3>
     </header>
     <div class="form-group">
-        <label for="text.content">Text</label>
+        <label for="text.content">{{localize 'MonksEnhancedJournal.Text'}}</label>
         <div class="form-fields">
             <textarea name="text.content">{{object.text.content}}</textarea>
         </div>
     </div>
     <div class="form-group">
-        <label for="text.color">Text Colour</label>
+        <label for="text.color">{{localize 'MonksEnhancedJournal.TextColour'}}</label>
         <div class="form-fields">
             <input type="text" name="text.color" data-dtype="String" value="{{object.text.color}}">
             <input type="color" data-edit="text.color" value="{{object.text.color}}">
         </div>
     </div>
     <div class="form-group">
-        <label for="text.background">Background Colour</label>
+        <label for="text.background">{{localize 'MonksEnhancedJournal.BackgroundColour'}}</label>
         <div class="form-fields">
             <input type="text" name="text.background" data-dtype="String" value="{{object.text.background}}">
             <input type="color" data-edit="text.background" value="{{object.text.background}}">
         </div>
     </div>
     <div class="form-group">
-        <label for="text.align">Justification</label>
+        <label for="text.align">{{localize 'MonksEnhancedJournal.Justification'}}</label>
         <div class="form-fields">
             <select name="text.align">
                 {{ selectOptions alignOptions selected=object.text.align }}
@@ -56,7 +56,7 @@
         </div>
     </div>
     <div class="form-group">
-        <label for="text.valign">V-Align</label>
+        <label for="text.valign">{{localize 'MonksEnhancedJournal.VAlign'}}</label>
         <div class="form-fields">
             <select name="text.valign">
                 {{ selectOptions vAlignOptions selected=object.text.valign }}
@@ -64,19 +64,19 @@
         </div>
     </div>
     <header class="form-header">
-        <h3><i class="far fa-image"></i> Transition</h3>
+        <h3><i class="far fa-image"></i> {{localize 'MonksEnhancedJournal.Transition'}}</h3>
     </header>
     <div class="form-group">
-        <label for="transition.duration">Duration</label>
+        <label for="transition.duration">{{localize 'MonksEnhancedJournal.Duration'}}</label>
         <div class="form-fields">
             <input type="number" name="transition.duration" placeholder="seconds" value="{{object.transition.duration}}">
         </div>
     </div>
     <div class="form-group">
-        <label for="transition.effect">Effect</label>
+        <label for="transition.effect">{{localize 'MonksEnhancedJournal.Effect'}}</label>
         <div class="form-fields">
             <select name="transition.effect">
-                <option value="fade">Fade</option>
+                <option value="fade">{{localize 'MonksEnhancedJournal.Fade'}}</option>
             </select>
         </div>
     </div>

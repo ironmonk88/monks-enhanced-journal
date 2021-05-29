@@ -1,6 +1,6 @@
-<div class="flexcol sheet-body encounter-body">
+<div class="flexcol sheet-body encounter-body {{entrytype}}">
     <div class="header-name">
-        <input name="name" type="text" value="{{name}}" placeholder="Encounter Name">
+        <input name="name" type="text" value="{{name}}" placeholder="{{localize 'MonksEnhancedJournal.EncounterName'}}">
     </div>
     <div class="encounter-content">
         <div>
@@ -10,7 +10,7 @@
             <div style="height:100%;">
                 <ol class="items-list encounter-monsters">
                     <li class="items-header flexrow">
-                        <h3 class="item-name flexrow">Monsters</h3>
+                        <h3 class="item-name flexrow">{{localize 'MonksEnhancedJournal.Monsters'}}</h3>
                         <div class="item-controls flexrow"></div>
                     </li>
 
@@ -23,7 +23,7 @@
                             </div>
 
                             <div class="item-controls flexrow">
-                                <a class="item-control monster-delete" title="Delete Monster"><i class="fas fa-trash"></i></a>
+                                <a class="item-control monster-delete" title="{{localize 'MonksEnhancedJournal.DeleteMonster'}}"><i class="fas fa-trash"></i></a>
                             </div>
                         </li>
                         {{/each}}
@@ -33,8 +33,8 @@
             <div>
                 <ol class="items-list encounter-items">
                     <li class="items-header flexrow">
-                        <h3 class="item-name flexrow">Items</h3>
-                        <div class="item-details item-qty">Qty</div>
+                        <h3 class="item-name flexrow">{{localize 'MonksEnhancedJournal.Items'}}</h3>
+                        <div class="item-details item-qty">{{localize 'MonksEnhancedJournal.Qty'}}</div>
                         <div class="item-controls flexrow"></div>
                     </li>
 
@@ -61,14 +61,14 @@
             <div>
                 <ol class="items-list encounter-dcs">
                     <li class="items-header flexrow">
-                        <h3 class="item-name flexrow">DCs</h3>
+                        <h3 class="item-name flexrow">{{localize 'MonksEnhancedJournal.DCs'}}</h3>
 
-                        <div class="item-detail item-attribute">Attribute</div>
-                        <div class="item-detail item-dc">DC</div>
+                        <div class="item-detail item-attribute">{{localize 'MonksEnhancedJournal.Attribute'}}</div>
+                        <div class="item-detail item-dc">{{localize 'MonksEnhancedJournal.DC'}}</div>
 
                         <div class="item-controls flexrow">
-                            <a class="item-control dc-create" title="Create DC" data-type="dc">
-                                <i class="fas fa-plus"></i> Add
+                            <a class="item-control dc-create" title="{{localize 'MonksEnhancedJournal.CreateDC'}}" data-type="dc">
+                                <i class="fas fa-plus"></i> {{localize 'MonksEnhancedJournal.Add'}}
                             </a>
                         </div>
                     </li>
@@ -89,8 +89,8 @@
                             </div>
 
                             <div class="item-controls flexrow">
-                                <a class="item-control dc-edit" title="Edit DC"><i class="fas fa-edit"></i></a>
-                                <a class="item-control dc-delete" title="Delete DC"><i class="fas fa-trash"></i></a>
+                                <a class="item-control dc-edit" title="{{localize 'MonksEnhancedJournal.EditDC'}}"><i class="fas fa-edit"></i></a>
+                                <a class="item-control dc-delete" title="{{localize 'MonksEnhancedJournal.DeleteDC'}}"><i class="fas fa-trash"></i></a>
                             </div>
                         </li>
                         {{/each}}
@@ -100,15 +100,15 @@
             <div>
                 <ol class="items-list encounter-traps">
                     <li class="items-header flexrow">
-                        <h3 class="item-name flexrow">Traps</h3>
+                        <h3 class="item-name flexrow">{{localize 'MonksEnhancedJournal.Traps'}}</h3>
 
-                        <div class="item-detail item-find">Find</div>
-                        <div class="item-detail item-disarm">Disarm</div>
-                        <div class="item-detail item-avoid">Avoid</div>
+                        <div class="item-detail item-find">{{localize 'MonksEnhancedJournal.Find'}}</div>
+                        <div class="item-detail item-disarm">{{localize 'MonksEnhancedJournal.Disarm'}}</div>
+                        <div class="item-detail item-avoid">{{localize 'MonksEnhancedJournal.Avoid'}}</div>
 
                         <div class="item-controls flexrow">
-                            <a class="item-control trap-create" title="Create Trap" data-type="dc">
-                                <i class="fas fa-plus"></i> Add
+                            <a class="item-control trap-create" title="{{localize 'MonksEnhancedJournal.CreateTrap'}}" data-type="dc">
+                                <i class="fas fa-plus"></i> {{localize 'MonksEnhancedJournal.Add'}}
                             </a>
                         </div>
                     </li>
@@ -132,8 +132,8 @@
                             </div>
 
                             <div class="item-controls flexrow">
-                                <a class="item-control trap-edit" title="Edit Trap"><i class="fas fa-edit"></i></a>
-                                <a class="item-control trap-delete" title="Delete Trap"><i class="fas fa-trash"></i></a>
+                                <a class="item-control trap-edit" title="{{localize 'MonksEnhancedJournal.EditTrap'}}"><i class="fas fa-edit"></i></a>
+                                <a class="item-control trap-delete" title="{{localize 'MonksEnhancedJournal.DeleteTrap'}}"><i class="fas fa-trash"></i></a>
                             </div>
                         </li>
                         {{/each}}

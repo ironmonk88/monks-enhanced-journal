@@ -5,8 +5,10 @@ import { SubSheet, ActorSubSheet, JournalEntrySubSheet } from "../classes/Enhanc
 export class EnhancedJournalSheet extends JournalSheet {
     tabs = [];
     bookmarks = [];
+    searchresults = [];
     searchpos = 0;
     lastquery = '';
+    _imgcontext = null;
 
     constructor(object, options = {}) {
         super(object, options);
@@ -17,10 +19,12 @@ export class EnhancedJournalSheet extends JournalSheet {
                 t.history = [t.entityId];
             return t;
         });*/
-        this.tabs.active = () => {
+        this.tabs.active = (findone = true) => {
             let tab = this.tabs.find(t => t.active);
-            if (tab == undefined && this.tabs.length > 0)
-                tab = this.tabs[0];
+            if (findone) {
+                if (tab == undefined && this.tabs.length > 0)
+                    tab = this.tabs[0];
+            }
             return tab;
         };
         this.bookmarks = duplicate(game.user.getFlag('monks-enhanced-journal', 'bookmarks') || []);
@@ -29,7 +33,7 @@ export class EnhancedJournalSheet extends JournalSheet {
 
         this._collapsed = false;
 
-        this.document = null;
+        this.subdocument = null;
 
         MonksEnhancedJournal.journal = this;
 
@@ -39,7 +43,7 @@ export class EnhancedJournalSheet extends JournalSheet {
     static get defaultOptions() {
         let expanded = game.user.isGM || setting('allow-player');
         return mergeObject(super.defaultOptions, {
-            title: "Monk's Enhanced Journal",
+            title: i18n("MonksEnhancedJournal.Title"),
             classes: ["sheet", "journal-sheet", "monks-journal-sheet", `${game.system.id}`, (expanded? '' : 'condensed')],
             popOut: true,
             width: (expanded ? 1025 : 700),
@@ -49,19 +53,20 @@ export class EnhancedJournalSheet extends JournalSheet {
             closeOnSubmit: false,
             submitOnClose: false,
             submitOnChange: true,
-            viewPermission: ENTITY_PERMISSIONS.NONE
+            viewPermission: CONST.ENTITY_PERMISSIONS.NONE
         });
     }
 
     getData(options) {
+        const cfg = CONFIG["JournalEntry"];
         return mergeObject(super.getData(options),
             {
                 tabs: this.tabs,
                 bookmarks: this.bookmarks,
-                content: this.document,
+                content: this.subdocument,
                 tree: ui.journal.tree,
-                canCreate: ui.journal.constructor.cls.can(game.user, "create"),
-                sidebarIcon: CONFIG[ui.journal.constructor.entity].sidebarIcon,
+                canCreate: cfg.documentClass.canUserCreate(game.user),
+                sidebarIcon: cfg.sidebarIcon,
                 user: game.user
             }, {recursive: false}
         );
@@ -73,6 +78,10 @@ export class EnhancedJournalSheet extends JournalSheet {
             if (that.form == undefined)
                 debugger;
         }, 10);
+    }
+
+    _inferDefaultMode() {
+        return "text";
     }
 
     _render(force, options = {}) {
@@ -110,11 +119,12 @@ export class EnhancedJournalSheet extends JournalSheet {
     }
 
     async renderDirectory() {
+        const cfg = CONFIG["JournalEntry"];
         let template = "modules/monks-enhanced-journal/templates/directory.html";
         let data = {
             tree: ui.journal.tree,
-            canCreate: ui.journal.constructor.cls.can(game.user, "create"),
-            sidebarIcon: CONFIG[ui.journal.constructor.entity].sidebarIcon,
+            canCreate: cfg.documentClass.canUserCreate(game.user),
+            sidebarIcon: cfg.sidebarIcon,
             user: game.user
         };
 
@@ -132,19 +142,29 @@ export class EnhancedJournalSheet extends JournalSheet {
 
         $('.sidebar', this.element).empty().append(html);
 
-        this.activateListeners(html);
+        this.activateDirectoryListeners(html);
     }
 
     activateEditor(name, options = {}, initialContent = "") {
-        let custom = options.style_formats.find(s => s.title == "Custom");
+        let editor = this.editors[name]
+        if (editor.options.style_formats == undefined)
+            options.style_formats = [...CONFIG.TinyMCE.style_formats];
+
+        let custom = editor.options.style_formats?.find(s => s.title == "Custom");
         if (custom) {
-            custom.items.push({block: "section", classes:"readaloud", title:"Read Aloud", wrapper: true});
+            let readaloud = custom.items.find(s => s.title == "Read Aloud");
+            if(!readaloud)
+                custom.items.push({ block: "section", classes: "readaloud", title: "Read Aloud", wrapper: true });
         }
+
         if (options.content_css) {
             if (options.content_css.find(c => c == 'modules/monks-enhanced-journal/css/editor.css') == undefined)
                 options.content_css.push('modules/monks-enhanced-journal/css/editor.css');
         } else
             options.content_css = ['modules/monks-enhanced-journal/css/editor.css'];
+
+        $('.editor .editor-content', this.element).unmark();
+
         super.activateEditor(name, options, initialContent);
     }
 
@@ -201,13 +221,13 @@ export class EnhancedJournalSheet extends JournalSheet {
 
     findEntity(entityId, text) {
         if (entityId == undefined)
-            return { apps: {}, data: { flags: { 'monks-enhanced-journal': { type: 'blank' } }, content: { msg: "MonksEnhancedJournal.OpenEntry" } } };
+            return { apps: {}, data: { flags: { 'monks-enhanced-journal': { type: 'blank' } }, content: { msg: "MonksEnhancedJournal.OpenEntry" } }, ignore: true };
         else {
             let entity = game.journal.get(entityId);
             if (entity == undefined)
                 entity = game.actors.get(entityId);
             if (entity == undefined)
-                entity = { apps: {}, data: { name: text, flags: { 'monks-enhanced-journal': { type: 'blank' } }, content: { msg: `Cannot find the entity: ${text}` } } };
+                entity = { apps: {}, data: { name: text, flags: { 'monks-enhanced-journal': { type: 'blank' } }, content: { msg: `${i18n("MonksEnhancedJournal.CannotFindEntity")}: ${text}` } }, ignore: true };
 
             return entity;
         }
@@ -219,10 +239,10 @@ export class EnhancedJournalSheet extends JournalSheet {
 
         let tab = {
             id: makeid(),
-            text: entity?.data.name || 'New Tab',
+            text: entity?.data.name || i18n("MonksEnhancedJournal.NewTab"),
             active: false,
             entityId: entity?.id,
-            entity: entity || { apps: {}, data: { flags: { 'monks-enhanced-journal': { type: 'blank' } }, content: { msg: "MonksEnhancedJournal.OpenEntry"} } },
+            entity: entity || { apps: {}, data: { flags: { 'monks-enhanced-journal': { type: 'blank' } }, content: { msg: "MonksEnhancedJournal.OpenEntry" } }, ignore: true },
             history: []
         };
         if (tab.entityId != undefined)
@@ -232,11 +252,8 @@ export class EnhancedJournalSheet extends JournalSheet {
             .addClass('journal-tab')
             .attr('title', tab.text)
             .attr('data-tabid', tab.id)
-            .append(
-                $('<div>')
-                    .addClass('tab-content')
-                    .append($('<span>').html(tab.text))
-                    .append($('<div>').addClass('close').on('click', $.proxy(this.removeTab, this, tab)).append($('<i>').addClass('fas fa-times'))))
+            .append($('<div>').addClass('tab-content').append($('<span>').html(tab.text)))
+            .append($('<div>').addClass('close').click(this.removeTab.bind(this, tab)).append($('<i>').addClass('fas fa-times')))
             .on('click', $.proxy(this.activateTab, this, tab))
             .insertBefore($('.tab-add', this.element));
         this.activateTab(tab);  //activating the tab should save it
@@ -260,8 +277,8 @@ export class EnhancedJournalSheet extends JournalSheet {
         else if (typeof tab == 'number')
             tab = this.tabs[tab];
 
-        let currentTab = this.tabs.active();
-        if (currentTab?.id != tab.id || this.document == undefined) {
+        let currentTab = this.tabs.active(false);
+        if (currentTab?.id != tab.id || this.subdocument == undefined) {
             if (tab.entity == undefined) {
                 //try to find the entity
                 tab.entity = this.findEntity(tab.entityId, tab.text);
@@ -281,9 +298,11 @@ export class EnhancedJournalSheet extends JournalSheet {
 
         $('.back-button', this.element).toggleClass('disabled', !this.canBack(tab));
         $('.forward-button', this.element).toggleClass('disabled', !this.canForward(tab));
-
-        if (currentTab?.id == tab.id)
+        
+        if (currentTab?.id == tab.id) {
+            this.updateHistory();
             return false;
+        }
 
         log('activateTab JournalID', this.appId, this.tabs);
         if (currentTab != undefined)
@@ -291,6 +310,8 @@ export class EnhancedJournalSheet extends JournalSheet {
         tab.active = true;
         $(`.journal-tab[data-tabid="${tab.id}"]`, this.element).addClass('active').siblings().removeClass('active');
         this.saveTabs();
+
+        this.updateHistory();
 
         return true;
     }
@@ -324,16 +345,13 @@ export class EnhancedJournalSheet extends JournalSheet {
 
             $('.back-button', this.element).toggleClass('disabled', !this.canBack(tab));
             $('.forward-button', this.element).toggleClass('disabled', !this.canForward(tab));
+            this.updateHistory();
         }
 
         this.display(tab.entity);
     }
 
     removeTab(tab, event) {
-        if (tab.currentTarget != undefined) {
-            tab.preventDefault();
-            tab = tab.currentTarget.parentElement.parentElement.dataset.tabid;
-        }
         if (typeof tab == 'string')
             tab = this.tabs.find(t => t.id == tab);
 
@@ -346,8 +364,8 @@ export class EnhancedJournalSheet extends JournalSheet {
         if (this.tabs.length == 0)
             this.addTab();
         else {
-
-            if (!this.activateTab((idx >= this.tabs.length ? idx - 1 : idx)))
+            let nextIdx = (idx >= this.tabs.length ? idx - 1 : idx);
+            if (!this.activateTab(nextIdx))
                 this.saveTabs();
         }
 
@@ -371,32 +389,69 @@ export class EnhancedJournalSheet extends JournalSheet {
         game.user.setFlag('monks-enhanced-journal', 'tabs', update);
     }
 
-    changeHistory(event) {
+    navigateHistory(event) {
         if (!$(event.currentTarget).hasClass('disabled')) {
             let dir = event.currentTarget.dataset.history;
             let tab = this.tabs.active();
 
             if (tab.history.length > 1) {
-                tab.historyIdx = clampNumber(((tab.historyIdx == undefined ? 0 : tab.historyIdx) + (dir == 'back' ? 1 : -1)), 0, (tab.history.length - 1));
-
-                tab.entityId = tab.history[tab.historyIdx];
-                tab.entity = this.findEntity(tab.entityId, tab.text);
-                /*
-                tab.entity = game.journal.get(tab.entityId);
-                if (tab.entity == undefined)
-                    tab.entity = game.actors.get(tab.entityId);
-                if (tab.entity == undefined)
-                    tab.entity = { apps: {}, data: { name: tab.text, flags: { 'monks-enhanced-journal': { type: 'blank' } }, content: { msg: `Cannot find the entity: ${tab.text}` } } };
-                    */
-
-                this.saveTabs();
-
-                this.display(tab.entity);
-
-                $('.back-button', this.element).toggleClass('disabled', !this.canBack(tab));
-                $('.forward-button', this.element).toggleClass('disabled', !this.canForward(tab));
+                let result = true;
+                let idx = 0;
+                do {
+                    idx = ((tab.historyIdx == undefined ? 0 : tab.historyIdx) + (dir == 'back' ? 1 : -1));
+                    result = this.changeHistory(idx);
+                } while (!result && idx > 0 && idx < tab.history.length )
             }
         }
+        event.preventDefault();
+    }
+
+    changeHistory(idx) {
+        let tab = this.tabs.active();
+        tab.historyIdx = Math.clamped(idx, 0, (tab.history.length - 1));
+
+        tab.entityId = tab.history[tab.historyIdx];
+        tab.entity = this.findEntity(tab.entityId, tab.text);
+        /*
+        tab.entity = game.journal.get(tab.entityId);
+        if (tab.entity == undefined)
+            tab.entity = game.actors.get(tab.entityId);
+        if (tab.entity == undefined)
+            tab.entity = { apps: {}, data: { name: tab.text, flags: { 'monks-enhanced-journal': { type: 'blank' } }, content: { msg: `Cannot find the entity: ${tab.text}` } } };
+            */
+
+        this.saveTabs();
+
+        this.display(tab.entity);
+
+        $('.back-button', this.element).toggleClass('disabled', !this.canBack(tab));
+        $('.forward-button', this.element).toggleClass('disabled', !this.canForward(tab));
+
+        return (tab.entity != undefined && tab.entity.ignore !== true);
+    }
+
+    updateHistory() {
+        let index = 0;
+        let tab = this.tabs.active();
+        this._tabcontext.menuItems = [];
+
+        for (let i = 0; i < tab.history.length; i++) {
+            let h = tab.history[i];
+            let entity = this.findEntity(h, '');
+            if (entity != undefined && entity.ignore !== true) {
+                let type = entity.getFlag('monks-enhanced-journal', 'type');
+                let icon = MonksEnhancedJournal.getIcon(type);
+                let item = {
+                    name: entity.name || 'Unknown',
+                    icon: `<i class="fas ${icon}"></i>`,
+                    callback: (li) => {
+                        let idx = i;
+                        this.changeHistory(idx)
+                    }
+                }
+                this._tabcontext.menuItems.push(item);
+            }
+        };
     }
 
     addBookmark() {
@@ -502,11 +557,11 @@ export class EnhancedJournalSheet extends JournalSheet {
                 log('clicking tab');
             }
 
-            this.document = $('<div>').addClass(sheet.options.classes);
-            this.document.append($('.window-content', sheet.element));
+            this.subdocument = $('<div>').addClass(sheet.options.classes);
+            this.subdocument.append($('.window-content', sheet.element));
 
             $('.content', this.element).attr('entity-type', 'actor');
-            $('.content form', this.element).empty().append(this.document);
+            $('.content form', this.element).empty().append(this.subdocument);
             this.activateDocumentListeners($('.content form > *', this.element).get(0), 'actor');
 
             sheet.close();
@@ -518,14 +573,14 @@ export class EnhancedJournalSheet extends JournalSheet {
 
             this.subsheet = new subsheet(this.object);
 
-        this.document = await this.subsheet.render();
+        this.subdocument = await this.subsheet.render();
 
         this.searchpos = 0;
 
         $('.content', this.element).attr('entity-type', type).attr('entity-id', this.object.id);
-        $('.content form', this.element).empty().append(this.document);
+        $('.content form', this.element).empty().append(this.subdocument);
 
-        Hooks.callAll('displaySubSheet', this, this.object, this.document);
+        Hooks.callAll('displaySubSheet', this, this.object, this.subdocument);
 
         this.subsheet.activateControls($('#journal-buttons', this.element).empty());
         if (game.modules.get("polyglot")?.active) {
@@ -546,20 +601,39 @@ export class EnhancedJournalSheet extends JournalSheet {
 
     }
 
+    _randomizePerson() {
+        //randomize first name, last name, race, gender, profession
+        //check first to see if the field needs to be rendomized, or if the fields are filled in
+    }
+
     searchText(query) {
-        if (query != this.lastquery)
-            this.searchpos = 0;
+        let that = this;
+        $('.editor .editor-content', this.element).unmark().mark(query, {
+            wildcards: 'enabled',
+            accuracy: "complementary",
+            separateWordSearch: false,
+            noMatch: function () {
+                if (query != '')
+                    $('.mainbar .navigation .search', that.element).addClass('error');
+            },
+            done: function (total) {
+                if (query == '')
+                    $('.mainbar .navigation .search', that.element).removeClass('error');
+                if (total > 0) {
+                    $('.mainbar .navigation .search', that.element).removeClass('error');
+                    let first = $('.editor .editor-content mark:first', that.element);
+                    $('.editor', that.element).parent().scrollTop(first.position().top - 10);
+                }
+            }
+        });
+    }
 
-        var regex = new RegExp(query, 'i');
+    requestConvert() {
 
-        let match = $('.editor', this.element).html().match(regex);
-        if (pos == -1 && this.searchpos > 0)
-            pos = $('.editor', this.element).html().indexOf(query, 0);
+    }
 
-        log('Search for:', query, pos);
+    convert(type) {
 
-        this.searchpos = pos + 1;
-        this.lastquery = query;
     }
 
     _onDrop(event) {
@@ -580,7 +654,7 @@ export class EnhancedJournalSheet extends JournalSheet {
                         $('.encounter-content', this.element).scrollTop(scrollTop);
                     });
                 });
-            } else if (data.pack != undefined) {
+            } else if (data.pack == undefined) {
                 let actor = game.actors.get(data.id);
                 this.open(actor);
             }
@@ -618,17 +692,25 @@ export class EnhancedJournalSheet extends JournalSheet {
         //    $('.sheet-body', this.element).removeClass('editing');
 
         let update = {};
+
+        if (this.form == undefined)
+            this.form = $('.monks-enhanced-journal .body > .content form', this.element).get(0);
             
         const formData = expandObject(this._getSubmitData());
 
         if (formData.name)
             update.name = formData.name;
 
+        if (formData.img)
+            update.img = formData.img;
+
         if (formData.content) {
-            if (this.entitytype == 'journalentry') {
+            if (this.entitytype == 'oldentry' || this.entitytype == 'journalentry') {
                 update.content = formData.content;
             } else {
                 update.content = this.object.data.content;
+                if (typeof update.content == 'string')
+                    update.content = JSON.parse(update.content);
                 update.content = mergeObject(update.content, formData.content, { recursive: false });
                 if (formData.userdata) {
                     update.content[game.user.id] = formData.userdata;
@@ -690,7 +772,7 @@ export class EnhancedJournalSheet extends JournalSheet {
     }
 
     _onEditImage(event) {
-        if (this.object.permission < ENTITY_PERMISSIONS.OWNER)
+        if (this.object.permission < CONST.ENTITY_PERMISSIONS.OWNER)
             return null;
 
         const fp = new FilePicker({
@@ -701,6 +783,7 @@ export class EnhancedJournalSheet extends JournalSheet {
                 //I have no idea why the form gets deleted sometimes, but add it back.
                 if (this.form == undefined)
                     this.form = $('.monks-enhanced-journal .body > .content form', this.element).get(0);
+                $('img[data-edit="img"]').css({ opacity: '' });
                 this._onSubmit(event, { preventClose: true });
             },
             top: this.position.top + 40,
@@ -712,7 +795,7 @@ export class EnhancedJournalSheet extends JournalSheet {
     _contextMenu(html) {
         this._context = new ContextMenu(html, ".bookmark-button", [
             {
-                name: "Delete",
+                name: "MonksEnhancedJournal.Delete",
                 icon: '<i class="fas fa-trash"></i>',
                 callback: li => {
                     const bookmark = this.bookmarks.find(b => b.id === li[0].dataset.bookmarkId);
@@ -720,9 +803,52 @@ export class EnhancedJournalSheet extends JournalSheet {
                 }
             }
         ]);
+        this._tabcontext = new ContextMenu(html, ".mainbar .navigation .nav-button.history", [
+        ]);
+        this._imgcontext = new ContextMenu(html, ".journal-body.oldentry .tab.picture", [
+            {
+                name: "MonksEnhancedJournal.Delete",
+                icon: '<i class="fas fa-trash"></i>',
+                callback: li => {
+                    log('Remove image on old entry');
+                }
+            }
+        ]);
     }
 
-    activateListeners(html) {   
+    async _onChangeInput(event) {
+        let ctrl = $(event.currentTarget);
+        if (ctrl.hasClass('search') && ctrl.hasClass('nav-input')) {
+            event.preventDefault();
+        } else
+            super._onChangeInput(event);
+    }
+
+    activateDirectoryListeners(html) {   
+        $('.sidebar-toggle', html).on('click', function () { if (this._collapsed) this.expandSidebar(); else this.collapseSidebar(); });
+
+        ui.journal._contextMenu.call(ui.journal, html);
+
+        const directory = html.find(".directory-list");
+        const entries = directory.find(".directory-item");
+
+        // Directory-level events
+        html.find('.create-entity').click(ev => ui.journal._onCreateDocument(ev));
+        html.find('.collapse-all').click(ui.journal.collapseAll.bind(this));
+        html.find(".folder .folder .folder .create-folder").remove(); // Prevent excessive folder nesting
+        if (game.user.isGM) html.find('.create-folder').click(ev => ui.journal._onCreateFolder(ev));
+
+        // Entry-level events
+        directory.on("click", ".entity-name", ui.journal._onClickEntityName.bind(ui.journal));
+        directory.on("click", ".folder-header", ui.journal._toggleFolder.bind(this));
+        //this._contextMenu(html);
+
+        // Intersection Observer
+        const observer = new IntersectionObserver(ui.journal._onLazyLoadImage.bind(this), { root: directory[0] });
+        entries.each((i, li) => observer.observe(li));
+    }
+
+    activateListeners(html) {
         super.activateListeners(html);
 
         this._contextMenu(html);
@@ -734,7 +860,13 @@ export class EnhancedJournalSheet extends JournalSheet {
 
         html.find('.tab-add').click(this.addTab.bind(this));
         html.find('.journal-tab').click(this.activateTab.bind(this));
-        html.find('.journal-tab .close').click(this.removeTab.bind(this));
+
+        let that = this;
+        $('.journal-tab .close').each(function () {
+            let tabid = $(this).closest('.journal-tab')[0].dataset.tabid;
+            let tab = that.tabs.find(t => t.id == tabid);
+            $(this).click(that.removeTab.bind(that, tab));
+        });
 
         //html.find('.navigation .show').click(this._onShowPlayers.bind(this));
         /*
@@ -757,27 +889,7 @@ export class EnhancedJournalSheet extends JournalSheet {
             }
         });*/
 
-        ui.journal._contextMenu.call(ui.journal, html);
-
-        const directory = html.find(".directory-list");
-        const entries = directory.find(".directory-item");
-
-        // Directory-level events
-        html.find('.create-entity').click(ev => ui.journal._onCreateEntity(ev));
-        html.find('.collapse-all').click(ui.journal.collapseAll.bind(this));
-        html.find(".folder .folder .folder .create-folder").remove(); // Prevent excessive folder nesting
-        if (game.user.isGM) html.find('.create-folder').click(ev => ui.journal._onCreateFolder(ev));
-
-        // Entry-level events
-        directory.on("click", ".entity-name", ui.journal._onClickEntityName.bind(ui.journal));
-        directory.on("click", ".folder-header", ui.journal._toggleFolder.bind(this));
-        //this._contextMenu(html);
-
-        $('.back-button, .forward-button').toggle(game.user.isGM || setting('allow-player')).on('click', $.proxy(this.changeHistory, this));
-
-        // Intersection Observer
-        const observer = new IntersectionObserver(ui.journal._onLazyLoadImage.bind(this), { root: directory[0] });
-        entries.each((i, li) => observer.observe(li));
+        $('.back-button, .forward-button', html).toggle(game.user.isGM || setting('allow-player')).on('click', this.navigateHistory.bind(this));
     }
 
     addResizeObserver(html) {

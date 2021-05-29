@@ -1,46 +1,50 @@
-<div class="flexcol person-container">
+<div class="flexcol person-container {{entrytype}}">
     <header class="sheet-header journal-header flexrow">
         <img class="profile" src="{{content.img}}" data-edit="content.img" onerror="this.src='modules/monks-enhanced-journal/assets/person.png'">
         <section class="header-details">
-            <h1 class="personname"><input name="name" type="text" value="{{name}}" placeholder="Person Name"></h1>
+            <h1 class="personname"><input name="name" type="text" value="{{name}}" placeholder="{{localize 'MonksEnhancedJournal.PersonName'}}"></h1>
             <div class="form-group">
-                <label>Role</label>
-                <input type="text" name="content.role" placeholder="Role" value="{{content.role}}" />
+                <label>{{localize 'MonksEnhancedJournal.Role'}}</label>
+                <input type="text" name="content.role" placeholder="{{localize 'MonksEnhancedJournal.Role'}}" value="{{content.role}}" />
             </div>
             <div class="form-group">
-                <label>Location</label>
-                <input type="text" name="content.location" placeholder="Location" value="{{content.location}}" />
+                <label>{{localize 'MonksEnhancedJournal.Location'}}</label>
+                <input type="text" name="content.location" placeholder="{{localize 'MonksEnhancedJournal.Location'}}" value="{{content.location}}" />
             </div>
         </section>
     </header>
     <nav class="sheet-navigation tabs" data-group="primary">
-        <a class="item active" data-tab="description">Description</a>
-        <a class="item" data-tab="notes">Notes</a>
+        <a class="item active" data-tab="description">{{localize 'MonksEnhancedJournal.Description'}}</a>
+        <a class="item" data-tab="notes">{{localize 'MonksEnhancedJournal.Notes'}}</a>
     </nav>
     <section class="sheet-body">
         <div class="tab description flexcol active" data-group="primary" data-tab="description">
-            <div class="details">
+            <div class="details" style="border-bottom: 2px groove #eeede0;">
                 <div class="form-group">
-                    <label>Race</label>
-                    <input type="text" name="content.race" placeholder="Race" value="{{content.race}}" />
+                    <label>{{localize 'MonksEnhancedJournal.Race'}}</label>
+                    <input type="text" name="content.race" placeholder="{{localize 'MonksEnhancedJournal.Race'}}" value="{{content.race}}" />
                 </div>
                 <div class="form-group">
-                    <label>Gender</label>
-                    <input type="text" name="content.gender" placeholder="Gender" value="{{content.gender}}" />
+                    <label>{{localize 'MonksEnhancedJournal.Gender'}}</label>
+                    <input type="text" name="content.gender" placeholder="{{localize 'MonksEnhancedJournal.Gender'}}" value="{{content.gender}}" />
                 </div>
                 <div class="form-group">
-                    <label>Voice</label>
-                    <input type="text" name="content.voice" placeholder="Voice" value="{{content.voice}}" />
+                    <label>{{localize 'MonksEnhancedJournal.Profession'}}</label>
+                    <input type="text" name="content.profession" placeholder="{{localize 'MonksEnhancedJournal.Profession'}}" value="{{content.profession}}" />
                 </div>
                 <div class="form-group">
-                    <label>Faction</label>
-                    <input type="text" name="content.faction" placeholder="Faction" value="{{content.faction}}" />
+                    <label>{{localize 'MonksEnhancedJournal.Voice'}}</label>
+                    <input type="text" name="content.voice" placeholder="{{localize 'MonksEnhancedJournal.Voice'}}" value="{{content.voice}}" />
+                </div>
+                <div class="form-group">
+                    <label>{{localize 'MonksEnhancedJournal.Faction'}}</label>
+                    <input type="text" name="content.faction" placeholder="{{localize 'MonksEnhancedJournal.Faction'}}" value="{{content.faction}}" />
                 </div>
             </div>
             {{editor target="content.summary" content=content.summary editable=true button=true}}
         </div>
         <div class="tab notes flexcol" data-group="primary" data-tab="notes">
-            <div style="flex: 0 0 20px;">These will only be viewable by you.</div>
+            <div style="flex: 0 0 20px;">{{localize 'MonksEnhancedJournal.OnlyViewable'}}</div>
             <div>
                 <textarea name="userdata.notes" style="width: calc(100% - 4px);height: calc(100% - 4px)">{{userdata.notes}}</textarea>
             </div>
