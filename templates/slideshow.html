@@ -1,21 +1,21 @@
-<div class="slideshow-container flexcol{{#if content.playing}} playing{{/if}} {{entrytype}}">
+<div class="slideshow-container flexcol{{#if flags.monks-enhanced-journal.playing}} playing{{/if}} {{entrytype}}">
     <div class="header-name">
         <input name="name" type="text" value="{{name}}" placeholder="{{localize 'MonksEnhancedJournal.SlideshowName'}}">
     </div>
     <div class="flexcol slideshow-settings">
         <div class="form-group" style="flex: 0 0 30px;">
-            <label for="content.showas">{{localize 'MonksEnhancedJournal.ShowAs'}}</label>
+            <label for="flags.monks-enhanced-journal.showas">{{localize 'MonksEnhancedJournal.ShowAs'}}</label>
             <div class="form-fields">
-                <select name="content.showas">
-                    {{ selectOptions showasOptions selected=content.showas }}
+                <select name="flags.monks-enhanced-journal.showas">
+                    {{ selectOptions showasOptions selected=flags.monks-enhanced-journal.showas }}
                 </select>
             </div>
         </div>
         <div class="form-group" style="flex: 0 0 30px;">
             <label for="audiofile">{{localize 'MonksEnhancedJournal.AudioFile'}}</label>
             <div class="form-fields">
-                {{ filePicker type="audio" target="content.audiofile" }}
-                <input class="image" style="border-color:#7a7971;" type="text" name="content.audiofile" placeholder="path/audio.mp3" value="{{content.audiofile}}">
+                {{ filePicker type="audio" target="flags.monks-enhanced-journal.audiofile" }}
+                <input class="image" style="border-color:#7a7971;" type="text" name="flags.monks-enhanced-journal.audiofile" placeholder="path/audio.mp3" value="{{flags.monks-enhanced-journal.audiofile}}">
             </div>
         </div>
     </div>
@@ -38,7 +38,7 @@
     </div>
     <div class="slideshow-body-outer">
         <div class="slideshow-body">
-            {{#each content.slides}}
+            {{#each flags.monks-enhanced-journal.slides}}
             <div class="slide{{#if this.active}} active{{/if}}" data-slide-id="{{this.id}}">
                 <div class="slide-background"><div style="{{this.background}}"></div></div>
                 <img src="{{this.img}}" style="object-fit:{{this.sizing}}" />

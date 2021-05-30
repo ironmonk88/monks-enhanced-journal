@@ -1,1 +1,136 @@
-# monks-enhanced-journal
+# Monk's Enhanced Journal
+Add-On Module for Foundry VTT
+This is an enhanced version of the journal.  It allows for multiple types of journal entries, and adds increased functionality such as searching, private notes, bookmarks and tabs.
+
+## Installation
+Simply use the install module screen within the FoundryVTT setup
+
+## Usage & Current Features
+
+![monks-enhanced-journal](/screenshots/main.png)
+
+The new interface adds the journal directory on the right hand side of the window, a tab bar and bookmark bar along the top, aswell as additional tools relevant to the journal entry loaded.
+
+![monks-enhanced-journal](/screenshots/sidebar.png)
+
+Right-clicking on the Journal Directory tab on the sidebar will open the Enhanced Journal window.
+
+### Tab Bar
+
+![monks-enhanced-journal](/screenshots/tabs.png)
+
+You can open multiple journal entries in Enhanced Journal by clicking on the + button to the right of the tabs.  Once a new tab is open, clicking on items in the Journal Directory will open that entry in the new tab.
+
+### Bookmark Bar
+
+![monks-enhanced-journal](/screenshots/bookmark.png)
+
+If you have Journal Entries that you reference a lot, you can add them to the bookmark bar by clicking on the star button.  Clicking on a bookmark button will open that entry in the current tab.  To delete a bookmark button, right-click the entry and select Delete fromt he drop down menu.
+
+### Forward/Back buttons, and additional tools
+
+At the top of the Journal Pages on the left side will be a forward and back button.  As you open pages within a tab, you can use the forward and back button to navigate the history of pages you've visited.  Right-clickign on these buttons will also show a menu of all pages in the history so you can navigate directly to a previous page.
+
+On the right side will be additional tools available for each journal page.  These are specific to the type of Journal Entry being viewed.
+
+Common to all entries is the locate button, that will center the screen on the Note icon that represents this journal entry.  So when you drag and drop a journal entry on the map, pressing this button from the Enhanced Journal will help locate it on the map.
+Also common to most entries is the Show to players button, that will show a copy of the journal entry on the players screens.  You can choose to send this entry to all players or choose which players can view it.
+
+![monks-enhanced-journal](/screenshots/search.png)
+
+And Journal Entries that contain text descriptions have a search box that will search the description and highlight words that match what's typed in the search box.  Which is useful to look things up, when a player has asked about something and you can't remember where in the big block of text it's mentioned.
+
+## New Journal Entries Types
+
+Along with the regular journal entry, you can now create entries that are just a picture, represent a person, place, quest, encounter, and can create a slideshow for a multimedia presentation for your players.
+Specific icons for each journal type are added to both the standard Journal Directory and the Journal Directory on the Enhanced Journal window so that you can see at a glance what type each entry represents.
+
+### Picture
+
+![monks-enhanced-journal](/screenshots/picture.png)
+
+This is to represent a single picture.  It's like the image part of an old journal entry.
+
+### Journal Entry
+
+![monks-enhanced-journal](/screenshots/journalentry.png)
+
+This is to represent a journal entry.  It's like the text part of an old journal entry.
+
+### Person
+
+![monks-enhanced-journal](/screenshots/person.png)
+
+This represents a person in your world.  This person most likely won't have a token, but still needs to be referenced and have information available.  You can upload a picture, add information to relevant properties and add descriptive text.  There is also a notes section where you can add private notes to this journal entry.
+
+### Place
+
+![monks-enhanced-journal](/screenshots/place.png)
+
+This is similar to the Person entry and represents a place that could be visited in your world.
+
+### Encounter
+
+![monks-enhanced-journal](/screenshots/encounter1.png)
+
+This represents an encounter on the map.  There is a place to add a description of what's happening at this location
+
+![monks-enhanced-journal](/screenshots/encounter2.png)
+
+On the second tab you can store information on what monsters will be encountered, what items could be gained at this location, and what DCs could be triggered.  To add a monster or item to the entry, drag the appropriate icon onto the sheet.  Dragging the monster icon from the entry to the canvas will create a representative token on the map.  Clicking on the dice icon, on a DC row will prompt for a dice roll.  Currently it's set to use Monk's Tokenbar to request those rolls, but I have plane to expand this in the future.
+
+### Slideshow
+
+![monks-enhanced-journal](/screenshots/slideshow.png)
+
+If you want to create a multimedia presentation for your players to introduce your module, you can use a slideshow.  A slideshow can be shown to the players in a window, onthe canvas but still allowing access to other windows, or covering everything so they can be more immersed in the presentation.  You can also add an audio file to play once the slideshow starts.
+Clicking on the Plus tool button will add another slide.  You can customise a slide by setting the background image, and setting how that image is displayed.  You can also add text to the slide, change the colour of that text, and change where it's positioned.  You can also customise how long the slide is shown for, and what kind of effect is used to transition to the next slide.
+
+![monks-enhanced-journal](/screenshots/slideshow2.png)
+
+When you wish to play the slideshow, press the play button and it will be displayed on the players screen and begin the animations.  The current slide will be shown in the journal window, with the remaining slides showing along the bottom.  Clicking on the slides along the bottom will show that specific slide, if the display length of a slide has been set to manual, then click the slide to advance to the next one, and right-click to reverse a slide.  A progress bar along the top will show you how much time is left in the slide before the next one is shown.
+
+### Quest
+
+![monks-enhanced-journal](/screenshots/quest1.png)
+
+The represents potential side quests that your player could complete.
+
+![monks-enhanced-journal](/screenshots/quest2.png)
+
+You can also set the rewards that are gained by completing this quest.  To add an item, drag the item icon on the journal page.
+
+### Old Entry
+
+![monks-enhanced-journal](/screenshots/oldentry.png)
+
+Journal Entries that were created outside of Enhanced Journal are represented by both a text area and a picture area.  Since they could be created with either or both I didn't want that information to be lost.
+
+### Actor Entry
+
+![monks-enhanced-journal](/screenshots/actor.png)
+
+If you draw an actor onto a blank tab, or onto a journal page that isn't an encounter, it will open that actor in it's own page.  The idea is that you can prepare for an encounter by having the text on one tab, and any monsters that could be encountered on seperate tabs, that way you can switch between them easily.
+
+## Plans for the future
+
+I have plans to add a conversion feature that will allow you to convert an old journal entry into one of the new types.
+I'd like to add a name generator for a person entry so that you can create a Person quickly.
+I have plans to add a funtion to export and import a journal entry so that you can move Journal Entries between worlds.
+I'd like to add traps to the encounter entry, so you can contain multiple related DCs and record potential damage or effects applied.
+Add additional dice rolling modules in case you don't use Monk's TokenBar... it's just easier to code for my own modules.  :-)  But it's coming.
+Additional transition effects for the slideshow.
+Preload and switch to a new scene once the slideshow finishes.
+
+## Bug Reporting
+I'm sure there are lots of issues with it.  It's very much a work in progress.
+Please feel free to contact me on discord if you have any questions or concerns. ironmonk88#4075
+
+## Support
+
+If you feel like being generous, stop by my <a href="https://www.patreon.com/ironmonk">patreon</a>.  Not necessary but definitely appreciated.
+
+## License
+This Foundry VTT module, writen by Ironmonk, is licensed under [GNU GPLv3.0](https://www.gnu.org/licenses/gpl-3.0.en.html), supplemented by [Commons Clause](https://commonsclause.com/).
+
+This work is licensed under Foundry Virtual Tabletop <a href="https://foundryvtt.com/article/license/">EULA - Limited License Agreement for module development from May 29, 2020.</a>

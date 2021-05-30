@@ -1,145 +1,151 @@
-<div class="flexcol sheet-body encounter-body {{entrytype}}">
-    <div class="header-name">
+<div class="flexcol journal-subsheet sheet-body encounter-body {{entrytype}}" editable="{{editable}}">
+    <div class="header-name flexrow">
         <input name="name" type="text" value="{{name}}" placeholder="{{localize 'MonksEnhancedJournal.EncounterName'}}">
     </div>
-    <div class="encounter-content">
-        <div>
-            {{editor target="content.summary" content=content.summary editable=true button=true}}
+    <nav class="sheet-navigation tabs" data-group="primary">
+        <a class="item active" data-tab="description">{{localize 'MonksEnhancedJournal.Description'}}</a>
+        <a class="item" data-tab="details">{{localize 'MonksEnhancedJournal.Details'}}</a>
+    </nav>
+    <section class="sheet-body">
+        <div class="tab description flexcol active" data-group="primary" data-tab="description">
+            {{editor target="content" content=content editable=true button=true}}
         </div>
-        <div class="encounter-sidebar flexcol">
-            <div style="height:100%;">
-                <ol class="items-list encounter-monsters">
-                    <li class="items-header flexrow">
-                        <h3 class="item-name flexrow">{{localize 'MonksEnhancedJournal.Monsters'}}</h3>
-                        <div class="item-controls flexrow"></div>
-                    </li>
+        <div class="tab details flexcol" data-group="primary" data-tab="details">
+            <div class="encounter-content flexcol">
+                <div style="height:100%;">
+                    <ol class="items-list encounter-monsters">
+                        <li class="items-header flexrow">
+                            <h3 class="item-name flexrow">{{localize 'MonksEnhancedJournal.Monsters'}}</h3>
+                            <div class="item-controls flexrow"></div>
+                        </li>
 
-                    <ol class="item-list">
-                        {{#each content.monsters}}
-                        <li class="item flexrow " data-pack="{{this.pack}}" data-id="{{this.id}}" data-container="monsters" data-entity="Actor" draggable="true">
-                            <div class="item-name flexrow">
-                                <div class="item-image monster-icon" data-id="{{this.id}}" data-entity="Actor" style="background-image: url('{{this.img}}')" draggable="true" ></div>
-                                <h4>{{this.name}}</h4>
-                            </div>
+                        <ol class="item-list">
+                            {{#each flags.monks-enhanced-journal.monsters}}
+                            <li class="item flexrow " data-pack="{{this.pack}}" data-id="{{this.id}}" data-container="monsters" data-entity="Actor" draggable="true">
+                                <div class="item-name flexrow">
+                                    <div class="item-image monster-icon" data-id="{{this.id}}" data-entity="Actor" style="background-image: url('{{this.img}}')" draggable="true"></div>
+                                    <h4>{{this.name}}</h4>
+                                </div>
+
+                                <div class="item-controls flexrow">
+                                    <a class="item-control monster-delete" title="{{localize 'MonksEnhancedJournal.DeleteMonster'}}"><i class="fas fa-trash"></i></a>
+                                </div>
+                            </li>
+                            {{/each}}
+                        </ol>
+                    </ol>
+                </div>
+                <div>
+                    <ol class="items-list encounter-items">
+                        <li class="items-header flexrow">
+                            <h3 class="item-name flexrow">{{localize 'MonksEnhancedJournal.Items'}}</h3>
+                            <div class="item-details item-qty">{{localize 'MonksEnhancedJournal.Qty'}}</div>
+                            <div class="item-controls flexrow"></div>
+                        </li>
+
+                        <ol class="item-list">
+                            {{#each flags.monks-enhanced-journal.items}}
+                            <li class="item flexrow " data-pack="{{this.pack}}" data-id="{{this.id}}" data-container="items" data-entity="Item" draggable="true">
+                                <div class="item-name flexrow">
+                                    <div class="item-image item-icon" style="background-image: url('{{this.img}}')"></div>
+                                    <h4>{{this.name}}</h4>
+                                </div>
+
+                                <div class="item-detail item-qty">
+                                    <input type="text" name="qty" value="{{this.qty}}" style="text-align:center;" />
+                                </div>
+
+                                <div class="item-controls flexrow">
+                                    <a class="item-control item-delete" title="Delete Item"><i class="fas fa-trash"></i></a>
+                                </div>
+                            </li>
+                            {{/each}}
+                        </ol>
+                    </ol>
+                </div>
+                <div>
+                    <ol class="items-list encounter-dcs">
+                        <li class="items-header flexrow">
+                            <h3 class="item-name flexrow">{{localize 'MonksEnhancedJournal.DCs'}}</h3>
+
+                            <div class="item-detail item-attribute">{{localize 'MonksEnhancedJournal.Attribute'}}</div>
+                            <div class="item-detail item-dc">{{localize 'MonksEnhancedJournal.DC'}}</div>
 
                             <div class="item-controls flexrow">
-                                <a class="item-control monster-delete" title="{{localize 'MonksEnhancedJournal.DeleteMonster'}}"><i class="fas fa-trash"></i></a>
+                                <a class="item-control dc-create" title="{{localize 'MonksEnhancedJournal.CreateDC'}}" data-type="dc">
+                                    <i class="fas fa-plus"></i> {{localize 'MonksEnhancedJournal.Add'}}
+                                </a>
                             </div>
                         </li>
-                        {{/each}}
+
+                        <ol class="item-list">
+                            {{#each flags.monks-enhanced-journal.dcs}}
+                            <li class="item flexrow " data-id="{{this.id}}" data-container="dcs" draggable="false">
+                                <div class="item-name flexrow rollable">
+                                    <div class="item-image" style="background-image: url('{{this.img}}')"></div>
+                                    <h4>{{this.name}}</h4>
+                                </div>
+
+                                <div class="item-detail item-attribute">
+                                    {{this.label}}
+                                </div>
+                                <div class="item-detail item-dc">
+                                    DC {{this.dc}}
+                                </div>
+
+                                <div class="item-controls flexrow">
+                                    <a class="item-control dc-edit" title="{{localize 'MonksEnhancedJournal.EditDC'}}"><i class="fas fa-edit"></i></a>
+                                    <a class="item-control dc-delete" title="{{localize 'MonksEnhancedJournal.DeleteDC'}}"><i class="fas fa-trash"></i></a>
+                                </div>
+                            </li>
+                            {{/each}}
+                        </ol>
                     </ol>
-                </ol>
-            </div>
-            <div>
-                <ol class="items-list encounter-items">
-                    <li class="items-header flexrow">
-                        <h3 class="item-name flexrow">{{localize 'MonksEnhancedJournal.Items'}}</h3>
-                        <div class="item-details item-qty">{{localize 'MonksEnhancedJournal.Qty'}}</div>
-                        <div class="item-controls flexrow"></div>
-                    </li>
+                </div>
+                <div style="display:none;">
+                    <ol class="items-list encounter-traps">
+                        <li class="items-header flexrow">
+                            <h3 class="item-name flexrow">{{localize 'MonksEnhancedJournal.Traps'}}</h3>
 
-                    <ol class="item-list">
-                        {{#each content.items}}
-                        <li class="item flexrow " data-pack="{{this.pack}}" data-id="{{this.id}}" data-container="items" data-entity="Item" draggable="true">
-                            <div class="item-name flexrow">
-                                <div class="item-image item-icon" style="background-image: url('{{this.img}}')"></div>
-                                <h4>{{this.name}}</h4>
-                            </div>
-
-                            <div class="item-detail item-qty">
-                                <input type="text" name="qty" value="{{this.qty}}" style="text-align:center;" />
-                            </div>
+                            <div class="item-detail item-find">{{localize 'MonksEnhancedJournal.Find'}}</div>
+                            <div class="item-detail item-disarm">{{localize 'MonksEnhancedJournal.Disarm'}}</div>
+                            <div class="item-detail item-avoid">{{localize 'MonksEnhancedJournal.Avoid'}}</div>
 
                             <div class="item-controls flexrow">
-                                <a class="item-control item-delete" title="Delete Item"><i class="fas fa-trash"></i></a>
+                                <a class="item-control trap-create" title="{{localize 'MonksEnhancedJournal.CreateTrap'}}" data-type="dc">
+                                    <i class="fas fa-plus"></i> {{localize 'MonksEnhancedJournal.Add'}}
+                                </a>
                             </div>
                         </li>
-                        {{/each}}
+
+                        <ol class="item-list">
+                            {{#each flags.monks-enhanced-journal.traps}}
+                            <li class="item flexrow " data-id="{{this.id}}" data-container="traps" draggable="false">
+                                <div class="item-name flexrow rollable">
+                                    <div class="item-image" style="background-image: url('{{this.img}}')"></div>
+                                    <h4>{{this.name}}</h4>
+                                </div>
+
+                                <div class="item-detail item-find">
+                                    {{this.finddc}}
+                                </div>
+                                <div class="item-detail item-disarm">
+                                    {{this.disarmdc}}
+                                </div>
+                                <div class="item-detail item-avoid">
+                                    {{this.avoiddc}}
+                                </div>
+
+                                <div class="item-controls flexrow">
+                                    <a class="item-control trap-edit" title="{{localize 'MonksEnhancedJournal.EditTrap'}}"><i class="fas fa-edit"></i></a>
+                                    <a class="item-control trap-delete" title="{{localize 'MonksEnhancedJournal.DeleteTrap'}}"><i class="fas fa-trash"></i></a>
+                                </div>
+                            </li>
+                            {{/each}}
+                        </ol>
                     </ol>
-                </ol>
-            </div>
-            <div>
-                <ol class="items-list encounter-dcs">
-                    <li class="items-header flexrow">
-                        <h3 class="item-name flexrow">{{localize 'MonksEnhancedJournal.DCs'}}</h3>
-
-                        <div class="item-detail item-attribute">{{localize 'MonksEnhancedJournal.Attribute'}}</div>
-                        <div class="item-detail item-dc">{{localize 'MonksEnhancedJournal.DC'}}</div>
-
-                        <div class="item-controls flexrow">
-                            <a class="item-control dc-create" title="{{localize 'MonksEnhancedJournal.CreateDC'}}" data-type="dc">
-                                <i class="fas fa-plus"></i> {{localize 'MonksEnhancedJournal.Add'}}
-                            </a>
-                        </div>
-                    </li>
-
-                    <ol class="item-list">
-                        {{#each content.dcs}}
-                        <li class="item flexrow " data-id="{{this.id}}" data-container="dcs" draggable="false">
-                            <div class="item-name flexrow rollable">
-                                <div class="item-image" style="background-image: url('{{this.img}}')"></div>
-                                <h4>{{this.name}}</h4>
-                            </div>
-
-                            <div class="item-detail item-attribute">
-                                {{this.label}}
-                            </div>
-                            <div class="item-detail item-dc">
-                                DC {{this.dc}}
-                            </div>
-
-                            <div class="item-controls flexrow">
-                                <a class="item-control dc-edit" title="{{localize 'MonksEnhancedJournal.EditDC'}}"><i class="fas fa-edit"></i></a>
-                                <a class="item-control dc-delete" title="{{localize 'MonksEnhancedJournal.DeleteDC'}}"><i class="fas fa-trash"></i></a>
-                            </div>
-                        </li>
-                        {{/each}}
-                    </ol>
-                </ol>
-            </div>
-            <div>
-                <ol class="items-list encounter-traps">
-                    <li class="items-header flexrow">
-                        <h3 class="item-name flexrow">{{localize 'MonksEnhancedJournal.Traps'}}</h3>
-
-                        <div class="item-detail item-find">{{localize 'MonksEnhancedJournal.Find'}}</div>
-                        <div class="item-detail item-disarm">{{localize 'MonksEnhancedJournal.Disarm'}}</div>
-                        <div class="item-detail item-avoid">{{localize 'MonksEnhancedJournal.Avoid'}}</div>
-
-                        <div class="item-controls flexrow">
-                            <a class="item-control trap-create" title="{{localize 'MonksEnhancedJournal.CreateTrap'}}" data-type="dc">
-                                <i class="fas fa-plus"></i> {{localize 'MonksEnhancedJournal.Add'}}
-                            </a>
-                        </div>
-                    </li>
-
-                    <ol class="item-list">
-                        {{#each content.traps}}
-                        <li class="item flexrow " data-id="{{this.id}}" data-container="traps" draggable="false">
-                            <div class="item-name flexrow rollable">
-                                <div class="item-image" style="background-image: url('{{this.img}}')"></div>
-                                <h4>{{this.name}}</h4>
-                            </div>
-
-                            <div class="item-detail item-find">
-                                {{this.finddc}}
-                            </div>
-                            <div class="item-detail item-disarm">
-                                {{this.disarmdc}}
-                            </div>
-                            <div class="item-detail item-avoid">
-                                {{this.avoiddc}}
-                            </div>
-
-                            <div class="item-controls flexrow">
-                                <a class="item-control trap-edit" title="{{localize 'MonksEnhancedJournal.EditTrap'}}"><i class="fas fa-edit"></i></a>
-                                <a class="item-control trap-delete" title="{{localize 'MonksEnhancedJournal.DeleteTrap'}}"><i class="fas fa-trash"></i></a>
-                            </div>
-                        </li>
-                        {{/each}}
-                    </ol>
-                </ol>
+                </div>
             </div>
         </div>
-    </div>
+    </section>
 </div>

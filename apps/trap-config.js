@@ -28,8 +28,9 @@ export class TrapConfig extends FormApplication {
     async _updateObject(event, formData) {
         log('updating trap', event, formData, this.object);
         mergeObject(this.object, formData);
-        MonksEnhancedJournal.journal.saveData();
-
+        MonksEnhancedJournal.journal.saveData().then(() => {
+            MonksEnhancedJournal.journal.display(MonksEnhancedJournal.journal.object);
+        });
     }
 
     activateListeners(html) {

@@ -1,4 +1,4 @@
-<div class="flexcol journal-body {{entrytype}}">
+<div class="flexcol journal-subsheet journal-body {{entrytype}}" editable="{{editable}}">
     <header class="header-name">
         <input name="name" type="text" value="{{name}}" placeholder="{{localize 'MonksEnhancedJournal.JournalEntryName'}}">
     </header>
@@ -7,7 +7,7 @@
         <a class="item" data-tab="picture">{{localize 'MonksEnhancedJournal.Picture'}}</a>
     </nav>
     <section class="sheet-body">
-        <div class="tab description flexrow active" data-group="primary" data-tab="description">
+        <div class="tab description flexcol active" data-group="primary" data-tab="description">
             {{editor target="content" content=content editable=true button=true}}
         </div>
         <div class="tab picture flexrow active" data-group="primary" data-tab="picture">

@@ -132,10 +132,10 @@ export class MonksEnhancedJournal {
         selected = selected instanceof Array ? selected.map(String) : [String(selected)];
 
         // Create an option
-        const option = (key, label) => {
+        const option = (groupid, key, label) => {
             if (localize) label = game.i18n.localize(label);
-            let isSelected = selected.includes(key);
-            html += `<option value="${key}" ${isSelected ? "selected" : ""}>${label}</option>`
+            let isSelected = selected.includes(groupid + ":" + key);
+            html += `<option value="${groupid}:${key}" ${isSelected ? "selected" : ""}>${label}</option>`
         };
 
         // Create the options
@@ -145,7 +145,7 @@ export class MonksEnhancedJournal {
             for (let group of choices) {
                 let label = (localize ? game.i18n.localize(group.text) : group.text);
                 html += `<optgroup label="${label}">`;
-                Object.entries(group.groups).forEach(e => option(...e));
+                Object.entries(group.groups).forEach(e => option(group.id, ...e));
                 html += `</optgroup>`;
             }
         } else {
@@ -158,9 +158,6 @@ export class MonksEnhancedJournal {
         let entry = await fromUuid(entryId);
         if (entry.entity !== "JournalEntry") return;
         if (!force && !entry.visible) return;
-
-        // Don't show an entry that has no content
-        if (!entry.data.content) return;
 
         // Show the sheet with the appropriate mode
         entry.sheet._render(true, { sheetMode: mode }).then(() => {
@@ -221,10 +218,10 @@ export class MonksEnhancedJournal {
     static saveUserData(data) {
         if (game.user.isGM) {
             let entity = game.journal.get(data.entityId);
-            let content = JSON.parse(entity.data.content);
-            content[data.userId] = data.userdata;
+            let update = {};
+            update["flags.monks-enhanced-journal." + data.userId] = data.userdata;
 
-            entity.update({ content: JSON.stringify(content) });
+            entity.update(update);
         }
     }
 
@@ -239,7 +236,7 @@ export class MonksEnhancedJournal {
                 MonksEnhancedJournal.slideshow = {
                     id: data.id,
                     object: slideshow,
-                    content: JSON.parse(slideshow.data.content)
+                    content: slideshow.data.flags["monks-enhanced-journal"]
                 }
 
                 let showas = MonksEnhancedJournal.slideshow.content.showas;

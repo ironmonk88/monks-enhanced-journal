@@ -221,13 +221,13 @@ export class EnhancedJournalSheet extends JournalSheet {
 
     findEntity(entityId, text) {
         if (entityId == undefined)
-            return { apps: {}, data: { flags: { 'monks-enhanced-journal': { type: 'blank' } }, content: { msg: "MonksEnhancedJournal.OpenEntry" } }, ignore: true };
+            return { apps: {}, data: { flags: { 'monks-enhanced-journal': { type: 'blank' } }, content: "MonksEnhancedJournal.OpenEntry" }, ignore: true };
         else {
             let entity = game.journal.get(entityId);
             if (entity == undefined)
                 entity = game.actors.get(entityId);
             if (entity == undefined)
-                entity = { apps: {}, data: { name: text, flags: { 'monks-enhanced-journal': { type: 'blank' } }, content: { msg: `${i18n("MonksEnhancedJournal.CannotFindEntity")}: ${text}` } }, ignore: true };
+                entity = { apps: {}, data: { name: text, flags: { 'monks-enhanced-journal': { type: 'blank' } }, content: `${i18n("MonksEnhancedJournal.CannotFindEntity")}: ${text}` }, ignore: true };
 
             return entity;
         }
@@ -242,7 +242,7 @@ export class EnhancedJournalSheet extends JournalSheet {
             text: entity?.data.name || i18n("MonksEnhancedJournal.NewTab"),
             active: false,
             entityId: entity?.id,
-            entity: entity || { apps: {}, data: { flags: { 'monks-enhanced-journal': { type: 'blank' } }, content: { msg: "MonksEnhancedJournal.OpenEntry" } }, ignore: true },
+            entity: entity || { apps: {}, data: { flags: { 'monks-enhanced-journal': { type: 'blank' } }, content: "MonksEnhancedJournal.OpenEntry" }, ignore: true },
             history: []
         };
         if (tab.entityId != undefined)
@@ -284,13 +284,13 @@ export class EnhancedJournalSheet extends JournalSheet {
                 tab.entity = this.findEntity(tab.entityId, tab.text);
                 /*
                 if (tab.entityId == undefined)
-                    tab.entity = { apps: {}, data: { flags: { 'monks-enhanced-journal': { type: 'blank' } }, content: { msg: "MonksEnhancedJournal.OpenEntry"} } };
+                    tab.entity = { apps: {}, data: { flags: { 'monks-enhanced-journal': { type: 'blank' } }, content: "MonksEnhancedJournal.OpenEntry" } };
                 else {
                     tab.entity = game.journal.get(tab.entityId);
                     if (tab.entity == undefined)
                         tab.entity = game.actors.get(tab.entityId);
                     if (tab.entity == undefined)
-                        tab.entity = { apps: {}, data: { name: tab.text, flags: { 'monks-enhanced-journal': { type: 'blank' } }, content: { msg: `Cannot find the entity: ${tab.text}` } } };
+                        tab.entity = { apps: {}, data: { name: tab.text, flags: { 'monks-enhanced-journal': { type: 'blank' } }, content: `Cannot find the entity: ${tab.text}` } };
                 }*/
             }
             this.display(tab.entity);
@@ -417,7 +417,7 @@ export class EnhancedJournalSheet extends JournalSheet {
         if (tab.entity == undefined)
             tab.entity = game.actors.get(tab.entityId);
         if (tab.entity == undefined)
-            tab.entity = { apps: {}, data: { name: tab.text, flags: { 'monks-enhanced-journal': { type: 'blank' } }, content: { msg: `Cannot find the entity: ${tab.text}` } } };
+            tab.entity = { apps: {}, data: { name: tab.text, flags: { 'monks-enhanced-journal': { type: 'blank' } }, content: `Cannot find the entity: ${tab.text}` } };
             */
 
         this.saveTabs();
@@ -648,11 +648,11 @@ export class EnhancedJournalSheet extends JournalSheet {
 
         if (data.type == 'Actor') {
             if (this.entitytype == 'encounter') {
-                let scrollTop = $('.encounter-content', this.element).scrollTop();
+                //let scrollTop = $('.encounter-content', this.element).scrollTop();
                 this.subsheet.addMonster(data).then(() => {
-                    this.display(this.object).then(() => {
+                    this.display(this.object);/*.then(() => {
                         $('.encounter-content', this.element).scrollTop(scrollTop);
-                    });
+                    });*/
                 });
             } else if (data.pack == undefined) {
                 let actor = game.actors.get(data.id);
@@ -691,13 +691,15 @@ export class EnhancedJournalSheet extends JournalSheet {
         //if (type == 'encounter')
         //    $('.sheet-body', this.element).removeClass('editing');
 
-        let update = {};
 
         if (this.form == undefined)
             this.form = $('.monks-enhanced-journal .body > .content form', this.element).get(0);
             
         const formData = expandObject(this._getSubmitData());
 
+        //let update = {};
+
+        /*
         if (formData.name)
             update.name = formData.name;
 
@@ -724,25 +726,30 @@ export class EnhancedJournalSheet extends JournalSheet {
 
                 update.content = JSON.stringify(update.content);
             }
-        }
+        }*/
 
-        if (!this.isEditable && formData.userdata) {
+        if (!this.isEditable && formData.flags["monks-enhanced-journal"]["game.user.id"]) {
             //need to have the GM update this, but only the user notes
             game.socket.emit(MonksEnhancedJournal.SOCKET, {
                 action: "saveUserData",
                 args: {
                     entityId: this.object.id,
                     userId: game.user.id,
-                    userdata: formData.userdata
+                    userdata: formData.flags["monks-enhanced-journal"]["game.user.id"]
                 }
             });
             return new Promise(() => { });
         }else
-            return this.object.update(update);
+            return this.object.update(formData);
     }
 
     saveData() {
-        this.object.update({ content: JSON.stringify(this.object.data.content) });
+        return this.object.update({
+            name: this.object.data.name,
+            img: this.object.data.img,
+            content: this.object.data.content,
+            flags: this.object.data.flags
+        });
     }
 
     _getHeaderButtons() {
@@ -753,10 +760,25 @@ export class EnhancedJournalSheet extends JournalSheet {
         return buttons;
     }
 
+    findMapEntry(event) {
+        let mainbar = event.currentTarget.closest('.mainbar');
+        let content = $(mainbar).next();
+        let id = $(content).attr('entity-id');
+        //find this id on the map
+
+        let note = canvas.scene.data.notes.find(n => {
+            return n.data.entryId == id;
+        });
+        if (note) {
+            //if (note.visible && !canvas.notes._active) canvas.notes.activate();
+            canvas.animatePan({ x: note.data.x, y: note.data.y, scale: 1, duration: 250 });
+        }
+    }
+
     async _onShowPlayers(event) {
         if (this.entitytype == 'picture') {
             game.socket.emit("shareImage", {
-                image: this.content.img,
+                image: this.object.data.img,
                 title: this.object.name,
                 uuid: this.object.uuid
             });
@@ -777,7 +799,7 @@ export class EnhancedJournalSheet extends JournalSheet {
 
         const fp = new FilePicker({
             type: "image",
-            current: this.object.data.content.img,
+            current: this.object.data.img,
             callback: path => {
                 event.currentTarget.src = path;
                 //I have no idea why the form gets deleted sometimes, but add it back.
@@ -892,10 +914,10 @@ export class EnhancedJournalSheet extends JournalSheet {
         $('.back-button, .forward-button', html).toggle(game.user.isGM || setting('allow-player')).on('click', this.navigateHistory.bind(this));
     }
 
-    addResizeObserver(html) {
+    /*addResizeObserver(html) {
         new ResizeObserver(function (obs) {
             log('resize observer', obs);
             $(obs[0].target).toggleClass('flexcol', obs[0].contentRect.width < 900).toggleClass('flexrow', obs[0].contentRect.width >= 900);
         }).observe($('.encounter-content', html).get(0));
-    }
+    }*/
 }

@@ -13,7 +13,7 @@
         <label for="sizing">{{localize 'MonksEnhancedJournal.Sizing'}}</label>
         <div class="form-fields">
             <select name="sizing">
-                {{ selectOptions sizingOptions selected=object.sizing }}
+                {{ selectOptions sizingOptions selected=object.sizing localize=true }}
             </select>
         </div>
     </div>
@@ -51,7 +51,7 @@
         <label for="text.align">{{localize 'MonksEnhancedJournal.Justification'}}</label>
         <div class="form-fields">
             <select name="text.align">
-                {{ selectOptions alignOptions selected=object.text.align }}
+                {{ selectOptions alignOptions selected=object.text.align localize=true }}
             </select>
         </div>
     </div>
@@ -59,7 +59,7 @@
         <label for="text.valign">{{localize 'MonksEnhancedJournal.VAlign'}}</label>
         <div class="form-fields">
             <select name="text.valign">
-                {{ selectOptions vAlignOptions selected=object.text.valign }}
+                {{ selectOptions vAlignOptions selected=object.text.valign localize=true }}
             </select>
         </div>
     </div>

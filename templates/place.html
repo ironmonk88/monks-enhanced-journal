@@ -1,19 +1,19 @@
-<div class="flexcol place-container {{entrytype}}">
+<div class="flexcol journal-subsheet place-container {{entrytype}}" editable="{{editable}}">
     <header class="sheet-header journal-header flexrow">
-        <img class="profile" src="{{content.img}}" data-edit="content.img" onerror="this.src='modules/monks-enhanced-journal/assets/place.png'">
+        <img class="profile" src="{{img}}" data-edit="img" onerror="this.src='modules/monks-enhanced-journal/assets/place.png'">
         <section class="header-details">
             <h1 class="placename"><input name="name" type="text" value="{{name}}" placeholder="{{localize 'MonksEnhancedJournal.PlaceName'}}" /></h1>
             <div class="form-group">
                 <label>{{localize 'MonksEnhancedJournal.Location'}}</label>
-                <input type="text" name="content.location" placeholder="{{localize 'MonksEnhancedJournal.Location'}}" value="{{content.location}}" />
+                <input type="text" name="flags.monks-enhanced-journal.location" placeholder="{{localize 'MonksEnhancedJournal.Location'}}" value="{{flags.monks-enhanced-journal.location}}" />
             </div>
             <div class="form-group">
                 <label>{{localize 'MonksEnhancedJournal.Government'}}</label>
-                <input type="text" name="content.government" placeholder="{{localize 'MonksEnhancedJournal.Government'}}" value="{{content.government}}" />
+                <input type="text" name="flags.monks-enhanced-journal.government" placeholder="{{localize 'MonksEnhancedJournal.Government'}}" value="{{flags.monks-enhanced-journal.government}}" />
             </div>
             <div class="form-group">
                 <label>{{localize 'MonksEnhancedJournal.Size'}}</label>
-                <input type="text" name="content.size" placeholder="{{localize 'MonksEnhancedJournal.Size'}}" value="{{content.size}}" />
+                <input type="text" name="flags.monks-enhanced-journal.size" placeholder="{{localize 'MonksEnhancedJournal.Size'}}" value="{{flags.monks-enhanced-journal.size}}" />
             </div>
         </section>
     </header>
@@ -22,13 +22,13 @@
         <a class="item" data-tab="notes">{{localize 'MonksEnhancedJournal.Notes'}}</a>
     </nav>
     <section class="sheet-body">
-        <div class="tab description flexrow active" data-group="primary" data-tab="description">
-            {{editor target="content.summary" content=content.summary editable=true button=true}}
+        <div class="tab description flexcol active" data-group="primary" data-tab="description">
+            {{editor target="content" content=content editable=true button=true}}
         </div>
         <div class="tab notes flexcol" data-group="primary" data-tab="notes">
             <div style="flex: 0 0 20px;">{{localize 'MonksEnhancedJournal.OnlyViewable'}}</div>
             <div>
-                <textarea name="userdata.notes" style="width: calc(100% - 4px);height: calc(100% - 4px)">{{userdata.notes}}</textarea>
+                <textarea name="flags.monks-enhanced-journal.{{userid}}.notes" style="width: calc(100% - 4px);height: calc(100% - 4px)">{{userdata.notes}}</textarea>
             </div>
         </div>
     </section>

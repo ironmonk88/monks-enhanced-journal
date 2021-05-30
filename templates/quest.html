@@ -1,19 +1,19 @@
-<div class="flexcol quest-container {{entrytype}}">
+<div class="flexcol journal-subsheet quest-container {{entrytype}}" editable="{{editable}}">
     <header class="sheet-header journal-header flexrow">
-        <img class="profile" src="{{content.img}}" data-edit="content.img" onerror="this.src='modules/monks-enhanced-journal/assets/quest.png'">
+        <img class="profile" src="{{img}}" data-edit="img" onerror="this.src='modules/monks-enhanced-journal/assets/quest.png'">
         <section class="header-details">
             <h1 class="questname"><input name="name" type="text" value="{{name}}" placeholder="{{localize 'MonksEnhancedJournal.QuestName'}}"></h1>
             <div class="form-group">
                 <label>{{localize 'MonksEnhancedJournal.Source'}}</label>
-                <input type="text" name="content.source" placeholder="{{localize 'MonksEnhancedJournal.Source'}}" value="{{content.source}}" />
+                <input type="text" name="flags.monks-enhanced-journal.source" placeholder="{{localize 'MonksEnhancedJournal.Source'}}" value="{{flags.monks-enhanced-journal.source}}" />
             </div>
             <div class="form-group">
                 <label>{{localize 'MonksEnhancedJournal.Seen'}}</label>
-                <input type="checkbox" name="content.seen" checked="{{checked content.seen}}" />
+                <input type="checkbox" name="flags.monks-enhanced-journal.seen" checked="{{checked flags.monks-enhanced-journal.seen}}" />
             </div>
             <div class="form-group">
                 <label>{{localize 'MonksEnhancedJournal.Completed'}}</label>
-                <input type="checkbox" name="content.completed" checked="{{checked content.completed}}" />
+                <input type="checkbox" name="flags.monks-enhanced-journal.completed" checked="{{checked flags.monks-enhanced-journal.completed}}" />
             </div>
         </section>
     </header>
@@ -23,13 +23,13 @@
         <a class="item" data-tab="notes">{{localize 'MonksEnhancedJournal.Notes'}}</a>
     </nav>
     <section class="sheet-body">
-        <div class="tab description flexrow active" data-group="primary" data-tab="description">
-            {{editor target="content.summary" content=content.summary editable=true button=true}}
+        <div class="tab description flexcol active" data-group="primary" data-tab="description">
+            {{editor target="content" content=content editable=true button=true}}
         </div>
         <div class="tab rewards flexcol active" data-group="primary" data-tab="rewards">
             <div class="form-group">
                 <label>{{localize 'MonksEnhancedJournal.Experience'}}</label>
-                <input type="text" name="content.xp" placeholder="{{localize 'MonksEnhancedJournal.Experience'}}" value="{{content.xp}}" />
+                <input type="text" name="flags.monks-enhanced-journal.xp" placeholder="{{localize 'MonksEnhancedJournal.Experience'}}" value="{{flags.monks-enhanced-journal.xp}}" />
             </div>
             <ol class="items-list encounter-items">
                 <li class="items-header flexrow">
@@ -42,7 +42,7 @@
                 </li>
 
                 <ol class="item-list">
-                    {{#each content.items}}
+                    {{#each flags.monks-enhanced-journal.items}}
                     <li class="item flexrow " data-item-id="{{this.id}}" draggable="true">
                         <div class="item-name flexrow">
                             <div class="item-image" style="background-image: url('{{this.img}}')"></div>
@@ -64,7 +64,7 @@
         <div class="tab notes flexcol active" data-group="primary" data-tab="notes">
             <div style="flex: 0 0 20px;">{{localize 'MonksEnhancedJournal.OnlyViewable'}}</div>
             <div>
-                <textarea name="userdata.notes" style="width: calc(100% - 4px);height: calc(100% - 4px)">{{userdata.notes}}</textarea>
+                <textarea name="flags.monks-enhanced-journal.{{userid}}.notes" style="width: calc(100% - 4px);height: calc(100% - 4px)">{{userdata.notes}}</textarea>
             </div>
         </div>
     </section>
