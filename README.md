@@ -34,7 +34,7 @@ At the top of the Journal Pages on the left side will be a forward and back butt
 On the right side will be additional tools available for each journal page.  These are specific to the type of Journal Entry being viewed.
 
 Common to all entries is the locate button, that will center the screen on the Note icon that represents this journal entry.  So, when you drag and drop a journal entry on the map, pressing this button from the Enhanced Journal will help locate it on the map.
-Also common to most entries is the Show to players button, that will show a copy of the journal entry on the players screens.  You can choose to send this entry to all players or choose which players can view it.
+Also common to most entries is the Show to players button, that will show a copy of the journal entry on the players screens.  You can choose to send this entry to all players or choose which players can view it.  Shift clicking this button will show the full entry to all players.  Ctrl clicking will send just the image to all players.  You can choose to send the full entry or just the picture when selecting what player to send it to.
 
 ![monks-enhanced-journal](/screenshots/search.png)
 

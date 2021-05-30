@@ -1,4 +1,4 @@
-<div class="slideshow-container flexcol{{#if flags.monks-enhanced-journal.playing}} playing{{/if}} {{entrytype}}">
+<div class="slideshow-container flexcol{{#if playing}} playing{{/if}} {{entrytype}}">
     <div class="header-name">
         <input name="name" type="text" value="{{name}}" placeholder="{{localize 'MonksEnhancedJournal.SlideshowName'}}">
     </div>
@@ -38,7 +38,7 @@
     </div>
     <div class="slideshow-body-outer">
         <div class="slideshow-body">
-            {{#each flags.monks-enhanced-journal.slides}}
+            {{#each slides}}
             <div class="slide{{#if this.active}} active{{/if}}" data-slide-id="{{this.id}}">
                 <div class="slide-background"><div style="{{this.background}}"></div></div>
                 <img src="{{this.img}}" style="object-fit:{{this.sizing}}" />

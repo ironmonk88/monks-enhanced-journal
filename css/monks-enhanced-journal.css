@@ -942,3 +942,11 @@
 .monks-journal-sheet .journal-subsheet[editable="false"] .editor-edit {
     display: none !important;
 }
+
+.select-player .inactive{
+    color:#808080;
+}
+
+#slideshow-display header h4{
+    display:none;
+}

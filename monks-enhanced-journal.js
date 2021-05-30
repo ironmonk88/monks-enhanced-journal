@@ -225,6 +225,22 @@ export class MonksEnhancedJournal {
         }
     }
 
+    static showEntry(data) {
+        if (data.users == undefined || data.users.includes(game.user.id)) {
+            //show an entry
+            if (data.image != undefined) {
+                new ImagePopout(data.image, {
+                    title: data.title,
+                    uuid: data.uuid,
+                    shareable: false,
+                    editable: false
+                }).render(true);
+            } else {
+                Journal._showEntry(data.uuid, "text", true);
+            }
+        }
+    }
+
     static async playSlideshow(data) {
         if (!game.user.isGM) {
             //clear any old ones
@@ -359,6 +375,14 @@ Hooks.once("ready", async function () {
 });
 
 Hooks.on("preCreateJournalEntry", (entry, data, options, userId) => {
-    entry.data._source.flags['monks-enhanced-journal'] = { type: data.type };
-    entry.data._source.content = (data.type == 'journalentry' ? '' : '{}');
+    let flags = { type: data.type };
+    switch (data.type) {
+        case 'encounter':
+            flags = mergeObject(flags, EncounterSubSheet.defaultObject);
+            break;
+        case 'slideshow':
+            flags = mergeObject(flags, SlideshowSubSheet.defaultObject);
+            break;
+    }
+    entry.data._source.flags['monks-enhanced-journal'] = flags;
 });

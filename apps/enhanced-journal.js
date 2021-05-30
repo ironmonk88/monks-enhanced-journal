@@ -1,6 +1,7 @@
 import { makeid } from "../monks-enhanced-journal.js";
 import { MonksEnhancedJournal, log, i18n, setting } from "../monks-enhanced-journal.js"
 import { SubSheet, ActorSubSheet, JournalEntrySubSheet } from "../classes/EnhancedJournalEntry.js"
+import { SelectPlayer } from "./selectplayer.js";
 
 export class EnhancedJournalSheet extends JournalSheet {
     tabs = [];
@@ -212,11 +213,11 @@ export class EnhancedJournalSheet extends JournalSheet {
     }
 
     canBack(tab) {
-        return tab.history.length > 1 && (tab.historyIdx == undefined || tab.historyIdx < tab.history.length - 1);
+        return tab.history?.length > 1 && (tab.historyIdx == undefined || tab.historyIdx < tab.history.length - 1);
     }
 
     canForward(tab) {
-        return tab.history.length > 1 && tab.historyIdx && tab.historyIdx > 0;
+        return tab.history?.length > 1 && tab.historyIdx && tab.historyIdx > 0;
     }
 
     findEntity(entityId, text) {
@@ -435,6 +436,9 @@ export class EnhancedJournalSheet extends JournalSheet {
         let tab = this.tabs.active();
         this._tabcontext.menuItems = [];
 
+        if (tab.history == undefined)
+            return;
+
         for (let i = 0; i < tab.history.length; i++) {
             let h = tab.history[i];
             let entity = this.findEntity(h, '');
@@ -548,30 +552,21 @@ export class EnhancedJournalSheet extends JournalSheet {
         let types = this.getEntityTypes;
         let type = (entity instanceof Actor ? 'actor' : this.entitytype);
 
-        /*if (entity instanceof Actor) {
-            const sheet = entity.sheet;
-            await sheet._render(true);
-            $(sheet.element).hide();
+        /*
+        try {
+            let content = JSON.parse(this.object.data.content);
+            let flags = this.object.data.flags['monks-enhanced-journal'];
+            flags = mergeObject(flags, content);
+            this.object.data.content = flags.summary;
+            delete flags.summary;
+            this.object.update({ 'flags.monks-enhanced-journal': flags, content: this.object.data.content});
+        } catch (e) {
 
-            sheet._onChangeTab = function (event, tabs, active) {
-                log('clicking tab');
-            }
+        }*/
 
-            this.subdocument = $('<div>').addClass(sheet.options.classes);
-            this.subdocument.append($('.window-content', sheet.element));
+        let subsheet = types[type] || JournalEntrySubSheet;
 
-            $('.content', this.element).attr('entity-type', 'actor');
-            $('.content form', this.element).empty().append(this.subdocument);
-            this.activateDocumentListeners($('.content form > *', this.element).get(0), 'actor');
-
-            sheet.close();
-        } else {*/
-            //let types = MonksEnhancedJournal.getEntityTypes();
-            //let type = this.entitytype;
-
-            let subsheet = types[type] || JournalEntrySubSheet;
-
-            this.subsheet = new subsheet(this.object);
+        this.subsheet = new subsheet(this.object);
 
         this.subdocument = await this.subsheet.render();
 
@@ -775,7 +770,44 @@ export class EnhancedJournalSheet extends JournalSheet {
         }
     }
 
-    async _onShowPlayers(event) {
+    doShowPlayers(event) {
+        if (event.shiftKey)
+            this._onShowPlayers(this.object, null, false, event);
+        else if (event.ctrlKey)
+            this._onShowPlayers(this.object, null, true, event);
+        else {
+            new SelectPlayer(this.object, {}).render(true);
+        }
+    }
+
+    async _onShowPlayers(object, users, showpic, event) {
+        if(users != undefined)
+            users = users.filter(u => u.selected);
+        //if we havn't picked anyone to show this to, then exit
+        if (users instanceof Array && users.length == 0)
+            return;
+
+        if (!object.isOwner) throw new Error("You may only request to show Journal Entries which you own.");
+
+        let args = {
+            title: object.name,
+            uuid: object.uuid,
+            users: (users != undefined ? users.map(u => u.id) : users)
+        }
+        if (showpic || this.object.data.flags["monks-enhanced-journal"].type == 'picture')
+            args.image = object.data.img;
+
+        game.socket.emit(MonksEnhancedJournal.SOCKET, {
+            action: "showEntry",
+            args: args
+        });
+        ui.notifications.info(game.i18n.format("MonksEnhanceJournal.MsgShowPlayers", {
+            title: object.name,
+            which: (users == undefined ? 'all players' : users.map(u => u.name).join(', '))
+        }));
+
+
+        /*
         if (this.entitytype == 'picture') {
             game.socket.emit("shareImage", {
                 image: this.object.data.img,
@@ -787,10 +819,9 @@ export class EnhancedJournalSheet extends JournalSheet {
                 title: this.object.name,
                 which: "all"
             }));
-        } else if (this.entitytype == 'slideshow') {
-            //start a slideshow?
-        } else
+        } else {
             super._onShowPlayers(event);
+        }*/
     }
 
     _onEditImage(event) {

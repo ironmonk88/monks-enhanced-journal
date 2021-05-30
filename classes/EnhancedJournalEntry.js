@@ -27,6 +27,10 @@ export class SubSheet {
         }
     }
 
+    get defaultObject() {
+        return {};
+    }
+
     getData(data) {
         if (data == undefined)
             data = this.object.data;
@@ -158,17 +162,19 @@ export class SubSheet {
         if (game.modules.get("polyglot")?.active) {
             let app = $(MonksEnhancedJournal.journal.element).closest('.app');
             let btn = $('.polyglot-button', app);
-            let icon = $('i', btn).attr('class').replace('fas ', '');
-            ctrls.push({
-                id: 'polyglot',
-                text: 'Polyglot: ' + game.i18n.localize("POLYGLOT.ToggleRunes"),
-                icon: icon,
-                callback: function () {
-                    btn.click();
-                    let icon = $('i', btn).attr('class').replace('fas ', '');
-                    $('.nav-button.polyglot i', this.element).attr('class', 'fas ' + icon);
-                }
-            });
+            if (btn.length > 0) {
+                let icon = $('i', btn).attr('class').replace('fas ', '');
+                ctrls.push({
+                    id: 'polyglot',
+                    text: 'Polyglot: ' + game.i18n.localize("POLYGLOT.ToggleRunes"),
+                    icon: icon,
+                    callback: function () {
+                        btn.click();
+                        let icon = $('i', btn).attr('class').replace('fas ', '');
+                        $('.nav-button.polyglot i', this.element).attr('class', 'fas ' + icon);
+                    }
+                });
+            }
         }
     }
 }
@@ -237,15 +243,25 @@ export class EncounterSubSheet extends SubSheet {
         return 'encounter';
     }
 
+    static get defaultObject() {
+        return { items: [], monsters: [], dcs: [], traps: [] };
+    }
+
     getData(data) {
         data = super.getData(data);
+
+        let safeGet = function (container, value) {
+            if (config == undefined) return;
+            if (config[container] == undefined) return;
+            return config[container][value];
+        }
 
         let config = (game.system.id == "tormenta20" ? CONFIG.T20 : CONFIG[game.system.id.toUpperCase()]);
 
         if (data.flags["monks-enhanced-journal"].dcs) {
             for (let dc of data.flags["monks-enhanced-journal"].dcs) {
                 let [type, value] = dc.attribute.split(':');
-                dc.label = config?.abilities[value] || config?.skills[value] || config?.scores[value] || config?.atributos[value] || config?.pericias[value] || value;
+                dc.label = safeGet('abilities', value) || safeGet('skills', value) || safeGet('scores', value) || safeGet('atributos', value) || safeGet('pericias', value) || value;
             }
         }
 
@@ -256,7 +272,7 @@ export class EncounterSubSheet extends SubSheet {
         let ctrls = [
             { text: '<i class="fas fa-search"></i>', type: 'text' },
             { id: 'search', type: 'input', text: i18n("MonksEnhancedJournal.SearchEncounterDescription"), callback: MonksEnhancedJournal.journal.searchText },
-            { id: 'show', text: i18n("MonksEnhancedJournal.ShowToPlayers"), icon: 'fa-eye', conditional: game.user.isGM, callback: MonksEnhancedJournal.journal._onShowPlayers },
+            { id: 'show', text: i18n("MonksEnhancedJournal.ShowToPlayers"), icon: 'fa-eye', conditional: game.user.isGM, callback: MonksEnhancedJournal.journal.doShowPlayers },
             { id: 'edit', text: i18n("MonksEnhancedJournal.EditDescription"), icon: 'fa-pencil-alt', conditional: () => { return this.object.permission == CONST.ENTITY_PERMISSIONS.OWNER }, callback: this.onEditDescription }
         ];
         this.addPolyglotButton(ctrls);
@@ -464,7 +480,7 @@ export class JournalEntrySubSheet extends SubSheet {
         let ctrls = [
             { text: '<i class="fas fa-search"></i>', type: 'text' },
             { id: 'search', type: 'input', text: i18n("MonksEnhancedJournal.SearchJournalEntry"), callback: MonksEnhancedJournal.journal.searchText },
-            { id: 'show', text: i18n("MonksEnhancedJournal.ShowToPlayers"), icon: 'fa-eye', conditional: game.user.isGM, callback: MonksEnhancedJournal.journal._onShowPlayers },
+            { id: 'show', text: i18n("MonksEnhancedJournal.ShowToPlayers"), icon: 'fa-eye', conditional: game.user.isGM, callback: MonksEnhancedJournal.journal.doShowPlayers },
             { id: 'edit', text: i18n("MonksEnhancedJournal.EditDescription"), icon: 'fa-pencil-alt', conditional: () => { return this.object.permission == CONST.ENTITY_PERMISSIONS.OWNER }, callback: this.onEditDescription }
         ];
         /*
@@ -513,7 +529,7 @@ export class PersonSubSheet extends SubSheet {
             { text: '<i class="fas fa-search"></i>', type: 'text' },
             { id: 'search', type: 'input', text: i18n("MonksEnhancedJournal.SearchPersonDescription"), callback: MonksEnhancedJournal.journal.searchText },
             /*{ id: 'random', text: 'Generate Random Character', icon: 'fa-exchange-alt', conditional: game.user.isGM, callback: MonksEnhancedJournal.journal._randomizePerson },*/
-            { id: 'show', text: i18n("MonksEnhancedJournal.ShowToPlayers"), icon: 'fa-eye', conditional: game.user.isGM, callback: MonksEnhancedJournal.journal._onShowPlayers },
+            { id: 'show', text: i18n("MonksEnhancedJournal.ShowToPlayers"), icon: 'fa-eye', conditional: game.user.isGM, callback: MonksEnhancedJournal.journal.doShowPlayers },
             { id: 'edit', text: i18n("MonksEnhancedJournal.EditDescription"), icon: 'fa-pencil-alt', conditional: () => { return this.object.permission == CONST.ENTITY_PERMISSIONS.OWNER }, callback: this.onEditDescription }
         ];
         this.addPolyglotButton(ctrls);
@@ -553,7 +569,7 @@ export class PictureSubSheet extends SubSheet {
 
     _entityControls() {
         let ctrls = [
-            { id: 'show', text: i18n("MonksEnhancedJournal.ShowToPlayers"), icon: 'fa-eye', conditional: game.user.isGM, callback: MonksEnhancedJournal.journal._onShowPlayers }
+            { id: 'show', text: i18n("MonksEnhancedJournal.ShowToPlayers"), icon: 'fa-eye', conditional: game.user.isGM, callback: MonksEnhancedJournal.journal.doShowPlayers }
         ];
         return ctrls.concat(super._entityControls());
     }
@@ -579,7 +595,7 @@ export class PlaceSubSheet extends SubSheet {
         let ctrls = [
             { text: '<i class="fas fa-search"></i>', type: 'text' },
             { id: 'search', type: 'input', text: i18n("MonksEnhancedJournal.SearchPlaceDescription"), callback: MonksEnhancedJournal.journal.searchText },
-            { id: 'show', text: i18n("MonksEnhancedJournal.ShowToPlayers"), icon: 'fa-eye', conditional: game.user.isGM, callback: MonksEnhancedJournal.journal._onShowPlayers },
+            { id: 'show', text: i18n("MonksEnhancedJournal.ShowToPlayers"), icon: 'fa-eye', conditional: game.user.isGM, callback: MonksEnhancedJournal.journal.doShowPlayers },
             { id: 'edit', text: i18n("MonksEnhancedJournal.EditDescription"), icon: 'fa-pencil-alt', conditional: () => { return this.object.permission == CONST.ENTITY_PERMISSIONS.OWNER }, callback: this.onEditDescription }
         ];
         this.addPolyglotButton(ctrls);
@@ -613,6 +629,10 @@ export class QuestSubSheet extends SubSheet {
         });
     }
 
+    get defaultObject() {
+        return { items: [] };
+    }
+
     get type() {
         return 'quest';
     }
@@ -621,7 +641,7 @@ export class QuestSubSheet extends SubSheet {
         let ctrls = [
             { text: '<i class="fas fa-search"></i>', type: 'text' },
             { id: 'search', type: 'input', text: i18n("MonksEnhancedJournal.SearchQuestDescription"), callback: MonksEnhancedJournal.journal.searchText },
-            { id: 'show', text: i18n("MonksEnhancedJournal.ShowToPlayers"), icon: 'fa-eye', conditional: game.user.isGM, callback: MonksEnhancedJournal.journal._onShowPlayers },
+            { id: 'show', text: i18n("MonksEnhancedJournal.ShowToPlayers"), icon: 'fa-eye', conditional: game.user.isGM, callback: MonksEnhancedJournal.journal.doShowPlayers },
             { id: 'edit', text: i18n("MonksEnhancedJournal.EditDescription"), icon: 'fa-pencil-alt', conditional: () => { return this.object.permission == CONST.ENTITY_PERMISSIONS.OWNER }, callback: this.onEditDescription }
         ];
         this.addPolyglotButton(ctrls);
@@ -659,13 +679,21 @@ export class SlideshowSubSheet extends SubSheet {
         return 'slideshow';
     }
 
+    static get defaultObject() {
+        return { state: 'stopped', slides: [] };
+    }
+
     getData(data) {
         data = super.getData(data);
         data.showasOptions = { canvas: "Canvas", fullscreen: "Full Screen", window: "Window" };
+        if (data.flags["monks-enhanced-journal"].state == undefined)
+            data.flags["monks-enhanced-journal"].state = 'stopped';
+        data.playing = (data.flags["monks-enhanced-journal"].state != 'stopped');
 
         let idx = 0;
         if (data.flags["monks-enhanced-journal"].slides) {
-            for (let slide of data.flags["monks-enhanced-journal"].slides) {
+            data.slides = data.flags["monks-enhanced-journal"].slides.map(s => {
+                let slide = duplicate(s);
                 if (slide.background?.color == '')
                     slide.background = `background-image:url(\'${slide.img}\');`;
                 else
@@ -677,13 +705,13 @@ export class SlideshowSubSheet extends SubSheet {
                 slide.middleText = (slide.text?.valign == 'middle' ? slide.text?.content : '');
                 slide.bottomText = (slide.text?.valign == 'bottom' ? slide.text?.content : '');
 
-                slide.active = (idx == this.object.data.content.slideAt);
+                return slide;
+            });
 
-                idx++;
-            }
+            data.slides[this.object.data.flags['monks-enhanced-journal'].slideAt].active = true;
         }
 
-        if (this.object.data.flags["monks-enhanced-journal"].playing) {
+        if (this.object.data.flags["monks-enhanced-journal"].state !== 'stopped') {
             data.slideshowing = this.object.data.flags["monks-enhanced-journal"].slides[this.object.data.flags["monks-enhanced-journal"].slideAt];
 
             if (data.slideshowing.background?.color == '')
@@ -710,12 +738,17 @@ export class SlideshowSubSheet extends SubSheet {
 
     _entityControls() {
         let ctrls = [
-            { id: 'add', text: i18n("MonksEnhancedJournal.AddSlide"), icon: 'fa-plus', conditional: game.user.isGM, callback: this.addSlide },
-            { id: 'clear', text: i18n("MonksEnhancedJournal.ClearAll"), icon: 'fa-dumpster', conditional: game.user.isGM, callback: this.deleteAll },
-            { id: 'play', text: i18n("MonksEnhancedJournal.Play"), icon: 'fa-play', conditional: game.user.isGM, visible: !this.object.data.flags["monks-enhanced-journal"].playing, callback: this.playSlideshow },
-            { id: 'stop', text: i18n("MonksEnhancedJournal.Stop"), icon: 'fa-stop', conditional: game.user.isGM, visible: this.object.data.flags["monks-enhanced-journal"].playing, callback: this.stopSlideshow }
+            { id: 'add', text: i18n("MonksEnhancedJournal.AddSlide"), icon: 'fa-plus', visible: this.object.data.flags["monks-enhanced-journal"].state === 'stopped', conditional: game.user.isGM, callback: this.addSlide },
+            { id: 'clear', text: i18n("MonksEnhancedJournal.ClearAll"), icon: 'fa-dumpster', visible: this.object.data.flags["monks-enhanced-journal"].state === 'stopped', conditional: game.user.isGM, callback: this.deleteAll },
+            { id: 'play', text: i18n("MonksEnhancedJournal.Play"), icon: 'fa-play', visible: this.object.data.flags["monks-enhanced-journal"].state !== 'playing', conditional: game.user.isGM, callback: this.playSlideshow },
+            { id: 'pause', text: i18n("MonksEnhancedJournal.Pause"), icon: 'fa-pause', visible: this.object.data.flags["monks-enhanced-journal"].state === 'playing', conditional: game.user.isGM, callback: this.pauseSlideshow },
+            { id: 'stop', text: i18n("MonksEnhancedJournal.Stop"), icon: 'fa-stop', visible: this.object.data.flags["monks-enhanced-journal"].state !== 'stopped', conditional: game.user.isGM, callback: this.stopSlideshow }
         ];
-        return ctrls.concat(super._entityControls());
+        ctrls = ctrls.concat(super._entityControls());
+        let ctrl = ctrls.find(c => c.id == 'locate');
+        if (ctrl)
+            ctrl.visible = (this.object.data.flags["monks-enhanced-journal"].state === 'stopped');
+        return ctrls;
     }
 
     activateListeners(html) {
@@ -779,54 +812,93 @@ export class SlideshowSubSheet extends SubSheet {
     }
 
     activateSlide(event) {
-        if (this.object.data.flags["monks-enhanced-journal"].playing) {
+        if (this.object.data.flags["monks-enhanced-journal"].state != 'stopped') {
             let idx = $(event.currentTarget).index();
             this.playSlide(idx);
         }
     }
 
+    updateButtons() {
+        $('.navigation .add', this.element).toggle(this.object.data.flags["monks-enhanced-journal"].state === 'stopped');
+        $('.navigation .clear', this.element).toggle(this.object.data.flags["monks-enhanced-journal"].state === 'stopped');
+        $('.navigation .locate', this.element).toggle(this.object.data.flags["monks-enhanced-journal"].state === 'stopped');
+        $('.navigation .play', this.element).toggle(this.object.data.flags["monks-enhanced-journal"].state !== 'playing');
+        $('.navigation .pause', this.element).toggle(this.object.data.flags["monks-enhanced-journal"].state === 'playing');
+        $('.navigation .stop', this.element).toggle(this.object.data.flags["monks-enhanced-journal"].state !== 'stopped');
+    }
+
     playSlideshow(refresh = true) {
-        this.object.data.flags["monks-enhanced-journal"].playing = true;
-        this.object.data.flags["monks-enhanced-journal"].slideAt = 0;
-        this.object.data.flags["monks-enhanced-journal"].sound = undefined;
+        if (this.object.data.flags["monks-enhanced-journal"].slides.length == 0)
+            return;
 
+        if (this.object.data.flags["monks-enhanced-journal"].state == 'playing')
+            return;
+
+        if (this.object.data.flags["monks-enhanced-journal"].state == 'stopped') {
+            this.object.data.flags["monks-enhanced-journal"].slideAt = 0;
+            this.object.sound = undefined;
+
+            if (this.object.data.flags["monks-enhanced-journal"].audiofile != undefined && this.object.data.flags["monks-enhanced-journal"].audiofile != '')
+                this.object.sound = AudioHelper.play({ src: this.object.data.flags["monks-enhanced-journal"].audiofile }, true);
+        } else {
+            if (this.object.sound)
+                this.object.sound.play();
+        }
+
+        let animate = (this.object.data.flags["monks-enhanced-journal"].state != 'paused');
+        this.object.data.flags["monks-enhanced-journal"].state = 'playing';
         $('.slide-showing .duration', this.element).show();
-        $('.slideshow-container', this.element).toggleClass('playing', this.object.data.flags["monks-enhanced-journal"].playing);
-        $('.navigation .play', this.element).toggle(!this.object.data.flags["monks-enhanced-journal"].playing);
-        $('.navigation .stop', this.element).toggle(this.object.data.flags["monks-enhanced-journal"].playing);
-
-        if (this.object.data.flags["monks-enhanced-journal"].audiofile != undefined && this.object.data.flags["monks-enhanced-journal"].audiofile != '')
-            this.object.data.flags["monks-enhanced-journal"].sound = AudioHelper.play({ src: this.object.data.flags["monks-enhanced-journal"].audiofile }, true);
+        $('.slideshow-container', this.element).toggleClass('playing', this.object.data.flags["monks-enhanced-journal"].state != 'stopped');
+        this.subsheet.updateButtons.call(this);
 
         //inform players
         game.socket.emit(
             MonksEnhancedJournal.SOCKET,
             {
                 action: 'playSlideshow',
-                args: { id: this.object.id, idx: 0 }
+                args: { id: this.object.id, idx: this.object.data.flags["monks-enhanced-journal"].slideAt }
             }
         );
 
-        if (this.object.data.flags["monks-enhanced-journal"].playing) {
-            if (refresh)
-                $('.slide-showing .slide', this.element).remove();
-            this.subsheet.playSlide(0);
-        }
+        if (refresh && this.object.data.flags["monks-enhanced-journal"].state == 'stopped')
+            $('.slide-showing .slide', this.element).remove();
+        this.subsheet.playSlide(this.object.data.flags["monks-enhanced-journal"].slideAt, animate);
+
+        this.object.update({ 'flags.monks-enhanced-journal': this.object.data.flags["monks-enhanced-journal"]});
+    }
+
+    pauseSlideshow() {
+        let slide = this.object.data.flags["monks-enhanced-journal"].slides[this.object.data.flags["monks-enhanced-journal"].slideAt];
+        if (slide.transition.timer)
+            window.clearTimeout(slide.transition.timer);
+
+        $('.slide-showing .duration', this.element).hide().stop();
+
+        this.object.data.flags["monks-enhanced-journal"].state = 'paused';
+        this.subsheet.updateButtons.call(this);
+
+        if (this.object.sound)
+            this.object.sound.pause();
+
+        this.object.update({ 'flags.monks-enhanced-journal': this.object.data.flags["monks-enhanced-journal"] });
     }
 
     stopSlideshow() {
-        this.object.data.flags["monks-enhanced-journal"].playing = false;
+        let slide = this.object.data.flags["monks-enhanced-journal"].slides[this.object.data.flags["monks-enhanced-journal"].slideAt];
+        if (slide && slide.transition.timer)
+            window.clearTimeout(slide.transition.timer);
+
+        this.object.data.flags["monks-enhanced-journal"].state = 'stopped';
         this.object.data.flags["monks-enhanced-journal"].slideAt = 0;
         $('.slide-showing .slide', this.element).remove();
-        $('.slide-showing .duration', this.element).hide();
-        $('.slideshow-container', MonksEnhancedJournal.journal.element).toggleClass('playing', this.object.data.flags["monks-enhanced-journal"].playing);
-        $('.navigation .play', MonksEnhancedJournal.journal.element).toggle(!this.object.data.flags["monks-enhanced-journal"].playing);
-        $('.navigation .stop', MonksEnhancedJournal.journal.element).toggle(this.object.data.flags["monks-enhanced-journal"].playing);
+        $('.slide-showing .duration', this.element).hide().stop();
+        $('.slideshow-container', MonksEnhancedJournal.journal.element).toggleClass('playing', this.object.data.flags["monks-enhanced-journal"].state != 'stopped');
+        this.subsheet.updateButtons.call(this);
 
-        if (this.object.data.flags["monks-enhanced-journal"]?.sound?._src != undefined) {
+        if (this.object.sound?._src != undefined) {
             game.socket.emit("stopAudio", { src: this.object.data.flags["monks-enhanced-journal"].audiofile });
-            this.object.data.flags["monks-enhanced-journal"].sound.stop();
-            this.object.data.flags["monks-enhanced-journal"].sound = undefined;
+            this.object.sound.stop();
+            this.object.sound = undefined;
         }
 
         //inform players
@@ -837,6 +909,8 @@ export class SlideshowSubSheet extends SubSheet {
                 args: { }
             }
         );
+
+        this.object.update({ 'flags.monks-enhanced-journal': this.object.data.flags["monks-enhanced-journal"] });
     }
 
     playSlide(idx, animate = true) {
@@ -845,13 +919,15 @@ export class SlideshowSubSheet extends SubSheet {
         //remove any that are still on the way out
         $('.slide-showing .slide.out', this.element).remove();
 
-        //remove any old slides
-        let oldSlide = $('.slide-showing .slide', this.element);
-        oldSlide.addClass('out').animate({ opacity: 0 }, 1000, 'linear', function () { $(this).remove() });
+        if (animate) {
+            //remove any old slides
+            let oldSlide = $('.slide-showing .slide', this.element);
+            oldSlide.addClass('out').animate({ opacity: 0 }, 1000, 'linear', function () { $(this).remove() });
 
-        //bring in the new slide
-        let newSlide = MonksEnhancedJournal.createSlide(slide, $('.slide-showing', this.element));
-        newSlide.css({ opacity: 0 }).animate({ opacity: 1 }, 1000, 'linear');
+            //bring in the new slide
+            let newSlide = MonksEnhancedJournal.createSlide(slide, $('.slide-showing', this.element));
+            newSlide.css({ opacity: 0 }).animate({ opacity: 1 }, 1000, 'linear');
+        }
 
         /*
         let background = '';
@@ -907,7 +983,7 @@ export class SlideshowSubSheet extends SubSheet {
         if (this.object.data.flags["monks-enhanced-journal"].slideAt < 0)
             this.object.data.flags["monks-enhanced-journal"].slideAt = 0;
         else if (this.object.data.flags["monks-enhanced-journal"].slideAt >= this.object.data.flags["monks-enhanced-journal"].slides.length)
-            this.stopSlideshow();
+            this.stopSlideshow.call(MonksEnhancedJournal.journal);
         else
             this.playSlide(this.object.data.flags["monks-enhanced-journal"].slideAt, dir > 0);
     }

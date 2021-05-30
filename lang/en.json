@@ -17,6 +17,7 @@
   "MonksEnhancedJournal.Skill": "Skill",
 
   "MonksEnhancedJournal.ClickForNext": "Click for next slide.",
+  "MonksEnhanceJournal.MsgShowPlayers": "Showed {title} to {which}.",
 
   "MonksEnhancedJournal.NewTab": "New Tab",
   "MonksEnhancedJournal.OpenEntry": "Open an Entry",
@@ -31,6 +32,7 @@
   "MonksEnhancedJournal.AddSlide": "Add Slide",
   "MonksEnhancedJournal.ClearAll": "Clear All",
   "MonksEnhancedJournal.Play": "Play",
+  "MonksEnhancedJournal.Pause": "Pause",
   "MonksEnhancedJournal.Stop": "Stop",
   "MonksEnhancedJournal.EditSlide": "Edit Slide",
   "MonksEnhancedJournal.Delete": "Delete",
@@ -98,7 +100,10 @@
   "MonksEnhancedJournal.ShowAs": "Show As",
   "MonksEnhancedJournal.AudioFile": "Audio File",
   "MonksEnhancedJournal.Convert": "Convert",
-  "MonksEnhancedJournal.LocateMapEncounter": "Locate Encounter on Map",
+  "MonksEnhancedJournal.LocateMapEncounter": "Locate Note on Map",
+  "MonksEnhancedJournal.SelectPlayer": "Select Player",
+  "MonksEnhancedJournal.Show": "Show",
+  "MonksEnhancedJournal.ShowAll": "Show To All",
 
   "MonksEnhancedJournal.Contain": "Contain",
   "MonksEnhancedJournal.Cover": "Cover",
