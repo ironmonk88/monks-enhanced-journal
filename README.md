@@ -40,7 +40,7 @@ Also common to most entries is the Show to players button, that will show a copy
 
 And Journal Entries that contain text descriptions have a search box that will search the description and highlight words that match what's typed in the search box.  Which is useful to look things up, when a player has asked about something and you can't remember where in the big block of text it's mentioned.
 
-## New Journal Entries Types
+## New Journal Entry Types
 
 Along with the regular journal entry, you can now create entries that are just a picture, represent a person, place, quest, encounter, and can create a slideshow for a multimedia presentation for your players.
 Specific icons for each journal type are added to both the standard Journal Directory and the Journal Directory on the Enhanced Journal window so that you can see at a glance what type each entry represents.
