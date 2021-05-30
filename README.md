@@ -25,7 +25,7 @@ You can open multiple journal entries in Enhanced Journal by clicking on the + b
 
 ![monks-enhanced-journal](/screenshots/bookmark.png)
 
-If you have Journal Entries that you reference a lot, you can add them to the bookmark bar by clicking on the star button.  Clicking on a bookmark button will open that entry in the current tab.  To delete a bookmark button, right-click the entry and select Delete fromt he drop down menu.
+If you have Journal Entries that you reference a lot, you can add them to the bookmark bar by clicking on the star button.  Clicking on a bookmark button will open that entry in the current tab.  To delete a bookmark button, right-click the entry and select Delete from the drop down menu.
 
 ### Forward/Back buttons, and additional tools
 
