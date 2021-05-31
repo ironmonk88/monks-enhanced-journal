@@ -28,6 +28,11 @@ export class TrapConfig extends FormApplication {
     async _updateObject(event, formData) {
         log('updating trap', event, formData, this.object);
         mergeObject(this.object, formData);
+        if (this.object.id == undefined) {
+            this.object.id = makeid();
+            MonksEnhancedJournal.journal.object.data.flags["monks-enhanced-journal"].traps.push(this.object);
+        }
+
         MonksEnhancedJournal.journal.saveData().then(() => {
             MonksEnhancedJournal.journal.display(MonksEnhancedJournal.journal.object);
         });

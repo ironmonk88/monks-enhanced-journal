@@ -124,7 +124,7 @@ export class SubSheet {
     }
 
     _entityControls() {
-        return [{ id: 'locate', text: i18n("MonksEnhancedJournal.LocateMapEncounter"), icon: 'fa-crosshairs', conditional: game.user.isGM, callback: MonksEnhancedJournal.journal.findMapEntry }];
+        return [{ id: 'locate', text: i18n("SIDEBAR.JumpPin"), icon: 'fa-crosshairs', conditional: game.user.isGM, callback: MonksEnhancedJournal.journal.findMapEntry }];
     }
 
     onEditDescription() {
@@ -260,8 +260,12 @@ export class EncounterSubSheet extends SubSheet {
 
         if (data.flags["monks-enhanced-journal"].dcs) {
             for (let dc of data.flags["monks-enhanced-journal"].dcs) {
-                let [type, value] = dc.attribute.split(':');
-                dc.label = safeGet('abilities', value) || safeGet('skills', value) || safeGet('scores', value) || safeGet('atributos', value) || safeGet('pericias', value) || value;
+                if (dc.attribute == undefined || dc.attribute.indexOf(':') < 0)
+                    dc.label = 'Invalid';
+                else {
+                    let [type, value] = dc.attribute.split(':');
+                    dc.label = safeGet('abilities', value) || safeGet('skills', value) || safeGet('scores', value) || safeGet('atributos', value) || safeGet('pericias', value) || value;
+                }
             }
         }
 
@@ -292,23 +296,23 @@ export class EncounterSubSheet extends SubSheet {
 
         //monster
         $('.monster-icon', html).click(this.clickItem.bind(this));
-        $('.monster-delete', html).on('click', $.proxy(this.deleteItem, this));
+        $('.monster-delete', html).on('click', $.proxy(this._deleteItem, this));
         html.on('dragstart', ".monster-icon", TextEditor._onDragEntityLink);
 
         //item
         $('.item-icon', html).click(this.clickItem.bind(this));
-        $('.item-delete', html).on('click', $.proxy(this.deleteItem, this));
+        $('.item-delete', html).on('click', $.proxy(this._deleteItem, this));
 
         //DCs
         $('.dc-create', html).on('click', $.proxy(this.createDC, this));
         $('.dc-edit', html).on('click', $.proxy(this.editDC, this));
-        $('.dc-delete', html).on('click', $.proxy(this.deleteItem, this));
+        $('.dc-delete', html).on('click', $.proxy(this._deleteItem, this));
         $('.encounter-dcs .item-name', html).on('click', $.proxy(this.rollDC, this));
 
         //Traps
         $('.trap-create', html).on('click', $.proxy(this.createTrap, this));
         $('.trap-edit', html).on('click', $.proxy(this.editTrap, this));
-        $('.trap-delete', html).on('click', $.proxy(this.deleteItem, this));
+        $('.trap-delete', html).on('click', $.proxy(this._deleteItem, this));
         $('.encounter-traps .item-name', html).on('click', $.proxy(this.rollTrap, this));
     }
 
@@ -399,17 +403,21 @@ export class EncounterSubSheet extends SubSheet {
         TextEditor._onClickEntityLink(event);
     }
 
-    deleteItem(data) {
+    _deleteItem(event) {
         let item = event.currentTarget.closest('.item');
-        if (this.object.data.flags["monks-enhanced-journal"][item.dataset.container].findSplice(i => i.id == item.dataset.id));
-        $(item).remove();
+        this.deleteItem(item.dataset.id, item.dataset.container);
+    }
+
+    deleteItem(id, container) {
+        this.object.data.flags["monks-enhanced-journal"][container].findSplice(i => i.id == id);
+        $(`li[data-id="${id}"]`, this.element).remove();
     }
 
     createDC() {
-        let dc = { id: makeid(), dc:10 };
+        let dc = { dc:10 };
         if (this.object.data.flags["monks-enhanced-journal"].dcs == undefined)
             this.object.data.flags["monks-enhanced-journal"].dcs = [];
-        this.object.data.flags["monks-enhanced-journal"].dcs.push(dc);
+        //this.object.data.flags["monks-enhanced-journal"].dcs.push(dc);
         new DCConfig(dc).render(true);
     }
 
@@ -435,10 +443,10 @@ export class EncounterSubSheet extends SubSheet {
     }
 
     createTrap() {
-        let trap = { id: makeid() };
+        let trap = { };
         if (this.object.data.flags["monks-enhanced-journal"].traps == undefined)
             this.object.data.flags["monks-enhanced-journal"].traps = [];
-        this.object.data.flags["monks-enhanced-journal"].traps.push(trap);
+        //this.object.data.flags["monks-enhanced-journal"].traps.push(trap);
         new TrapConfig(trap).render(true);
     }
 
@@ -661,6 +669,55 @@ export class QuestSubSheet extends SubSheet {
 
         $('.editor-content[data-edit="content"]', MonksEnhancedJournal.journal.element).html(content);
     }
+
+    async addItem(data) {
+        let item;
+
+        if (data.pack) {
+            const pack = game.packs.get(data.pack);
+            let id = data.id;
+            if (data.lookup) {
+                if (!pack.index.length) await pack.getIndex();
+                const entry = pack.index.find(i => (i._id === data.lookup) || (i.name === data.lookup));
+                id = entry.id;
+            }
+            item = id ? await pack.getDocument(id) : null;
+        } else {
+            item = game.items.get(data.id);
+        }
+
+        if (this.object.data.flags["monks-enhanced-journal"].items == undefined)
+            this.object.data.flags["monks-enhanced-journal"].items = [];
+
+        if (item) {
+            let newitem = {
+                id: item.id,
+                img: item.img,
+                name: item.name,
+                qty: 1
+            };
+
+            if (data.pack)
+                newitem.pack = data.pack;
+
+            this.object.data.flags["monks-enhanced-journal"].items.push(newitem);
+            MonksEnhancedJournal.journal.saveData();
+            this.refresh();
+        }
+    }
+
+    clickItem(event) {
+        let target = event.currentTarget;
+        let li = target.closest('li');
+        event.currentTarget = li;
+        TextEditor._onClickEntityLink(event);
+    }
+
+    deleteItem(data) {
+        let item = event.currentTarget.closest('.item');
+        if (this.object.data.flags["monks-enhanced-journal"][item.dataset.container].findSplice(i => i.id == item.dataset.id));
+        $(item).remove();
+    }
 }
 
 export class SlideshowSubSheet extends SubSheet {
@@ -708,7 +765,8 @@ export class SlideshowSubSheet extends SubSheet {
                 return slide;
             });
 
-            data.slides[this.object.data.flags['monks-enhanced-journal'].slideAt].active = true;
+            if (this.object.data.flags['monks-enhanced-journal'].slideAt && this.object.data.flags['monks-enhanced-journal'].slideAt < data.slides.length)
+                data.slides[this.object.data.flags['monks-enhanced-journal'].slideAt].active = true;
         }
 
         if (this.object.data.flags["monks-enhanced-journal"].state !== 'stopped') {

@@ -101,6 +101,49 @@ export class MonksEnhancedJournal {
             if (this.entry) MonksEnhancedJournal.openJournalEntry(this.entry);
         }
 
+        TextEditor.prototype.constructor._onClickContentLink = async function (event) {
+            event.preventDefault();
+            const a = event.currentTarget;
+            let document = null;
+            let id = a.dataset.id;
+
+            // Target 1 - Compendium Link
+            if (a.dataset.pack) {
+                const pack = game.packs.get(a.dataset.pack);
+                if (a.dataset.lookup) {
+                    if (!pack.index.length) await pack.getIndex();
+                    const entry = pack.index.find(i => (i._id === a.dataset.lookup) || (i.name === a.dataset.lookup));
+                    if (entry) {
+                        a.dataset.id = id = entry._id;
+                        delete a.dataset.lookup;
+                    }
+                }
+                document = id ? await pack.getDocument(id) : null;
+            }
+
+            // Target 2 - World Entity Link
+            else {
+                const collection = game.collections.get(a.dataset.entity);
+                document = collection.get(id);
+                if ((document.documentName === "Scene") && document.journal) document = document.journal;
+                if (!document.testUserPermission(game.user, "LIMITED")) {
+                    return ui.notifications.warn(`You do not have permission to view this ${document.documentName} sheet.`);
+                }
+            }
+            if (!document) return;
+
+            // Action 1 - Execute an Action
+            if (document.documentName === "Macro") {
+                if (!document.testUserPermission(game.user, "LIMITED")) {
+                    return ui.notifications.warn(`You do not have permission to use this ${document.documentName}.`);
+                }
+                return document.execute();
+            }
+
+            // Action 2 - Render the Entity sheet
+            return MonksEnhancedJournal.openJournalEntry(document);
+        }
+
         Handlebars.registerHelper({ selectGroups: MonksEnhancedJournal.selectGroups });
     }
 
@@ -385,4 +428,9 @@ Hooks.on("preCreateJournalEntry", (entry, data, options, userId) => {
             break;
     }
     entry.data._source.flags['monks-enhanced-journal'] = flags;
+});
+
+Hooks.on("deleteJournalEntry", (document, html, userId) => {
+    if (MonksEnhancedJournal.journal)
+        MonksEnhancedJournal.journal.deleteEntity(document.id);
 });

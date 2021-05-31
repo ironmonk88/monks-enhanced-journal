@@ -234,6 +234,22 @@ export class EnhancedJournalSheet extends JournalSheet {
         }
     }
 
+    deleteEntity(entityId){
+        //an entity has been deleted, what do we do?
+        for (let tab of this.tabs) {
+            if (tab.entityId == entityId)
+                tab.entity = this.findEntity('', tab.text); //I know this will return a blank one, just want to maintain consistency
+
+            //remove it from the history
+            tab.history = tab.history.filter(h => h != entityId);
+
+            if (tab.active)
+                this.display(tab.entity);
+        }
+
+        this.saveTabs();
+    }
+
     addTab(entity) {
         if (entity?.currentTarget != undefined)
             entity = null;
@@ -294,22 +310,28 @@ export class EnhancedJournalSheet extends JournalSheet {
                         tab.entity = { apps: {}, data: { name: tab.text, flags: { 'monks-enhanced-journal': { type: 'blank' } }, content: `Cannot find the entity: ${tab.text}` } };
                 }*/
             }
-            this.display(tab.entity);
+            
         }
 
-        $('.back-button', this.element).toggleClass('disabled', !this.canBack(tab));
-        $('.forward-button', this.element).toggleClass('disabled', !this.canForward(tab));
+        log('activateTab JournalID', this.appId, this.tabs);
         
         if (currentTab?.id == tab.id) {
+            this.display(tab.entity);
             this.updateHistory();
             return false;
         }
 
-        log('activateTab JournalID', this.appId, this.tabs);
         if (currentTab != undefined)
             currentTab.active = false;
         tab.active = true;
+
+        $('.back-button', this.element).toggleClass('disabled', !this.canBack(tab));
+        $('.forward-button', this.element).toggleClass('disabled', !this.canForward(tab));
+
         $(`.journal-tab[data-tabid="${tab.id}"]`, this.element).addClass('active').siblings().removeClass('active');
+
+        this.display(tab.entity);
+
         this.saveTabs();
 
         this.updateHistory();
@@ -339,7 +361,7 @@ export class EnhancedJournalSheet extends JournalSheet {
 
                 this.saveTabs();
 
-                $(`.journal-tab[data-tabid="${tab.id}"]`, this.element).attr('title', tab.text).find('.tab-content span').html(tab.text);
+                //$(`.journal-tab[data-tabid="${tab.id}"]`, this.element).attr('title', tab.text).find('.tab-content span').html(tab.text);
             } else if (tab.entity == undefined) {
                 tab.entity = entity;
             }
@@ -546,6 +568,10 @@ export class EnhancedJournalSheet extends JournalSheet {
         //make sure that it sticks to one EnhancedJournal, and calling sheet() has a habit of creating a new one, if this one isn't added manually
         if (this.object.apps[this.appId] == undefined)
             this.object.apps[this.appId] = this;
+
+        let tab = this.tabs.active();
+        tab.text = entity.data.name;
+        $(`.journal-tab[data-tabid="${tab.id}"]`, this.element).attr('title', tab.text).find('.tab-content span').html(tab.text);
 
         $('.title input', this.element).val(entity.data.name);
 
@@ -899,6 +925,10 @@ export class EnhancedJournalSheet extends JournalSheet {
         // Intersection Observer
         const observer = new IntersectionObserver(ui.journal._onLazyLoadImage.bind(this), { root: directory[0] });
         entries.each((i, li) => observer.observe(li));
+
+
+        this._searchFilters = [new SearchFilter({ inputSelector: 'input[name="search"]', contentSelector: ".directory-list", callback: ui.journal._onSearchFilter.bind(ui.journal) })];
+        this._searchFilters.forEach(f => f.bind(html[0]));
     }
 
     activateListeners(html) {

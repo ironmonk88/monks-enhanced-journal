@@ -1,4 +1,4 @@
-import { MonksEnhancedJournal, log, setting, i18n } from '../monks-enhanced-journal.js';
+import { MonksEnhancedJournal, log, setting, i18n, makeid } from '../monks-enhanced-journal.js';
 
 export class DCConfig extends FormApplication {
     constructor(object, options = {}) {
@@ -35,6 +35,11 @@ export class DCConfig extends FormApplication {
     async _updateObject(event, formData) {
         log('updating dc', event, formData, this.object);
         mergeObject(this.object, formData);
+        if (this.object.id == undefined) {
+            this.object.id = makeid();
+            MonksEnhancedJournal.journal.object.data.flags["monks-enhanced-journal"].dcs.push(this.object);
+        }
+            
         MonksEnhancedJournal.journal.saveData().then(() => {
             MonksEnhancedJournal.journal.display(MonksEnhancedJournal.journal.object);
         });
@@ -42,5 +47,11 @@ export class DCConfig extends FormApplication {
 
     activateListeners(html) {
         super.activateListeners(html);
+    }
+
+    async close(options) {
+        if (this.object.id && (this.object.attribute == 'undefined' || this.object.attribute.indexOf(':') < 0))
+            MonksEnhancedJournal.journal.subsheet.deleteItem(this.object.id, 'dcs');    //delete it if it wasn't created properly
+        return super.close(options);
     }
 }
