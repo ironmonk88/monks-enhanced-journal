@@ -400,7 +400,7 @@ export class MonksEnhancedJournal {
                 let objectives = $('<ul>');
                 $('<li>').append(`<b>${quest.name}</b>`).append(objectives).appendTo(quests);
 
-                for (let objective of quest.getFlag('monks-enhanced-journal', 'objectives')) {
+                for (let objective of (quest.getFlag('monks-enhanced-journal', 'objectives') || [])) {
                     objectives.append($('<li>').html(objective.content).attr('completed', objective.status));
                 }
             }
