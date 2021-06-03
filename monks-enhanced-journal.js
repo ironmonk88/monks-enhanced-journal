@@ -87,12 +87,17 @@ export class MonksEnhancedJournal {
         }
         JournalDirectory.prototype._onClickEntityName = onClickEntityName;
 
+        let oldRenderPopout = JournalDirectory.prototype.renderPopout;
         JournalDirectory.prototype.renderPopout = function () {
-            let entry = new JournalEntry({ name: 'temporary' }); //new JournalEntryData({name:'temporary'})
-            let ejs = new EnhancedJournalSheet(entry);
-            ejs._render(true).then(() => {
-                MonksEnhancedJournal.journal.activateTab(MonksEnhancedJournal.journal.tabs.active());
-            });
+            if (game.user.isGM || settings('allow-players')) {
+                let entry = new JournalEntry({ name: 'temporary' }); //new JournalEntryData({name:'temporary'})
+                let ejs = new EnhancedJournalSheet(entry);
+                ejs._render(true).then(() => {
+                    MonksEnhancedJournal.journal.activateTab(MonksEnhancedJournal.journal.tabs.active());
+                });
+            } else {
+                return oldRenderPopout.call(this);
+            }
         }
 
         Journal.prototype.constructor._showEntry = MonksEnhancedJournal._showEntry;
@@ -101,6 +106,7 @@ export class MonksEnhancedJournal {
             if (this.entry) MonksEnhancedJournal.openJournalEntry(this.entry);
         }
 
+        //let oldClickContentLink = TextEditor.prototype.constructor._onClickContentLink;
         TextEditor.prototype.constructor._onClickContentLink = async function (event) {
             event.preventDefault();
             const a = event.currentTarget;
@@ -141,7 +147,10 @@ export class MonksEnhancedJournal {
             }
 
             // Action 2 - Render the Entity sheet
-            return MonksEnhancedJournal.openJournalEntry(document);
+            if (document.entity == 'Actor')
+                return MonksEnhancedJournal.openJournalEntry(document);
+            else
+                return document.sheet.render(true);
         }
 
         Handlebars.registerHelper({ selectGroups: MonksEnhancedJournal.selectGroups });
@@ -379,6 +388,28 @@ export class MonksEnhancedJournal {
             )
             .appendTo(container);
     }
+
+    static refreshObjectives() {
+        let display = $('#objective-display').empty();
+
+        let quests = $('<ul>');
+        //find all in progress quests
+        for (let quest of game.journal) {
+            if (quest.getFlag('monks-enhanced-journal', 'type') == 'quest' && quest.getFlag('monks-enhanced-journal', 'status') == 'inprogress') {
+                //find all objectives
+                let objectives = $('<ul>');
+                $('<li>').append(`<b>${quest.name}</b>`).append(objectives).appendTo(quests);
+
+                for (let objective of quest.getFlag('monks-enhanced-journal', 'objectives')) {
+                    objectives.append($('<li>').html(objective.content).attr('completed', objective.status));
+                }
+            }
+        }
+
+        if (quests.children().length > 0) {
+            display.append($('<div>').addClass('title').html('Objectives')).append(quests);
+        }
+    }
 }
 
 Hooks.on("renderJournalDirectory", async (app, html, options) => {
@@ -395,6 +426,9 @@ Hooks.on("renderJournalDirectory", async (app, html, options) => {
         let icon = MonksEnhancedJournal.getIcon(type);
 
         $('.entity-name', this).prepend($('<i>').addClass('fas fa-fw ' + icon));
+
+        if (type == 'quest')
+            $(this).attr('status', entry.getFlag('monks-enhanced-journal', 'status'));
 
         //if (entry.data.img != "" && entry.data.content != "") {
             //this is a dual entry
@@ -415,6 +449,8 @@ Hooks.once("ready", async function () {
     if (game.modules?.popout?.active) {
         MonksEnhancedJournal.initPopout();
     }
+
+    $('<div>').attr('id', 'objective-display').appendTo('body');
 });
 
 Hooks.on("preCreateJournalEntry", (entry, data, options, userId) => {
@@ -426,11 +462,42 @@ Hooks.on("preCreateJournalEntry", (entry, data, options, userId) => {
         case 'slideshow':
             flags = mergeObject(flags, SlideshowSubSheet.defaultObject);
             break;
+        case 'quest':
+            flags = mergeObject(flags, QuestSubSheet.defaultObject);
+            break;
     }
     entry.data._source.flags['monks-enhanced-journal'] = flags;
 });
 
+Hooks.on("createJournalEntry", (entry, data, options, userId) => {
+    if (MonksEnhancedJournal.journal) {
+        //open this item in a new tab
+        if (!MonksEnhancedJournal.journal.rendered) {
+            //allow the journal to load before opening, so that activatelisteners could be called
+            foundry.utils.debounce(function () { MonksEnhancedJournal.journal.open.call(MonksEnhancedJournal.journal, entry, true); }, 100);
+        }else
+            MonksEnhancedJournal.journal.open.call(MonksEnhancedJournal.journal, entry, true);
+    }
+});
+
+Hooks.on("updateJournalEntry", (document, html, userId) => {
+    if (MonksEnhancedJournal.journal) {
+        if (document.data.flags['monks-enhanced-journal'].type == 'quest' && ui.controls.activeControl == 'notes' && setting('show-objectives'))
+            MonksEnhancedJournal.refreshObjectives();
+    }
+});
+
 Hooks.on("deleteJournalEntry", (document, html, userId) => {
-    if (MonksEnhancedJournal.journal)
+    if (MonksEnhancedJournal.journal) {
         MonksEnhancedJournal.journal.deleteEntity(document.id);
+        if (document.data.flags['monks-enhanced-journal'].type == 'quest' && ui.controls.activeControl == 'notes' && setting('show-objectives'))
+            MonksEnhancedJournal.refreshObjectives();
+    }
+});
+
+Hooks.on('renderSceneControls', (controls) => {
+    let showObjectives = (controls.activeControl == 'notes' && setting('show-objectives'));
+    $('#objective-display').toggleClass('active', showObjectives);
+    if (showObjectives)
+        MonksEnhancedJournal.refreshObjectives();
 });

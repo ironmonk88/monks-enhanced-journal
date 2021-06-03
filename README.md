@@ -94,7 +94,15 @@ When you wish to play the slideshow, press the play button and it will be displa
 
 ![monks-enhanced-journal](/screenshots/quest1.png)
 
-The represents potential side quests that your player could complete.
+The represents potential side quests that your player could complete.  Quest status is also color coded on the Directory so you can see at a glace what the current status of the Quest is.
+
+![monks-enhanced-journal](/screenshots/quest3.png)
+
+New for 1.0.7 Objectives have been added.
+
+![monks-enhanced-journal](/screenshots/objectives.png)
+
+When the Notes tool is selected, players can view the objectives of any In Progress quests.
 
 ![monks-enhanced-journal](/screenshots/quest2.png)
 

@@ -36,7 +36,8 @@ export class EnhancedJournalSheet extends JournalSheet {
 
         this.subdocument = null;
 
-        MonksEnhancedJournal.journal = this;
+        if (MonksEnhancedJournal.journal == undefined)
+            MonksEnhancedJournal.journal = this;
 
         this.sheettabs = new Tabs({ navSelector: ".tabs", contentSelector: ".sheet-body", initial: "description", callback: function () { } });
     }
@@ -54,7 +55,8 @@ export class EnhancedJournalSheet extends JournalSheet {
             closeOnSubmit: false,
             submitOnClose: false,
             submitOnChange: true,
-            viewPermission: CONST.ENTITY_PERMISSIONS.NONE
+            viewPermission: CONST.ENTITY_PERMISSIONS.NONE,
+            scrollY: ["ol.directory-list",".encounter-content"]
         });
     }
 
@@ -86,8 +88,10 @@ export class EnhancedJournalSheet extends JournalSheet {
     }
 
     _render(force, options = {}) {
-        MonksEnhancedJournal.journal = this;
-        if (options.data || MonksEnhancedJournal.journal._element != null) {
+        if (MonksEnhancedJournal.journal == undefined)
+            MonksEnhancedJournal.journal = this;
+
+        if (options.action != 'create' && (options.data || MonksEnhancedJournal.journal._element != null)) {
             return new Promise((resolve, reject) => {
                 if (this.subsheet != undefined)
                     this.subsheet.refresh();
@@ -129,6 +133,8 @@ export class EnhancedJournalSheet extends JournalSheet {
             user: game.user
         };
 
+        this._saveScrollPositions($('#journal-directory'));
+
         let html = await renderTemplate(template, data);
         html = $(html);
 
@@ -139,30 +145,38 @@ export class EnhancedJournalSheet extends JournalSheet {
             let icon = MonksEnhancedJournal.getIcon(type);
 
             $('.entity-name', this).prepend($('<i>').addClass('fas fa-fw ' + icon));
+
+            if (type == 'quest')
+                $(this).attr('status', entry.getFlag('monks-enhanced-journal', 'status'));
         });
 
         $('.sidebar', this.element).empty().append(html);
 
         this.activateDirectoryListeners(html);
+
+        this._restoreScrollPositions($('#journal-directory'));
     }
 
     activateEditor(name, options = {}, initialContent = "") {
         let editor = this.editors[name]
-        if (editor.options.style_formats == undefined)
+        if (editor?.options?.style_formats == undefined)
             options.style_formats = [...CONFIG.TinyMCE.style_formats];
 
-        let custom = editor.options.style_formats?.find(s => s.title == "Custom");
+        let custom = editor?.options?.style_formats?.find(s => s.title == "Custom");
         if (custom) {
             let readaloud = custom.items.find(s => s.title == "Read Aloud");
             if(!readaloud)
                 custom.items.push({ block: "section", classes: "readaloud", title: "Read Aloud", wrapper: true });
         }
 
+        if (editor?.options?.content_css == undefined)
+            options.content_css = [...CONFIG.TinyMCE.content_css];
+
         if (options.content_css) {
             if (options.content_css.find(c => c == 'modules/monks-enhanced-journal/css/editor.css') == undefined)
                 options.content_css.push('modules/monks-enhanced-journal/css/editor.css');
-        } else
-            options.content_css = ['modules/monks-enhanced-journal/css/editor.css'];
+        } //else
+        //    options.content_css = ['modules/monks-enhanced-journal/css/editor.css'];
 
         $('.editor .editor-content', this.element).unmark();
 
@@ -208,6 +222,16 @@ export class EnhancedJournalSheet extends JournalSheet {
         }
     }
 
+    getRecent() {
+        return (game.user.getFlag("monks-enhanced-journal", "_recentlyViewed") || []).map(r => {
+            return mergeObject(r, { img: MonksEnhancedJournal.getIcon(r.type)});
+        });
+    }
+
+    getCommon() {
+        return [];
+    }
+
     tabChange(tab, event) {
         log('tab change', tab, event);
     }
@@ -222,13 +246,13 @@ export class EnhancedJournalSheet extends JournalSheet {
 
     findEntity(entityId, text) {
         if (entityId == undefined)
-            return { apps: {}, data: { flags: { 'monks-enhanced-journal': { type: 'blank' } }, content: "MonksEnhancedJournal.OpenEntry" }, ignore: true };
+            return { apps: {}, data: { flags: { 'monks-enhanced-journal': { type: 'blank' } }, content: "", recent: this.getRecent(), common: this.getCommon() }, ignore: true };
         else {
             let entity = game.journal.get(entityId);
             if (entity == undefined)
                 entity = game.actors.get(entityId);
             if (entity == undefined)
-                entity = { apps: {}, data: { name: text, flags: { 'monks-enhanced-journal': { type: 'blank' } }, content: `${i18n("MonksEnhancedJournal.CannotFindEntity")}: ${text}` }, ignore: true };
+                entity = { apps: {}, data: { name: text, flags: { 'monks-enhanced-journal': { type: 'blank' } }, content: `${i18n("MonksEnhancedJournal.CannotFindEntity")}: ${text}`, recent: this.getRecent(), common: this.getCommon() }, ignore: true };
 
             return entity;
         }
@@ -259,7 +283,7 @@ export class EnhancedJournalSheet extends JournalSheet {
             text: entity?.data.name || i18n("MonksEnhancedJournal.NewTab"),
             active: false,
             entityId: entity?.id,
-            entity: entity || { apps: {}, data: { flags: { 'monks-enhanced-journal': { type: 'blank' } }, content: "MonksEnhancedJournal.OpenEntry" }, ignore: true },
+            entity: entity || { apps: {}, data: { flags: { 'monks-enhanced-journal': { type: 'blank' } }, content: "", recent: this.getRecent(), common: this.getCommon() }, ignore: true },
             history: []
         };
         if (tab.entityId != undefined)
@@ -356,7 +380,7 @@ export class EnhancedJournalSheet extends JournalSheet {
                     tab.history.unshift(tab.entityId);
 
                     if (tab.history.length > 10)
-                        tab.history = tab.history.slice(0, 9);
+                        tab.history = tab.history.slice(0, 10);
                 }
 
                 this.saveTabs();
@@ -484,6 +508,14 @@ export class EnhancedJournalSheet extends JournalSheet {
         //get the current tab and save the entity and name
         let tab = this.tabs.active();
 
+        if (tab?.entityId == undefined)
+            return;
+
+        if (this.bookmarks.find(b => b.entityId == tab.entityId) != undefined) {
+            ui.notifications.warn(i18n("MonksEnhancedJournal.MsgOnlyOneBookmark"));
+            return;
+        }
+
         let entitytype = function(entity) {
             if (entity instanceof Actor)
                 return 'actor';
@@ -570,7 +602,7 @@ export class EnhancedJournalSheet extends JournalSheet {
             this.object.apps[this.appId] = this;
 
         let tab = this.tabs.active();
-        tab.text = entity.data.name;
+        tab.text = entity.data.name || i18n("MonksEnhancedJournal.NewTab");
         $(`.journal-tab[data-tabid="${tab.id}"]`, this.element).attr('title', tab.text).find('.tab-content span').html(tab.text);
 
         $('.title input', this.element).val(entity.data.name);
@@ -589,6 +621,25 @@ export class EnhancedJournalSheet extends JournalSheet {
         } catch (e) {
 
         }*/
+
+        if (type == 'quest' && entity.getFlag("monks-enhanced-journal", "status") == undefined) {
+            if (entity.getFlag("monks-enhanced-journal", "completed") === true)
+                entity.setFlag("monks-enhanced-journal", "status", 'completed');
+            else if (entity.getFlag("monks-enhanced-journal", "seen") === true)
+                entity.setFlag("monks-enhanced-journal", "status", 'available');
+            else
+                entity.setFlag("monks-enhanced-journal", "status", 'inactive');
+        }
+
+        if (entity != undefined && entity.ignore != true) {
+            entity.setFlag("monks-enhanced-journal", "_viewcount", (entity.setFlag("monks-enhanced-journal", "_viewcount") || 0) + 1);
+            let recent = game.user.getFlag("monks-enhanced-journal", "_recentlyViewed") || [];
+            recent.findSplice(e => e.id == entity.id || typeof e != 'object');
+            recent.unshift({ id: entity.id, name: entity.name, type: entity.getFlag("monks-enhanced-journal", "type") });
+            if (recent.length > 5)
+                recent = recent.slice(0, 5);
+            game.user.setFlag("monks-enhanced-journal", "_recentlyViewed", recent);
+        }
 
         let subsheet = types[type] || JournalEntrySubSheet;
 
@@ -707,61 +758,72 @@ export class EnhancedJournalSheet extends JournalSheet {
     }
 
     _onSubmit(ev) {
-        let type = this.entitytype;
+        //let type = this.entitytype;
 
         //if (type == 'encounter')
         //    $('.sheet-body', this.element).removeClass('editing');
-
-
-        if (this.form == undefined)
-            this.form = $('.monks-enhanced-journal .body > .content form', this.element).get(0);
-            
-        const formData = expandObject(this._getSubmitData());
-
-        //let update = {};
-
-        /*
-        if (formData.name)
-            update.name = formData.name;
-
-        if (formData.img)
-            update.img = formData.img;
-
-        if (formData.content) {
-            if (this.entitytype == 'oldentry' || this.entitytype == 'journalentry') {
-                update.content = formData.content;
-            } else {
-                update.content = this.object.data.content;
-                if (typeof update.content == 'string')
-                    update.content = JSON.parse(update.content);
-                update.content = mergeObject(update.content, formData.content, { recursive: false });
-                if (formData.userdata) {
-                    update.content[game.user.id] = formData.userdata;
-                }
-
-                if (update.content.items) {
-                    for (let item of update.content.items) {
-                        delete item.item;
-                    }
-                }
-
-                update.content = JSON.stringify(update.content);
+        if ($(ev.currentTarget).hasClass('objective-status')) {
+            let id = ev.currentTarget.closest('li').dataset.itemId;
+            let objective = this.object.data.flags['monks-enhanced-journal'].objectives.find(o => o.id == id);
+            if (objective) {
+                objective.status = $(ev.currentTarget).is(':checked');
+                return this.object.update({ 'flags.monks-enhanced-journal': this.object.data.flags['monks-enhanced-journal']});
             }
-        }*/
+        } else {
+            if (this.form == undefined)
+                this.form = $('.monks-enhanced-journal .body > .content form', this.element).get(0);
 
-        if (!this.isEditable && formData.flags["monks-enhanced-journal"]["game.user.id"]) {
-            //need to have the GM update this, but only the user notes
-            game.socket.emit(MonksEnhancedJournal.SOCKET, {
-                action: "saveUserData",
-                args: {
-                    entityId: this.object.id,
-                    userId: game.user.id,
-                    userdata: formData.flags["monks-enhanced-journal"]["game.user.id"]
+            const formData = expandObject(this._getSubmitData());
+
+            if (this.entitytype == 'quest') {
+                $(`li[data-entity-id="${this.object.id}"]`, '#journal,#journal-directory').attr('status', formData.flags['monks-enhanced-journal'].status);
+            }
+
+            //let update = {};
+
+            /*
+            if (formData.name)
+                update.name = formData.name;
+    
+            if (formData.img)
+                update.img = formData.img;
+    
+            if (formData.content) {
+                if (this.entitytype == 'oldentry' || this.entitytype == 'journalentry') {
+                    update.content = formData.content;
+                } else {
+                    update.content = this.object.data.content;
+                    if (typeof update.content == 'string')
+                        update.content = JSON.parse(update.content);
+                    update.content = mergeObject(update.content, formData.content, { recursive: false });
+                    if (formData.userdata) {
+                        update.content[game.user.id] = formData.userdata;
+                    }
+    
+                    if (update.content.items) {
+                        for (let item of update.content.items) {
+                            delete item.item;
+                        }
+                    }
+    
+                    update.content = JSON.stringify(update.content);
                 }
-            });
-            return new Promise(() => { });
-        }else
-            return this.object.update(formData);
+            }*/
+
+            if (!this.isEditable && foundry.utils.getProperty(formData, 'flags.monks-enhanced-journal.' + game.user.id)) {
+                //need to have the GM update this, but only the user notes
+                game.socket.emit(MonksEnhancedJournal.SOCKET, {
+                    action: "saveUserData",
+                    args: {
+                        entityId: this.object.id,
+                        userId: game.user.id,
+                        userdata: formData.flags["monks-enhanced-journal"][game.user.id]
+                    }
+                });
+                return new Promise(() => { });
+            } else
+                return this.object.update(formData);
+        }
     }
 
     saveData() {
@@ -778,6 +840,16 @@ export class EnhancedJournalSheet extends JournalSheet {
         buttons.findSplice(b => b.class == "entry-text");
         buttons.findSplice(b => b.class == "entry-image");
         buttons.findSplice(b => b.class == "share-image");
+
+        buttons.unshift({
+            label: i18n("MonksEnhancedJournal.Maximize"),
+            class: "toggle-fullscreen",
+            icon: "fas fa-expand-arrows-alt",
+            onclick: async (ev) => {
+                MonksEnhancedJournal.journal.fullscreen();
+            },
+        });
+
         return buttons;
     }
 
@@ -806,6 +878,22 @@ export class EnhancedJournalSheet extends JournalSheet {
         }
     }
 
+    fullscreen() {
+        if (this.element.hasClass("maximized")) {
+            this.element.removeClass("maximized");
+            $('.toggle-fullscreen', this.element).html(`<i class="fas fa-expand-arrows-alt"></i>${i18n("MonksEnhancedJournal.Maximize")}`);
+            this.setPosition({ width: this._previousPosition.width, height: this._previousPosition.height });
+            this.setPosition({ left: this._previousPosition.left, top: this._previousPosition.top });
+        } else {
+            this.element.addClass("maximized");
+            $('.toggle-fullscreen', this.element).html(`<i class="fas fa-compress-arrows-alt"></i>${i18n("MonksEnhancedJournal.Restore")}`);
+            
+            this._previousPosition = duplicate(MonksEnhancedJournal.journal.position);
+            this.setPosition({ left: 0, top: 0 });
+            this.setPosition({ height: $('body').height(), width: $('body').width() - $('#sidebar').width() });
+        }
+    }
+
     async _onShowPlayers(object, users, showpic, event) {
         if(users != undefined)
             users = users.filter(u => u.selected);
@@ -818,7 +906,8 @@ export class EnhancedJournalSheet extends JournalSheet {
         let args = {
             title: object.name,
             uuid: object.uuid,
-            users: (users != undefined ? users.map(u => u.id) : users)
+            users: (users != undefined ? users.map(u => u.id) : users),
+            showid: makeid()
         }
         if (showpic || this.object.data.flags["monks-enhanced-journal"].type == 'picture')
             args.image = object.data.img;
@@ -827,10 +916,10 @@ export class EnhancedJournalSheet extends JournalSheet {
             action: "showEntry",
             args: args
         });
-        ui.notifications.info(game.i18n.format("MonksEnhanceJournal.MsgShowPlayers", {
+        ui.notifications.info(game.i18n.format("MonksEnhancedJournal.MsgShowPlayers", {
             title: object.name,
             which: (users == undefined ? 'all players' : users.map(u => u.name).join(', '))
-        }));
+        }) + ', click <a href="javascript:void(0);" onclick="MonksEnhancedJournal.journal.cancelSend(\'' + args.showid + '\');">here</a> to cancel', { permanent: true });
 
 
         /*

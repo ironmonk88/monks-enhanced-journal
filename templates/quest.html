@@ -8,17 +8,16 @@
                 <input type="text" name="flags.monks-enhanced-journal.source" placeholder="{{localize 'MonksEnhancedJournal.Source'}}" value="{{flags.monks-enhanced-journal.source}}" />
             </div>
             <div class="form-group">
-                <label>{{localize 'MonksEnhancedJournal.Seen'}}</label>
-                <input type="checkbox" name="flags.monks-enhanced-journal.seen" checked="{{checked flags.monks-enhanced-journal.seen}}" />
-            </div>
-            <div class="form-group">
-                <label>{{localize 'MonksEnhancedJournal.Completed'}}</label>
-                <input type="checkbox" name="flags.monks-enhanced-journal.completed" checked="{{checked flags.monks-enhanced-journal.completed}}" />
+                <label>{{localize 'MonksEnhancedJournal.Status'}}</label>
+                <select name="flags.monks-enhanced-journal.status" style="font-size:16px;">
+                    {{ selectOptions statusOptions selected=flags.monks-enhanced-journal.status localize=true }}
+                </select>
             </div>
         </section>
     </header>
     <nav class="sheet-navigation tabs" data-group="primary">
         <a class="item active" data-tab="description">{{localize 'MonksEnhancedJournal.Description'}}</a>
+        <a class="item" data-tab="objectives">{{localize 'MonksEnhancedJournal.Objectives'}}</a>
         <a class="item" data-tab="rewards">{{localize 'MonksEnhancedJournal.Rewards'}}</a>
         <a class="item" data-tab="notes">{{localize 'MonksEnhancedJournal.Notes'}}</a>
     </nav>
@@ -26,12 +25,48 @@
         <div class="tab description flexcol active" data-group="primary" data-tab="description">
             {{editor target="content" content=content editable=true button=true}}
         </div>
+        <div class="tab objectives flexcol active" data-group="primary" data-tab="objectives">
+            <ol class="items-list objective-items">
+                <li class="items-header flexrow">
+                    <h3 class="item-name flexrow">{{localize 'MonksEnhancedJournal.Objectives'}}</h3>
+
+                    <div class="item-name flexrow" style="flex:0 0 100px;justify-content:center;">
+                        Complete
+                    </div>
+
+                    <div class="item-controls flexrow">
+                        <a class="item-control objective-create" title="{{localize 'MonksEnhancedJournal.CreateObjective'}}" data-type="objective">
+                            <i class="fas fa-plus"></i> {{localize 'MonksEnhancedJournal.Add'}}
+                        </a>
+                    </div>
+                </li>
+
+                <ol class="item-list">
+                    {{#each flags.monks-enhanced-journal.objectives}}
+                    <li class="item flexrow " data-item-id="{{this.id}}" data-container="objectives" draggable="true">
+                        <div class="item-name flexrow">
+                            <h4 style="white-space: normal;">{{this.content}}</h4>
+                        </div>
+
+                        <div class="item-name flexrow" style="flex:0 0 100px;position:relative;justify-content:center;">
+                            <input class="objective-status" type="checkbox" {{checked this.status}} />
+                        </div>
+
+                        <div class="item-controls flexrow">
+                            <a class="item-control objective-edit" title="Edit Objective"><i class="fas fa-edit"></i></a>
+                            <a class="item-control objective-delete" title="{{localize 'MonksEnhancedJournal.DeleteItem'}}"><i class="fas fa-trash"></i></a>
+                        </div>
+                    </li>
+                    {{/each}}
+                </ol>
+            </ol>
+        </div>
         <div class="tab rewards flexcol active" data-group="primary" data-tab="rewards">
             <div class="form-group">
                 <label>{{localize 'MonksEnhancedJournal.Experience'}}</label>
                 <input type="text" name="flags.monks-enhanced-journal.xp" placeholder="{{localize 'MonksEnhancedJournal.Experience'}}" value="{{flags.monks-enhanced-journal.xp}}" />
             </div>
-            <ol class="items-list encounter-items">
+            <ol class="items-list reward-items">
                 <li class="items-header flexrow">
                     <h3 class="item-name flexrow">{{localize 'MonksEnhancedJournal.Items'}}</h3>
 
@@ -43,7 +78,7 @@
 
                 <ol class="item-list">
                     {{#each flags.monks-enhanced-journal.items}}
-                    <li class="item flexrow " data-item-id="{{this.id}}" draggable="true">
+                    <li class="item flexrow " data-item-id="{{this.id}}" data-container="items" draggable="true">
                         <div class="item-name flexrow">
                             <div class="item-image" style="background-image: url('{{this.img}}')"></div>
                             <h4>{{this.name}}</h4>

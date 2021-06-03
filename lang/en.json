@@ -8,6 +8,8 @@
   "MonksEnhancedJournal.allow-player.hint": "Allow Players to use the enhanced journal",
   "MonksEnhancedJournal.rolling-module.name": "Dice Rolling Module",
   "MonksEnhancedJournal.rolling-module.hint": "Module to use when requesting a dice roll",
+  "MonksEnhancedJournal.show-objectives.name": "Show Objectives",
+  "MonksEnhancedJournal.show-objectives.hint": "Show the current objectives when the notes tool is active",
 
   "MonsEnhancedJournal.SlideConfiguration": "Slide Configuration",
   "MonsEnhancedJournal.DCConfiguration": "DC Configuration",
@@ -17,7 +19,8 @@
   "MonksEnhancedJournal.Skill": "Skill",
 
   "MonksEnhancedJournal.ClickForNext": "Click for next slide.",
-  "MonksEnhanceJournal.MsgShowPlayers": "Showed {title} to {which}.",
+  "MonksEnhancedJournal.MsgShowPlayers": "Showed {title} to {which}.",
+  "MonksEnhancedJournal.MsgOnlyOneBookmark": "Can't bookmark the same entity twice",
 
   "MonksEnhancedJournal.NewTab": "New Tab",
   "MonksEnhancedJournal.OpenEntry": "Open an Entry",
@@ -80,9 +83,9 @@
   "MonksEnhancedJournal.Size": "Size",
   "MonksEnhancedJournal.QuestName": "QuestName",
   "MonksEnhancedJournal.Source": "Source",
-  "MonksEnhancedJournal.Seen": "Seen",
-  "MonksEnhancedJournal.Completed": "Completed",
+  "MonksEnhancedJournal.Status": "Status",
   "MonksEnhancedJournal.Rewards": "Rewards",
+  "MonksEnhancedJournal.Objectives": "Objectives",
   "MonksEnhancedJournal.Experience": "Experience",
   "MonksEnhancedJournal.DeleteItem": "Delete Item",
   "MonksEnhancedJournal.Effect": "Effect",
@@ -104,6 +107,9 @@
   "MonksEnhancedJournal.SelectPlayer": "Select Player",
   "MonksEnhancedJournal.Show": "Show",
   "MonksEnhancedJournal.ShowAll": "Show To All",
+  "MonksEnhancedJournal.CreateObjective": "Create Objective",
+  "MonksEnhancedJournal.Maximize": "Maximize",
+  "MonksEnhancedJournal.Restore": "Restore",
 
   "MonksEnhancedJournal.Contain": "Contain",
   "MonksEnhancedJournal.Cover": "Cover",
@@ -123,5 +129,11 @@
   "MonksEnhancedJournal.person": "Person",
   "MonksEnhancedJournal.place": "Place",
   "MonksEnhancedJournal.quest": "Quest",
-  "MonksEnhancedJournal.encounter": "Encounter"
+  "MonksEnhancedJournal.encounter": "Encounter",
+
+  "MonksEnhancedJournal.inactive": "Inactive",
+  "MonksEnhancedJournal.available": "Available",
+  "MonksEnhancedJournal.inprogress": "In Progress",
+  "MonksEnhancedJournal.completed": "Completed",
+  "MonksEnhancedJournal.failed": "Failed"
 }

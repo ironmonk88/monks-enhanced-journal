@@ -1,0 +1,9 @@
+<form class="objectives" autocomplete="off" onsubmit="event.preventDefault();">
+    <div class="form-group">
+        <label for="content">{{localize 'MonksEnhancedJournal.Name'}}</label>
+        <div class="form-fields">
+            <textarea type="text" name="content" placeholder="Content" style="height:125px;">{{object.content}}</textarea>
+        </div>
+    </div>
+    <button type="submit" name="submit" value="1"><i class="far fa-save"></i> {{localize "MonksEnhancedJournal.Update"}}</button>
+</form>

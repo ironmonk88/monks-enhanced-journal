@@ -26,4 +26,13 @@ export const registerSettings = function () {
 		choices: rollingmodules,
 		config: true
 	});
+
+	game.settings.register(modulename, "show-objectives", {
+		name: i18n("MonksEnhancedJournal.show-objectives.name"),
+		hint: i18n("MonksEnhancedJournal.show-objectives.hint"),
+		scope: "world",
+		config: true,
+		default: true,
+		type: Boolean,
+	});
 }

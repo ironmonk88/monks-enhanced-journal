@@ -1,3 +1,33 @@
+# Version 1.0.7
+
+Fixed an issue where you could bookmark a blank tab
+
+Fixed an issue where a blank tab would lose the "New Tab" title on reload.
+
+Fixed an issue with the Directory reseting the scroll top when rendered.
+
+Fixed issue where players could right-click the journal directory tab and it would pop up the last viewed entry.
+
+Fixed an issue with players saving to a journal entry
+
+Fixing an issue where the styling of the editor got dropped.
+
+Adding Recently Viewed to blank tab
+
+Changed Quest merged Seen/Completed into one status. 
+
+Adding color highlights to show what state a quest is in.
+
+Added Objectives display when Notes tool is selected
+
+Updated the styling to support Pathfinder
+
+Fixed an issue with localization of attribute in the Encounter entry.
+
+Embedded item links no longer open a blank page.
+
+Added Maximize button.
+
 # Version 1.0.6
 
 Fixed an issue when creating a new slideshow, it was trying to access the currently active slide and since there wasn't one, it was causing an error.

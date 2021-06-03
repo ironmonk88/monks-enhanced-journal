@@ -1,6 +1,7 @@
 import { DCConfig } from "../apps/dc-config.js";
 import { SlideConfig } from "../apps/slideconfig.js";
 import { TrapConfig } from "../apps/trap-config.js";
+import { Objectives } from "../apps/objectives.js";
 import { setting, i18n, log, makeid, MonksEnhancedJournal } from "../monks-enhanced-journal.js";
 
 export class SubSheet {
@@ -61,7 +62,7 @@ export class SubSheet {
         if (MonksEnhancedJournal.journal) {
             if (!MonksEnhancedJournal.journal.isEditable) {
                 MonksEnhancedJournal.journal._disableFields.call(this, html.get(0));
-                $('textarea[name="userdata.notes"]', html).removeAttr('disabled').on('change', $.proxy(MonksEnhancedJournal.journal._onChangeInput, MonksEnhancedJournal.journal));
+                $(`textarea[name="flags.monks-enhanced-journal.${game.user.id}.notes"]`, html).removeAttr('disabled').on('change', $.proxy(MonksEnhancedJournal.journal._onChangeInput, MonksEnhancedJournal.journal));
                 $('.editor-edit', html).css({ width: '0px !important', height: '0px !important'});
             }
 
@@ -73,6 +74,13 @@ export class SubSheet {
             //html.find('button.file-picker').each((i, button) => MonksEnhancedJournal.journal?._activateFilePicker());
             html.find('img[data-edit]').click(ev => {
                 MonksEnhancedJournal.journal?._onEditImage(ev)
+            });
+
+            html.find('.recent-link').click(ev => {
+                let id = ev.currentTarget.dataset.entityId;
+                let entity = game.journal.find(j => j.id == id);
+                if(entity)
+                    MonksEnhancedJournal.journal.open(entity);
             });
         }
     }
@@ -265,6 +273,7 @@ export class EncounterSubSheet extends SubSheet {
                 else {
                     let [type, value] = dc.attribute.split(':');
                     dc.label = safeGet('abilities', value) || safeGet('skills', value) || safeGet('scores', value) || safeGet('atributos', value) || safeGet('pericias', value) || value;
+                    dc.label = i18n(dc.label);
                 }
             }
         }
@@ -358,6 +367,7 @@ export class EncounterSubSheet extends SubSheet {
         let item = event.currentTarget.closest('.item');
         if (this.object.data.flags["monks-enhanced-journal"].dcs.findSplice(dc => dc.id == item.dataset.id));
         $(item).remove();
+        MonksEnhancedJournal.journal.saveData()
     }
 
     async addItem(data) {
@@ -411,6 +421,7 @@ export class EncounterSubSheet extends SubSheet {
     deleteItem(id, container) {
         this.object.data.flags["monks-enhanced-journal"][container].findSplice(i => i.id == id);
         $(`li[data-id="${id}"]`, this.element).remove();
+        MonksEnhancedJournal.journal.saveData()
     }
 
     createDC() {
@@ -637,8 +648,21 @@ export class QuestSubSheet extends SubSheet {
         });
     }
 
+    getData(data) {
+        data = super.getData(data);
+        data.statusOptions = {
+            inactive: "MonksEnhancedJournal.inactive",
+            available: "MonksEnhancedJournal.available",
+            inprogress: "MonksEnhancedJournal.inprogress",
+            completed: "MonksEnhancedJournal.completed",
+            failed: "MonksEnhancedJournal.failed"
+        };
+
+        return data;
+    }
+
     get defaultObject() {
-        return { items: [] };
+        return { items: [], objectives: [], seen: false, completed: false };
     }
 
     get type() {
@@ -659,6 +683,12 @@ export class QuestSubSheet extends SubSheet {
     activateListeners(html) {
         super.activateListeners(html);
         MonksEnhancedJournal.journal.sheettabs.bind(html[0]);
+
+        $('.objective-create', html).on('click', $.proxy(this.createObjective, this));
+        $('.objective-edit', html).on('click', $.proxy(this.editObjective, this));
+        $('.objective-delete', html).on('click', $.proxy(this._deleteItem, this));
+
+        $('.item-delete', html).on('click', $.proxy(this._deleteItem, this));
     }
 
     refresh() {
@@ -713,10 +743,29 @@ export class QuestSubSheet extends SubSheet {
         TextEditor._onClickEntityLink(event);
     }
 
-    deleteItem(data) {
+    _deleteItem(event) {
         let item = event.currentTarget.closest('.item');
-        if (this.object.data.flags["monks-enhanced-journal"][item.dataset.container].findSplice(i => i.id == item.dataset.id));
-        $(item).remove();
+        this.deleteItem(item.dataset.itemId, item.dataset.container);
+    }
+
+    deleteItem(id, container) {
+        this.object.data.flags["monks-enhanced-journal"][container].findSplice(i => i.id == id);
+        $(`li[data-item-id="${id}"]`, this.element).remove();
+        MonksEnhancedJournal.journal.saveData()
+    }
+
+    createObjective() {
+        let objective = { status: false };
+        if (this.object.data.flags["monks-enhanced-journal"].objectives == undefined)
+            this.object.data.flags["monks-enhanced-journal"].objectives = [];
+        new Objectives(objective).render(true);
+    }
+
+    editObjective(event) {
+        let item = event.currentTarget.closest('.item');
+        let objective = this.object.data.flags["monks-enhanced-journal"].objectives.find(obj => obj.id == item.dataset.itemId);
+        if (objective != undefined)
+            new Objectives(objective).render(true);
     }
 }
 
