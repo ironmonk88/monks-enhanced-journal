@@ -40,6 +40,8 @@ export class EnhancedJournalSheet extends JournalSheet {
             MonksEnhancedJournal.journal = this;
 
         this.sheettabs = new Tabs({ navSelector: ".tabs", contentSelector: ".sheet-body", initial: "description", callback: function () { } });
+
+        //this.dirDrag = this._createDragDropHandlers();
     }
 
     static get defaultOptions() {
@@ -51,7 +53,11 @@ export class EnhancedJournalSheet extends JournalSheet {
             width: (expanded ? 1025 : 700),
             height: (expanded ? 700 : 650),
             resizable: true,
-            dragDrop: [{ dragSelector: ".entity.actor,.entity.item", dropSelector: "#MonksEnhancedJournal .body" }],
+            dragDrop: [
+                { dragSelector: ".entity.actor", dropSelector: "#MonksEnhancedJournal .body" },
+                { dragSelector: ".entity.item", dropSelector: "#MonksEnhancedJournal .body" },
+                { dragSelector: ".encounter-items .item-list .item", dropSelector: "null" },
+                { dragSelector: ".reward-items .item-list .item", dropSelector: "null" }],
             closeOnSubmit: false,
             submitOnClose: false,
             submitOnChange: true,
@@ -74,6 +80,21 @@ export class EnhancedJournalSheet extends JournalSheet {
             }, {recursive: false}
         );
     }
+
+    /*_createDragDropHandlers() {
+        return [{ dragSelector: ".directory-item", dropSelector: ".directory-list" }].map(d => {
+            d.permissions = {
+                dragstart: ui.journal._canDragStart.bind(ui.journal),
+                drop: ui.journal._canDragDrop.bind(ui.journal)
+            };
+            d.callbacks = {
+                dragstart: ui.journal._onDragStart.bind(ui.journal),
+                dragover: ui.journal._onDragOver.bind(ui.journal),
+                drop: ui.journal._onDrop.bind(ui.journal)
+            };
+            return new DragDrop(d);
+        });
+    }*/
 
     checkForm() {
         let that = this;
@@ -205,6 +226,9 @@ export class EnhancedJournalSheet extends JournalSheet {
         let flags = this.object.data?.flags;
         let type = (flags != undefined ? flags['monks-enhanced-journal']?.type : null) || 'oldentry';
 
+        if (this.object?.folder?.name == '_fql_quests')
+            type = 'quest';
+
         return type;
     }
 
@@ -244,13 +268,19 @@ export class EnhancedJournalSheet extends JournalSheet {
         return tab.history?.length > 1 && tab.historyIdx && tab.historyIdx > 0;
     }
 
-    findEntity(entityId, text) {
+    async findEntity(entityId, text) {
         if (entityId == undefined)
             return { apps: {}, data: { flags: { 'monks-enhanced-journal': { type: 'blank' } }, content: "", recent: this.getRecent(), common: this.getCommon() }, ignore: true };
         else {
-            let entity = game.journal.get(entityId);
-            if (entity == undefined)
-                entity = game.actors.get(entityId);
+            let entity;
+            if (entityId.indexOf('.') >= 0)
+                entity = await fromUuid(entityId);
+            else {
+                if (entity == undefined)
+                    entity = game.journal.get(entityId);
+                if (entity == undefined)
+                    entity = game.actors.get(entityId);
+            }
             if (entity == undefined)
                 entity = { apps: {}, data: { name: text, flags: { 'monks-enhanced-journal': { type: 'blank' } }, content: `${i18n("MonksEnhancedJournal.CannotFindEntity")}: ${text}`, recent: this.getRecent(), common: this.getCommon() }, ignore: true };
 
@@ -258,11 +288,11 @@ export class EnhancedJournalSheet extends JournalSheet {
         }
     }
 
-    deleteEntity(entityId){
+    async deleteEntity(entityId){
         //an entity has been deleted, what do we do?
         for (let tab of this.tabs) {
             if (tab.entityId == entityId)
-                tab.entity = this.findEntity('', tab.text); //I know this will return a blank one, just want to maintain consistency
+                tab.entity = await this.findEntity('', tab.text); //I know this will return a blank one, just want to maintain consistency
 
             //remove it from the history
             tab.history = tab.history.filter(h => h != entityId);
@@ -282,7 +312,7 @@ export class EnhancedJournalSheet extends JournalSheet {
             id: makeid(),
             text: entity?.data.name || i18n("MonksEnhancedJournal.NewTab"),
             active: false,
-            entityId: entity?.id,
+            entityId: entity?.uuid,
             entity: entity || { apps: {}, data: { flags: { 'monks-enhanced-journal': { type: 'blank' } }, content: "", recent: this.getRecent(), common: this.getCommon() }, ignore: true },
             history: []
         };
@@ -290,10 +320,10 @@ export class EnhancedJournalSheet extends JournalSheet {
             tab.history.push(tab.entityId);
         this.tabs.push(tab);
         $('<div>')
-            .addClass('journal-tab')
+            .addClass('journal-tab flexrow')
             .attr('title', tab.text)
             .attr('data-tabid', tab.id)
-            .append($('<div>').addClass('tab-content').append($('<span>').html(tab.text)))
+            .append($('<div>').addClass('tab-content').html(tab.text))
             .append($('<div>').addClass('close').click(this.removeTab.bind(this, tab)).append($('<i>').addClass('fas fa-times')))
             .on('click', $.proxy(this.activateTab, this, tab))
             .insertBefore($('.tab-add', this.element));
@@ -302,7 +332,7 @@ export class EnhancedJournalSheet extends JournalSheet {
         return tab;
     }
 
-    activateTab(tab, event) {
+    async activateTab(tab, event) {
         if (tab == undefined)
             tab = this.addTab();
 
@@ -322,17 +352,7 @@ export class EnhancedJournalSheet extends JournalSheet {
         if (currentTab?.id != tab.id || this.subdocument == undefined) {
             if (tab.entity == undefined) {
                 //try to find the entity
-                tab.entity = this.findEntity(tab.entityId, tab.text);
-                /*
-                if (tab.entityId == undefined)
-                    tab.entity = { apps: {}, data: { flags: { 'monks-enhanced-journal': { type: 'blank' } }, content: "MonksEnhancedJournal.OpenEntry" } };
-                else {
-                    tab.entity = game.journal.get(tab.entityId);
-                    if (tab.entity == undefined)
-                        tab.entity = game.actors.get(tab.entityId);
-                    if (tab.entity == undefined)
-                        tab.entity = { apps: {}, data: { name: tab.text, flags: { 'monks-enhanced-journal': { type: 'blank' } }, content: `Cannot find the entity: ${tab.text}` } };
-                }*/
+                tab.entity = await this.findEntity(tab.entityId, tab.text);
             }
             
         }
@@ -365,9 +385,9 @@ export class EnhancedJournalSheet extends JournalSheet {
 
     updateTab(tab, entity) {
         if (tab != undefined) {
-            if (tab.entityId != entity.data._id) {
+            if (tab.entityId != entity.uuid) {
                 tab.text = entity.data.name;
-                tab.entityId = entity.data._id;
+                tab.entityId = entity.uuid;
                 tab.entity = entity;
 
                 if ((game.user.isGM || setting('allow-player')) && tab.entityId != undefined) {    //only save the history if the player is a GM or they get the full journal experience... and if it's not a blank tab
@@ -385,7 +405,7 @@ export class EnhancedJournalSheet extends JournalSheet {
 
                 this.saveTabs();
 
-                //$(`.journal-tab[data-tabid="${tab.id}"]`, this.element).attr('title', tab.text).find('.tab-content span').html(tab.text);
+                //$(`.journal-tab[data-tabid="${tab.id}"]`, this.element).attr('title', tab.text).find('.tab-content').html(tab.text);
             } else if (tab.entity == undefined) {
                 tab.entity = entity;
             }
@@ -453,19 +473,12 @@ export class EnhancedJournalSheet extends JournalSheet {
         event.preventDefault();
     }
 
-    changeHistory(idx) {
+    async changeHistory(idx) {
         let tab = this.tabs.active();
         tab.historyIdx = Math.clamped(idx, 0, (tab.history.length - 1));
 
         tab.entityId = tab.history[tab.historyIdx];
-        tab.entity = this.findEntity(tab.entityId, tab.text);
-        /*
-        tab.entity = game.journal.get(tab.entityId);
-        if (tab.entity == undefined)
-            tab.entity = game.actors.get(tab.entityId);
-        if (tab.entity == undefined)
-            tab.entity = { apps: {}, data: { name: tab.text, flags: { 'monks-enhanced-journal': { type: 'blank' } }, content: `Cannot find the entity: ${tab.text}` } };
-            */
+        tab.entity = await this.findEntity(tab.entityId, tab.text);
 
         this.saveTabs();
 
@@ -477,7 +490,7 @@ export class EnhancedJournalSheet extends JournalSheet {
         return (tab.entity != undefined && tab.entity.ignore !== true);
     }
 
-    updateHistory() {
+    async updateHistory() {
         let index = 0;
         let tab = this.tabs.active();
         this._tabcontext.menuItems = [];
@@ -487,7 +500,7 @@ export class EnhancedJournalSheet extends JournalSheet {
 
         for (let i = 0; i < tab.history.length; i++) {
             let h = tab.history[i];
-            let entity = this.findEntity(h, '');
+            let entity = await this.findEntity(h, '');
             if (entity != undefined && entity.ignore !== true) {
                 let type = entity.getFlag('monks-enhanced-journal', 'type');
                 let icon = MonksEnhancedJournal.getIcon(type);
@@ -544,10 +557,10 @@ export class EnhancedJournalSheet extends JournalSheet {
         this.saveBookmarks();
     }
 
-    activateBookmark(event) {
+    async activateBookmark(event) {
         let id = event.currentTarget.dataset.bookmarkId;
         let bookmark = this.bookmarks.find(b => b.id == id);
-        let entity = this.findEntity(bookmark.entityId, bookmark.text);
+        let entity = await this.findEntity(bookmark.entityId, bookmark.text);
         this.open(entity);
     }
 
@@ -603,7 +616,7 @@ export class EnhancedJournalSheet extends JournalSheet {
 
         let tab = this.tabs.active();
         tab.text = entity.data.name || i18n("MonksEnhancedJournal.NewTab");
-        $(`.journal-tab[data-tabid="${tab.id}"]`, this.element).attr('title', tab.text).find('.tab-content span').html(tab.text);
+        $(`.journal-tab[data-tabid="${tab.id}"]`, this.element).attr('title', tab.text).find('.tab-content').html(tab.text);
 
         $('.title input', this.element).val(entity.data.name);
 
@@ -622,7 +635,7 @@ export class EnhancedJournalSheet extends JournalSheet {
 
         }*/
 
-        if (type == 'quest' && entity.getFlag("monks-enhanced-journal", "status") == undefined) {
+        if ((game.user.isGM || setting('allow-player')) && type == 'quest' && entity.getFlag("monks-enhanced-journal", "status") == undefined) {
             if (entity.getFlag("monks-enhanced-journal", "completed") === true)
                 entity.setFlag("monks-enhanced-journal", "status", 'completed');
             else if (entity.getFlag("monks-enhanced-journal", "seen") === true)
@@ -632,7 +645,8 @@ export class EnhancedJournalSheet extends JournalSheet {
         }
 
         if (entity != undefined && entity.ignore != true) {
-            entity.setFlag("monks-enhanced-journal", "_viewcount", (entity.setFlag("monks-enhanced-journal", "_viewcount") || 0) + 1);
+            if (game.user.isGM || setting('allow-player'))
+                entity.setFlag("monks-enhanced-journal", "_viewcount", (parseInt(entity.getFlag("monks-enhanced-journal", "_viewcount")) || 0) + 1);
             let recent = game.user.getFlag("monks-enhanced-journal", "_recentlyViewed") || [];
             recent.findSplice(e => e.id == entity.id || typeof e != 'object');
             recent.unshift({ id: entity.id, name: entity.name, type: entity.getFlag("monks-enhanced-journal", "type") });
@@ -708,6 +722,35 @@ export class EnhancedJournalSheet extends JournalSheet {
 
     }
 
+    _onDragStart(event) {
+        const li = event.currentTarget;
+
+        const dragData = {};
+
+        let id = li.dataset.id;
+        if (li.dataset.entity == 'Item') {
+            dragData.id = id;
+            dragData.type = "Item";
+            //dragData.data = item.data;
+        }
+
+        event.dataTransfer.setData("text/plain", JSON.stringify(dragData));
+
+        MonksEnhancedJournal.journal._dragItem = id;
+    }
+
+    async itemDropped(id, actor) {
+        let items = this.object.getFlag('monks-enhanced-journal', 'items');
+        if (items) {
+            let item = items.find(i => i.id == id);
+            if (item) {
+                item.received = actor.name;
+                await this.object.setFlag('monks-enhanced-journal', 'items', items);
+                this.display(this.object);
+            }
+        }
+    }
+
     _onDrop(event) {
         log('drop', event);
         let data;
@@ -763,7 +806,7 @@ export class EnhancedJournalSheet extends JournalSheet {
         //if (type == 'encounter')
         //    $('.sheet-body', this.element).removeClass('editing');
         if ($(ev.currentTarget).hasClass('objective-status')) {
-            let id = ev.currentTarget.closest('li').dataset.itemId;
+            let id = ev.currentTarget.closest('li').dataset.id;
             let objective = this.object.data.flags['monks-enhanced-journal'].objectives.find(o => o.id == id);
             if (objective) {
                 objective.status = $(ev.currentTarget).is(':checked');
@@ -874,7 +917,7 @@ export class EnhancedJournalSheet extends JournalSheet {
         else if (event.ctrlKey)
             this._onShowPlayers(this.object, null, true, event);
         else {
-            new SelectPlayer(this.object, {}).render(true);
+            new SelectPlayer(this.object, { showpic: $('.fullscreen-image', this.element).is(':visible')}).render(true);
         }
     }
 
@@ -919,7 +962,7 @@ export class EnhancedJournalSheet extends JournalSheet {
         ui.notifications.info(game.i18n.format("MonksEnhancedJournal.MsgShowPlayers", {
             title: object.name,
             which: (users == undefined ? 'all players' : users.map(u => u.name).join(', '))
-        }) + ', click <a href="javascript:void(0);" onclick="MonksEnhancedJournal.journal.cancelSend(\'' + args.showid + '\');">here</a> to cancel', { permanent: true });
+        }) + (showpic || this.object.data.flags["monks-enhanced-journal"].type == 'picture' ? ', click <a onclick="game.MonksEnhancedJournal.journal.cancelSend(\'' + args.showid + '\', ' + showpic + ');event.preventDefault();">here</a> to cancel' : ''));
 
 
         /*
@@ -937,6 +980,16 @@ export class EnhancedJournalSheet extends JournalSheet {
         } else {
             super._onShowPlayers(event);
         }*/
+    }
+
+    cancelSend(id, showpic) {
+        game.socket.emit(MonksEnhancedJournal.SOCKET, {
+            action: "cancelShow",
+            args: {
+                showid: id,
+                userId: game.user.id
+            }
+        });
     }
 
     _onEditImage(event) {
@@ -982,6 +1035,71 @@ export class EnhancedJournalSheet extends JournalSheet {
                 }
             }
         ]);
+        this._convertmenu = new ContextMenu(html, ".nav-button.convert", [
+            {
+                name: "Encounter",
+                icon: '<i class="fas fa-toolbox"></i>',
+                callback: li => {
+                    this.object.setFlag('monks-enhanced-journal', 'type', 'encounter').then(() => {
+                        MonksEnhancedJournal.journal.display(this.object);
+                    });
+                }
+            },
+            {
+                name: "Journal Entry",
+                icon: '<i class="fas fa-book-open"></i>',
+                callback: li => {
+                    this.object.setFlag('monks-enhanced-journal', 'type', 'journalentry').then(() => {
+                        MonksEnhancedJournal.journal.display(this.object);
+                    });
+                }
+            },
+            {
+                name: "Organization",
+                icon: '<i class="fas fa-flag"></i>',
+                callback: li => {
+                    this.object.setFlag('monks-enhanced-journal', 'type', 'organization').then(() => {
+                        MonksEnhancedJournal.journal.display(this.object);
+                    });
+                }
+            },
+            {
+                name: "Person",
+                icon: '<i class="fas fa-user"></i>',
+                callback: li => {
+                    this.object.setFlag('monks-enhanced-journal', 'type', 'person').then(() => {
+                        MonksEnhancedJournal.journal.display(this.object);
+                    });
+                }
+            },
+            {
+                name: "Picture",
+                icon: '<i class="fas fa-image"></i>',
+                callback: li => {
+                    this.object.setFlag('monks-enhanced-journal', 'type', 'picture').then(() => {
+                        MonksEnhancedJournal.journal.display(this.object);
+                    });
+                }
+            },
+            {
+                name: "Place",
+                icon: '<i class="fas fa-place-of-worship"></i>',
+                callback: li => {
+                    this.object.setFlag('monks-enhanced-journal', 'type', 'place').then(() => {
+                        MonksEnhancedJournal.journal.display(this.object);
+                    });
+                }
+            },
+            {
+                name: "Quest",
+                icon: '<i class="fas fa-map-signs"></i>',
+                callback: li => {
+                    this.object.setFlag('monks-enhanced-journal', 'type', 'quest').then(() => {
+                        MonksEnhancedJournal.journal.display(this.object);
+                    });
+                }
+            }
+        ], { eventName: 'click' });
     }
 
     async _onChangeInput(event) {
@@ -1015,9 +1133,10 @@ export class EnhancedJournalSheet extends JournalSheet {
         const observer = new IntersectionObserver(ui.journal._onLazyLoadImage.bind(this), { root: directory[0] });
         entries.each((i, li) => observer.observe(li));
 
-
         this._searchFilters = [new SearchFilter({ inputSelector: 'input[name="search"]', contentSelector: ".directory-list", callback: ui.journal._onSearchFilter.bind(ui.journal) })];
         this._searchFilters.forEach(f => f.bind(html[0]));
+
+        ui.journal._dragDrop.forEach(d => d.bind(html[0]));
     }
 
     activateListeners(html) {

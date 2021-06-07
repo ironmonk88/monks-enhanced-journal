@@ -1,4 +1,4 @@
-import { MonksEnhancedJournal, log, setting, i18n } from '../monks-enhanced-journal.js';
+import { MonksEnhancedJournal, log, setting, i18n, makeid } from '../monks-enhanced-journal.js';
 
 export class SlideConfig extends FormApplication {
     constructor(object, options = {}) {
@@ -32,7 +32,16 @@ export class SlideConfig extends FormApplication {
     async _updateObject(event, formData) {
         log('updating slide', event, formData, this.object);
         mergeObject(this.object, formData);
-        MonksEnhancedJournal.journal.saveData();
+        if (this.object.id == undefined) {
+            this.object.id = makeid();
+            MonksEnhancedJournal.journal.object.data.flags["monks-enhanced-journal"].slides.push(this.object);
+
+            MonksEnhancedJournal.createSlide(this.object, $('.slideshow-body', MonksEnhancedJournal.journal.element));
+        }
+
+        MonksEnhancedJournal.journal.saveData().then(() => {
+            MonksEnhancedJournal.journal.display(MonksEnhancedJournal.journal.object);
+        });
 
         $(`.slide[data-slide-id="${this.object.id}"] img`, MonksEnhancedJournal.journal.element)
             .attr('src', this.object.img)

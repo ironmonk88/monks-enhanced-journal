@@ -1,6 +1,10 @@
 <div class="flexcol journal-subsheet person-container {{entrytype}}" editable="{{editable}}">
+    <img class="fullscreen-image" src="{{img}}" />
     <header class="sheet-header journal-header flexrow">
-        <img class="profile" src="{{img}}" data-edit="img" onerror="this.src='modules/monks-enhanced-journal/assets/person.png'">
+        <div class="sheet-image">
+            <div class="magnify-image" title="Show Full Size"><i class="fas fa-search"></i></div>
+            <img class="profile" src="{{img}}" data-edit="img" onerror="this.src='modules/monks-enhanced-journal/assets/person.png'">
+        </div>
         <section class="header-details">
             <h1 class="personname"><input name="name" type="text" value="{{name}}" placeholder="{{localize 'MonksEnhancedJournal.PersonName'}}"></h1>
             <div class="form-group">

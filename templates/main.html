@@ -4,8 +4,8 @@
             <div class="tab-bar flexrow">
                 <div class="tab-row flexrow">
                     {{#each tabs}}
-                    <div class="journal-tab{{#if this.active}} active{{/if}}" title="{{this.text}}" data-tabid="{{this.id}}">
-                        <div class="tab-content"><span>{{this.text}}</span></div>
+                    <div class="journal-tab flexrow{{#if this.active}} active{{/if}}" title="{{this.text}}" data-tabid="{{this.id}}">
+                        <div class="tab-content">{{this.text}}</div>
                         <div class="close"><i class="fas fa-times"></i></div>
                     </div>
                     {{/each}}

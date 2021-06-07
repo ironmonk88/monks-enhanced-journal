@@ -39,19 +39,23 @@
                     <ol class="items-list encounter-items">
                         <li class="items-header flexrow">
                             <h3 class="item-name flexrow">{{localize 'MonksEnhancedJournal.Items'}}</h3>
-                            <div class="item-details item-qty">{{localize 'MonksEnhancedJournal.Qty'}}</div>
+                            <div class="item-controls item-qty">{{localize 'MonksEnhancedJournal.Qty'}}</div>
                             <div class="item-controls flexrow"></div>
                         </li>
 
                         <ol class="item-list">
                             {{#each flags.monks-enhanced-journal.items}}
-                            <li class="item flexrow " data-pack="{{this.pack}}" data-id="{{this.id}}" data-container="items" data-entity="Item" draggable="true">
+                            <li class="item flexrow{{#if this.received}} received{{/if}}" data-pack="{{this.pack}}" data-id="{{this.id}}" data-container="items" data-entity="Item" draggable="true">
                                 <div class="item-name flexrow">
                                     <div class="item-image item-icon" style="background-image: url('{{this.img}}')"></div>
                                     <h4>{{this.name}}</h4>
                                 </div>
 
-                                <div class="item-detail item-qty">
+                                <div class="item-name item-received">
+                                    {{#if this.received}}received by {{this.received}}{{/if}}
+                                </div>
+
+                                <div class="item-controls item-qty">
                                     <input type="text" name="qty" value="{{this.qty}}" style="text-align:center;" />
                                 </div>
 

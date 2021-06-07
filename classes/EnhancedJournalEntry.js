@@ -37,14 +37,19 @@ export class SubSheet {
             data = this.object.data;
 
         data.userid = game.user.id;
-        data.editable = MonksEnhancedJournal.journal.isEditable;
+        data.editable = MonksEnhancedJournal.journal.isEditable && this.isEditable;
 
         if (data.flags["monks-enhanced-journal"] && data.flags["monks-enhanced-journal"][game.user.id])
             data.userdata = data.flags["monks-enhanced-journal"][game.user.id];
 
         data.entrytype = this.type;
+        data.description = data.content;
 
         return data;
+    }
+
+    get isEditable() {
+        return this.object.permission == CONST.ENTITY_PERMISSIONS.OWNER && MonksEnhancedJournal.journal.isEditable && this.object?.compendium?.locked !== true;
     }
 
     async render(data) {
@@ -82,6 +87,14 @@ export class SubSheet {
                 if(entity)
                     MonksEnhancedJournal.journal.open(entity);
             });
+
+            $('.magnify-image', html).click(this.magnifyImage.bind(this));
+            $('.fullscreen-image', html).click(ev => {
+                $('.fullscreen-image', html).hide();
+            });
+
+            for (let dragdrop of MonksEnhancedJournal.journal._dragDrop)
+                dragdrop.bind(html[0]);
         }
     }
 
@@ -136,7 +149,7 @@ export class SubSheet {
     }
 
     onEditDescription() {
-        if (this.object.permission < CONST.ENTITY_PERMISSIONS.OWNER)
+        if (!this.isEditable)
             return null;
 
         if ($('div.tox-tinymce', this.element).length > 0) {
@@ -184,6 +197,10 @@ export class SubSheet {
                 });
             }
         }
+    }
+
+    magnifyImage(event) {
+        $('.fullscreen-image').show();
     }
 }
 
@@ -286,7 +303,8 @@ export class EncounterSubSheet extends SubSheet {
             { text: '<i class="fas fa-search"></i>', type: 'text' },
             { id: 'search', type: 'input', text: i18n("MonksEnhancedJournal.SearchEncounterDescription"), callback: MonksEnhancedJournal.journal.searchText },
             { id: 'show', text: i18n("MonksEnhancedJournal.ShowToPlayers"), icon: 'fa-eye', conditional: game.user.isGM, callback: MonksEnhancedJournal.journal.doShowPlayers },
-            { id: 'edit', text: i18n("MonksEnhancedJournal.EditDescription"), icon: 'fa-pencil-alt', conditional: () => { return this.object.permission == CONST.ENTITY_PERMISSIONS.OWNER }, callback: this.onEditDescription }
+            { id: 'edit', text: i18n("MonksEnhancedJournal.EditDescription"), icon: 'fa-pencil-alt', conditional: this.isEditable, callback: this.onEditDescription },
+            { id: 'convert', text: i18n("MonksEnhancedJournal.Convert"), icon: 'fa-clipboard-list', conditional: (game.user.isGM && this.isEditable), callback: MonksEnhancedJournal.journal.requestConvert }
         ];
         this.addPolyglotButton(ctrls);
         return ctrls.concat(super._entityControls());
@@ -390,17 +408,22 @@ export class EncounterSubSheet extends SubSheet {
             this.object.data.flags["monks-enhanced-journal"].items = [];
 
         if (item) {
-            let newitem = {
-                id: item.id,
-                img: item.img,
-                name: item.name,
-                qty: 1
-            };
+            let olditem = this.object.data.flags["monks-enhanced-journal"].items.find(i => i.id == item.id);
+            if (olditem) {
+                olditem.qty++;
+            } else {
+                let newitem = {
+                    id: item.id,
+                    img: item.img,
+                    name: item.name,
+                    qty: 1
+                };
 
-            if (data.pack)
-                newitem.pack = data.pack;
+                if (data.pack)
+                    newitem.pack = data.pack;
 
-            this.object.data.flags["monks-enhanced-journal"].items.push(newitem);
+                this.object.data.flags["monks-enhanced-journal"].items.push(newitem);
+            }
             MonksEnhancedJournal.journal.saveData();
             this.refresh();
         }
@@ -421,7 +444,7 @@ export class EncounterSubSheet extends SubSheet {
     deleteItem(id, container) {
         this.object.data.flags["monks-enhanced-journal"][container].findSplice(i => i.id == id);
         $(`li[data-id="${id}"]`, this.element).remove();
-        MonksEnhancedJournal.journal.saveData()
+        MonksEnhancedJournal.journal.saveData();
     }
 
     createDC() {
@@ -500,12 +523,10 @@ export class JournalEntrySubSheet extends SubSheet {
             { text: '<i class="fas fa-search"></i>', type: 'text' },
             { id: 'search', type: 'input', text: i18n("MonksEnhancedJournal.SearchJournalEntry"), callback: MonksEnhancedJournal.journal.searchText },
             { id: 'show', text: i18n("MonksEnhancedJournal.ShowToPlayers"), icon: 'fa-eye', conditional: game.user.isGM, callback: MonksEnhancedJournal.journal.doShowPlayers },
-            { id: 'edit', text: i18n("MonksEnhancedJournal.EditDescription"), icon: 'fa-pencil-alt', conditional: () => { return this.object.permission == CONST.ENTITY_PERMISSIONS.OWNER }, callback: this.onEditDescription }
+            { id: 'edit', text: i18n("MonksEnhancedJournal.EditDescription"), icon: 'fa-pencil-alt', conditional: this.isEditable, callback: this.onEditDescription },
+            { id: 'convert', text: i18n("MonksEnhancedJournal.Convert"), icon: 'fa-clipboard-list', conditional: (game.user.isGM && this.isEditable), callback: MonksEnhancedJournal.journal.requestConvert }
         ];
-        /*
-        if (this.type == 'oldentry')
-            ctrls.push({ id: 'convert', text: i18n("MonksEnhancedJournal.Convert"), icon: 'fa-clipboard-list', conditional: game.user.isGM, callback: MonksEnhancedJournal.journal.requestConvert });
-            */
+        
         this.addPolyglotButton(ctrls);
         return ctrls.concat(super._entityControls());
     }
@@ -524,6 +545,49 @@ export class JournalEntrySubSheet extends SubSheet {
         $('.editor-content[data-edit="content"]').html(content);
 
         //MonksEnhancedJournal._imgcontext.bind();
+    }
+}
+
+export class OrganizationSubSheet extends SubSheet {
+    constructor(data, options) {
+        super(data, options);
+    }
+
+    static get defaultOptions() {
+        return mergeObject(super.defaultOptions, {
+            text: "MonksEnhancedJournal.organization",
+            template: "modules/monks-enhanced-journal/templates/organization.html"
+        });
+    }
+
+    get type() {
+        return 'organization';
+    }
+
+    _entityControls() {
+        let ctrls = [
+            { text: '<i class="fas fa-search"></i>', type: 'text' },
+            { id: 'search', type: 'input', text: i18n("MonksEnhancedJournal.SearchOrganizationDescription"), callback: MonksEnhancedJournal.journal.searchText },
+            { id: 'show', text: i18n("MonksEnhancedJournal.ShowToPlayers"), icon: 'fa-eye', conditional: game.user.isGM, callback: MonksEnhancedJournal.journal.doShowPlayers },
+            { id: 'edit', text: i18n("MonksEnhancedJournal.EditDescription"), icon: 'fa-pencil-alt', conditional: this.isEditable, callback: this.onEditDescription },
+            { id: 'convert', text: i18n("MonksEnhancedJournal.Convert"), icon: 'fa-clipboard-list', conditional: (game.user.isGM && this.isEditable), callback: MonksEnhancedJournal.journal.requestConvert }
+        ];
+        this.addPolyglotButton(ctrls);
+        return ctrls.concat(super._entityControls());
+    }
+
+    activateListeners(html) {
+        super.activateListeners(html);
+        MonksEnhancedJournal.journal.sheettabs.bind(html[0]);
+    }
+
+    refresh() {
+        super.refresh();
+
+        const owner = this.object.isOwner;
+        const content = TextEditor.enrichHTML(this.object.data.content, { secrets: owner, entities: true });
+
+        $('.editor-content[data-edit="content"]', MonksEnhancedJournal.journal.element).html(content);
     }
 }
 
@@ -549,7 +613,8 @@ export class PersonSubSheet extends SubSheet {
             { id: 'search', type: 'input', text: i18n("MonksEnhancedJournal.SearchPersonDescription"), callback: MonksEnhancedJournal.journal.searchText },
             /*{ id: 'random', text: 'Generate Random Character', icon: 'fa-exchange-alt', conditional: game.user.isGM, callback: MonksEnhancedJournal.journal._randomizePerson },*/
             { id: 'show', text: i18n("MonksEnhancedJournal.ShowToPlayers"), icon: 'fa-eye', conditional: game.user.isGM, callback: MonksEnhancedJournal.journal.doShowPlayers },
-            { id: 'edit', text: i18n("MonksEnhancedJournal.EditDescription"), icon: 'fa-pencil-alt', conditional: () => { return this.object.permission == CONST.ENTITY_PERMISSIONS.OWNER }, callback: this.onEditDescription }
+            { id: 'edit', text: i18n("MonksEnhancedJournal.EditDescription"), icon: 'fa-pencil-alt', conditional: this.isEditable, callback: this.onEditDescription },
+            { id: 'convert', text: i18n("MonksEnhancedJournal.Convert"), icon: 'fa-clipboard-list', conditional: (game.user.isGM && this.isEditable), callback: MonksEnhancedJournal.journal.requestConvert }
         ];
         this.addPolyglotButton(ctrls);
         return ctrls.concat(super._entityControls());
@@ -615,7 +680,8 @@ export class PlaceSubSheet extends SubSheet {
             { text: '<i class="fas fa-search"></i>', type: 'text' },
             { id: 'search', type: 'input', text: i18n("MonksEnhancedJournal.SearchPlaceDescription"), callback: MonksEnhancedJournal.journal.searchText },
             { id: 'show', text: i18n("MonksEnhancedJournal.ShowToPlayers"), icon: 'fa-eye', conditional: game.user.isGM, callback: MonksEnhancedJournal.journal.doShowPlayers },
-            { id: 'edit', text: i18n("MonksEnhancedJournal.EditDescription"), icon: 'fa-pencil-alt', conditional: () => { return this.object.permission == CONST.ENTITY_PERMISSIONS.OWNER }, callback: this.onEditDescription }
+            { id: 'edit', text: i18n("MonksEnhancedJournal.EditDescription"), icon: 'fa-pencil-alt', conditional: this.isEditable, callback: this.onEditDescription },
+            { id: 'convert', text: i18n("MonksEnhancedJournal.Convert"), icon: 'fa-clipboard-list', conditional: (game.user.isGM && this.isEditable), callback: MonksEnhancedJournal.journal.requestConvert }
         ];
         this.addPolyglotButton(ctrls);
         return ctrls.concat(super._entityControls());
@@ -658,6 +724,35 @@ export class QuestSubSheet extends SubSheet {
             failed: "MonksEnhancedJournal.failed"
         };
 
+        if (this.object?.folder?.name == '_fql_quests') {
+            //This is a Forien's quest log, let's try and convert
+            let fq = JSON.parse(this.object.data.content);
+
+            let source = '';
+            /*
+            if (fq.giver != '') {
+                let entity = await fromUuid(fq.giver);
+                source = entity.name;
+            }*/
+
+            let convert = {
+                description: fq.description,
+                name: fq.title,
+                source: source,
+                img: fq.splash,
+                flags: {
+                    'monks-enhanced-journal': {
+                        status: (fq.status == 'active' ? 'inprogress' : (fq.status == 'hidden' ? 'inactive' : fq.status)),
+                        objectives: fq.tasks.map(t => { return { id: makeid(), content: t.name, status: t.completed } }),
+                        items: fq.rewards.filter(r => r.type == 'Item').map(r => { return { id: r.data._id, img: r.data.img, name: r.data.name, qty: 1} })
+
+                    }}
+            };
+            convert.flags['monks-enhanced-journal'][game.user.id] = fq.gmnotes;
+
+            data = mergeObject(data, convert);
+        }
+
         return data;
     }
 
@@ -674,7 +769,8 @@ export class QuestSubSheet extends SubSheet {
             { text: '<i class="fas fa-search"></i>', type: 'text' },
             { id: 'search', type: 'input', text: i18n("MonksEnhancedJournal.SearchQuestDescription"), callback: MonksEnhancedJournal.journal.searchText },
             { id: 'show', text: i18n("MonksEnhancedJournal.ShowToPlayers"), icon: 'fa-eye', conditional: game.user.isGM, callback: MonksEnhancedJournal.journal.doShowPlayers },
-            { id: 'edit', text: i18n("MonksEnhancedJournal.EditDescription"), icon: 'fa-pencil-alt', conditional: () => { return this.object.permission == CONST.ENTITY_PERMISSIONS.OWNER }, callback: this.onEditDescription }
+            { id: 'edit', text: i18n("MonksEnhancedJournal.EditDescription"), icon: 'fa-pencil-alt', conditional: this.isEditable, callback: this.onEditDescription },
+            { id: 'convert', text: i18n("MonksEnhancedJournal.Convert"), icon: 'fa-clipboard-list', conditional: (game.user.isGM && this.isEditable), callback: MonksEnhancedJournal.journal.requestConvert }
         ];
         this.addPolyglotButton(ctrls);
         return ctrls.concat(super._entityControls());
@@ -720,17 +816,22 @@ export class QuestSubSheet extends SubSheet {
             this.object.data.flags["monks-enhanced-journal"].items = [];
 
         if (item) {
-            let newitem = {
-                id: item.id,
-                img: item.img,
-                name: item.name,
-                qty: 1
-            };
+            let olditem = this.object.data.flags["monks-enhanced-journal"].items.find(i => i.id == item.id);
+            if (olditem) {
+                olditem.qty++;
+            } else {
+                let newitem = {
+                    id: item.id,
+                    img: item.img,
+                    name: item.name,
+                    qty: 1
+                };
 
-            if (data.pack)
-                newitem.pack = data.pack;
+                if (data.pack)
+                    newitem.pack = data.pack;
 
-            this.object.data.flags["monks-enhanced-journal"].items.push(newitem);
+                this.object.data.flags["monks-enhanced-journal"].items.push(newitem);
+            }
             MonksEnhancedJournal.journal.saveData();
             this.refresh();
         }
@@ -745,13 +846,13 @@ export class QuestSubSheet extends SubSheet {
 
     _deleteItem(event) {
         let item = event.currentTarget.closest('.item');
-        this.deleteItem(item.dataset.itemId, item.dataset.container);
+        this.deleteItem(item.dataset.id, item.dataset.container);
     }
 
     deleteItem(id, container) {
         this.object.data.flags["monks-enhanced-journal"][container].findSplice(i => i.id == id);
-        $(`li[data-item-id="${id}"]`, this.element).remove();
-        MonksEnhancedJournal.journal.saveData()
+        $(`li[data-id="${id}"]`, this.element).remove();
+        MonksEnhancedJournal.journal.saveData();
     }
 
     createObjective() {
@@ -763,7 +864,7 @@ export class QuestSubSheet extends SubSheet {
 
     editObjective(event) {
         let item = event.currentTarget.closest('.item');
-        let objective = this.object.data.flags["monks-enhanced-journal"].objectives.find(obj => obj.id == item.dataset.itemId);
+        let objective = this.object.data.flags["monks-enhanced-journal"].objectives.find(obj => obj.id == item.dataset.id);
         if (objective != undefined)
             new Objectives(objective).render(true);
     }
@@ -885,10 +986,10 @@ export class SlideshowSubSheet extends SubSheet {
             text: { color: '#FFFFFF', background: '#000000', align: 'center', valign: 'middle' },
             transition: { duration: 5, effect: 'fade' }
         }, data);
-        slide.id = makeid();
-        this.object.data.flags["monks-enhanced-journal"].slides.push(slide);
+        //slide.id = makeid();
+        //this.object.data.flags["monks-enhanced-journal"].slides.push(slide);
 
-        MonksEnhancedJournal.createSlide(slide, $('.slideshow-body', this.element));
+        //MonksEnhancedJournal.createSlide(slide, $('.slideshow-body', this.element));
 
         if (options.showdialog)
             new SlideConfig(slide).render(true);
@@ -921,6 +1022,7 @@ export class SlideshowSubSheet extends SubSheet {
     activateSlide(event) {
         if (this.object.data.flags["monks-enhanced-journal"].state != 'stopped') {
             let idx = $(event.currentTarget).index();
+            this.object.data.flags["monks-enhanced-journal"].slideAt = idx;
             this.playSlide(idx);
         }
     }
@@ -934,7 +1036,7 @@ export class SlideshowSubSheet extends SubSheet {
         $('.navigation .stop', this.element).toggle(this.object.data.flags["monks-enhanced-journal"].state !== 'stopped');
     }
 
-    playSlideshow(refresh = true) {
+    async playSlideshow(refresh = true) {
         if (this.object.data.flags["monks-enhanced-journal"].slides.length == 0)
             return;
 
@@ -946,9 +1048,11 @@ export class SlideshowSubSheet extends SubSheet {
             this.object.sound = undefined;
 
             if (this.object.data.flags["monks-enhanced-journal"].audiofile != undefined && this.object.data.flags["monks-enhanced-journal"].audiofile != '')
-                this.object.sound = AudioHelper.play({ src: this.object.data.flags["monks-enhanced-journal"].audiofile }, true);
+                AudioHelper.play({ src: this.object.data.flags["monks-enhanced-journal"].audiofile, loop: true }).then((sound) => {
+                    this.object.sound = sound;
+                });
         } else {
-            if (this.object.sound)
+            if (this.object.sound && this.object.sound.paused)
                 this.object.sound.play();
         }
 
@@ -1002,7 +1106,7 @@ export class SlideshowSubSheet extends SubSheet {
         $('.slideshow-container', MonksEnhancedJournal.journal.element).toggleClass('playing', this.object.data.flags["monks-enhanced-journal"].state != 'stopped');
         this.subsheet.updateButtons.call(this);
 
-        if (this.object.sound?._src != undefined) {
+        if (this.object.sound?.src != undefined) {
             game.socket.emit("stopAudio", { src: this.object.data.flags["monks-enhanced-journal"].audiofile });
             this.object.sound.stop();
             this.object.sound = undefined;
@@ -1061,7 +1165,8 @@ export class SlideshowSubSheet extends SubSheet {
         $('.slideshow-body', this.element).scrollLeft((idx * 116));
         $('.slide-showing .duration', this.element).empty();
 
-        window.clearTimeout(slide.transition.timer);
+        if (this.object?._currentSlide?.transition?.timer)
+            window.clearTimeout(this.object?._currentSlide?.transition?.timer);
 
         if (slide.transition?.duration > 0) {
             //set up the transition
@@ -1072,6 +1177,8 @@ export class SlideshowSubSheet extends SubSheet {
         } else {
             $('.slide-showing .duration', this.element).append($('<div>').addClass('duration-label').html(i18n("MonksEnhancedJournal.ClickForNext")));
         }
+
+        this.object._currentSlide = slide;
 
         game.socket.emit(
             MonksEnhancedJournal.SOCKET,

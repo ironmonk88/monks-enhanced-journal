@@ -1,3 +1,40 @@
+# Version 1.0.8
+Added button to exapand an image to the full size of the window.
+
+Fixed an issue with drag and dropping directory items.
+
+Fixed an issue with dragging and dropping items onto actors.
+
+Fix tab styling when a tab gets really small.
+
+Added option to convert to different journal types.
+
+Fixed issue with cancelling sent images.
+
+Added support for Forien's Quest log items.  It's not quite correct, the text isn't uploading properly, but the rest of the details are uploaded properly.
+
+Added Organizations
+
+Fixed issue where deleting items wasn't refreshing
+
+Recording where the items were dropped
+
+Fixing issue where dropping the same item on Rewards or Items would duplicate the item.  Instead it just increases the Quantity.
+
+Fixed issues with playing the slideshow.  The sound will now quit playing when the slideshow has stopped.
+
+Fixed issue with the tab titles not updating.
+
+Fixed issue when trying to load a Journal Page from a Compendium... I honestly didn't even know those existed.
+
+Fixed an issue opening journal entries links from descriptions
+
+Fixed and issue when showing players if no players are picked
+
+Fixed an issue with creating a new slide, but not actually saving it, still leaves the old slide
+
+Fixed an issue with editing when you should be allowed to edit.
+
 # Version 1.0.7
 
 Fixed an issue where you could bookmark a blank tab

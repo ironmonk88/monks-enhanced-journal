@@ -1,7 +1,7 @@
 import { registerSettings } from "./settings.js";
 import { EnhancedJournalSheet } from "./apps/enhanced-journal.js"
 import { SlideshowDisplay } from "./apps/slideshow-display.js"
-import { SubSheet, ActorSubSheet, EncounterSubSheet, JournalEntrySubSheet, PersonSubSheet, PictureSubSheet, PlaceSubSheet, QuestSubSheet, SlideshowSubSheet } from "./classes/EnhancedJournalEntry.js"
+import { SubSheet, ActorSubSheet, EncounterSubSheet, JournalEntrySubSheet, PersonSubSheet, PictureSubSheet, PlaceSubSheet, QuestSubSheet, SlideshowSubSheet, OrganizationSubSheet } from "./classes/EnhancedJournalEntry.js"
 
 export let debug = (...args) => {
     if (debugEnabled > 1) console.log("DEBUG: monks-enhanced-journal | ", ...args);
@@ -47,7 +47,8 @@ export class MonksEnhancedJournal {
             person: PersonSubSheet,
             place: PlaceSubSheet,
             quest: QuestSubSheet,
-            encounter: EncounterSubSheet
+            encounter: EncounterSubSheet,
+            organization: OrganizationSubSheet,
         };
     }
 
@@ -59,13 +60,16 @@ export class MonksEnhancedJournal {
             person: "MonksEnhancedJournal.person",
             place: "MonksEnhancedJournal.place",
             quest: "MonksEnhancedJournal.quest",
-            encounter: "MonksEnhancedJournal.encounter"
+            encounter: "MonksEnhancedJournal.encounter",
+            organization: "MonksEnhancedJournal.organization"
         };
     }
 
     static init() {
         log('Initializing Monks Enhanced Journal');
         registerSettings();
+
+        game.MonksEnhancedJournal = this;
 
         MonksEnhancedJournal.SOCKET = "module.monks-enhanced-journal";
 
@@ -89,7 +93,7 @@ export class MonksEnhancedJournal {
 
         let oldRenderPopout = JournalDirectory.prototype.renderPopout;
         JournalDirectory.prototype.renderPopout = function () {
-            if (game.user.isGM || settings('allow-players')) {
+            if (game.user.isGM || setting('allow-players')) {
                 let entry = new JournalEntry({ name: 'temporary' }); //new JournalEntryData({name:'temporary'})
                 let ejs = new EnhancedJournalSheet(entry);
                 ejs._render(true).then(() => {
@@ -147,16 +151,26 @@ export class MonksEnhancedJournal {
             }
 
             // Action 2 - Render the Entity sheet
-            if (document.entity == 'Actor')
+            if (document.documentName == 'Actor' || document.documentName == 'JournalEntry')
                 return MonksEnhancedJournal.openJournalEntry(document);
             else
                 return document.sheet.render(true);
         }
 
+        let oldOnClickEntry = Compendium.prototype._onClickEntry;
+        Compendium.prototype._onClickEntry = async function (event) {
+            let li = event.currentTarget.parentElement;
+            const document = await this.collection.getDocument(li.dataset.documentId);
+            if (document instanceof JournalEntry) {
+                MonksEnhancedJournal.openJournalEntry(document, { editable: game.user.isGM && !this.collection.locked });
+            } else
+                return oldOnClickEntry.call(this, event);
+        }
+
         Handlebars.registerHelper({ selectGroups: MonksEnhancedJournal.selectGroups });
     }
 
-    static openJournalEntry(entry) {
+    static openJournalEntry(entry, options) {
         //if the enhanced journal is already open, then just pass it the new object, if not then let it render as normal
         if (MonksEnhancedJournal.journal != undefined) {
             log('JournalID', MonksEnhancedJournal.journal.appId, MonksEnhancedJournal.journal.tabs);
@@ -206,13 +220,13 @@ export class MonksEnhancedJournal {
         return new Handlebars.SafeString(html);
     }
 
-    static async _showEntry(entryId, mode = "text", force = true) {
+    static async _showEntry(entryId, mode = "text", force = true, showid) {
         let entry = await fromUuid(entryId);
         if (entry.entity !== "JournalEntry") return;
         if (!force && !entry.visible) return;
 
         // Show the sheet with the appropriate mode
-        entry.sheet._render(true, { sheetMode: mode }).then(() => {
+        return entry.sheet._render(true, { sheetMode: mode }).then(() => {
             MonksEnhancedJournal.journal.open(entry);
         });
     }
@@ -258,6 +272,8 @@ export class MonksEnhancedJournal {
             case 'encounter': return 'fa-toolbox';
             case 'quest': return 'fa-map-signs';
             case 'journalentry': return 'fa-book-open';
+            case 'actor': return 'fa-users';
+            case 'organization': return 'fa-flag';
             default:
                 return 'fa-book-open';
         }
@@ -277,26 +293,39 @@ export class MonksEnhancedJournal {
         }
     }
 
-    static showEntry(data) {
+    static async showEntry(data) {
         if (data.users == undefined || data.users.includes(game.user.id)) {
             //show an entry
             if (data.image != undefined) {
-                new ImagePopout(data.image, {
+                let img = new ImagePopout(data.image, {
                     title: data.title,
                     uuid: data.uuid,
                     shareable: false,
                     editable: false
-                }).render(true);
+                });
+                await img._render(true);
+                $(img.element).attr('data-show-id', data.showid);
             } else {
-                Journal._showEntry(data.uuid, "text", true);
+                Journal._showEntry(data.uuid, "text", true).then((what) => {
+                    log(what);
+                });
             }
+        }
+    }
+
+    static cancelShow(data) {
+        let app = $('.image-popout[data-show-id="' + data.showid + '"]');
+        if (app.length > 0) {
+            $('.window-header .close', app).click();
+        } else {
+            //check to see if this is a tab
         }
     }
 
     static async playSlideshow(data) {
         if (!game.user.isGM) {
             //clear any old ones
-            if (MonksEnhancedJournal.slideshow != undefined)
+            if (MonksEnhancedJournal.slideshow != undefined && MonksEnhancedJournal.slideshow.id != data.id)
                 MonksEnhancedJournal.stopSlideshow();
 
             let slideshow = game.journal.find(e => e.id == data.id);
@@ -326,6 +355,11 @@ export class MonksEnhancedJournal {
                     MonksEnhancedJournal.slideshow.element.toggleClass('fullscreen', showas == 'fullscreen');
                 }
                 MonksEnhancedJournal.slideshow.element.addClass('active');
+
+                if (MonksEnhancedJournal.slideshow.content.audiofile != undefined && MonksEnhancedJournal.slideshow.content.audiofile != '' && MonksEnhancedJournal.slideshow.sound == undefined)
+                    AudioHelper.play({ src: MonksEnhancedJournal.slideshow.content.audiofile, loop: true}).then((sound) => {
+                        MonksEnhancedJournal.slideshow.sound = sound;
+                    });
 
                 if (data.idx != undefined)
                     MonksEnhancedJournal.playSlide(data);
@@ -363,7 +397,11 @@ export class MonksEnhancedJournal {
     static stopSlideshow(data) {
         if (!game.user.isGM) {
             if (MonksEnhancedJournal.slideshow != undefined) {
-                MonksEnhancedJournal.slideshow.element.removeClass('active');
+                MonksEnhancedJournal.slideshow?.element?.removeClass('active');
+
+                if (MonksEnhancedJournal.slideshow?.sound.src != undefined) {
+                    MonksEnhancedJournal.slideshow?.sound.stop();
+                }
                 delete MonksEnhancedJournal.slideshow;
             }
         }
@@ -500,4 +538,12 @@ Hooks.on('renderSceneControls', (controls) => {
     $('#objective-display').toggleClass('active', showObjectives);
     if (showObjectives)
         MonksEnhancedJournal.refreshObjectives();
+});
+
+Hooks.on('dropActorSheetData', (actor, sheet, data) => {
+    //check to see if an item was dropped from either the encounter or quest and record what actor it was
+    if (MonksEnhancedJournal.journal && data.id == MonksEnhancedJournal.journal._dragItem) {
+        MonksEnhancedJournal.journal.itemDropped(data.id, actor);
+        MonksEnhancedJournal.journal._dragItem = null;
+    }
 });

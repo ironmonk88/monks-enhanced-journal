@@ -1,6 +1,10 @@
 <div class="flexcol journal-subsheet quest-container {{entrytype}}" editable="{{editable}}">
+    <img class="fullscreen-image" src="{{img}}" />
     <header class="sheet-header journal-header flexrow">
-        <img class="profile" src="{{img}}" data-edit="img" onerror="this.src='modules/monks-enhanced-journal/assets/quest.png'">
+        <div class="sheet-image">
+            <div class="magnify-image" title="Show Full Size"><i class="fas fa-search"></i></div>
+            <img class="profile" src="{{img}}" data-edit="img" onerror="this.src='modules/monks-enhanced-journal/assets/quest.png'">
+        </div>
         <section class="header-details">
             <h1 class="questname"><input name="name" type="text" value="{{name}}" placeholder="{{localize 'MonksEnhancedJournal.QuestName'}}"></h1>
             <div class="form-group">
@@ -43,7 +47,7 @@
 
                 <ol class="item-list">
                     {{#each flags.monks-enhanced-journal.objectives}}
-                    <li class="item flexrow " data-item-id="{{this.id}}" data-container="objectives" draggable="true">
+                    <li class="item flexrow " data-id="{{this.id}}" data-container="objectives" draggable="true">
                         <div class="item-name flexrow">
                             <h4 style="white-space: normal;">{{this.content}}</h4>
                         </div>
@@ -78,10 +82,14 @@
 
                 <ol class="item-list">
                     {{#each flags.monks-enhanced-journal.items}}
-                    <li class="item flexrow " data-item-id="{{this.id}}" data-container="items" draggable="true">
+                    <li class="item flexrow{{#if this.received}} received{{/if}}" data-id="{{this.id}}" data-container="items" data-entity="Item" draggable="true">
                         <div class="item-name flexrow">
                             <div class="item-image" style="background-image: url('{{this.img}}')"></div>
                             <h4>{{this.name}}</h4>
+                        </div>
+
+                        <div class="item-name item-received">
+                            {{#if this.received}}received by {{this.received}}{{/if}}
                         </div>
 
                         <div class="item-controls item-qty">

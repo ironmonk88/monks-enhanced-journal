@@ -6,6 +6,7 @@ export class SelectPlayer extends FormApplication {
 
     constructor(object, options = {}) {
         super(object, options);
+        this.showpic = (options.showpic != undefined ? options.showpic : false);
     }
 
     /** @override */
@@ -42,7 +43,7 @@ export class SelectPlayer extends FormApplication {
 
     canShowPic() {
         let type = this.object.data.flags["monks-enhanced-journal"].type;
-        return (["person","place","quest","oldentry"].includes(type));
+        return (["person","place","quest","oldentry", "organization"].includes(type));
     }
 
     /* -------------------------------------------- */
@@ -67,6 +68,10 @@ export class SelectPlayer extends FormApplication {
     }
 
     showPlayers(mode, event) {
+        if (mode == 'players' && this.users.length == 0) {
+
+            return;
+        }
         MonksEnhancedJournal.journal._onShowPlayers.call(MonksEnhancedJournal.journal, this.object, (mode == 'all' ? null : this.users), this.showpic, event);
     }
 
