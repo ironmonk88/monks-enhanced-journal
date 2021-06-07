@@ -27,5 +27,5 @@
   "bugs": "https://github.com/ironmonk88/monks-enhanced-journal/issues",
   "allowBugReporter": true,
   "minimumCoreVersion": "0.8.0",
-  "compatibleCoreVersion": "0.8.5"
+  "compatibleCoreVersion": "0.8.6"
 }
