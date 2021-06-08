@@ -196,8 +196,10 @@ export class EnhancedJournalSheet extends JournalSheet {
         if (options.content_css) {
             if (options.content_css.find(c => c == 'modules/monks-enhanced-journal/css/editor.css') == undefined)
                 options.content_css.push('modules/monks-enhanced-journal/css/editor.css');
-        } //else
-        //    options.content_css = ['modules/monks-enhanced-journal/css/editor.css'];
+
+            if (game.modules.get("polyglot")?.active && options.content_css.find(c => c == 'modules/polyglot/css/polyglot.css') == undefined)
+                options.content_css.push('modules/polyglot/css/polyglot.css');
+        }
 
         $('.editor .editor-content', this.element).unmark();
 
@@ -913,9 +915,9 @@ export class EnhancedJournalSheet extends JournalSheet {
 
     doShowPlayers(event) {
         if (event.shiftKey)
-            this._onShowPlayers(this.object, null, false, event);
+            this._onShowPlayers(this.object, null, { showpic: false }, event);
         else if (event.ctrlKey)
-            this._onShowPlayers(this.object, null, true, event);
+            this._onShowPlayers(this.object, null, { showpic: true }, event);
         else {
             new SelectPlayer(this.object, { showpic: $('.fullscreen-image', this.element).is(':visible')}).render(true);
         }
@@ -937,7 +939,7 @@ export class EnhancedJournalSheet extends JournalSheet {
         }
     }
 
-    async _onShowPlayers(object, users, showpic, event) {
+    async _onShowPlayers(object, users, options, event) {
         if(users != undefined)
             users = users.filter(u => u.selected);
         //if we havn't picked anyone to show this to, then exit
@@ -952,7 +954,7 @@ export class EnhancedJournalSheet extends JournalSheet {
             users: (users != undefined ? users.map(u => u.id) : users),
             showid: makeid()
         }
-        if (showpic || this.object.data.flags["monks-enhanced-journal"].type == 'picture')
+        if (options.showpic || this.object.data.flags["monks-enhanced-journal"].type == 'picture')
             args.image = object.data.img;
 
         game.socket.emit(MonksEnhancedJournal.SOCKET, {
@@ -962,9 +964,18 @@ export class EnhancedJournalSheet extends JournalSheet {
         ui.notifications.info(game.i18n.format("MonksEnhancedJournal.MsgShowPlayers", {
             title: object.name,
             which: (users == undefined ? 'all players' : users.map(u => u.name).join(', '))
-        }) + (showpic || this.object.data.flags["monks-enhanced-journal"].type == 'picture' ? ', click <a onclick="game.MonksEnhancedJournal.journal.cancelSend(\'' + args.showid + '\', ' + showpic + ');event.preventDefault();">here</a> to cancel' : ''));
+        }) + (options.showpic || this.object.data.flags["monks-enhanced-journal"].type == 'picture' ? ', click <a onclick="game.MonksEnhancedJournal.journal.cancelSend(\'' + args.showid + '\', ' + options.showpic + ');event.preventDefault();">here</a> to cancel' : ''));
 
-
+        if (options.updatepermission) {
+            let permissions = {};
+            Object.assign(permissions, object.data.permission);
+            if (users == undefined)
+                permissions["default"] = CONST.ENTITY_PERMISSIONS.OBSERVER;
+            else {
+                users.forEach(user => { permissions[user.id] = CONST.ENTITY_PERMISSIONS.OBSERVER; });
+            }
+            object.update({ permission : permissions });
+        }
         /*
         if (this.entitytype == 'picture') {
             game.socket.emit("shareImage", {

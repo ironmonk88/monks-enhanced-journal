@@ -35,4 +35,13 @@ export const registerSettings = function () {
 		default: true,
 		type: Boolean,
 	});
+
+	game.settings.register(modulename, "use-runes", {
+		name: i18n("MonksEnhancedJournal.use-runes.name"),
+		hint: i18n("MonksEnhancedJournal.use-runes.hint"),
+		scope: "world",
+		config: game.modules.get("polyglot")?.active,
+		default: true,
+		type: Boolean,
+	});
 }

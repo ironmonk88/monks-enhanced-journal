@@ -413,10 +413,11 @@
     height: fit-content;
 }*/
 
+/*
 .monks-journal-sheet .content[entity-type="journalentry"] .sheet-navigation,
 .monks-journal-sheet .content[entity-type="journalentry"] .tab.picture{
     display: none;
-}
+}*/
 
 .person-container, .place-container, .organization-container {
     height: 100%;
@@ -555,8 +556,8 @@
     float: left;
     display: none;
     object-fit: contain;
-    background-color: #FFFFFF;
     z-index: 900;
+    background: url(ui/parchment.jpg) repeat;
 }
 
 .monks-journal-sheet.sheet .person-container .sheet-header .header-details .form-group label,

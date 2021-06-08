@@ -186,7 +186,8 @@ export class MonksEnhancedJournal {
 
             if (sheet._minimized) return sheet.maximize();
             else return sheet._render(true).then(() => {
-                MonksEnhancedJournal.journal.open(entry);
+                if (MonksEnhancedJournal.journal)
+                    MonksEnhancedJournal.journal.open(entry);
             });
         }
     }
@@ -241,6 +242,13 @@ export class MonksEnhancedJournal {
         //Hooks.on("closeJournalSheet", (app, html, data) => {
         //    this._onJournalRemoved(app);
         //});
+
+        if (game.modules.get("polyglot")?.active) {
+            //import {Polyglot} from "./module/logic.js";
+            const importedJS = await import("/modules/polyglot/module/logic.js");
+            this.polyglot = new importedJS.Polyglot();
+            this.polyglot.loadLanguages();
+        }
     }
 
     static initPopout() {
@@ -508,7 +516,7 @@ Hooks.on("preCreateJournalEntry", (entry, data, options, userId) => {
 });
 
 Hooks.on("createJournalEntry", (entry, data, options, userId) => {
-    if (MonksEnhancedJournal.journal) {
+    if (MonksEnhancedJournal.journal && userId == game.user.id) {
         //open this item in a new tab
         if (!MonksEnhancedJournal.journal.rendered) {
             //allow the journal to load before opening, so that activatelisteners could be called

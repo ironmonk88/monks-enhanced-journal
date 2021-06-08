@@ -3,10 +3,12 @@ import { MonksEnhancedJournal, log, setting, i18n } from '../monks-enhanced-jour
 export class SelectPlayer extends FormApplication {
     users = [];
     showpic = false;
+    updatepermission = false;
 
     constructor(object, options = {}) {
         super(object, options);
         this.showpic = (options.showpic != undefined ? options.showpic : false);
+        this.updatepermission = (options.updatepermission != undefined ? options.updatepermission : false);
     }
 
     /** @override */
@@ -36,14 +38,15 @@ export class SelectPlayer extends FormApplication {
             {
                 users: this.users,
                 picchoice: this.canShowPic(),
-                showpic: this.showpic
+                showpic: this.showpic,
+                updatepermission: this.updatepermission
             }
         );
     }
 
     canShowPic() {
         let type = this.object.data.flags["monks-enhanced-journal"].type;
-        return (["person","place","quest","oldentry", "organization"].includes(type));
+        return (["person","place","quest","oldentry", "organization"].includes(type) || this.object.documentName == 'Actor');
     }
 
     /* -------------------------------------------- */
@@ -65,14 +68,25 @@ export class SelectPlayer extends FormApplication {
 
     updateShowPic(event) {
         this.showpic = $(event.currentTarget).is(':checked');
+        if (this.showpic) {
+            this.updatepermission = false;
+            $('.update-permission', this.element).prop('checked', false);
+        }
+    }
+
+    updatePermission(event) {
+        this.updatepermission = $(event.currentTarget).is(':checked');
+        if (this.updatepermission) {
+            this.showpic = false;
+            $('.show-pic', this.element).prop('checked', false);
+        }
     }
 
     showPlayers(mode, event) {
         if (mode == 'players' && this.users.length == 0) {
-
             return;
         }
-        MonksEnhancedJournal.journal._onShowPlayers.call(MonksEnhancedJournal.journal, this.object, (mode == 'all' ? null : this.users), this.showpic, event);
+        MonksEnhancedJournal.journal._onShowPlayers.call(MonksEnhancedJournal.journal, this.object, (mode == 'all' ? null : this.users), { showpic: this.showpic, updatepermission: this.updatepermission }, event);
     }
 
     activateListeners(html) {
@@ -83,5 +97,6 @@ export class SelectPlayer extends FormApplication {
 
         html.find('input[type="checkbox"].user-select').change(this.updateSelection.bind(this));
         html.find('input[type="checkbox"].pic-select').change(this.updateShowPic.bind(this));
+        html.find('input[type="checkbox"].update-permission').change(this.updatePermission.bind(this));
     }
 }

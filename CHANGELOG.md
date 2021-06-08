@@ -1,3 +1,11 @@
+# Version 1.0.9
+
+Fixed issue with player viewing encounter log while GM creates a new entry, that entry would appear in the players enhanced journal.
+
+Fixed issue with Polyglot integration
+
+Added option to set permissions when showing to players.
+
 # Version 1.0.8
 Added button to exapand an image to the full size of the window.
 
