@@ -144,6 +144,10 @@ export class EnhancedJournalSheet extends JournalSheet {
         return super._renderInner(...args);
     }
 
+    _replaceHTML(element, html) {
+        //We don't actually want to refresh the inner I don't believe, unless it's to update the subsheet
+    }
+
     async renderDirectory() {
         const cfg = CONFIG["JournalEntry"];
         let template = "modules/monks-enhanced-journal/templates/directory.html";

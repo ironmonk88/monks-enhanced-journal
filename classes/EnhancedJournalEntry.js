@@ -67,7 +67,7 @@ export class SubSheet {
             let known_languages = new Set();
             if (checklang)
                 [known_languages] = MonksEnhancedJournal.polyglot.getUserLanguages([game.user.character]);
-            let userunes = !game.user.isGM || (this.object && (this.object.getFlag('monks-enhanced-journal', 'use-runes') != undefined ? this.object.getFlag('monks-enhanced-journal', 'use-runes') : setting('use-runes')));
+            let userunes = !game.user.isGM || (this.object && !this.object.ignore && (this.object.getFlag('monks-enhanced-journal', 'use-runes') != undefined ? this.object.getFlag('monks-enhanced-journal', 'use-runes') : setting('use-runes')));
             if (userunes) {
                 $('span.polyglot-journal', this.element).each(function () {
                     const lang = this.dataset.language;

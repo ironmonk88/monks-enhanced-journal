@@ -1,3 +1,8 @@
+# Version 1.0.10
+Fixed issue when deleted entries are loaded.
+
+Fixed issue when entries are created.
+
 # Version 1.0.9
 Fixed issue with player viewing encounter log while GM creates a new entry, that entry would appear in the players enhanced journal.
 
