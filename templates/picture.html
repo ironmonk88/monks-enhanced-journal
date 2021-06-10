@@ -1,7 +1,8 @@
-<div class="journal-subsheet picture-container flexcol {{entrytype}}">
-    <div class="header-name">
-        <input name="name" type="text" value="{{name}}" placeholder="{{localize 'MonksEnhancedJournal.PictureName'}}">
-    </div>
+<div class="flexcol journal-subsheet picture-container {{entrytype}}" editable="{{editable}}">
+    <header class="header-name">
+        <input type="text" name="name" placeholder="{{localize 'MonksEnhancedJournal.PersonName'}}" value="{{name}}" />
+        <input type="text" style="display:none;" /><!--I can't figure out what's going on, but to avoid Enter causing a page submit a second text needs to be on the page-->
+    </header>
     <div class="flexcol" style="overflow:hidden;">
         <!--<div class="img-background" style="background-image: url('{{img}}')"></div>-->
         <img class="picture-img" src="{{img}}" data-edit="img" onerror="this.src = 'icons/svg/mystery-man.svg'" />

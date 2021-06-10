@@ -557,7 +557,7 @@
     display: none;
     object-fit: contain;
     z-index: 900;
-    background: url(ui/parchment.jpg) repeat;
+    background: url(../../../ui/parchment.jpg) repeat;
 }
 
 .monks-journal-sheet.sheet .person-container .sheet-header .header-details .form-group label,
@@ -1251,4 +1251,25 @@
 
 .monks-journal-sheet.pf2e form .npc-body{
     margin-top:0px;
+}
+
+.actor-img {
+    flex: 0 0 80px;
+    max-width: 80px;
+    height: 160px;
+    object-fit:contain;
+    object-position:top center;
+    font-size:15px;
+}
+
+.sheet header.sheet-header .actor-img img {
+    width: 80px;
+    height: 80px;
+    object-fit: contain;
+    border:none;
+    cursor:pointer;
+}
+
+.monks-journal-sheet.sheet .items-list .item-assigned {
+    text-align: center;
 }

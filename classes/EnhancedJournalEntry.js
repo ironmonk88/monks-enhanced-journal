@@ -67,7 +67,7 @@ export class SubSheet {
             let known_languages = new Set();
             if (checklang)
                 [known_languages] = MonksEnhancedJournal.polyglot.getUserLanguages([game.user.character]);
-            let userunes = !game.user.isGM || (this.object.getFlag('monks-enhanced-journal', 'use-runes') != undefined ? this.object.getFlag('monks-enhanced-journal', 'use-runes') : setting('use-runes'));
+            let userunes = !game.user.isGM || (this.object && (this.object.getFlag('monks-enhanced-journal', 'use-runes') != undefined ? this.object.getFlag('monks-enhanced-journal', 'use-runes') : setting('use-runes')));
             if (userunes) {
                 $('span.polyglot-journal', this.element).each(function () {
                     const lang = this.dataset.language;
@@ -388,6 +388,19 @@ export class EncounterSubSheet extends SubSheet {
         $('.trap-edit', html).on('click', $.proxy(this.editTrap, this));
         $('.trap-delete', html).on('click', $.proxy(this._deleteItem, this));
         $('.encounter-traps .item-name', html).on('click', $.proxy(this.rollTrap, this));
+
+        let that = this;
+        $('.item-assigned input', html).on('change', function (event) {
+            let id = $(event.currentTarget).closest('li').attr('data-id');
+            let items = that.object.data.flags['monks-enhanced-journal'].items;
+            let item = items.find(i => i.id == id);
+            if (item) {
+                item.assigned = $(this).is(':checked');
+                delete item.received;
+                that.object.setFlag('monks-enhanced-journal', 'items', items);
+                $(event.currentTarget).parent().siblings('.item-received').html('');
+            }
+        });
     }
 
     async addMonster(data) {
@@ -423,7 +436,7 @@ export class EncounterSubSheet extends SubSheet {
                 monster.pack = data.pack;
 
             this.object.data.flags["monks-enhanced-journal"].monsters.push(monster);
-            MonksEnhancedJournal.journal.saveData();
+            await MonksEnhancedJournal.journal.saveData();
             this.refresh();
         }
     }
@@ -471,7 +484,7 @@ export class EncounterSubSheet extends SubSheet {
 
                 this.object.data.flags["monks-enhanced-journal"].items.push(newitem);
             }
-            MonksEnhancedJournal.journal.saveData();
+            await MonksEnhancedJournal.journal.saveData();
             this.refresh();
         }
     }
@@ -675,6 +688,8 @@ export class PersonSubSheet extends SubSheet {
     activateListeners(html) {
         super.activateListeners(html);
         MonksEnhancedJournal.journal.sheettabs.bind(html[0]);
+
+        $('.actor-img img', html).click(this.openActor.bind(this));
     }
 
     refresh() {
@@ -684,6 +699,50 @@ export class PersonSubSheet extends SubSheet {
         const content = TextEditor.enrichHTML(this.object.data.content, { secrets: owner, entities: true });
 
         $('.editor-content[data-edit="content"]', MonksEnhancedJournal.journal.element).html(content);
+    }
+
+    async addActor(data) {
+        let actor;
+        if (data.pack) {
+            const pack = game.packs.get(data.pack);
+            let id = data.id;
+            if (data.lookup) {
+                if (!pack.index.length) await pack.getIndex();
+                const entry = pack.index.find(i => (i._id === data.lookup) || (i.name === data.lookup));
+                id = entry.id;
+            }
+            actor = id ? await pack.getDocument(id) : null;
+        } else {
+            actor = game.actors.get(data.id);
+            if (actor.documentName === "Scene" && actor.journal) actor = actor.journal;
+            if (!actor.testUserPermission(game.user, "LIMITED")) {
+                return ui.notifications.warn(`You do not have permission to view this ${actor.entity} sheet.`);
+            }
+        }
+
+        if (actor) {
+            let actorLink = {
+                id: actor.id,
+                img: actor.img,
+                name: actor.name
+            };
+
+            if (data.pack)
+                actorLink.pack = data.pack;
+
+            this.object.data.flags["monks-enhanced-journal"].actor = actorLink;
+            MonksEnhancedJournal.journal.saveData();
+            this.refresh();
+        }
+    }
+
+    openActor(event) {
+        let actorLink = this.object.getFlag('monks-enhanced-journal', 'actor');
+        let actor = game.actors.find(a => a.id == actorLink.id);
+        if (actor) {
+            //actor.sheet.render(true);
+            MonksEnhancedJournal.journal.open(actor, event.shiftKey);
+        }
     }
 }
 
@@ -837,6 +896,19 @@ export class QuestSubSheet extends SubSheet {
         $('.objective-delete', html).on('click', $.proxy(this._deleteItem, this));
 
         $('.item-delete', html).on('click', $.proxy(this._deleteItem, this));
+
+        let that = this;
+        $('.item-assigned input', html).on('change', function (event) {
+            let id = $(event.currentTarget).closest('li').attr('data-id');
+            let items = that.object.data.flags['monks-enhanced-journal'].items;
+            let item = items.find(i => i.id == id);
+            if (item) {
+                item.assigned = $(this).is(':checked');
+                delete item.received;
+                that.object.setFlag('monks-enhanced-journal', 'items', items);
+                $(event.currentTarget).parent().siblings('.item-received').html('');
+            }
+        });
     }
 
     refresh() {
@@ -884,7 +956,7 @@ export class QuestSubSheet extends SubSheet {
 
                 this.object.data.flags["monks-enhanced-journal"].items.push(newitem);
             }
-            MonksEnhancedJournal.journal.saveData();
+            await MonksEnhancedJournal.journal.saveData();
             this.refresh();
         }
     }
@@ -1089,8 +1161,10 @@ export class SlideshowSubSheet extends SubSheet {
     }
 
     async playSlideshow(refresh = true) {
-        if (this.object.data.flags["monks-enhanced-journal"].slides.length == 0)
+        if (this.object.data.flags["monks-enhanced-journal"].slides.length == 0) {
+            ui.notifications.warn('Cannot play a slideshow with no slides');
             return;
+        }
 
         if (this.object.data.flags["monks-enhanced-journal"].state == 'playing')
             return;

@@ -74,6 +74,8 @@
                 <li class="items-header flexrow">
                     <h3 class="item-name flexrow">{{localize 'MonksEnhancedJournal.Items'}}</h3>
 
+                    <div class="item-controls item-assigned">{{localize 'MonksEnhancedJournal.Assigned'}}</div>
+
                     <div class="item-controls item-qty">{{localize 'MonksEnhancedJournal.Qty'}}</div>
 
                     <div class="item-controls flexrow">
@@ -82,7 +84,7 @@
 
                 <ol class="item-list">
                     {{#each flags.monks-enhanced-journal.items}}
-                    <li class="item flexrow{{#if this.received}} received{{/if}}" data-id="{{this.id}}" data-container="items" data-entity="Item" draggable="true">
+                    <li class="item flexrow{{#if this.received}} received{{/if}}" data-id="{{this.id}}" data-pack="{{this.pack}}" data-container="items" data-entity="Item" draggable="true">
                         <div class="item-name flexrow">
                             <div class="item-image" style="background-image: url('{{this.img}}')"></div>
                             <h4>{{this.name}}</h4>
@@ -90,6 +92,10 @@
 
                         <div class="item-name item-received">
                             {{#if this.received}}received by {{this.received}}{{/if}}
+                        </div>
+
+                        <div class="item-controls item-assigned">
+                            <input type="checkbox" name="assigned" {{checked this.assigned}} style="text-align:center;" />
                         </div>
 
                         <div class="item-controls item-qty">

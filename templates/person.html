@@ -16,6 +16,13 @@
                 <input type="text" name="flags.monks-enhanced-journal.location" placeholder="{{localize 'MonksEnhancedJournal.Location'}}" value="{{flags.monks-enhanced-journal.location}}" />
             </div>
         </section>
+        {{#if flags.monks-enhanced-journal.actor}}
+        <div class="actor-img">
+            <div style="width:100%;text-align:center;">Actor</div>
+            <img src="{{flags.monks-enhanced-journal.actor.img}}" data-actor-id="{{flags.monks-enhanced-journal.actor.id}}" onerror="$(this).hide();">
+            <div style="text-align: center;">{{flags.monks-enhanced-journal.actor.name}}</div>
+        </div>
+        {{/if}}
     </header>
     <nav class="sheet-navigation tabs" data-group="primary">
         <a class="item active" data-tab="description">{{localize 'MonksEnhancedJournal.Description'}}</a>

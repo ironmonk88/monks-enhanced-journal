@@ -173,6 +173,12 @@ export class EnhancedJournalSheet extends JournalSheet {
 
         $('.sidebar', this.element).empty().append(html);
 
+        if (game.modules.get("forien-quest-log")?.active && !game.settings.get("forien-quest-log", 'showFolder')) {
+            let folder = game.journal.directory.folders.find(f => (f.name == '_fql_quests' && f.parent == null));
+            let elem = html.find(`.folder[data-folder-id="${folder.id}"]`);
+            elem.remove();
+        }
+
         this.activateDirectoryListeners(html);
 
         this._restoreScrollPositions($('#journal-directory'));
@@ -732,9 +738,12 @@ export class EnhancedJournalSheet extends JournalSheet {
         let id = li.dataset.id;
         if (li.dataset.entity == 'Item') {
             dragData.id = id;
+            dragData.pack = li.dataset.pack;
             dragData.type = "Item";
             //dragData.data = item.data;
         }
+
+        log('Drag Start', dragData);
 
         event.dataTransfer.setData("text/plain", JSON.stringify(dragData));
 
@@ -747,8 +756,11 @@ export class EnhancedJournalSheet extends JournalSheet {
             let item = items.find(i => i.id == id);
             if (item) {
                 item.received = actor.name;
-                await this.object.setFlag('monks-enhanced-journal', 'items', items);
-                this.display(this.object);
+                item.assigned = true;
+                this.object.setFlag('monks-enhanced-journal', 'items', items).then(() => {
+                    log('Item Dropped', item);
+                    this.display(this.object);
+                });
             }
         }
     }
@@ -771,13 +783,18 @@ export class EnhancedJournalSheet extends JournalSheet {
                         $('.encounter-content', this.element).scrollTop(scrollTop);
                     });*/
                 });
+            } else if (this.entitytype == 'person') {
+                this.subsheet.addActor(data).then(() => {
+                    this.display(this.object);
+                });
             } else if (data.pack == undefined) {
                 let actor = game.actors.get(data.id);
                 this.open(actor);
             }
         } else if (data.type == 'Item' && (this.entitytype == 'encounter' || this.entitytype == 'quest')) {
-            this.subsheet.addItem(data);
-            this.display(this.object);
+            this.subsheet.addItem(data).then(() => {
+                this.display(this.object);
+            })
         }
 
         log('drop data', event, data);
@@ -871,7 +888,7 @@ export class EnhancedJournalSheet extends JournalSheet {
         }
     }
 
-    saveData() {
+    async saveData() {
         return this.object.update({
             name: this.object.data.name,
             img: this.object.data.img,
@@ -1001,6 +1018,13 @@ export class EnhancedJournalSheet extends JournalSheet {
                 userId: game.user.id
             }
         });
+    }
+
+    _onSelectFile(selection, filePicker, event) {
+        log(selection, filePicker, event);
+        let updates = {};
+        updates[filePicker.field.name] = selection;
+        this.object.update(updates);
     }
 
     _onEditImage(event) {

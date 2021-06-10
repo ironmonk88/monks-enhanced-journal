@@ -152,7 +152,7 @@ export class MonksEnhancedJournal {
 
             // Action 2 - Render the Entity sheet
             if (document.documentName == 'Actor' || document.documentName == 'JournalEntry')
-                return MonksEnhancedJournal.openJournalEntry(document);
+                return MonksEnhancedJournal.openJournalEntry(document, { newtab: event.shiftKey });
             else
                 return document.sheet.render(true);
         }
@@ -170,7 +170,7 @@ export class MonksEnhancedJournal {
         Handlebars.registerHelper({ selectGroups: MonksEnhancedJournal.selectGroups });
     }
 
-    static openJournalEntry(entry, options) {
+    static openJournalEntry(entry, options = {}) {
         //if the enhanced journal is already open, then just pass it the new object, if not then let it render as normal
         if (MonksEnhancedJournal.journal != undefined) {
             log('JournalID', MonksEnhancedJournal.journal.appId, MonksEnhancedJournal.journal.tabs);
@@ -179,7 +179,7 @@ export class MonksEnhancedJournal {
                     MonksEnhancedJournal.journal.open(entry);
                 })
             } else
-                MonksEnhancedJournal.journal.open(entry);
+                MonksEnhancedJournal.journal.open(entry, options.newtab);
         }
         else {
             const sheet = entry.sheet;
@@ -515,7 +515,7 @@ Hooks.on("preCreateJournalEntry", (entry, data, options, userId) => {
     entry.data._source.flags['monks-enhanced-journal'] = flags;
 });
 
-Hooks.on("createJournalEntry", (entry, data, options, userId) => {
+Hooks.on("createJournalEntry", (entry, options, userId) => {
     if (MonksEnhancedJournal.journal && userId == game.user.id) {
         //open this item in a new tab
         if (!MonksEnhancedJournal.journal.rendered) {

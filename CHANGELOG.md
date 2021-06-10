@@ -1,10 +1,29 @@
 # Version 1.0.9
-
 Fixed issue with player viewing encounter log while GM creates a new entry, that entry would appear in the players enhanced journal.
 
 Fixed issue with Polyglot integration
 
 Added option to set permissions when showing to players.
+
+Added option to show picture when viewing an Actor
+
+Added option to open Actor sheet from Actor tab
+
+Fixed issue where selecting an old journal entry that was just a picture and then changing to an enhanced journal, wouldn't display anything.
+
+Added option to see both text and picture for journal entries regardless of if they're old or new.
+
+Fixed an issue with slideshow sound not saving.
+
+Fixed a really strange issue where if there's only one text control on a window, pressing enter in it will cause the webpage to submit.
+
+Added option to shift click and open an entry in a new tab.
+
+Fixed issue with adding Compendium items, was missing the pack id
+
+Fixed issue when creating a new Entry, it wouldn't load the new entry properly.
+
+Hiding Forien's Quest folder if that module is running and the folder is not to be shown.
 
 # Version 1.0.8
 Added button to exapand an image to the full size of the window.
