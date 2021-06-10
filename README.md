@@ -63,11 +63,17 @@ This is to represent a journal entry.  It's like the text part of an old journal
 
 This represents a person in your world.  This person most likely won't have a token, but still needs to be referenced and have information available.  You can upload a picture, add information to relevant properties and add descriptive text.  There is also a notes section where you can add private notes to this journal entry.
 
+You can also drag an actor onto a Person Entry to link that Person to the actor.
+
 ### Place
 
 ![monks-enhanced-journal](/screenshots/place.png)
 
 This is like the Person entry and represents a place that could be visited in your world.
+
+### Organizations
+
+This represents an Organization or Faction within the world.
 
 ### Encounter
 
@@ -78,6 +84,8 @@ This represents an encounter on the map.  There is a place to add a description 
 ![monks-enhanced-journal](/screenshots/encounter2.png)
 
 On the second tab you can store information on what monsters will be encountered, what items could be gained at this location, and what DCs could be triggered.  To add a monster or item to the entry, drag the appropriate icon onto the sheet.  Dragging the monster icon from the entry to the canvas will create a representative token on the map.  Clicking on the dice icon, on a DC row will prompt for a dice roll.  Currently it's set to use Monk's Tokenbar to request those rolls, but I have plane to expand this in the future.
+
+You can also drag an item off this list, onto an actor and it will register which actor that item has been handed off to.
 
 ### Slideshow
 
@@ -107,6 +115,7 @@ When the Notes tool is selected, players can view the objectives of any In Progr
 ![monks-enhanced-journal](/screenshots/quest2.png)
 
 You can also set the rewards that are gained by completing this quest.  To add an item, drag the item icon on the journal page.
+You can also drag an item off this list, onto an actor and it will register which actor that item has been handed off to.
 
 ### Old Entry
 
