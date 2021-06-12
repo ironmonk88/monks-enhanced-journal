@@ -124,7 +124,7 @@ export class MonksEnhancedJournal {
                     if (!pack.index.length) await pack.getIndex();
                     const entry = pack.index.find(i => (i._id === a.dataset.lookup) || (i.name === a.dataset.lookup));
                     if (entry) {
-                        a.dataset.id = id = entry._id;
+                        a.dataset.id = id = entry.id;
                         delete a.dataset.lookup;
                     }
                 }
@@ -166,6 +166,15 @@ export class MonksEnhancedJournal {
             } else
                 return oldOnClickEntry.call(this, event);
         }
+
+        /*
+        let oldOnCreateDocument = JournalDirectory.prototype._onCreateDocument;
+        JournalDirectory.prototype._onCreateDocument = async function (event) {
+            let result = oldOnCreateDocument.call(this, event).then((html) => {
+                log('create document', html);
+            });
+            log(result);
+        }*/
 
         Handlebars.registerHelper({ selectGroups: MonksEnhancedJournal.selectGroups });
     }
@@ -456,30 +465,62 @@ export class MonksEnhancedJournal {
             display.append($('<div>').addClass('title').html('Objectives')).append(quests);
         }
     }
+
+    static updateDirectory(html) {
+        $('.entity.journal', html).each(function () {
+            let id = this.dataset.entityId;
+            let entry = game.journal.get(id);
+            let type = entry.getFlag('monks-enhanced-journal', 'type');// || (entry.data.img != "" && entry.data.content == "" ? 'picture' : 'journalentry'); //we'll add the picture later
+            let icon = MonksEnhancedJournal.getIcon(type);
+
+            $('.entity-name', this).prepend($('<i>').addClass('fas fa-fw ' + icon));
+
+            if (type == 'quest')
+                $(this).attr('status', entry.getFlag('monks-enhanced-journal', 'status'));
+
+            if (setting('show-permissions') && game.user.isGM && (entry.data.permission.default > 0 || Object.keys(entry.data.permission).length > 1)) {
+                let permissions = $('<div>').addClass('permissions');
+                if (entry.data.permission.default > 0)
+                    permissions.append($('<i>').addClass('fas fa-users').attr('title', 'Everyone'));
+                else {
+                    for (let [key, value] of Object.entries(entry.data.permission)) {
+                        let user = game.users.find(u => {
+                            return u.id == key && !u.isGM;
+                        });
+                        if (user != undefined && value > 0)
+                            permissions.append($('<div>').css({ backgroundColor: user.data.color }).html(user.name[0]).attr('title', user.name));
+                    }
+                }
+                $('h4', this).append(permissions);
+            }
+        });
+
+        /*
+        $('.folder', html).each(function () {
+            let id = this.dataset.folderId;
+            let folder = ui.journal.folders.find(e => e.id == id);
+
+            if (folder) {
+                let type = folder.getFlag('monks-enhanced-journal', 'defaulttype');
+                if (type && type != 'journalentry') {
+                    let icon = MonksEnhancedJournal.getIcon(type);
+
+                    $('<span>').addClass('default-type').html(`<i class="fas ${icon}"></i>`).insertBefore($('.create-folder', this));
+                }
+            }
+        });*/
+    }
 }
 
 Hooks.on("renderJournalDirectory", async (app, html, options) => {
     //add journal indicators
     log('rendering journal directory', app, html, options);
     if (MonksEnhancedJournal.journal) {
-        await MonksEnhancedJournal.journal.renderDirectory();
+        let jdir = await MonksEnhancedJournal.journal.renderDirectory();
+        MonksEnhancedJournal.updateDirectory(jdir);
     }
 
-    $('.entity.journal', html).each(function () {
-        let id = this.dataset.entityId;
-        let entry = app.entities.find(e => e.id == id);
-        let type = entry.getFlag('monks-enhanced-journal', 'type');// || (entry.data.img != "" && entry.data.content == "" ? 'picture' : 'journalentry'); //we'll add the picture later
-        let icon = MonksEnhancedJournal.getIcon(type);
-
-        $('.entity-name', this).prepend($('<i>').addClass('fas fa-fw ' + icon));
-
-        if (type == 'quest')
-            $(this).attr('status', entry.getFlag('monks-enhanced-journal', 'status'));
-
-        //if (entry.data.img != "" && entry.data.content != "") {
-            //this is a dual entry
-        //}
-    });
+    MonksEnhancedJournal.updateDirectory(html);
 });
 
 Hooks.on("renderJournalSheet", (app, html) => {
@@ -555,3 +596,22 @@ Hooks.on('dropActorSheetData', (actor, sheet, data) => {
         MonksEnhancedJournal.journal._dragItem = null;
     }
 });
+
+/*
+Hooks.on("renderFolderConfig", (app, html, options) => {
+    let defaultType = app.object.getFlag('monks-enhanced-journal', 'defaulttype');
+
+    $('<div>')
+        .addClass('form-group')
+        .append($('<label>').html('Default Entry Type'))
+        .append($('<div>')
+            .addClass('form-fields')
+            .append($('<select>')
+                .attr('name', 'flags.monks-enhanced-journal.defaulttype')
+                .append(Object.entries(MonksEnhancedJournal.getTypeLabels()).map(([k, v]) => {
+                    return $('<option>').attr('value', k).html(i18n(v)).prop('selected', defaultType == k);
+                }))))
+        .insertAfter($('input[name="sorting"]', html).closest('.form-group'));
+
+    $(html).css({height: $(html).height() + 30});
+});*/

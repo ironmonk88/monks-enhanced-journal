@@ -23,7 +23,9 @@ export class SubSheet {
 
     refresh() {
         try {
-            //this.object.data.content = JSON.parse(this.object.data.content);
+            if (game.modules.get("polyglot")?.active) {
+                this.renderPolyglot();
+            }
         } catch (err) {
         }
     }
@@ -60,31 +62,12 @@ export class SubSheet {
 
         this.activateListeners($(this.element));
 
-        let that = this;
-
         if (game.modules.get("polyglot")?.active) {
-            let checklang = !game.user.isGM && this.object.permission < CONST.ENTITY_PERMISSIONS.OWNER;
-            let known_languages = new Set();
-            if (checklang)
-                [known_languages] = MonksEnhancedJournal.polyglot.getUserLanguages([game.user.character]);
-            let userunes = !game.user.isGM || (this.object && !this.object.ignore && (this.object.getFlag('monks-enhanced-journal', 'use-runes') != undefined ? this.object.getFlag('monks-enhanced-journal', 'use-runes') : setting('use-runes')));
-            if (userunes) {
-                $('span.polyglot-journal', this.element).each(function () {
-                    const lang = this.dataset.language;
-                    if (lang) {
-                        const known = known_languages.has(lang);
-                        if (checklang && known)
-                            return; //Do not show the runes if the language is known and it's not the GM
+            this.known_languages = new Set();
+            [this.known_languages] = MonksEnhancedJournal.polyglot.getUserLanguages([game.user.character]);
 
-                        $(this).data({ 'text': this.textContent, 'font': this.style.font, 'converted': true });
-                        this.textContent = MonksEnhancedJournal.polyglot.scrambleString(this.textContent, game.settings.get('polyglot', 'useUniqueSalt') ? that.object.id : lang);
-                        this.style.font = MonksEnhancedJournal.polyglot._getFontStyle(lang);
-                    }
-                });
-            }
+            this.renderPolyglot();
         }
-
-        MonksEnhancedJournal.polyglot
 
         return this.element;
     }
@@ -121,6 +104,14 @@ export class SubSheet {
 
             for (let dragdrop of MonksEnhancedJournal.journal._dragDrop)
                 dragdrop.bind(html[0]);
+
+            if (MonksEnhancedJournal.journal.editors.content) {
+                let oldSaveCallback = MonksEnhancedJournal.journal.editors.content.options.save_onsavecallback;
+                MonksEnhancedJournal.journal.editors.content.options.save_onsavecallback = async (name) => {
+                    await oldSaveCallback.call(MonksEnhancedJournal.journal.editors.content, name);
+                    MonksEnhancedJournal.journal.subsheet.refresh();
+                }
+            }
         }
     }
 
@@ -205,7 +196,107 @@ export class SubSheet {
         }
     }
 
+    async renderPolyglot() {
+
+        //show the runes if [(gm or owner) and userunes][not gm and lang unknown]
+
+        let that = this;
+        //userunes = !(this.object.getFlag('monks-enhanced-journal', 'use-runes') != undefined ? this.object.getFlag('monks-enhanced-journal', 'use-runes') : setting('use-runes'));
+        //MonksEnhancedJournal.journal.object.setFlag('monks-enhanced-journal', 'use-runes', userunes);
+        //$('.nav-button.polyglot i', this.element).attr('class', 'fas ' + (userunes ? 'fa-link' : 'fa-unlink'));
+
+
+        $('.editor-content span.polyglot-journal:not(.converted)', this.element).each(function () {
+            const lang = this.dataset.language;
+            if (!lang) return;
+
+            let scramble = MonksEnhancedJournal.polyglot.scrambleString(this.textContent, game.settings.get('polyglot', 'useUniqueSalt') ? that.object.id : lang);
+            let scrambleSpan = $('<span>').addClass('polyglot-scramble').css({ 'font': MonksEnhancedJournal.polyglot._getFontStyle(lang) }).html(scramble);
+            $('<div>')
+                .addClass('polyglot-container')
+                .attr('data-language', (game.user.isGM || that.object.permission == CONST.ENTITY_PERMISSIONS.OWNER || that.known_languages.has(lang) ? MonksEnhancedJournal.polyglot.constructor.languages[lang] : 'Unknown'))
+                .insertBefore($(this).addClass('converted').attr('title', ''))
+                .append(this)
+                .append(scrambleSpan)
+                .hover(
+                    function () {
+                        //hover in
+                        const lang = this.dataset.language;
+                        if (game.user.isGM || that.object.permission == CONST.ENTITY_PERMISSIONS.OWNER || that.known_languages.has(lang)) {
+                            $(this).addClass('translate');
+                        }
+                    },
+                    function () {
+                        //hover out
+                        $(this).removeClass('translate');
+                    }
+                );
+
+            /*
+            if (!$(this).data('converted')) {
+                $(this).data({
+                    'text': this.textContent,
+                    'scramble': MonksEnhancedJournal.polyglot.scrambleString(this.textContent, game.settings.get('polyglot', 'useUniqueSalt') ? that.object.id : lang),
+                    'font': this.style.font,
+                    'converted': true
+                });
+            }
+
+            this.textContent = $(this).data('scramble');
+            this.style.font = MonksEnhancedJournal.polyglot._getFontStyle(lang);
+
+            $(this).hover(
+                function () {
+                    //hover in
+                    const lang = this.dataset.language;
+                    if (game.user.isGM || that.object.permission == CONST.ENTITY_PERMISSIONS.OWNER || that.known_languages.has(lang)) {
+                        this.textContent = $(this).data('text');
+                        this.style.font = $(this).data('font');
+                    }
+                },
+                function () {
+                    //hover out
+                    const lang = this.dataset.language;
+                    this.textContent = $(this).data('scramble');
+                    this.style.font = MonksEnhancedJournal.polyglot._getFontStyle(lang);
+                }
+            );*/
+
+
+
+            /*
+            else if (!userunes && $(this).data('converted')) {
+                this.textContent = $(this).data('text');
+                this.style.font = $(this).data('font');
+                $(this).data('converted', false)
+            }*/
+        });
+    }
+
+    /*
+     * let checklang = !game.user.isGM && this.object.permission < CONST.ENTITY_PERMISSIONS.OWNER;
+            let known_languages = new Set();
+            if (checklang)
+                [known_languages] = MonksEnhancedJournal.polyglot.getUserLanguages([game.user.character]);
+            let userunes = !game.user.isGM || (this.object && !this.object.ignore && (this.object.getFlag('monks-enhanced-journal', 'use-runes') != undefined ? this.object.getFlag('monks-enhanced-journal', 'use-runes') : setting('use-runes')));
+            if (userunes) {
+                $('span.polyglot-journal', this.element).each(function () {
+                    const lang = this.dataset.language;
+                    if (lang) {
+                        const known = known_languages.has(lang);
+                        if (checklang && known)
+                            return; //Do not show the runes if the language is known and it's not the GM
+
+                        $(this).data({ 'text': this.textContent, 'font': this.style.font, 'converted': true });
+                        this.textContent = MonksEnhancedJournal.polyglot.scrambleString(this.textContent, game.settings.get('polyglot', 'useUniqueSalt') ? that.object.id : lang);
+                        this.style.font = MonksEnhancedJournal.polyglot._getFontStyle(lang);
+                    }
+                });
+            }
+    */
+
     addPolyglotButton(ctrls) {
+        /*
         if (game.modules.get("polyglot")?.active) {
             let app = $(MonksEnhancedJournal.journal.element).closest('.app');
             let btn = $('.polyglot-button', app);
@@ -214,28 +305,11 @@ export class SubSheet {
                 ctrls.push({
                     id: 'polyglot',
                     text: 'Polyglot: ' + game.i18n.localize("POLYGLOT.ToggleRunes"),
-                    icon: (userunes ? 'fa-unlink' : 'fa-link'),
-                    callback: function () {
-                        userunes = !userunes;
-                        MonksEnhancedJournal.journal.object.setFlag('monks-enhanced-journal', 'use-runes', userunes);
-                        $('.nav-button.polyglot i', this.element).attr('class', 'fas ' + (userunes ? 'fa-unlink' : 'fa-link'));
-                        $('span.polyglot-journal', this.element).each(function () {
-                            const lang = this.dataset.language;
-                            if (!lang) return;
-                            if (userunes && !$(this).data('converted')) {
-                                $(this).data({ 'text': this.textContent, 'font': this.style.font, 'converted': true });
-                                this.textContent = MonksEnhancedJournal.polyglot.scrambleString(this.textContent, game.settings.get('polyglot', 'useUniqueSalt') ? that.object.id : lang);
-                                this.style.font = MonksEnhancedJournal.polyglot._getFontStyle(lang);
-                            } else if (!userunes && $(this).data('converted')) {
-                                this.textContent = $(this).data('text');
-                                this.style.font = $(this).data('font');
-                                $(this).data('converted', false)
-                            }
-                        });
-                    }
+                    icon: (userunes ? 'fa-link' : 'fa-unlink'),
+                    callback: this.renderPolyglot
                 });
             }
-        }
+        }*/
     }
 
     magnifyImage(event) {
@@ -401,6 +475,15 @@ export class EncounterSubSheet extends SubSheet {
                 $(event.currentTarget).parent().siblings('.item-received').html('');
             }
         });
+    }
+
+    refresh() {
+        const owner = this.object.isOwner;
+        const content = TextEditor.enrichHTML(this.object.data.content, { secrets: owner, entities: true });
+
+        $('.editor-content[data-edit="content"]').html(content);
+
+        super.refresh();
     }
 
     async addMonster(data) {
@@ -602,14 +685,11 @@ export class JournalEntrySubSheet extends SubSheet {
     }
 
     refresh() {
-        super.refresh();
-
         const owner = this.object.isOwner;
         const content = TextEditor.enrichHTML(this.object.data.content, { secrets: owner, entities: true });
 
         $('.editor-content[data-edit="content"]').html(content);
-
-        //MonksEnhancedJournal._imgcontext.bind();
+        super.refresh();
     }
 }
 
@@ -647,12 +727,11 @@ export class OrganizationSubSheet extends SubSheet {
     }
 
     refresh() {
-        super.refresh();
-
         const owner = this.object.isOwner;
         const content = TextEditor.enrichHTML(this.object.data.content, { secrets: owner, entities: true });
 
         $('.editor-content[data-edit="content"]', MonksEnhancedJournal.journal.element).html(content);
+        super.refresh();
     }
 }
 
@@ -693,12 +772,11 @@ export class PersonSubSheet extends SubSheet {
     }
 
     refresh() {
-        super.refresh();
-
         const owner = this.object.isOwner;
         const content = TextEditor.enrichHTML(this.object.data.content, { secrets: owner, entities: true });
 
         $('.editor-content[data-edit="content"]', MonksEnhancedJournal.journal.element).html(content);
+        super.refresh();
     }
 
     async addActor(data) {
@@ -804,12 +882,11 @@ export class PlaceSubSheet extends SubSheet {
     }
 
     refresh() {
-        super.refresh();
-
         const owner = this.object.isOwner;
         const content = TextEditor.enrichHTML(this.object.data.content, { secrets: owner, entities: true });
 
         $('.editor-content[data-edit="content"]', MonksEnhancedJournal.journal.element).html(content);
+        super.refresh();
     }
 }
 
@@ -864,6 +941,10 @@ export class QuestSubSheet extends SubSheet {
             data = mergeObject(data, convert);
         }
 
+        data.currency = Object.entries(CONFIG[game.system.id.toUpperCase()]?.currencies).map(([k, v]) => {
+            return {name: k, value: this.object.getFlag('monks-enhanced-journal', k) };
+        });
+
         return data;
     }
 
@@ -909,15 +990,20 @@ export class QuestSubSheet extends SubSheet {
                 $(event.currentTarget).parent().siblings('.item-received').html('');
             }
         });
+
+        $('.assign-xp', html).on('click', function (event) {
+            if (game.modules.get("monks-tokenbar")?.active && setting('rolling-module') == 'monks-tokenbar') {
+                game.MonksTokenBar.assignXP(null, { xp: that.object.getFlag('monks-enhanced-journal', 'xp') });
+            }
+        });
     }
 
     refresh() {
-        super.refresh();
-
         const owner = this.object.isOwner;
         const content = TextEditor.enrichHTML(this.object.data.content, { secrets: owner, entities: true });
 
         $('.editor-content[data-edit="content"]', MonksEnhancedJournal.journal.element).html(content);
+        super.refresh();
     }
 
     async addItem(data) {

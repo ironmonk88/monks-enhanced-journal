@@ -12,6 +12,8 @@
   "MonksEnhancedJournal.show-objectives.hint": "Show the current objectives when the notes tool is active",
   "MonksEnhancedJournal.use-runes.name": "Default Rune state",
   "MonksEnhancedJournal.use-runes.hint": "If using Polyglot, set the default state of runes in Journal Entry.",
+  "MonksEnhancedJournal.show-permissions.name": "Show player permissions",
+  "MonksEnhancedJournal.show-permissions.hint": "Show player permissions on the journal entry",
 
   "MonsEnhancedJournal.SlideConfiguration": "Slide Configuration",
   "MonsEnhancedJournal.DCConfiguration": "DC Configuration",
@@ -116,6 +118,8 @@
   "MonksEnhancedJournal.OrganizationName": "Organization Name",
   "MonksEnhancedJournal.Alignment": "Alignment",
   "MonksEnhancedJournal.Assigned": "Assigned",
+  "MonksEnhancedJournal.Additional": "Additional",
+  "MonksEnhancedJournal.Currency": "Currency",
 
   "MonksEnhancedJournal.Contain": "Contain",
   "MonksEnhancedJournal.Cover": "Cover",

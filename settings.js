@@ -44,4 +44,13 @@ export const registerSettings = function () {
 		default: true,
 		type: Boolean,
 	});
+
+	game.settings.register(modulename, "show-permissions", {
+		name: i18n("MonksEnhancedJournal.show-permissions.name"),
+		hint: i18n("MonksEnhancedJournal.show-permissions.hint"),
+		scope: "world",
+		config: true,
+		default: true,
+		type: Boolean,
+	});
 }

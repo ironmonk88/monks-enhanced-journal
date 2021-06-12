@@ -3,6 +3,18 @@ Fixed issue when deleted entries are loaded.
 
 Fixed issue when entries are created.
 
+Fixed issue with folder sizing in PF1
+
+Added option to assign XP with button
+
+Added option to see the player permissions on the directory
+
+Added currency option to quest
+
+Fixed up polyglot not updating properly
+
+Fixed issues with entity links reverting after saving the entry.
+
 # Version 1.0.9
 Fixed issue with player viewing encounter log while GM creates a new entry, that entry would appear in the players enhanced journal.
 

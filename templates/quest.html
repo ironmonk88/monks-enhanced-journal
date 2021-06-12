@@ -66,9 +66,29 @@
             </ol>
         </div>
         <div class="tab rewards flexcol active" data-group="primary" data-tab="rewards">
-            <div class="form-group">
-                <label>{{localize 'MonksEnhancedJournal.Experience'}}</label>
-                <input type="text" name="flags.monks-enhanced-journal.xp" placeholder="{{localize 'MonksEnhancedJournal.Experience'}}" value="{{flags.monks-enhanced-journal.xp}}" />
+            <div class="details" style="flex-grow:0;">
+                <div class="form-group">
+                    <label>{{localize 'MonksEnhancedJournal.Experience'}}</label>
+                    <div class="form-fields">
+                        <button type="button" class="assign-xp" title="Assign Experience" tabindex="-1">
+                            <i class="fas fa-book-medical fa-fw"></i>
+                        </button>
+                        <input type="text" name="flags.monks-enhanced-journal.xp" placeholder="{{localize 'MonksEnhancedJournal.Experience'}}" value="{{flags.monks-enhanced-journal.xp}}" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>{{localize 'MonksEnhancedJournal.Additional'}}</label>
+                    <input type="text" name="flags.monks-enhanced-journal.additional" placeholder="{{localize 'MonksEnhancedJournal.Additional'}}" value="{{flags.monks-enhanced-journal.additional}}" />
+                </div>
+                <div class="form-group">
+                    <label>{{localize 'MonksEnhancedJournal.Currency'}}</label>
+                    <div class="form-fields">
+                        {{#each currency}}
+                        <label>{{localize this.name}}</label>
+                        <input type="text" name="flags.monks-enhanced-journal.{{this.name}}" placeholder="0" value="{{this.value}}" />
+                        {{/each}}
+                    </div>
+                </div>
             </div>
             <ol class="items-list reward-items">
                 <li class="items-header flexrow">
@@ -116,6 +136,6 @@
                 <textarea name="flags.monks-enhanced-journal.{{userid}}.notes" style="width: calc(100% - 4px);height: calc(100% - 4px)">{{userdata.notes}}</textarea>
             </div>
         </div>
-    </section>
+</section>
     <!-- Picture, Name, Source, Task/Description, Completion, Reward(XP, Items), Notes, isSeen, isComplete-->
 </div>

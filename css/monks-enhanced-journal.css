@@ -602,7 +602,8 @@
     box-shadow: 0 0 8px red;
 }*/
 #journal .entity-name > i, #journal-directory .entity-name > i {
-    margin-right: 10px;
+    margin-right: 8px;
+    margin-left: 4px;
 } 
 
 .monks-enhanced-journal .picture-container{
@@ -1272,4 +1273,114 @@
 
 .monks-journal-sheet.sheet .items-list .item-assigned {
     text-align: center;
+}
+
+.monks-journal-sheet.pf1.journal-sheet .folder-header,
+.monks-journal-sheet.pf1.journal-sheet .subdirectory {
+    width: 100%;
+}
+
+.sidebar-tab.directory .directory-item.journal{
+    position:relative;
+}
+
+.sidebar-tab.directory .directory-item.journal .permissions {
+    background-color: rgba(0, 0, 0, 0.5);
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    font-size: 10px;
+    height: 20px;
+    padding: 2px 4px;
+    border-bottom-left-radius: 4px;
+    line-height: 14px;
+}
+
+#journal-directory .directory-item.journal .permissions {
+    background-color: rgba(255, 255, 255, 0.5);
+}
+
+.sidebar-tab.directory .directory-item.journal .permissions i {
+    font-size: 13px;
+    text-shadow: 1px 1px 3px #000;
+}
+
+.sidebar-tab.directory .directory-item.journal .permissions:empty {
+    display: none;
+}
+
+.sidebar-tab.directory .directory-item.journal .permissions div {
+    width: 14px;
+    height: 14px;
+    display: inline-block;
+    border-radius: 100%;
+    text-align: center;
+    color: #000;
+    font-weight: 700;
+    background: #97dff4;
+    border: 1px solid #000;
+    margin-right: 2px;
+    text-shadow: none;
+}
+
+.sidebar-tab.directory .directory-item.journal .permissions i + div,
+.sidebar-tab.directory .directory-item.journal .permissions i + i {
+    margin-left: 5px;
+}
+
+.sidebar-tab.directory .directory-item.folder .default-type {
+    flex: 0 0 20px;
+}
+
+.monks-journal-sheet.sheet button.assign-xp {
+    order: 99;
+}
+
+.monks-journal-sheet.sheet .editor-content .polyglot-container {
+    background-color: rgba(255, 180, 0, 0.25);
+    text-align: center;
+    display: inline-block;
+    margin-bottom: 2px;
+    position:relative;
+}
+
+.monks-journal-sheet.sheet .editor-content .polyglot-container:before {
+    display: none;
+    position: absolute;
+    bottom: 100%;
+    left: 4px;
+    content: attr(data-language);
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+    border: 1px solid #C0C0C0;
+    color: #ffffff;
+    background-color: rgba(0, 0, 0, 0.6);
+    padding: 1px 4px;
+    font-size: 10px;
+    min-width: 40px;
+}
+
+.monks-journal-sheet.sheet .editor-content .polyglot-container:hover:before{
+    display:block;
+}
+
+.monks-journal-sheet.sheet .editor-content .polyglot-container span.polyglot-journal {
+    background-color: transparent;
+}
+
+.monks-journal-sheet.sheet .editor-content .polyglot-container .polyglot-journal {
+    display: none;
+    position: absolute;
+    width: 100%;
+    top: 50%;
+    transform: translateY(-50%);
+    float: left;
+}
+
+.monks-journal-sheet.sheet .editor-content .polyglot-container.translate .polyglot-journal{
+    display:inline-block;
+}
+
+.monks-journal-sheet.sheet .editor-content .polyglot-container.translate .polyglot-scramble {
+    visibility: hidden;
 }

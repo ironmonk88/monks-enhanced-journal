@@ -135,7 +135,10 @@ export class EnhancedJournalSheet extends JournalSheet {
                 $('.entity-name', this).prepend($('<i>').addClass('fas fa-fw ' + icon));
             });*/
 
-            this.renderDirectory();
+            this.renderDirectory().then((html) => {
+                MonksEnhancedJournal.updateDirectory(html);
+            })
+            
         })
     }
 
@@ -163,6 +166,7 @@ export class EnhancedJournalSheet extends JournalSheet {
         let html = await renderTemplate(template, data);
         html = $(html);
 
+        /*
         $('.entity.journal', html).each(function () {
             let id = this.dataset.entityId;
             let entry = ui.journal.entities.find(e => e.id == id);
@@ -173,7 +177,37 @@ export class EnhancedJournalSheet extends JournalSheet {
 
             if (type == 'quest')
                 $(this).attr('status', entry.getFlag('monks-enhanced-journal', 'status'));
+
+            if (entry.data.permission.default > 0 || Object.keys(entry.data.permission).length > 1) {
+                let permissions = $('<div>').addClass('permissions');
+                if (entry.data.permission.default > 0)
+                    permissions.append($('<i>').addClass('fas fa-users').attr('title', 'Everyone'));
+                else {
+                    for (let [key, value] of Object.entries(entry.data.permission)) {
+                        let user = game.users.find(u => {
+                            return u.id == key && !u.isGM;
+                        });
+                        if (user != undefined && value > 0)
+                            permissions.append($('<div>').css({ backgroundColor: user.data.color }).html(user.name[0]).attr('title', user.name));
+                    }
+                }
+                $('h4', this).append(permissions);
+            }
         });
+
+        $('.folder', html).each(function () {
+            let id = this.dataset.folderId;
+            let folder = ui.journal.folders.find(e => e.id == id);
+
+            if (folder) {
+                let type = folder.getFlag('monks-enhanced-journal', 'defaulttype');
+                if (type && type != 'journalentry') {
+                    let icon = MonksEnhancedJournal.getIcon(type);
+
+                    $('<span>').addClass('default-type').html(`<i class="fas ${icon}"></i>`).insertBefore($('.create-folder', this));
+                }
+            }
+        });*/
 
         $('.sidebar', this.element).empty().append(html);
 
@@ -186,6 +220,8 @@ export class EnhancedJournalSheet extends JournalSheet {
         this.activateDirectoryListeners(html);
 
         this._restoreScrollPositions($('#journal-directory'));
+
+        return html;
     }
 
     activateEditor(name, options = {}, initialContent = "") {
@@ -213,7 +249,8 @@ export class EnhancedJournalSheet extends JournalSheet {
 
         $('.editor .editor-content', this.element).unmark();
 
-        super.activateEditor(name, options, initialContent);
+        if(this.editors[name] != undefined)
+            super.activateEditor(name, options, initialContent);
     }
 
     get id() {
@@ -600,7 +637,7 @@ export class EnhancedJournalSheet extends JournalSheet {
             else if (newtab === true) {
                 //the journal is getting created
                 //lets see if we can find  tab with this entity?
-                let tab = this.tabs.find(t => t.entityId == entity.data._id);
+                let tab = this.tabs.find(t => t.entityId == entity.id);
                 if (tab != undefined)
                     this.activateTab(tab);
                 else
