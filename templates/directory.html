@@ -1,7 +1,7 @@
 {{#*inline "folderPartial"}}
 <li class="directory-item folder flexcol {{#unless folder.expanded}}collapsed{{/unless}}"
     data-folder-id="{{folder.id}}" data-folder-depth="{{folder.depth}}">
-    <header class="folder-header flexrow" style="background-color: {{folder.data.color}}">
+    <header class="folder-header flexrow{{#if folder.data.color}} customcolor{{/if}}" {{#if folder.data.color}}style="background-color: {{folder.data.color}}"{{/if}}>
         <h3><i class="fas fa-folder-open fa-fw"></i>{{folder.name}}</h3>
         {{#if user.isGM}}
         <a class="create-folder" data-parent-folder="{{folder.id}}"><i class="fas fa-folder-plus fa-fw"></i></a>
@@ -9,7 +9,7 @@
         {{/if}}
     </header>
 
-    <ol class="subdirectory">
+    <ol class="subdirectory" {{#if folder.data.color}}style="border-left-color: {{folder.data.color}};border-bottom-color: {{folder.data.color}}"{{/if}}>
         {{~#each folder.children as |child i|}}
         {{> folderPartial folder=child user=../user}}
         {{/each}}

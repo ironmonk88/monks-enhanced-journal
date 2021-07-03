@@ -210,7 +210,7 @@ export class SubSheet {
             const lang = this.dataset.language;
             if (!lang) return;
 
-            let scramble = MonksEnhancedJournal.polyglot.scrambleString(this.textContent, game.settings.get('polyglot', 'useUniqueSalt') ? that.object.id : lang);
+            let scramble = MonksEnhancedJournal.polyglot.scrambleString(this.textContent, game.settings.get('polyglot', 'useUniqueSalt') ? that.object.id : lang, lang);
             let scrambleSpan = $('<span>').addClass('polyglot-scramble').css({ 'font': MonksEnhancedJournal.polyglot._getFontStyle(lang) }).html(scramble);
             $('<div>')
                 .addClass('polyglot-container')
@@ -667,7 +667,8 @@ export class JournalEntrySubSheet extends SubSheet {
             { id: 'search', type: 'input', text: i18n("MonksEnhancedJournal.SearchJournalEntry"), callback: MonksEnhancedJournal.journal.searchText },
             { id: 'show', text: i18n("MonksEnhancedJournal.ShowToPlayers"), icon: 'fa-eye', conditional: game.user.isGM, callback: MonksEnhancedJournal.journal.doShowPlayers },
             { id: 'edit', text: i18n("MonksEnhancedJournal.EditDescription"), icon: 'fa-pencil-alt', conditional: this.isEditable, callback: this.onEditDescription },
-            { id: 'convert', text: i18n("MonksEnhancedJournal.Convert"), icon: 'fa-clipboard-list', conditional: (game.user.isGM && this.isEditable), callback: MonksEnhancedJournal.journal.requestConvert }
+            { id: 'convert', text: i18n("MonksEnhancedJournal.Convert"), icon: 'fa-clipboard-list', conditional: (game.user.isGM && this.isEditable), callback: MonksEnhancedJournal.journal.requestConvert },
+            { id: 'split', text: i18n("MonksEnhancedJournal.Extract"), icon: 'fa-file-export', conditional: (game.user.isGM && this.isEditable), callback: MonksEnhancedJournal.journal.splitJournal }
         ];
         
         this.addPolyglotButton(ctrls);
@@ -1406,10 +1407,17 @@ export class SlideshowSubSheet extends SubSheet {
 
     advanceSlide(dir, event) {
         this.object.data.flags["monks-enhanced-journal"].slideAt = this.object.data.flags["monks-enhanced-journal"].slideAt + dir;
+
         if (this.object.data.flags["monks-enhanced-journal"].slideAt < 0)
             this.object.data.flags["monks-enhanced-journal"].slideAt = 0;
-        else if (this.object.data.flags["monks-enhanced-journal"].slideAt >= this.object.data.flags["monks-enhanced-journal"].slides.length)
-            this.stopSlideshow.call(MonksEnhancedJournal.journal);
+        else if (this.object.data.flags["monks-enhanced-journal"].slideAt >= this.object.data.flags["monks-enhanced-journal"].slides.length) {
+            if (this.object.data.flags["monks-enhanced-journal"].loop) {
+                this.object.data.flags["monks-enhanced-journal"].slideAt = 0;
+                this.playSlide(0, true);
+            }
+            else
+                this.stopSlideshow.call(MonksEnhancedJournal.journal);
+        }
         else
             this.playSlide(this.object.data.flags["monks-enhanced-journal"].slideAt, dir > 0);
     }

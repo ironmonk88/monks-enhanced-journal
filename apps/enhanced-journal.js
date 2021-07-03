@@ -108,6 +108,22 @@ export class EnhancedJournalSheet extends JournalSheet {
         return "text";
     }
 
+    render(force, options = {}) {
+        if (!this.object.compendium && !this.object.ignore && !this.object.testUserPermission(game.user, this.options.viewPermission)) {
+            if (!force) return; // If rendering is not being forced, fail silently
+            const err = game.i18n.localize("SHEETS.EntitySheetPrivate");
+            ui.notifications.warn(err);
+            return console.warn(err);
+        }
+
+        // Update editable permission
+        options.editable = options.editable ?? this.object.isOwner;
+
+        // Register the active Application with the referenced Documents
+        this.object.apps[this.appId] = this;
+        return this._render(force, options);
+    }
+
     _render(force, options = {}) {
         if (MonksEnhancedJournal.journal == undefined)
             MonksEnhancedJournal.journal = this;
@@ -134,6 +150,10 @@ export class EnhancedJournalSheet extends JournalSheet {
 
                 $('.entity-name', this).prepend($('<i>').addClass('fas fa-fw ' + icon));
             });*/
+
+            if (this.object?.id) { //this.subsheet == undefined || this.subsheet.object.id != this.object.id) {
+                this.open(this.object);
+            }
 
             this.renderDirectory().then((html) => {
                 MonksEnhancedJournal.updateDirectory(html);
@@ -225,6 +245,7 @@ export class EnhancedJournalSheet extends JournalSheet {
     }
 
     activateEditor(name, options = {}, initialContent = "") {
+        /*
         let editor = this.editors[name]
         if (editor?.options?.style_formats == undefined)
             options.style_formats = [...CONFIG.TinyMCE.style_formats];
@@ -234,8 +255,12 @@ export class EnhancedJournalSheet extends JournalSheet {
             let readaloud = custom.items.find(s => s.title == "Read Aloud");
             if(!readaloud)
                 custom.items.push({ block: "section", classes: "readaloud", title: "Read Aloud", wrapper: true });
-        }
+            //let readaloud2 = custom.items.find(s => s.title == "Read Aloud 2");
+            //if (!readaloud2)
+            //    custom.items.push({ block: "section", classes: "readaloud2", title: "Read Aloud 2", wrapper: true });
+        }*/
 
+        /*
         if (editor?.options?.content_css == undefined)
             options.content_css = [...CONFIG.TinyMCE.content_css];
 
@@ -245,12 +270,13 @@ export class EnhancedJournalSheet extends JournalSheet {
 
             if (game.modules.get("polyglot")?.active && options.content_css.find(c => c == 'modules/polyglot/css/polyglot.css') == undefined)
                 options.content_css.push('modules/polyglot/css/polyglot.css');
-        }
+        }*/
 
         $('.editor .editor-content', this.element).unmark();
 
-        if(this.editors[name] != undefined)
+        if (this.editors[name] != undefined) {
             super.activateEditor(name, options, initialContent);
+        }
     }
 
     get id() {
@@ -353,7 +379,7 @@ export class EnhancedJournalSheet extends JournalSheet {
         this.saveTabs();
     }
 
-    addTab(entity) {
+    addTab(entity, options = { activate: true }) {
         if (entity?.currentTarget != undefined)
             entity = null;
 
@@ -376,7 +402,11 @@ export class EnhancedJournalSheet extends JournalSheet {
             .append($('<div>').addClass('close').click(this.removeTab.bind(this, tab)).append($('<i>').addClass('fas fa-times')))
             .on('click', $.proxy(this.activateTab, this, tab))
             .insertBefore($('.tab-add', this.element));
-        this.activateTab(tab);  //activating the tab should save it
+
+        if (options.activate)
+            this.activateTab(tab);  //activating the tab should save it
+        else
+            this.saveTabs();
 
         return tab;
     }
@@ -684,6 +714,8 @@ export class EnhancedJournalSheet extends JournalSheet {
 
         }*/
 
+
+        //Fix the status
         if ((game.user.isGM || setting('allow-player')) && type == 'quest' && entity.getFlag("monks-enhanced-journal", "status") == undefined) {
             if (entity.getFlag("monks-enhanced-journal", "completed") === true)
                 entity.setFlag("monks-enhanced-journal", "status", 'completed');
@@ -694,7 +726,11 @@ export class EnhancedJournalSheet extends JournalSheet {
         }
 
         if (entity != undefined && entity.ignore != true) {
-            if (game.user.isGM || setting('allow-player'))
+            let pack = null;
+            if (entity.pack) {
+                pack = game.packs.get(entity.pack);
+            }
+            if ((game.user.isGM || setting('allow-player')) && (pack == undefined || !pack.locked))
                 entity.setFlag("monks-enhanced-journal", "_viewcount", (parseInt(entity.getFlag("monks-enhanced-journal", "_viewcount")) || 0) + 1);
             let recent = game.user.getFlag("monks-enhanced-journal", "_recentlyViewed") || [];
             recent.findSplice(e => e.id == entity.id || typeof e != 'object');
@@ -729,11 +765,15 @@ export class EnhancedJournalSheet extends JournalSheet {
     }
 
     expandSidebar() {
-
+        this._collapsed = false;
+        this.element.removeClass('collapse');
+        $('.sidebar-toggle i', this.element).removeClass('fa-caret-left').addClass('fa-caret-right');
     }
 
     collapseSidebar() {
-
+        this._collapsed = true;
+        this.element.addClass('collapse');
+        $('.sidebar-toggle i', this.element).removeClass('fa-caret-right').addClass('fa-caret-left');
     }
 
     _randomizePerson() {
@@ -769,6 +809,34 @@ export class EnhancedJournalSheet extends JournalSheet {
 
     convert(type) {
 
+    }
+
+    async splitJournal(event) {
+        let ctrl = window.getSelection().baseNode.parentNode;
+        //make sure this is editor content selected
+        if ($(ctrl).closest('div.editor-content').length > 0) {
+            let currentTab = this.tabs.active(false);
+            var selection = window.getSelection().getRangeAt(0);
+            var selectedText = selection.extractContents();
+            let selectedHTML = $('<div>').append(selectedText);
+            if (selectedHTML.html() != '') {
+                let title = $('h1,h2,h3,h4', selectedHTML).first().text() || 'Extracted Journal Entry';
+
+                //create a new Journal entry in the same folder as the current object
+                //set the content to the extracted text (selectedHTML.html()) and use the title
+                let data = { name: title, type: 'journalentry', content: selectedHTML.html(), folder: this.object.folder };
+                let newentry = await JournalEntry.create(data, { activate: false });
+
+                //add a new tab but don't switch to it
+                this.addTab(newentry, { activate: false });
+
+                //save the current entry and refresh to make sure everything is reset
+                await this.object.update({ content: $(ctrl).closest('div.editor-content').html() });
+            } else
+                ui.notifications.warn('Nothing selected');
+        } else {
+            ui.notifications.warn('No editor content selected');
+        }
     }
 
     _onDragStart(event) {
@@ -877,6 +945,9 @@ export class EnhancedJournalSheet extends JournalSheet {
                 this.form = $('.monks-enhanced-journal .body > .content form', this.element).get(0);
 
             const formData = expandObject(this._getSubmitData());
+
+            if (Object.keys(formData).length == 0)
+                return;
 
             if (this.entitytype == 'quest') {
                 $(`li[data-entity-id="${this.object.id}"]`, '#journal,#journal-directory').attr('status', formData.flags['monks-enhanced-journal'].status);
@@ -1187,7 +1258,7 @@ export class EnhancedJournalSheet extends JournalSheet {
     }
 
     activateDirectoryListeners(html) {   
-        $('.sidebar-toggle', html).on('click', function () { if (this._collapsed) this.expandSidebar(); else this.collapseSidebar(); });
+        $('.sidebar-toggle', html).on('click', function () { if (MonksEnhancedJournal.journal._collapsed) MonksEnhancedJournal.journal.expandSidebar(); else MonksEnhancedJournal.journal.collapseSidebar(); });
 
         ui.journal._contextMenu.call(ui.journal, html);
 
@@ -1220,7 +1291,7 @@ export class EnhancedJournalSheet extends JournalSheet {
 
         this._contextMenu(html);
 
-        $('.sidebar-toggle', html).on('click', function () { if (this._collapsed) this.expandSidebar(); else this.collapseSidebar(); });
+        $('.sidebar-toggle', html).on('click', function () { if (MonksEnhancedJournal.journal._collapsed) MonksEnhancedJournal.journal.expandSidebar(); else MonksEnhancedJournal.journal.collapseSidebar(); });
 
         html.find('.add-bookmark').click(this.addBookmark.bind(this));
         html.find('.bookmark-button:not(.add-bookmark)').click(this.activateBookmark.bind(this));

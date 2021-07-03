@@ -9,10 +9,16 @@
     height: 100%;
     background: url(../../../ui/parchment.jpg) repeat;
     border-left: 1px solid rgba(0, 0, 0, 0.1);
+    transition: width 0.5s, flex 0.5s;
 }
 
-.monks-enhanced-journal .body{
-    height:100%;
+.monks-journal-sheet.collapse .monks-enhanced-journal .sidebar {
+    flex: 0 0 0px;
+    width: 0px;
+}
+
+.monks-enhanced-journal .body {
+    height: 100%;
 }
 
 .monks-enhanced-journal .content {
@@ -43,6 +49,15 @@
     overflow: hidden;
 }*/
 
+.monks-enhanced-journal .tab-bar {
+    position: relative;
+    transition: padding-right 0.5s;
+}
+
+.monks-journal-sheet.collapse .monks-enhanced-journal .tab-bar {
+    padding-right: 30px;
+}
+
 .monks-enhanced-journal .tab-bar .journal-tab {
     max-width: 150px;
     height: 100%;
@@ -58,7 +73,7 @@
     text-overflow: ellipsis;
     white-space: nowrap;
     cursor: pointer;
-    flex-wrap:nowrap;
+    flex-wrap: nowrap;
 }
 
 .monks-enhanced-journal .tab-bar .journal-tab.active,
@@ -81,10 +96,29 @@
     text-shadow: 0 0 8px red;
 }
 
+.monks-enhanced-journal .tab-bar .tab-button.sidebar-toggle {
+    float: left;
+    position: absolute;
+    top: 3px;
+    right: -34px;
+    font-size: 20px;
+    width: 30px;
+    transition: right 0.5s;
+}
+
+.monks-journal-sheet.collapse .monks-enhanced-journal .tab-bar .tab-button.sidebar-toggle {
+    right: 0px;
+    top: 0px;
+}
+
+.monks-enhanced-journal .sidebar-directory .action-buttons {
+    padding-left: 30px;
+}
+
 .monks-enhanced-journal .tab-bar .journal-tab .tab-content {
     overflow: hidden;
     text-overflow: ellipsis;
-    white-space:nowrap;
+    white-space: nowrap;
 }
 
 .monks-enhanced-journal .tab-bar .journal-tab:hover {
@@ -172,7 +206,12 @@
 
 .monks-enhanced-journal .mainbar .navigation .nav-input {
     margin-right: 4px;
-    margin-top: 2px;
+    margin-top: 1px;
+}
+
+.monks-enhanced-journal .mainbar .navigation .nav-input:focus {
+    background: rgba(255, 255, 240, 0.8);
+    border: 1px solid #C0C0C0;
 }
 
 .monks-enhanced-journal .mainbar .navigation .nav-text {
@@ -211,8 +250,9 @@
     padding: 0px;
 }
 
+.journal-sheet .monks-enhanced-journal .content[entity-type="oldentry"] form,
 .journal-sheet .monks-enhanced-journal .content[entity-type="journalentry"] form {
-    padding:0px 8px;
+    padding: 0px 8px;
 }
 
 .journal-sheet .monks-enhanced-journal .content[entity-type="actor"] form {
@@ -287,19 +327,34 @@
 }
 
 #journal-directory li.folder:not(.collapsed) > .folder-header {
-    background: rgba(0, 0, 0, 0.3);
+    background: rgba(0, 0, 0, 0.4);
 }
 
-#journal-directory li.folder .folder-header h3,
+/*#journal-directory li.folder .folder-header h3,
 #journal-directory li.folder > .folder-header .create-folder,
 #journal-directory li.folder > .folder-header .create-entity {
     color: #333;
-}
+}*/
 
 #journal-directory li.folder > .folder-header,
 #journal-directory li.folder.collapsed > .folder-header {
     border-top: 1px solid rgba(0, 0, 0, 0.1);
     border-bottom: none;
+}
+
+#journal-directory li.folder.collapsed > .folder-header:not(.customcolor),
+#journal-directory li.folder.collapsed > .folder-header .create-folder,
+#journal-directory li.folder.collapsed > .folder-header .create-entity {
+    color: #333;
+}
+
+#journal-directory li.folder.collapsed .folder-header.customcolor {
+    color: #FFF;
+}
+
+#journal-directory li.folder.collapsed > .folder-header.customcolor .create-folder,
+#journal-directory li.folder.collapsed > .folder-header.customcolor .create-entity {
+    color: #CCC;
 }
 
 #journal-directory .subdirectory {
@@ -1008,8 +1063,10 @@
     display:none;
 }
 
-.monks-journal-sheet .directory .directory-header .header-search input{
+.monks-journal-sheet .directory .directory-header .header-search input {
     height: 26px;
+    border: 1px solid #c0c0c0;
+    background: rgba(255, 255, 240, 0.8);
 }
 
 .monks-journal-sheet .directory .directory-header .header-actions button{
@@ -1383,4 +1440,118 @@
 
 .monks-journal-sheet.sheet .editor-content .polyglot-container.translate .polyglot-scramble {
     visibility: hidden;
+}
+
+.journal-select {
+    position: relative;
+    width: 100%;
+    height: 27px;
+    background: rgba(0, 0, 0, 0.05);
+    border: 1px solid #7a7971;
+    border-radius: 3px;
+    padding: 0 3px;
+    text-overflow: ellipsis;
+}
+
+.journal-select:focus {
+    box-shadow: 0 0 5px #FF0000;
+    outline: none;
+}
+/*
+.journal-select:after {
+    content: "\f078";
+    position: absolute;
+    right: 0px;
+    top: 0px;
+    font-family: "Font Awesome 5 Free";
+    -webkit-font-smoothing: antialiased;
+    display: inline-block;
+    font-style: normal;
+    font-variant: normal;
+    text-rendering: auto;
+    height: 100%;
+    width: 20px;
+    text-align: center;
+    line-height: 24px;
+}*/
+
+.journal-select > div > span {
+    line-height: 26px !important;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    display:inline-block;
+}
+
+.journal-select > div > i {
+    flex: 0 0 12px;
+    text-align: center;
+    line-height: 24px;
+    font-size: 11px;
+    color: #000;
+}
+
+.journal-select ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.journal-list {
+    display: none;
+    max-height: 300px;
+    overflow-y: auto;
+    margin: 0px 5px;
+    position: absolute;
+    float: left;
+    left:0px;
+    top: 100%;
+    background: url(../../../ui/parchment.jpg) repeat;
+    border: 1px solid #808080;
+    width: 100%;
+    border-bottom-right-radius: 5px;
+    border-bottom-left-radius: 5px;
+}
+
+.journal-select.open .journal-list{
+    display:block;
+}
+
+.journal-list .journal-item .journal-title {
+    padding: 4px;
+    cursor: pointer;
+    min-height: 25px;
+    width: 100%;
+    overflow-x: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.journal-list .journal-item:not(.folder):hover,
+.journal-list .journal-item.selected {
+    background-color: #1e90ff;
+    color: #FFF;
+}
+
+.journal-list .journal-item.folder > .journal-title {
+    background: rgba(0, 0, 0, 0.1);
+    font-weight: bold;
+}
+
+.journal-list .journal-item.folder > .journal-title:hover {
+    background: rgba(0, 0, 0, 0.3);
+}
+
+.journal-list .subfolder {
+    border-left: 4px solid #C0C0C0;
+    border-bottom: 4px solid #C0C0C0;
+}
+
+.journal-list .subfolder .journal-item{
+    padding-left: 5px;
+}
+
+.journal-list .journal-item.folder.collapse > ul {
+    display: none;
 }

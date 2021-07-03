@@ -80,6 +80,44 @@ export class MonksEnhancedJournal {
         game.system.entityTypes.JournalEntry = Object.keys(types);
         CONFIG.JournalEntry.typeLabels = MonksEnhancedJournal.getTypeLabels();
 
+        CONFIG.TinyMCE.content_css.push('modules/monks-enhanced-journal/css/editor.css');
+        CONFIG.TinyMCE.content_css.push('modules/polyglot/css/polyglot.css');
+
+        CONFIG.TinyMCE.style_formats[0].items.push({ block: "section", classes: "readaloud", title: "Read Aloud", wrapper: true });
+
+        CONFIG.JournalEntry.noteIcons = mergeObject(CONFIG.JournalEntry.noteIcons, {
+            "One": "modules/monks-enhanced-journal/assets/tile_1.png"
+        });
+
+        /*
+        let noteOptions = NoteConfig.defaultOptions;
+        Object.defineProperty(NoteConfig, 'defaultOptions', {
+            get: function () {
+                noteOptions.template = "modules/monks-enhanced-journal/templates/note-config.html";
+                return noteOptions;
+            }
+        });
+
+        let oldGetData = NoteConfig.prototype.getData;
+        NoteConfig.prototype.getData = function (options) {
+            let data = oldGetData.call(this, options);
+
+            function getFolders(folders) {
+                return folders.sort((a, b) => { return a.data.sort < b.data.sort ? -1 : a.data.sort > b.data.sort ? 1 : 0; }).map(f => {
+                    let entries = f.content.map(e => { return { key: e.id, name: e.name } });
+                    let folders = getFolders(f.children);
+                    return { text: f.name, folders: folders, entries: entries };
+                });
+            }
+
+            let folders = getFolders(game.journal.directory.folders.filter(f => f.parentFolder == null));
+            let entries = game.journal.contents.filter(j => j.folder == null).map(j => { return { key: j.id, name: j.name } });
+
+            data.entries = { folders: folders, entries: entries };
+
+            return data;
+        }*/
+
         const oldOnClickEntityName = JournalDirectory._onClickEntityName;
         function onClickEntityName(event) {
             event.preventDefault();
@@ -152,7 +190,7 @@ export class MonksEnhancedJournal {
 
             // Action 2 - Render the Entity sheet
             if (document.documentName == 'Actor' || document.documentName == 'JournalEntry')
-                return MonksEnhancedJournal.openJournalEntry(document, { newtab: event.shiftKey });
+                return MonksEnhancedJournal.openJournalEntry(document, { newtab: event.ctrlKey });
             else
                 return document.sheet.render(true);
         }
@@ -557,7 +595,7 @@ Hooks.on("preCreateJournalEntry", (entry, data, options, userId) => {
 });
 
 Hooks.on("createJournalEntry", (entry, options, userId) => {
-    if (MonksEnhancedJournal.journal && userId == game.user.id) {
+    if (MonksEnhancedJournal.journal && userId == game.user.id && options.activate !== false) {
         //open this item in a new tab
         if (!MonksEnhancedJournal.journal.rendered) {
             //allow the journal to load before opening, so that activatelisteners could be called
@@ -615,3 +653,47 @@ Hooks.on("renderFolderConfig", (app, html, options) => {
 
     $(html).css({height: $(html).height() + 30});
 });*/
+
+Hooks.on('renderNoteConfig', (app, html, data) => {
+    let ctrl = $('select[name="entryId"]', html);
+
+    function selectItem(event) {
+        event.preventDefault();
+        event.stopPropagation();
+        $('[name="entryId"]', html).val(this.id);
+        $('.journal-select > div > span').html(this.name);
+        $('.journal-select').removeClass('open');
+    }
+
+    function getFolders(folders) {
+        return folders.sort((a, b) => { return a.data.sort < b.data.sort ? -1 : a.data.sort > b.data.sort ? 1 : 0; }).map(f => {
+            return $('<li>').addClass('journal-item folder flexcol collapse').append($('<div>').addClass('journal-title').html(f.name)).append(
+                $('<ul>')
+                    .addClass('subfolder')
+                    .append(getFolders(f.children))
+                    .append(f.content
+                        .sort((a, b) => { return a.data.sort < b.data.sort ? -1 : a.data.sort > b.data.sort ? 1 : 0; })
+                        .map(e => { return $('<li>').addClass('journal-item flexrow').toggleClass('selected', app.object.data.entryId == e.id).attr('id', e.id).html($('<div>').addClass('journal-title').html(e.name)).click(selectItem.bind(e)) })))
+                .click(function (event) { event.preventDefault(); event.stopPropagation(); $(this).toggleClass('collapse'); });
+        });
+    }
+
+    ctrl.hide();
+
+    $('<div>')
+        .addClass('journal-select')
+        .attr('tabindex', '0')
+        .append($('<div>').addClass('flexrow').css({ font: ctrl.css('font') }).append($('<span>').html(data.entry.name)).append($('<i>').addClass('fas fa-chevron-down')))
+        .append($('<ul>')
+            .addClass('journal-list')
+            .append($('<li>').addClass('journal-item flexrow').toggleClass('selected', app.object.data.entryId == '').attr('id', '').html($('<div>').addClass('journal-title').html('')).click(selectItem.bind({id:'', name:''})))
+            .append(getFolders(game.journal.directory.folders.filter(f => f.parentFolder == null)))
+            .append(game.journal.contents
+                .filter(j => j.folder == null)
+                .sort((a, b) => { return a.data.sort < b.data.sort ? -1 : a.data.sort > b.data.sort ? 1 : 0; })
+                .map(j => { return $('<li>').addClass('journal-item').attr('id', j.id).html($('<div>').addClass('journal-title').html(j.name)).click(selectItem.bind(j)); })))
+        .focus(function () { $(this).addClass('open') })
+        .blur(function () { $(this).removeClass('open') })
+        .click(function () { $(this).addClass('open') })
+        .insertAfter(ctrl);
+});

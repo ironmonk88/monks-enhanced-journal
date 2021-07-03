@@ -10,6 +10,8 @@
                     {{ selectOptions showasOptions selected=flags.monks-enhanced-journal.showas }}
                 </select>
             </div>
+            <label style="padding-left:20px;">{{localize 'MonksEnhancedJournal.Loop'}}</label>
+            <input type="checkbox" name="flags.monks-enhanced-journal.loop" {{checked flags.monks-enhanced-journal.loop}}>
         </div>
         <div class="form-group" style="flex: 0 0 30px;">
             <label for="audiofile">{{localize 'MonksEnhancedJournal.AudioFile'}}</label>

@@ -1,3 +1,25 @@
+# Version 1.0.12
+
+Fixed issue with Scene Linked entry not opening properly.
+
+Fixed compatibility with quick insert
+
+Added collapsable right menu
+
+Added option to add tab without activating it.
+
+Fixed issue where opening an item from a locked compendium pack would thorw an error
+
+Added option to extract text from a journal entry into a new journal entry.  Kinda like what Furnace did with splitting a journal, but you have to select the text in Enhanced Journal.
+
+Added option to loop a slideshow
+
+Updated the colours for the journal directory so that custom directory colours have better readable text
+
+Updated the journal entry dropdown for notes dropped on the canvas.  Before it was just a random jumble, now it's a list that works similar to the sidebar directory list.
+
+Changed the "open in new tab" from shift click, to ctrl click, as shift click was highlighting text
+
 # Version 1.0.11
 Added option to see the player permissions on the directory
 
