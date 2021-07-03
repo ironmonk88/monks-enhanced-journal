@@ -1,3 +1,7 @@
+# Version 1.0.14
+
+Added support for Collapsible Journal Sections.
+
 # Version 1.0.12
 
 Fixed issue with Scene Linked entry not opening properly.

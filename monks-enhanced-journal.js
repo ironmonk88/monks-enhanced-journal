@@ -85,9 +85,10 @@ export class MonksEnhancedJournal {
 
         CONFIG.TinyMCE.style_formats[0].items.push({ block: "section", classes: "readaloud", title: "Read Aloud", wrapper: true });
 
+        /*
         CONFIG.JournalEntry.noteIcons = mergeObject(CONFIG.JournalEntry.noteIcons, {
             "One": "modules/monks-enhanced-journal/assets/tile_1.png"
-        });
+        });*/
 
         /*
         let noteOptions = NoteConfig.defaultOptions;
@@ -561,7 +562,7 @@ Hooks.on("renderJournalDirectory", async (app, html, options) => {
     MonksEnhancedJournal.updateDirectory(html);
 });
 
-Hooks.on("renderJournalSheet", (app, html) => {
+Hooks.on("renderJournalSheet", (app, html, data) => {
     html.closest('.app').find('.polyglot-button').hide();
 });
 

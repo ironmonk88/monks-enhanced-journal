@@ -718,11 +718,11 @@ export class EnhancedJournalSheet extends JournalSheet {
         //Fix the status
         if ((game.user.isGM || setting('allow-player')) && type == 'quest' && entity.getFlag("monks-enhanced-journal", "status") == undefined) {
             if (entity.getFlag("monks-enhanced-journal", "completed") === true)
-                entity.setFlag("monks-enhanced-journal", "status", 'completed');
+                await entity.setFlag("monks-enhanced-journal", "status", 'completed');
             else if (entity.getFlag("monks-enhanced-journal", "seen") === true)
-                entity.setFlag("monks-enhanced-journal", "status", 'available');
+                await entity.setFlag("monks-enhanced-journal", "status", 'available');
             else
-                entity.setFlag("monks-enhanced-journal", "status", 'inactive');
+                await entity.setFlag("monks-enhanced-journal", "status", 'inactive');
         }
 
         if (entity != undefined && entity.ignore != true) {
@@ -731,13 +731,13 @@ export class EnhancedJournalSheet extends JournalSheet {
                 pack = game.packs.get(entity.pack);
             }
             if ((game.user.isGM || setting('allow-player')) && (pack == undefined || !pack.locked))
-                entity.setFlag("monks-enhanced-journal", "_viewcount", (parseInt(entity.getFlag("monks-enhanced-journal", "_viewcount")) || 0) + 1);
+                await entity.setFlag("monks-enhanced-journal", "_viewcount", (parseInt(entity.getFlag("monks-enhanced-journal", "_viewcount")) || 0) + 1);
             let recent = game.user.getFlag("monks-enhanced-journal", "_recentlyViewed") || [];
             recent.findSplice(e => e.id == entity.id || typeof e != 'object');
             recent.unshift({ id: entity.id, name: entity.name, type: entity.getFlag("monks-enhanced-journal", "type") });
             if (recent.length > 5)
                 recent = recent.slice(0, 5);
-            game.user.setFlag("monks-enhanced-journal", "_recentlyViewed", recent);
+            await game.user.setFlag("monks-enhanced-journal", "_recentlyViewed", recent);
         }
 
         let subsheet = types[type] || JournalEntrySubSheet;
@@ -749,9 +749,11 @@ export class EnhancedJournalSheet extends JournalSheet {
         this.searchpos = 0;
 
         $('.content', this.element).attr('entity-type', type).attr('entity-id', this.object.id);
-        $('.content form', this.element).empty().append(this.subdocument);
+        let contentform = $('.content form', this.element);
+        contentform.empty().append(this.subdocument);
 
-        Hooks.callAll('displaySubSheet', this, this.object, this.subdocument);
+        Hooks.callAll('renderJournalSubSheet', this, contentform, this.object);
+        Hooks.callAll('renderJournalSheet', this, contentform, this.object);
 
         this.subsheet.activateControls($('#journal-buttons', this.element).empty());
         if (game.modules.get("polyglot")?.active) {
