@@ -145,8 +145,17 @@ export class MonksEnhancedJournal {
 
         Journal.prototype.constructor._showEntry = MonksEnhancedJournal._showEntry;
 
-        Note.prototype._onClickLeft2 = function (event) {
+        let clickNote = function (wrapped, ...args) {
             if (this.entry) MonksEnhancedJournal.openJournalEntry(this.entry);
+        }
+
+        if (game.modules.get("lib-wrapper")?.active) {
+            libWrapper.register("monks-enhanced-journal", "Note.prototype._onClickLeft2", clickNote, "OVERRIDE");
+        } else {
+            const oldClickNote = Note.prototype._onClickLeft2;
+            Note.prototype._onClickLeft2 = function (event) {
+                return clickNote.call(this, oldClickNote.bind(this));
+            }
         }
 
         //let oldClickContentLink = TextEditor.prototype.constructor._onClickContentLink;

@@ -1,3 +1,7 @@
+# Version 1.0.15
+
+Fixed conflict with Collapsible Journal Sections that prevented notes from being opened.
+
 # Version 1.0.14
 
 Added support for Collapsible Journal Sections.
