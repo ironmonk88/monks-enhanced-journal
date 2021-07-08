@@ -292,9 +292,14 @@
     margin: 0 0.25em;
 }
 
+#journal li.journal[status] .entity-name i,
+#journal-directory li.journal[status] .entity-name i{
+    margin-left:1px;
+}
+
 #journal li.journal[status] .entity-name,
 #journal-directory li.journal[status] .entity-name {
-    border-left: 0.25em solid #808080;
+    border-left: 0.45em solid #808080;
     margin-left: 0px;
 }
 
@@ -1554,4 +1559,16 @@
 
 .journal-list .journal-item.folder.collapse > ul {
     display: none;
+}
+
+.select-player .options {
+    margin: 0px -7px;
+    padding: 5px 7px;
+    background-color: rgba(255, 255, 255, 0.5);
+}
+
+.select-player .user-list {
+    border-top: 2px groove #eeede0;
+    margin-top: 0px;
+    padding-top: 5px;
 }

@@ -39,7 +39,9 @@ export class EnhancedJournalSheet extends JournalSheet {
         if (MonksEnhancedJournal.journal == undefined)
             MonksEnhancedJournal.journal = this;
 
-        this.sheettabs = new Tabs({ navSelector: ".tabs", contentSelector: ".sheet-body", initial: "description", callback: function () { } });
+        log('creating journal', this.appId, MonksEnhancedJournal.journal.appId);
+
+        //this.sheettabs = new Tabs({ navSelector: ".tabs", contentSelector: ".sheet-body", initial: "description", callback: function () { } });
 
         //this.dirDrag = this._createDragDropHandlers();
     }
@@ -125,45 +127,41 @@ export class EnhancedJournalSheet extends JournalSheet {
     }
 
     _render(force, options = {}) {
-        if (MonksEnhancedJournal.journal == undefined)
-            MonksEnhancedJournal.journal = this;
+        log('rendering journal', this.appId);
+        if (MonksEnhancedJournal.journal == undefined || !MonksEnhancedJournal.journal.rendered) {
+            //brand new journal
+            MonksEnhancedJournal.journal = (MonksEnhancedJournal.journal || this);
+            return super._render(force, options).then(() => {
+                this.renderDirectory().then((html) => {
+                    MonksEnhancedJournal.updateDirectory(html);
+                })
 
-        if (options.action != 'create' && (options.data || MonksEnhancedJournal.journal._element != null)) {
-            return new Promise((resolve, reject) => {
-                if (this.subsheet != undefined)
-                    this.subsheet.refresh();
-
-                if (this.form == undefined)
-                    this.form = $('.monks-enhanced-journal .body > .content form', this.element).get(0);
-                //this is an entity update, but we don't want to update the entire window because of it.
-                //this.display(this.object); //+++is this needed?
-            });
-        }
-
-        return super._render(force, options).then(() => {
-            /*
-            $('#journal-directory .entity.journal', this.element).each(function () {
-                let id = this.dataset.entityId;
-                let entry = ui.journal.entities.find(e => e.id == id);
-                let type = entry.getFlag('monks-enhanced-journal', 'type');
-                let icon = MonksEnhancedJournal.getIcon(type);
-
-                $('.entity-name', this).prepend($('<i>').addClass('fas fa-fw ' + icon));
-            });*/
-
-            if (this.object?.id) { //this.subsheet == undefined || this.subsheet.object.id != this.object.id) {
-                this.open(this.object);
-            }
-
-            this.renderDirectory().then((html) => {
-                MonksEnhancedJournal.updateDirectory(html);
             })
-            
-        })
+        } else {
+            //journal is already open
+            //if (options.action != 'create' && (options.data || MonksEnhancedJournal.journal._element != null)) {
+            if (this.appId != MonksEnhancedJournal.journal.appId)
+                this.close();
+
+            if (MonksEnhancedJournal.journal.object?.id != this.object.id) {
+                if (options.action == 'create')
+                    MonksEnhancedJournal.journal.addTab(this.object, { activate: false });
+                else
+                    return MonksEnhancedJournal.journal.open(this.object);
+            } else {
+                return new Promise((resolve, reject) => {
+                    if (this.subsheet != undefined)
+                        this.subsheet.refresh();
+
+                    if (this.form == undefined)
+                        this.form = $('.monks-enhanced-journal .body > .content form', this.element).get(0);
+                });
+            }
+        }
     }
 
     async _renderInner(...args) {
-        log('render inner:', ...args);
+        log('render inner:', this.appID, ...args);
         return super._renderInner(...args);
     }
 
@@ -313,11 +311,16 @@ export class EnhancedJournalSheet extends JournalSheet {
 
     async close(options) {
         if (options?.submit !== false) {
-            MonksEnhancedJournal.journal = null;
-            //const states = Application.RENDER_STATES;
-            //this.directory._state = states.CLOSED;
-            //delete ui.windows[this.directory.appId];
-            super.close(options);
+            if (MonksEnhancedJournal.journal.appId == this.appId) {
+                if ($('div.tox-tinymce[role="application"]', this.element).length) {
+                    if (!confirm('You have unsaved changes, are you sure you want to close this window?'))
+                        return false;
+                }
+
+                MonksEnhancedJournal.journal = null;
+            }
+            log('closing journal', this.appId);
+            return super.close(options);
         }
     }
 
@@ -412,6 +415,11 @@ export class EnhancedJournalSheet extends JournalSheet {
     }
 
     async activateTab(tab, event) {
+        if ($('div.tox-tinymce[role="application"]', this.element).length) {
+            if (!confirm('You have unsaved changes, are you sure you want to close this window?'))
+                return;
+        }
+
         if (tab == undefined)
             tab = this.addTab();
 
@@ -510,9 +518,11 @@ export class EnhancedJournalSheet extends JournalSheet {
         if (this.tabs.length == 0)
             this.addTab();
         else {
-            let nextIdx = (idx >= this.tabs.length ? idx - 1 : idx);
-            if (!this.activateTab(nextIdx))
-                this.saveTabs();
+            if (tab.active) {
+                let nextIdx = (idx >= this.tabs.length ? idx - 1 : idx);
+                if (!this.activateTab(nextIdx))
+                    this.saveTabs();
+            }
         }
 
         if (event != undefined)
@@ -673,7 +683,10 @@ export class EnhancedJournalSheet extends JournalSheet {
                 else
                     this.addTab(entity);
             } else {
-                this.updateTab(this.tabs.active(), entity);
+                if ($('div.tox-tinymce[role="application"]', this.element).length)
+                    this.addTab(entity, { activate: false}); //If we're editing, then open in a new tab but don't activate
+                else
+                    this.updateTab(this.tabs.active(), entity);
             }
         }
     }
@@ -730,7 +743,7 @@ export class EnhancedJournalSheet extends JournalSheet {
             if (entity.pack) {
                 pack = game.packs.get(entity.pack);
             }
-            if ((game.user.isGM || setting('allow-player')) && (pack == undefined || !pack.locked))
+            if ((game.user.isGM || setting('allow-player')) && entity.isOwner && (pack == undefined || !pack.locked)) 
                 await entity.setFlag("monks-enhanced-journal", "_viewcount", (parseInt(entity.getFlag("monks-enhanced-journal", "_viewcount")) || 0) + 1);
             let recent = game.user.getFlag("monks-enhanced-journal", "_recentlyViewed") || [];
             recent.findSplice(e => e.id == entity.id || typeof e != 'object');
@@ -763,7 +776,7 @@ export class EnhancedJournalSheet extends JournalSheet {
             }
         }
         //}
-        log('Open entity', entity);
+        log('Open entity', this.appId, entity);
     }
 
     expandSidebar() {
@@ -1050,7 +1063,8 @@ export class EnhancedJournalSheet extends JournalSheet {
         else if (event.ctrlKey)
             this._onShowPlayers(this.object, null, { showpic: true }, event);
         else {
-            new SelectPlayer(this.object, { showpic: $('.fullscreen-image', this.element).is(':visible')}).render(true);
+            let type = this.entitytype;
+            new SelectPlayer(this.object, { showpic: $('.fullscreen-image', this.element).is(':visible') || ((type == 'journalentry' || type == 'oldentry') && $('.tab.picture', this.element).hasClass('active') )}).render(true);
         }
     }
 

@@ -9,7 +9,7 @@
     </nav>
     <section class="sheet-body">
         <div class="tab description flexcol active" data-group="primary" data-tab="description">
-            {{editor target="content" content=content editable=true button=true}}
+            {{editor target="content" content=content editable=true button=true owner=owner}}
         </div>
         <div class="tab picture flexrow active" data-group="primary" data-tab="picture">
             <img class="picture-img" src="{{img}}" data-edit="img" onerror="$(this).css({opacity:0});" />

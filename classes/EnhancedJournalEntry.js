@@ -47,6 +47,8 @@ export class SubSheet {
         data.entrytype = this.type;
         data.description = data.content;
 
+        data.owner = this.object.isOwner;
+
         return data;
     }
 
@@ -576,7 +578,7 @@ export class EncounterSubSheet extends SubSheet {
         let target = event.currentTarget;
         let li = target.closest('li');
         event.currentTarget = li;
-        TextEditor._onClickEntityLink(event);
+        TextEditor._onClickContentLink(event);
     }
 
     _deleteItem(event) {

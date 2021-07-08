@@ -1,3 +1,23 @@
+# Version 1.0.16
+
+Fixed issue with rendering of the journal.
+
+Added check to see if the journal entry is being edited before allowing the tab to change.
+
+When removing tab that isn't the active one, don't switch to a new tab.
+
+Fixed issue when players that are allowed to use the full journal open an entry they can view.
+
+Allow Journal Entry to share to players as just a picture.
+
+Fixed an issue with a command change in Foundry. _onClickEntityLink to _onClickContentLink.
+
+Increased the width of the quest status bar.
+
+Fixed issue with spelling mistake when getting a setting.
+
+Fixed issue with secret comments not being displayed properly.
+
 # Version 1.0.15
 
 Fixed conflict with Collapsible Journal Sections that prevented notes from being opened.

@@ -132,7 +132,7 @@ export class MonksEnhancedJournal {
 
         let oldRenderPopout = JournalDirectory.prototype.renderPopout;
         JournalDirectory.prototype.renderPopout = function () {
-            if (game.user.isGM || setting('allow-players')) {
+            if (game.user.isGM || setting('allow-player')) {
                 let entry = new JournalEntry({ name: 'temporary' }); //new JournalEntryData({name:'temporary'})
                 let ejs = new EnhancedJournalSheet(entry);
                 ejs._render(true).then(() => {
@@ -182,6 +182,8 @@ export class MonksEnhancedJournal {
             // Target 2 - World Entity Link
             else {
                 const collection = game.collections.get(a.dataset.entity);
+                if (!collection)
+                    return;
                 document = collection.get(id);
                 if ((document.documentName === "Scene") && document.journal) document = document.journal;
                 if (!document.testUserPermission(game.user, "LIMITED")) {
@@ -604,6 +606,7 @@ Hooks.on("preCreateJournalEntry", (entry, data, options, userId) => {
     entry.data._source.flags['monks-enhanced-journal'] = flags;
 });
 
+/*
 Hooks.on("createJournalEntry", (entry, options, userId) => {
     if (MonksEnhancedJournal.journal && userId == game.user.id && options.activate !== false) {
         //open this item in a new tab
@@ -614,6 +617,7 @@ Hooks.on("createJournalEntry", (entry, options, userId) => {
             MonksEnhancedJournal.journal.open.call(MonksEnhancedJournal.journal, entry, true);
     }
 });
+*/
 
 Hooks.on("updateJournalEntry", (document, html, userId) => {
     if (MonksEnhancedJournal.journal) {
