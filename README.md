@@ -131,9 +131,7 @@ If you draw an actor onto a blank tab, or onto a journal page that isn't an enco
 
 ## Plans for the future
 
-I have plans to add a conversion feature that will allow you to convert an old journal entry into one of the new types.
 I'd like to add a name generator for a person entry so that you can create a Person quickly.
-I have plans to add a function to export and import a journal entry so that you can move Journal Entries between worlds.
 I'd like to add traps to the encounter entry, so you can contain multiple related DCs and record potential damage or effects applied.
 Add additional dice rolling modules in case you don't use Monk's TokenBar... it's just easier to code for my own modules.  :-)  But it's coming.
 Additional transition effects for the slideshow.
