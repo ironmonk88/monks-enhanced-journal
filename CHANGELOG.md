@@ -17,6 +17,8 @@ Added three more fonts.
 
 Added the drop cap style.  Yes these are borrowed from the "Custom Journal" module that doesn't seem to work any more.
 
+I swear this change is going to break something, and I apologize in advance for that happening.
+
 # Version 1.0.16
 
 Fixed issue with rendering of the journal.
