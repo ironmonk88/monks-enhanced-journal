@@ -250,10 +250,11 @@
     padding: 0px;
 }
 
+/*
 .journal-sheet .monks-enhanced-journal .content[entity-type="oldentry"] form,
 .journal-sheet .monks-enhanced-journal .content[entity-type="journalentry"] form {
     padding: 0px 8px;
-}
+}*/
 
 .journal-sheet .monks-enhanced-journal .content[entity-type="actor"] form {
     overflow-y: auto;
@@ -535,12 +536,20 @@
 
 .monks-journal-sheet.sheet .editor {
     overflow: visible;
-    max-height: fit-content;
-    height: fit-content;
+    /*max-height: fit-content;
+    height: fit-content;*/
+    height:100%;
 }
 
-.monks-journal-sheet.sheet .editor .editor-content{
-    overflow-y:visible;
+.monks-journal-sheet.sheet .editor .editor-content {
+    overflow-y: visible;
+    height: unset;
+    min-height: calc(100% - 8px);
+    padding: 2px;
+}
+
+.monks-journal-sheet.sheet .editor .tox-tinymce{
+    height: 100% !important;
 }
 
 .monks-journal-sheet.sheet .editor {

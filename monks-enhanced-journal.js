@@ -2,6 +2,7 @@ import { registerSettings } from "./settings.js";
 import { EnhancedJournalSheet } from "./apps/enhanced-journal.js"
 import { SlideshowDisplay } from "./apps/slideshow-display.js"
 import { SubSheet, ActorSubSheet, EncounterSubSheet, JournalEntrySubSheet, PersonSubSheet, PictureSubSheet, PlaceSubSheet, QuestSubSheet, SlideshowSubSheet, OrganizationSubSheet } from "./classes/EnhancedJournalEntry.js"
+import { backgroundinit } from "./classes/background.plugin.js"
 
 export let debug = (...args) => {
     if (debugEnabled > 1) console.log("DEBUG: monks-enhanced-journal | ", ...args);
@@ -83,7 +84,10 @@ export class MonksEnhancedJournal {
         CONFIG.TinyMCE.content_css.push('modules/monks-enhanced-journal/css/editor.css');
         CONFIG.TinyMCE.content_css.push('modules/polyglot/css/polyglot.css');
 
-        CONFIG.TinyMCE.style_formats[0].items.push({ block: "section", classes: "readaloud", title: "Read Aloud", wrapper: true });
+        CONFIG.TinyMCE.style_formats[0].items.push(
+            { block: "section", classes: "readaloud", title: "Read Aloud", wrapper: true },
+            { inline: "span", classes: "drop-cap", title: "Drop Cap" }
+        );
 
         /*
         CONFIG.JournalEntry.noteIcons = mergeObject(CONFIG.JournalEntry.noteIcons, {
@@ -203,8 +207,12 @@ export class MonksEnhancedJournal {
             // Action 2 - Render the Entity sheet
             if (document.documentName == 'Actor' || document.documentName == 'JournalEntry')
                 return MonksEnhancedJournal.openJournalEntry(document, { newtab: event.ctrlKey });
-            else
-                return document.sheet.render(true);
+            else {
+                if (document.documentName === "Scene")
+                    game.scenes.get(id).view();
+                else
+                    return document.sheet.render(true);
+            }
         }
 
         let oldOnClickEntry = Compendium.prototype._onClickEntry;
@@ -308,6 +316,8 @@ export class MonksEnhancedJournal {
             this.polyglot = new importedJS.Polyglot();
             this.polyglot.loadLanguages();
         }
+
+        tinyMCE.PluginManager.add('background', backgroundinit);
     }
 
     static initPopout() {

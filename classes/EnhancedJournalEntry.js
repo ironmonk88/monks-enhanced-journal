@@ -66,7 +66,7 @@ export class SubSheet {
 
         if (game.modules.get("polyglot")?.active) {
             this.known_languages = new Set();
-            [this.known_languages] = MonksEnhancedJournal.polyglot.getUserLanguages([game.user.character]);
+            [this.known_languages] = MonksEnhancedJournal.polyglot?.getUserLanguages([game.user.character]);
 
             this.renderPolyglot();
         }
@@ -691,8 +691,22 @@ export class JournalEntrySubSheet extends SubSheet {
         const owner = this.object.isOwner;
         const content = TextEditor.enrichHTML(this.object.data.content, { secrets: owner, entities: true });
 
-        $('.editor-content[data-edit="content"]').html(content);
+        $('.editor-content[data-edit="content"]', MonksEnhancedJournal.journal.element).html(content);
+        MonksEnhancedJournal.journal.updateStyle(this.object.getFlag('monks-enhanced-journal', 'style'));
+
+        if (!owner && ((this.object.data.img != undefined && this.object.data.img != '' && this.object.data.content == '') || ((this.object.data.img == undefined || this.object.data.img == '') && this.object.data.content != '')))
+            $('.sheet-navigation.tabs', MonksEnhancedJournal.journal.element).hide();
+
         super.refresh();
+    }
+
+    async render(data) {
+        let element = await super.render(data);
+
+        if (!this.object.isOwner && ((this.object.data.img != undefined && this.object.data.img != '' && this.object.data.content == '') || ((this.object.data.img == undefined || this.object.data.img == '') && this.object.data.content != '')))
+            $('.sheet-navigation.tabs', element).hide();
+
+        return element;
     }
 }
 

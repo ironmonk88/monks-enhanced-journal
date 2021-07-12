@@ -1,3 +1,22 @@
+# Version 1.0.17
+
+Fixed the issue with rendering again.  Hopefully this is the last time, but I'm not holding my breath.
+This time to fix issues with Trigger Happy.
+
+Altered the editor with journals so you can have a lot more control over the content.  Adding in the menu bar gives you access to text colour, formatting, font, font sizes, etc.
+
+Added the option of changing the background of a Journal Entry.  You can set it to a colour, or an image and control how that image is displayed.
+
+Fixed an issue where opening an Actor in Enhanced Journal, then going back to a previous entry would stop the tabs from responding.
+
+Changed the way Journal Entries are shared to players.  Now if the Journal Entry you're sharing has only text content or an image content, the tabs won't display.  If they're not needed, then they'll just get in the way.
+
+Changed the way embedded Scenes are opened from a Journal Entry.  Before it would open up the Scene config dialog, now they'll actually activate that scene.
+
+Added three more fonts.
+
+Added the drop cap style.  Yes these are borrowed from the "Custom Journal" module that doesn't seem to work any more.
+
 # Version 1.0.16
 
 Fixed issue with rendering of the journal.

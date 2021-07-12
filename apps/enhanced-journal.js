@@ -132,6 +132,8 @@ export class EnhancedJournalSheet extends JournalSheet {
             //brand new journal
             MonksEnhancedJournal.journal = (MonksEnhancedJournal.journal || this);
             return super._render(force, options).then(() => {
+                if(this.object?.name != 'temporary')
+                    MonksEnhancedJournal.journal.open(this.object);
                 this.renderDirectory().then((html) => {
                     MonksEnhancedJournal.updateDirectory(html);
                 })
@@ -140,8 +142,13 @@ export class EnhancedJournalSheet extends JournalSheet {
         } else {
             //journal is already open
             //if (options.action != 'create' && (options.data || MonksEnhancedJournal.journal._element != null)) {
-            if (this.appId != MonksEnhancedJournal.journal.appId)
+            if (this._state < 0)    //if this journal entry has already been closed then ignore it.
+                return;
+
+            if (this.appId != MonksEnhancedJournal.journal.appId) {
                 this.close();
+                delete this.object.apps[this.appId];
+            }
 
             if (MonksEnhancedJournal.journal.object?.id != this.object.id) {
                 if (options.action == 'create')
@@ -273,7 +280,35 @@ export class EnhancedJournalSheet extends JournalSheet {
         $('.editor .editor-content', this.element).unmark();
 
         if (this.editors[name] != undefined) {
+            let type = this.entitytype;
+            if (type == 'journalentry' || type == 'oldentry') {
+                options = foundry.utils.mergeObject(options, {
+                    menubar: true,
+                    plugins: CONFIG.TinyMCE.plugins + ' background',
+                    toolbar: CONFIG.TinyMCE.toolbar + ' background',
+                    font_formats: "Andale Mono=andale mono,times; Arial=arial,helvetica,sans-serif; Arial Black=arial black,avant garde; Book Antiqua=book antiqua,palatino; Comic Sans MS=comic sans ms,sans-serif; Courier New=courier new,courier; Georgia=georgia,palatino; Helvetica=helvetica; Impact=impact,chicago; Oswald=oswald; Symbol=symbol; Tahoma=tahoma,arial,helvetica,sans-serif; Terminal=terminal,monaco; Times New Roman=times new roman,times; Trebuchet MS=trebuchet ms,geneva; Verdana=verdana,geneva; Webdings=webdings; Wingdings=wingdings,zapf dingbats;Anglo Text=anglo_textregular;Lovers Quarrel=lovers_quarrelregular;Play=Play-Regular"
+                });
+            }
             super.activateEditor(name, options, initialContent);
+            //need this because foundry doesn't allow access to the init of the editor
+            if (type == 'journalentry' || type == 'oldentry') {
+                let count = 0;
+                let that = this;
+                let data = MonksEnhancedJournal.journal.object.getFlag('monks-enhanced-journal', 'style');
+                if (data) {
+                    let timer = window.setInterval(function () {
+                        count++;
+                        if (count > 20) {
+                            window.clearInterval(timer);
+                        }
+                        let editor = that.editors.content;
+                        if (editor && editor.mce) {
+                            MonksEnhancedJournal.journal.updateStyle(data, $(editor.mce.contentDocument.body));
+                            window.clearInterval(timer);
+                        }
+                    }, 100);
+                }
+            }
         }
     }
 
@@ -700,6 +735,9 @@ export class EnhancedJournalSheet extends JournalSheet {
     }*/
 
     async display(entity) {
+        if (this.object && this.object._sheet)
+            this.object._sheet = null;
+
         this.object = entity;
 
         //make sure that it sticks to one EnhancedJournal, and calling sheet() has a habit of creating a new one, if this one isn't added manually
@@ -753,16 +791,17 @@ export class EnhancedJournalSheet extends JournalSheet {
             await game.user.setFlag("monks-enhanced-journal", "_recentlyViewed", recent);
         }
 
+        let contentform = $('.content > form', this.element);
+        //this.sheettabs = new Tabs({ navSelector: ".tabs", contentSelector: ".sheet-body", initial: "description", callback: this.tabChange });
+
         let subsheet = types[type] || JournalEntrySubSheet;
-
         this.subsheet = new subsheet(this.object);
-
         this.subdocument = await this.subsheet.render();
 
         this.searchpos = 0;
 
         $('.content', this.element).attr('entity-type', type).attr('entity-id', this.object.id);
-        let contentform = $('.content form', this.element);
+
         contentform.empty().append(this.subdocument);
 
         Hooks.callAll('renderJournalSubSheet', this, contentform, this.object);
@@ -775,8 +814,28 @@ export class EnhancedJournalSheet extends JournalSheet {
                 btn.click().click();  //click the button off then on again so that it refreshes the text.  Change this if polyglot ever adds an API
             }
         }
-        //}
+
+        this.updateStyle(this.object.getFlag('monks-enhanced-journal', 'style'));
+
         log('Open entity', this.appId, entity);
+    }
+
+    updateStyle(data, element) {
+        if (data == undefined)
+            return;
+
+        if (element == undefined)
+            element = $('.editor-content[data-edit="content"]', MonksEnhancedJournal.journal.element);
+
+        let css = {
+            'background-color': (data.color ? data.color : ''),
+            'background-image': (data.img?.value ? 'url(' + data.img?.value + ')' : ''),
+            'background-repeat': (data.sizing == 'repeat' ? 'repeat' : 'no-repeat'),
+            'background-position': 'center',
+            'background-size': (data.sizing == 'repeat' ? 'auto' : (data.sizing == 'stretch' ? '100% 100%' : data.sizing))
+        }
+
+        element.css(css);
     }
 
     expandSidebar() {
