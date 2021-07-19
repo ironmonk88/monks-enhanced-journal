@@ -33,6 +33,8 @@ export let oldSheetClass = () => {
     return MonksEnhancedJournal._oldSheetClass;
 };
 
+export let polyglotLanguageProvider = undefined;
+
 export class MonksEnhancedJournal {
     static _oldSheetClass;
     static journal;
@@ -311,10 +313,8 @@ export class MonksEnhancedJournal {
         //});
 
         if (game.modules.get("polyglot")?.active) {
-            //import {Polyglot} from "./module/logic.js";
-            const importedJS = await import("/modules/polyglot/module/logic.js");
-            this.polyglot = new importedJS.Polyglot();
-            this.polyglot.loadLanguages();
+            const importedJS = await import("/modules/polyglot/module/api.js");
+            polyglotLanguageProvider = importedJS.currentLanguageProvider;
         }
 
         tinyMCE.PluginManager.add('background', backgroundinit);
