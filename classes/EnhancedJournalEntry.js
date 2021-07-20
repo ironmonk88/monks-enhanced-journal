@@ -65,9 +65,6 @@ export class SubSheet {
         this.activateListeners($(this.element));
 
         if (game.modules.get("polyglot")?.active) {
-            this.known_languages = new Set();
-            [this.known_languages] = MonksEnhancedJournal.polyglot?.getUserLanguages([game.user.character]);
-
             this.renderPolyglot();
         }
 
@@ -212,11 +209,12 @@ export class SubSheet {
             const lang = this.dataset.language;
             if (!lang) return;
 
-            let scramble = MonksEnhancedJournal.polyglot.scrambleString(this.textContent, game.settings.get('polyglot', 'useUniqueSalt') ? that.object.id : lang, lang);
-            let scrambleSpan = $('<span>').addClass('polyglot-scramble').css({ 'font': MonksEnhancedJournal.polyglot._getFontStyle(lang) }).html(scramble);
+            let scramble = polyglot.polyglot.scrambleString(this.textContent, game.settings.get('polyglot', 'useUniqueSalt') ? that.object.id : lang, lang);
+            let scrambleSpan = $('<span>').addClass('polyglot-scramble').css({ 'font': polyglot.polyglot._getFontStyle(lang) }).html(scramble);
+						
             $('<div>')
                 .addClass('polyglot-container')
-                .attr('data-language', (game.user.isGM || that.object.permission == CONST.ENTITY_PERMISSIONS.OWNER || that.known_languages.has(lang) ? MonksEnhancedJournal.polyglot.constructor.languages[lang] : 'Unknown'))
+                .attr('data-language', (game.user.isGM || that.object.permission == CONST.ENTITY_PERMISSIONS.OWNER || polyglot.polyglot.known_languages.has(lang) ? polyglot.polyglot.LanguageProvider.languages[lang] : 'Unknown'))
                 .insertBefore($(this).addClass('converted').attr('title', ''))
                 .append(this)
                 .append(scrambleSpan)
@@ -224,7 +222,7 @@ export class SubSheet {
                     function () {
                         //hover in
                         const lang = this.dataset.language;
-                        if (game.user.isGM || that.object.permission == CONST.ENTITY_PERMISSIONS.OWNER || that.known_languages.has(lang)) {
+                        if (game.user.isGM || that.object.permission == CONST.ENTITY_PERMISSIONS.OWNER || polyglot.polyglot.known_languages.has(lang)) {
                             $(this).addClass('translate');
                         }
                     },

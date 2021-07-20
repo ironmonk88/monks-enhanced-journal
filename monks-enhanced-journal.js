@@ -310,13 +310,6 @@ export class MonksEnhancedJournal {
         //    this._onJournalRemoved(app);
         //});
 
-        if (game.modules.get("polyglot")?.active) {
-            //import {Polyglot} from "./module/logic.js";
-            const importedJS = await import("/modules/polyglot/module/logic.js");
-            this.polyglot = new importedJS.Polyglot();
-            this.polyglot.loadLanguages();
-        }
-
         tinyMCE.PluginManager.add('background', backgroundinit);
     }
 
