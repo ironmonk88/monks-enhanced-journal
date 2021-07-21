@@ -168,7 +168,7 @@ export class SubSheet {
         if (!this.isEditable)
             return null;
 
-        if ($('div.tox-tinymce', this.element).length > 0) {
+        if (this.editors?.content?.active) {
             //close the editor
             const name = $('.editor-content', this.element).attr("data-edit");
             //this.saveEditor(name);
@@ -182,13 +182,15 @@ export class SubSheet {
             mce.remove();
             if (editor.hasButton) editor.button.style.display = "";
 
+            $('.nav-button.edit i', this.element).addClass('fa-pencil-alt').removeClass('fa-download');
+
             return submit.then(() => {
                 mce.destroy();
                 editor.mce = null;
                 this.render(true, { action:'update', data: {content: editor.initial, _id: this.object.id}}); //need to send this so that the render looks to the subsheet instead
                 editor.changed = false;
                 $('.sheet-body', this.element).removeClass('editing');
-            });            
+            }); 
         } else {
             $('.editor .editor-edit', this.element).click();
             //$('.sheet-body', this.element).addClass('editing');
@@ -214,7 +216,8 @@ export class SubSheet {
 						
             $('<div>')
                 .addClass('polyglot-container')
-                .attr('data-language', (game.user.isGM || that.object.permission == CONST.ENTITY_PERMISSIONS.OWNER || polyglot.polyglot.known_languages.has(lang) ? polyglot.polyglot.LanguageProvider.languages[lang] : 'Unknown'))
+                .attr('data-lang-text', (game.user.isGM || that.object.permission == CONST.ENTITY_PERMISSIONS.OWNER || polyglot.polyglot.known_languages.has(lang) ? polyglot.polyglot.LanguageProvider.languages[lang] : 'Unknown'))
+                .attr('data-language', lang)
                 .insertBefore($(this).addClass('converted').attr('title', ''))
                 .append(this)
                 .append(scrambleSpan)
@@ -441,6 +444,7 @@ export class EncounterSubSheet extends SubSheet {
         }).observe($('.encounter-content', html).get(0));*/
 
         MonksEnhancedJournal.journal.sheettabs.bind(html[0]);
+        MonksEnhancedJournal.journal.sheettabs.activate($('.sheet-navigation.tabs .item:first', html).attr('data-tab'));
 
         //monster
         $('.monster-icon', html).click(this.clickItem.bind(this));
@@ -739,6 +743,7 @@ export class OrganizationSubSheet extends SubSheet {
     activateListeners(html) {
         super.activateListeners(html);
         MonksEnhancedJournal.journal.sheettabs.bind(html[0]);
+        MonksEnhancedJournal.journal.sheettabs.activate($('.sheet-navigation.tabs .item:first', html).attr('data-tab'));
     }
 
     refresh() {
@@ -782,8 +787,27 @@ export class PersonSubSheet extends SubSheet {
     activateListeners(html) {
         super.activateListeners(html);
         MonksEnhancedJournal.journal.sheettabs.bind(html[0]);
+        MonksEnhancedJournal.journal.sheettabs.activate($('.sheet-navigation.tabs .item:first', html).attr('data-tab'));
 
         $('.actor-img img', html).click(this.openActor.bind(this));
+        html.on('dragstart', ".actor-img img", TextEditor._onDragEntityLink);
+
+        //onkeyup="textAreaAdjust(this)" style="overflow:hidden"
+        $('.entity-details textarea', html).keyup(this.textAreaAdjust.bind(this));
+
+        const actorOptions = this._getPersonActorContextOptions();
+        if (actorOptions) new ContextMenu($(html), ".actor-img", actorOptions);
+    }
+
+    async render(data) {
+        let html = super.render(data);
+
+        let that = this;
+        $('.entity-details textarea', html).each(function () {
+            that.textAreaAdjust({ currentTarget: this });
+        })
+
+        return html;
     }
 
     refresh() {
@@ -792,6 +816,12 @@ export class PersonSubSheet extends SubSheet {
 
         $('.editor-content[data-edit="content"]', MonksEnhancedJournal.journal.element).html(content);
         super.refresh();
+    }
+
+    textAreaAdjust(event) {
+        let element = event.currentTarget;
+        element.style.height = "1px";
+        element.style.height = (25 + element.scrollHeight) + "px";
     }
 
     async addActor(data) {
@@ -836,6 +866,30 @@ export class PersonSubSheet extends SubSheet {
             //actor.sheet.render(true);
             MonksEnhancedJournal.journal.open(actor, event.shiftKey);
         }
+    }
+
+    removeActor() {
+        this.object.unsetFlag('monks-enhanced-journal', 'actor');
+        $('.actor-img', this.element).remove();
+    }
+
+    _getPersonActorContextOptions() {
+        return [
+            {
+                name: "SIDEBAR.Delete",
+                icon: '<i class="fas fa-trash"></i>',
+                condition: () => game.user.isGM,
+                callback: li => {
+                    const id = li.data("id");
+                    //const slide = this.object.data.flags["monks-enhanced-journal"].slides.get(li.data("entityId"));
+                    Dialog.confirm({
+                        title: `${game.i18n.localize("SIDEBAR.Delete")} Actor Link`,
+                        content: 'Are you sure you want to remove a link to this Actor?',
+                        yes: this.removeActor.bind(this)
+                    });
+                }
+            }
+        ];
     }
 }
 
@@ -894,6 +948,7 @@ export class PlaceSubSheet extends SubSheet {
     activateListeners(html) {
         super.activateListeners(html);
         MonksEnhancedJournal.journal.sheettabs.bind(html[0]);
+        MonksEnhancedJournal.journal.sheettabs.activate($('.sheet-navigation.tabs .item:first', html).attr('data-tab'));
     }
 
     refresh() {
@@ -986,6 +1041,7 @@ export class QuestSubSheet extends SubSheet {
     activateListeners(html) {
         super.activateListeners(html);
         MonksEnhancedJournal.journal.sheettabs.bind(html[0]);
+        MonksEnhancedJournal.journal.sheettabs.activate($('.sheet-navigation.tabs .item:first', html).attr('data-tab'));
 
         $('.objective-create', html).on('click', $.proxy(this.createObjective, this));
         $('.objective-edit', html).on('click', $.proxy(this.editObjective, this));

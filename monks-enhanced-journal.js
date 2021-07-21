@@ -82,7 +82,8 @@ export class MonksEnhancedJournal {
         CONFIG.JournalEntry.typeLabels = MonksEnhancedJournal.getTypeLabels();
 
         CONFIG.TinyMCE.content_css.push('modules/monks-enhanced-journal/css/editor.css');
-        CONFIG.TinyMCE.content_css.push('modules/polyglot/css/polyglot.css');
+        if (game.modules.get("polyglot")?.active)
+            CONFIG.TinyMCE.content_css.push('modules/polyglot/css/polyglot.css');
 
         CONFIG.TinyMCE.style_formats[0].items.push(
             { block: "section", classes: "readaloud", title: "Read Aloud", wrapper: true },
@@ -123,7 +124,8 @@ export class MonksEnhancedJournal {
             return data;
         }*/
 
-        const oldOnClickEntityName = JournalDirectory._onClickEntityName;
+        /*
+        const oldOnClickEntityName = JournalDirectory.prototype._onClickEntityName;
         function onClickEntityName(event) {
             event.preventDefault();
             const element = event.currentTarget;
@@ -132,16 +134,13 @@ export class MonksEnhancedJournal {
 
             MonksEnhancedJournal.openJournalEntry(entry);
         }
-        JournalDirectory.prototype._onClickEntityName = onClickEntityName;
+        JournalDirectory.prototype._onClickEntityName = onClickEntityName;*/
 
         let oldRenderPopout = JournalDirectory.prototype.renderPopout;
         JournalDirectory.prototype.renderPopout = function () {
             if (game.user.isGM || setting('allow-player')) {
                 let entry = new JournalEntry({ name: 'temporary' }); //new JournalEntryData({name:'temporary'})
-                let ejs = new EnhancedJournalSheet(entry);
-                ejs._render(true).then(() => {
-                    MonksEnhancedJournal.journal.activateTab(MonksEnhancedJournal.journal.tabs.active());
-                });
+                new EnhancedJournalSheet(entry)._render(true);
             } else {
                 return oldRenderPopout.call(this);
             }
@@ -427,8 +426,9 @@ export class MonksEnhancedJournal {
                 MonksEnhancedJournal.slideshow.element.addClass('active');
 
                 if (MonksEnhancedJournal.slideshow.content.audiofile != undefined && MonksEnhancedJournal.slideshow.content.audiofile != '' && MonksEnhancedJournal.slideshow.sound == undefined)
-                    AudioHelper.play({ src: MonksEnhancedJournal.slideshow.content.audiofile, loop: true}).then((sound) => {
-                        MonksEnhancedJournal.slideshow.sound = sound;
+                    AudioHelper.play({ src: MonksEnhancedJournal.slideshow.content.audiofile, loop: true }).then((sound) => {
+                        if (MonksEnhancedJournal.slideshow)
+                            MonksEnhancedJournal.slideshow.sound = sound;
                     });
 
                 if (data.idx != undefined)
@@ -459,7 +459,8 @@ export class MonksEnhancedJournal {
 
                 //bring in the new slide
                 let newSlide = MonksEnhancedJournal.createSlide(slide, $('.slide-showing', MonksEnhancedJournal.slideshow.element));
-                newSlide.css({ opacity: 0 }).animate({ opacity: 1 }, 1000, 'linear');
+                if (newSlide)
+                    newSlide.css({ opacity: 0 }).animate({ opacity: 1 }, 1000, 'linear');
             }
         }
     }
@@ -469,7 +470,7 @@ export class MonksEnhancedJournal {
             if (MonksEnhancedJournal.slideshow != undefined) {
                 MonksEnhancedJournal.slideshow?.element?.removeClass('active');
 
-                if (MonksEnhancedJournal.slideshow?.sound.src != undefined) {
+                if (MonksEnhancedJournal.slideshow?.sound?.src != undefined) {
                     MonksEnhancedJournal.slideshow?.sound.stop();
                 }
                 delete MonksEnhancedJournal.slideshow;
@@ -478,6 +479,9 @@ export class MonksEnhancedJournal {
     }
 
     static createSlide(slide, container) {
+        if (slide == undefined)
+            return false;
+
         let background = '';
         if (slide.background?.color == '')
             background = `background-image:url(\'${slide.img}\');`;

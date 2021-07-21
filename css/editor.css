@@ -99,6 +99,7 @@ span.drop-cap {
 
 html{
     min-height:100%;
+    height:fit-content;
 }
 
 .mce-content-body {

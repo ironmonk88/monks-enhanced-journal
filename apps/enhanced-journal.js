@@ -59,7 +59,8 @@ export class EnhancedJournalSheet extends JournalSheet {
                 { dragSelector: ".entity.actor", dropSelector: "#MonksEnhancedJournal .body" },
                 { dragSelector: ".entity.item", dropSelector: "#MonksEnhancedJournal .body" },
                 { dragSelector: ".encounter-items .item-list .item", dropSelector: "null" },
-                { dragSelector: ".reward-items .item-list .item", dropSelector: "null" }],
+                { dragSelector: ".reward-items .item-list .item", dropSelector: "null" },
+                { dragSelector: ".slide", dropSelector: ".slideshow-body" }],
             closeOnSubmit: false,
             submitOnClose: false,
             submitOnChange: true,
@@ -106,6 +107,10 @@ export class EnhancedJournalSheet extends JournalSheet {
         }, 10);
     }
 
+    checkForChanges() {
+        return this.editors?.content?.active && this.editors?.content?.mce?.isDirty();
+    }
+
     _inferDefaultMode() {
         return "text";
     }
@@ -130,10 +135,17 @@ export class EnhancedJournalSheet extends JournalSheet {
         log('rendering journal', this.appId);
         if (MonksEnhancedJournal.journal == undefined || !MonksEnhancedJournal.journal.rendered) {
             //brand new journal
-            MonksEnhancedJournal.journal = (MonksEnhancedJournal.journal || this);
+            if (MonksEnhancedJournal.journal == undefined || (!MonksEnhancedJournal.journal.rendered && MonksEnhancedJournal.journal._state == 0))
+                MonksEnhancedJournal.journal = this;    //either set this up as the new one, or switch over if the journal has been opened by someone else and not closed.
+
+            if (options.action == 'update')
+                return;
             return super._render(force, options).then(() => {
                 if(this.object?.name != 'temporary')
                     MonksEnhancedJournal.journal.open(this.object);
+                else
+                    MonksEnhancedJournal.journal.activateTab(MonksEnhancedJournal.journal.tabs.active());
+
                 this.renderDirectory().then((html) => {
                     MonksEnhancedJournal.updateDirectory(html);
                 })
@@ -309,7 +321,14 @@ export class EnhancedJournalSheet extends JournalSheet {
                     }, 100);
                 }
             }
+
+            $('.nav-button.edit i', this.element).removeClass('fa-pencil-alt').addClass('fa-download');
         }
+    }
+
+    saveEditor(name, options) {
+        $('.nav-button.edit i', this.element).addClass('fa-pencil-alt').removeClass('fa-download');
+        return super.saveEditor(name, options);
     }
 
     get id() {
@@ -347,7 +366,7 @@ export class EnhancedJournalSheet extends JournalSheet {
     async close(options) {
         if (options?.submit !== false) {
             if (MonksEnhancedJournal.journal.appId == this.appId) {
-                if ($('div.tox-tinymce[role="application"]', this.element).length) {
+                if (this.checkForChanges()) {
                     if (!confirm('You have unsaved changes, are you sure you want to close this window?'))
                         return false;
                 }
@@ -450,7 +469,7 @@ export class EnhancedJournalSheet extends JournalSheet {
     }
 
     async activateTab(tab, event) {
-        if ($('div.tox-tinymce[role="application"]', this.element).length) {
+        if (this.checkForChanges()) {
             if (!confirm('You have unsaved changes, are you sure you want to close this window?'))
                 return;
         }
@@ -718,7 +737,7 @@ export class EnhancedJournalSheet extends JournalSheet {
                 else
                     this.addTab(entity);
             } else {
-                if ($('div.tox-tinymce[role="application"]', this.element).length)
+                if (this.checkForChanges())
                     this.addTab(entity, { activate: false}); //If we're editing, then open in a new tab but don't activate
                 else
                     this.updateTab(this.tabs.active(), entity);
@@ -815,7 +834,8 @@ export class EnhancedJournalSheet extends JournalSheet {
             }
         }
 
-        this.updateStyle(this.object.getFlag('monks-enhanced-journal', 'style'));
+        if(this.object && !this.object.ignore)
+            this.updateStyle(this.object.getFlag('monks-enhanced-journal', 'style'));
 
         log('Open entity', this.appId, entity);
     }
@@ -918,12 +938,15 @@ export class EnhancedJournalSheet extends JournalSheet {
 
         const dragData = {};
 
-        let id = li.dataset.id;
+        let id = li.dataset.id || li.dataset.slideId;
         if (li.dataset.entity == 'Item') {
             dragData.id = id;
             dragData.pack = li.dataset.pack;
             dragData.type = "Item";
             //dragData.data = item.data;
+        } else if(li.dataset.slideId) {
+            dragData.slideId = id;
+            dragData.type = "Slide";
         }
 
         log('Drag Start', dragData);
@@ -978,6 +1001,20 @@ export class EnhancedJournalSheet extends JournalSheet {
             this.subsheet.addItem(data).then(() => {
                 this.display(this.object);
             })
+        } else if(data.type == 'Slide') {
+            const target = event.target.closest(".slide") || null;
+            if (data.slideId === target.dataset.slideId) return; // Don't drop on yourself
+
+            let slides = duplicate(this.object.getFlag('monks-enhanced-journal', 'slides'));
+
+            let from = slides.findIndex(a => a.id == data.slideId);
+            let to = slides.findIndex(a => a.id == target.dataset.slideId);
+            slides.splice(to, 0, slides.splice(from, 1)[0]);
+
+            this.object.setFlag('monks-enhanced-journal', 'slides', slides);
+
+            $('.slideshow-body .slide[data-slide-id="' + data.slideId + '"]', this.element).insertBefore(target);
+            //+++ need to submit/save
         }
 
         log('drop data', event, data);
@@ -1246,8 +1283,7 @@ export class EnhancedJournalSheet extends JournalSheet {
                 }
             }
         ]);
-        this._tabcontext = new ContextMenu(html, ".mainbar .navigation .nav-button.history", [
-        ]);
+        this._tabcontext = new ContextMenu(html, ".mainbar .navigation .nav-button.history", []);
         this._imgcontext = new ContextMenu(html, ".journal-body.oldentry .tab.picture", [
             {
                 name: "MonksEnhancedJournal.Delete",

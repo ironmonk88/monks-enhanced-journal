@@ -1,3 +1,25 @@
+# Version 1.0.18
+
+Added option to reorder slides by dragging and dropping.
+
+Fixing an issue with GM Screen, it preloads a dummy version of a Journal Page, and I need to check that first and load a new page if it's active.
+
+Changing the edit pencil icon to a save icon when editing.
+
+Checking for changes appropriately instead of just checking if the editor is open.
+
+Fixing issues with Slideshow
+
+Fixing issue with Polyglot, the module added an API and required a small change with Enhanced Journal.
+
+Updated the Person sheet to show more information.
+
+Added option to delete an attached actor from a Person Sheet using right-click.
+
+Fixing styling issue with Pathfinder
+
+Fixing issue with adding polyglot css when polyglot isn't an active module.
+
 # Version 1.0.17
 
 Fixed the issue with rendering again.  Hopefully this is the last time, but I'm not holding my breath.
