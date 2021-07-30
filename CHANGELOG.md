@@ -1,3 +1,31 @@
+# Version 1.0.19
+
+Added the option to edit the fields that are seen on the person and city sheets
+
+Fixed issue where the Description tab was always starting as active
+
+Addes Shops!
+
+Prevent a Forien's Quest Log from being loaded into Enhanced Journal
+
+Added links to navigate through enties in a folder
+
+Changed the magnify image buton to a right click instead so the interface was cleaner.
+
+Changed polyglot rendering so that you have to click to translate.  I liked the hover over but it cause way too many issues with formating.
+
+Added inline request roll, so you can add a link to request a roll.  Currently the syntax is %[perception 15]% to request a perception roll with a DC of 15
+
+Fixed conflict between Enhanced Journal and Kanka
+
+Fixed issue when copying journal sheets to and from a compendium.
+
+Preloading polyglot fonts to speed up loading of Journal Page
+
+Added Notes to Encounter sheet
+
+
+
 # Version 1.0.18
 
 Added option to reorder slides by dragging and dropping.
