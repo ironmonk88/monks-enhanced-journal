@@ -1,0 +1,10 @@
+<form class="edit-fields" autocomplete="off" onsubmit="event.preventDefault();">
+    {{#each fields}}
+    <div class="form-group">
+        <label for="content">{{localize this.name}}</label>
+        <div class="form-fields">
+            <input type="checkbox" name="flags.monks-enhanced-journal.fields.{{@key}}.value" {{checked this.value}} />
+        </div>
+    </div>
+    {{/each}}
+</form>

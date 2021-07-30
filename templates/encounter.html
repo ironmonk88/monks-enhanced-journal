@@ -5,6 +5,7 @@
     <nav class="sheet-navigation tabs" data-group="primary">
         <a class="item active" data-tab="description">{{localize 'MonksEnhancedJournal.Description'}}</a>
         <a class="item" data-tab="details">{{localize 'MonksEnhancedJournal.Details'}}</a>
+        <a class="item" data-tab="notes">{{localize 'MonksEnhancedJournal.Notes'}}</a>
     </nav>
     <section class="sheet-body">
         <div class="tab description flexcol active" data-group="primary" data-tab="description">
@@ -154,6 +155,12 @@
                         </ol>
                     </ol>
                 </div>
+            </div>
+        </div>
+        <div class="tab notes flexcol" data-group="primary" data-tab="notes">
+            <div style="flex: 0 0 20px;">{{localize 'MonksEnhancedJournal.OnlyViewable'}}</div>
+            <div>
+                <textarea name="flags.monks-enhanced-journal.{{userid}}.notes" style="width: calc(100% - 4px);height: calc(100% - 4px)">{{userdata.notes}}</textarea>
             </div>
         </div>
     </section>

@@ -480,7 +480,7 @@
     display: none;
 }*/
 
-.person-container, .place-container, .organization-container {
+.person-container, .place-container, .organization-container, .shop-container {
     height: 100%;
 }
 
@@ -578,7 +578,8 @@
 .monks-journal-sheet.sheet .person-container,
 .monks-journal-sheet.sheet .place-container,
 .monks-journal-sheet.sheet .quest-container,
-.monks-journal-sheet.sheet .organization-container {
+.monks-journal-sheet.sheet .organization-container,
+.monks-journal-sheet.sheet .shop-container {
     height: 100%;
 }
 
@@ -595,7 +596,8 @@
 .monks-journal-sheet.sheet .person-container .sheet-header img.profile,
 .monks-journal-sheet.sheet .place-container .sheet-header img.profile,
 .monks-journal-sheet.sheet .quest-container .sheet-header img.profile,
-.monks-journal-sheet.sheet .organization-container .sheet-header img.profile {
+.monks-journal-sheet.sheet .organization-container .sheet-header img.profile,
+.monks-journal-sheet.sheet .shop-container .sheet-header img.profile {
     width: 100%;
     height: 100%;
     object-fit: contain;
@@ -603,6 +605,7 @@
     max-width: 100%;
 }
 
+/*
 .monks-journal-sheet.sheet .sheet-header .magnify-image {
     width: 20px;
     height: 20px;
@@ -622,7 +625,7 @@
 .monks-journal-sheet.sheet .sheet-header:hover .magnify-image {
     display:inline-block;
 }
-
+    */
 .monks-journal-sheet.sheet .fullscreen-image {
     width: 100%;
     height: 100%;
@@ -634,17 +637,46 @@
     background: url(../../../ui/parchment.jpg) repeat;
 }
 
+.monks-journal-sheet.sheet footer{
+    flex: 0 0 25px;
+    line-height: 25px;
+    font-size: 16px;
+    padding: 0px 6px;
+    border-top: 1px solid #C0C0C0;
+}
+
+.monks-journal-sheet.sheet footer > div.navigate-prev,
+.monks-journal-sheet.sheet footer > div.navigate-next {
+    flex: 0 0 auto;
+    cursor:pointer;
+}
+
+.monks-journal-sheet.sheet footer > div.navigate-prev:hover,
+.monks-journal-sheet.sheet footer > div.navigate-next:hover {
+    text-shadow: 0 0 8px red;
+}
+
+.monks-journal-sheet.sheet footer > div.navigate-next {
+    text-align: right;
+}
+
+.monks-journal-sheet.sheet .content[entity-type="actor"] + footer{
+    display:none;
+}
+
 .monks-journal-sheet.sheet .person-container .sheet-header .header-details .form-group label,
 .monks-journal-sheet.sheet .place-container .sheet-header .header-details .form-group label,
 .monks-journal-sheet.sheet .quest-container .sheet-header .header-details .form-group label,
-.monks-journal-sheet.sheet .organization-container .sheet-header .header-details .form-group label {
+.monks-journal-sheet.sheet .organization-container .sheet-header .header-details .form-group label,
+.monks-journal-sheet.sheet .shop-container .sheet-header .header-details .form-group label {
     max-width: 175px;
 }
 
 .monks-journal-sheet.sheet .person-container .sheet-header .header-details .form-group,
 .monks-journal-sheet.sheet .place-container .sheet-header .header-details .form-group,
 .monks-journal-sheet.sheet .quest-container .sheet-header .header-details .form-group,
-.monks-journal-sheet.sheet .organization-container .sheet-header .header-details .form-group {
+.monks-journal-sheet.sheet .organization-container .sheet-header .header-details .form-group,
+.monks-journal-sheet.sheet .shop-container .sheet-header .header-details .form-group {
     margin-right: 8px;
 }
 
@@ -665,17 +697,19 @@
     max-width: 175px;
 }
 
-.monks-journal-sheet.sheet .person-container .entity-details {
+.monks-journal-sheet.sheet .person-container .entity-details,
+.monks-journal-sheet.sheet .place-container .entity-details {
     background: var(--faintest-color);
     border-radius: 5px;
     padding: 8px;
     margin-bottom: 5px;
     position: relative;
     flex: 1;
-    font-size:0.8em;
+    font-size: 0.8em;
 }
 
-.monks-journal-sheet.sheet .person-container .entity-details ul {
+.monks-journal-sheet.sheet .person-container .entity-details ul,
+.monks-journal-sheet.sheet .place-container .entity-details ul {
     margin: 0;
     padding: 0;
     display: flex;
@@ -685,12 +719,14 @@
     list-style: none;
 }
 
-.monks-journal-sheet.sheet .person-container .entity-details ul li {
+.monks-journal-sheet.sheet .person-container .entity-details ul li,
+.monks-journal-sheet.sheet .place-container .entity-details ul li {
     display: flex;
     flex: 0 0 215px;
 }
 
-.monks-journal-sheet.sheet .person-container .tab.details .details .entity-details ul li label {
+.monks-journal-sheet.sheet .person-container .tab.details .details .entity-details ul li label,
+.monks-journal-sheet.sheet .place-container .tab.details .details .entity-details ul li label {
     flex: 0 0 60px;
 }
 /*
@@ -1282,6 +1318,10 @@
     text-align: center;
 }
 
+.monks-journal-sheet.sheet .items-list .item-controls a.active {
+    color: #ff6400;
+}
+
 .monks-journal-sheet.sheet .items-list .item {
     align-items: center;
     padding: 0 2px;
@@ -1304,9 +1344,16 @@
     margin-right: 5px;
 }
 
+.monks-journal-sheet.sheet .place-container .items-list .item .item-name .item-image {
+    flex: 0 0 70px;
+    height: 70px;
+    width: 70px;
+    object-fit: contain;
+}
+
 .monks-journal-sheet.sheet .items-list .item.received .item-name .item-image {
     filter: grayscale(100%);
-    opacity:0.7;
+    opacity: 0.7;
 }
 
 .monks-journal-sheet.sheet .items-list .items-header {
@@ -1618,4 +1665,26 @@
     border-top: 2px groove #eeede0;
     margin-top: 0px;
     padding-top: 5px;
+}
+
+a.inline-request-roll {
+    background: #DDD;
+    padding: 1px 4px;
+    border: 1px solid #4b4a44;
+    border-radius: 2px;
+    white-space: nowrap;
+    word-break: break-all;
+}
+
+.polyglot-journal.sizing{
+    position:absolute;
+    white-space:nowrap;
+}
+
+.monks-enhanced-journal .journal-subsheet:not(.gm) .gm-only{
+    display:none;
+}
+
+.monks-enhanced-journal .journal-subsheet:not(.owner) .owner-only {
+    display: none;
 }

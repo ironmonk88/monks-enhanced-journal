@@ -46,7 +46,7 @@ export class SelectPlayer extends FormApplication {
 
     canShowPic() {
         let type = this.object.data.flags["monks-enhanced-journal"].type;
-        return (["person", "place", "quest", "oldentry", "organization"].includes(type) ||
+        return (["person", "place", "quest", "oldentry", "organization", "shop"].includes(type) ||
             this.object.documentName == 'Actor' ||
             ((type == 'journalentry' || type == 'oldentry') && this.object.data.img != ''));
     }

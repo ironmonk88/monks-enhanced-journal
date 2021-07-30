@@ -2,7 +2,6 @@
     <img class="fullscreen-image" src="{{img}}" />
     <header class="sheet-header journal-header flexrow">
         <div class="sheet-image">
-            <div class="magnify-image" title="Show Full Size"><i class="fas fa-search"></i></div>
             <img class="profile" src="{{img}}" data-edit="img" onerror="this.src='modules/monks-enhanced-journal/assets/person.png'">
         </div>
         <section class="header-details">
@@ -33,47 +32,47 @@
             <div class="details flexrow" style="border-bottom: 2px groove #eeede0;">
                 <div class="entity-details">
                     <ul>
-                        <li>
+                        <li {{#unless fields.race.value}} style="display:none;"{{/unless}}>
                             <label>{{localize 'MonksEnhancedJournal.Race'}}</label>
                             <input type="text" name="flags.monks-enhanced-journal.race" value="{{flags.monks-enhanced-journal.race}}" />
                         </li>
-                        <li>
+                        <li {{#unless fields.gender.value}} style="display:none;"{{/unless}}>
                             <label>{{localize 'MonksEnhancedJournal.Gender'}}</label>
                             <input type="text" name="flags.monks-enhanced-journal.gender" value="{{flags.monks-enhanced-journal.gender}}" />
                         </li>
-                        <li>
+                        <li {{#unless fields.age.value}} style="display:none;"{{/unless}}>
                             <label>{{localize 'MonksEnhancedJournal.Age'}}</label>
                             <input type="text" name="flags.monks-enhanced-journal.age" value="{{flags.monks-enhanced-journal.age}}" />
                         </li>
-                        <li>
+                        <li {{#unless fields.eyes.value}} style="display:none;"{{/unless}}>
                             <label>{{localize 'MonksEnhancedJournal.Eyes'}}</label>
                             <input type="text" name="flags.monks-enhanced-journal.eyes" value="{{flags.monks-enhanced-journal.eyes}}" />
                         </li>
-                        <li>
+                        <li {{#unless fields.skin.value}} style="display:none;"{{/unless}}>
                             <label>{{localize 'MonksEnhancedJournal.Skin'}}</label>
                             <input type="text" name="flags.monks-enhanced-journal.skin" value="{{flags.monks-enhanced-journal.skin}}" />
                         </li>
-                        <li>
+                        <li {{#unless fields.hair.value}} style="display:none;"{{/unless}}>
                             <label>{{localize 'MonksEnhancedJournal.Hair'}}</label>
                             <input type="text" name="flags.monks-enhanced-journal.hair" value="{{flags.monks-enhanced-journal.hair}}" />
                         </li>
-                        <li>
+                        <li {{#unless fields.profession.value}} style="display:none;"{{/unless}}>
                             <label>{{localize 'MonksEnhancedJournal.Profession'}}</label>
                             <input type="text" name="flags.monks-enhanced-journal.profession" value="{{flags.monks-enhanced-journal.profession}}" />
                         </li>
-                        <li>
+                        <li {{#unless fields.voice.value}} style="display:none;"{{/unless}}>
                             <label>{{localize 'MonksEnhancedJournal.Voice'}}</label>
                             <input type="text" name="flags.monks-enhanced-journal.voice" value="{{flags.monks-enhanced-journal.voice}}" />
                         </li>
-                        <li>
+                        <li {{#unless fields.faction.value}} style="display:none;"{{/unless}}>
                             <label>{{localize 'MonksEnhancedJournal.Faction'}}</label>
                             <input type="text" name="flags.monks-enhanced-journal.faction" value="{{flags.monks-enhanced-journal.faction}}" />
                         </li>
-                        <li>
+                        <li {{#unless fields.height.value}} style="display:none;"{{/unless}}>
                             <label>{{localize 'MonksEnhancedJournal.Height'}}</label>
                             <input type="text" name="flags.monks-enhanced-journal.height" value="{{flags.monks-enhanced-journal.height}}" />
                         </li>
-                        <li>
+                        <li {{#unless fields.weight.value}} style="display:none;"{{/unless}}>
                             <label>{{localize 'MonksEnhancedJournal.Weight'}}</label>
                             <input type="text" name="flags.monks-enhanced-journal.weight" value="{{flags.monks-enhanced-journal.weight}}" />
                         </li>
@@ -81,37 +80,37 @@
                 </div>
             </div>
             <div class="details flexcol" style="border-bottom: 2px groove #eeede0;">
-                <div class="form-group">
+                <div class="form-group" {{#unless fields.traits.value}} style="display:none;"{{/unless}}>
                     <label>{{localize 'MonksEnhancedJournal.Traits'}}</label>
-                    <textarea name="flags.monks-enhanced-journal.traits" >{{flags.monks-enhanced-journal.traits}}</textarea>
+                    <textarea name="flags.monks-enhanced-journal.traits">{{flags.monks-enhanced-journal.traits}}</textarea>
                 </div>
-                <div class="form-group">
+                <div class="form-group" {{#unless fields.ideals.value}} style="display:none;"{{/unless}}>
                     <label>{{localize 'MonksEnhancedJournal.Ideals'}}</label>
-                    <textarea name="flags.monks-enhanced-journal.ideals" >{{flags.monks-enhanced-journal.ideals}}</textarea>
+                    <textarea name="flags.monks-enhanced-journal.ideals">{{flags.monks-enhanced-journal.ideals}}</textarea>
                 </div>
-                <div class="form-group">
+                <div class="form-group" {{#unless fields.bonds.value}} style="display:none;"{{/unless}}>
                     <label>{{localize 'MonksEnhancedJournal.Bonds'}}</label>
                     <textarea name="flags.monks-enhanced-journal.bonds">{{flags.monks-enhanced-journal.bonds}}</textarea>
                 </div>
-                <div class="form-group">
+                <div class="form-group" {{#unless fields.flaws.value}} style="display:none;"{{/unless}}>
                     <label>{{localize 'MonksEnhancedJournal.Flaws'}}</label>
                     <textarea name="flags.monks-enhanced-journal.flaws">{{flags.monks-enhanced-journal.flaws}}</textarea>
                 </div>
-                <div class="form-group">
+                <div class="form-group" {{#unless fields.longterm.value}} style="display:none;"{{/unless}}>
                     <label>{{localize 'MonksEnhancedJournal.LongTermGoal'}}</label>
                     <textarea name="flags.monks-enhanced-journal.longterm">{{flags.monks-enhanced-journal.longterm}}</textarea>
                 </div>
-                <div class="form-group">
+                <div class="form-group" {{#unless fields.shirtterm.value}} style="display:none;"{{/unless}}>
                     <label>{{localize 'MonksEnhancedJournal.ShortTermGoal'}}</label>
-                    <textarea name="flags.monks-enhanced-journal.shortterm" >{{flags.monks-enhanced-journal.shortterm}}</textarea>
+                    <textarea name="flags.monks-enhanced-journal.shortterm">{{flags.monks-enhanced-journal.shortterm}}</textarea>
                 </div>
-                <div class="form-group">
+                <div class="form-group" {{#unless fields.beliefs.value}} style="display:none;"{{/unless}}>
                     <label>{{localize 'MonksEnhancedJournal.Beliefs'}}</label>
                     <textarea name="flags.monks-enhanced-journal.beliefs">{{flags.monks-enhanced-journal.beliefs}}</textarea>
                 </div>
-                <div class="form-group">
+                <div class="form-group" {{#unless fields.secret.value}} style="display:none;"{{/unless}}>
                     <label>{{localize 'MonksEnhancedJournal.Secret'}}</label>
-                    <textarea name="flags.monks-enhanced-journal.secret" >{{flags.monks-enhanced-journal.secret}}</textarea>
+                    <textarea name="flags.monks-enhanced-journal.secret">{{flags.monks-enhanced-journal.secret}}</textarea>
                 </div>
             </div>
         </div>
