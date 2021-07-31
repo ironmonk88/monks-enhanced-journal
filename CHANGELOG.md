@@ -24,8 +24,6 @@ Preloading polyglot fonts to speed up loading of Journal Page
 
 Added Notes to Encounter sheet
 
-
-
 # Version 1.0.18
 
 Added option to reorder slides by dragging and dropping.

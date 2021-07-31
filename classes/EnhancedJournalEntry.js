@@ -67,7 +67,7 @@ export class SubSheet {
     }
 
     async render(data) {
-        let templateData = this.getData(data);
+        let templateData = await this.getData(data);
 
         let html = await renderTemplate(this.constructor.defaultOptions.template, templateData);
         this.element = $(html).get(0);
@@ -1024,12 +1024,14 @@ export class PlaceSubSheet extends SubSheet {
 
         data.shops = data.flags['monks-enhanced-journal'].shops.map(s => {
             let shop = game.journal.find(j => j.id == s.id);
+            if (!shop)
+                return null;
             return mergeObject(s, {
                 img: shop?.data.img,
                 name: shop?.name,
                 shoptype: foundry.utils.getProperty(shop, "data.flags.monks-enhanced-journal.shoptype")
             });
-        });
+        }).filter(s => s);
 
         return data;
     }
@@ -1185,7 +1187,8 @@ export class PlaceSubSheet extends SubSheet {
     openShop(event) {
         let item = event.currentTarget.closest('.item');
         let shop = game.journal.find(s => s.id == item.dataset.id);
-        MonksEnhancedJournal.journal.open(shop, event.shiftKey);
+        if(shop)
+            MonksEnhancedJournal.journal.open(shop, event.shiftKey);
     }
 }
 
@@ -1390,7 +1393,7 @@ export class ShopSubSheet extends SubSheet {
         return 'shop';
     }
 
-    getData(data) {
+    async getData(data) {
         data = super.getData(data);
         data.purchaseOptions = {
             locked: "MonksEnhancedJournal.purchasing.locked",
@@ -1401,7 +1404,20 @@ export class ShopSubSheet extends SubSheet {
         //get shop items
         let groups = {};
         for (let item of data.flags['monks-enhanced-journal'].items) {
-            let type = item.type || 'unknown';
+            if (item.uuid.indexOf('Actor') > 0) //If the item info comes from the Actor, then ignore it, it will get picked up later
+                continue;
+            let entity = await fromUuid(item.uuid);
+            let type = entity.type || 'unknown';
+
+            item = mergeObject({
+                name: entity.name,
+                type: type,
+                img: entity.img,
+                qty: entity.data.data.quantity,
+                price: entity.data.data.price,
+                cost: entity.data.data.price
+            }, item);
+
             if (groups[type] == undefined)
                 groups[type] = { name: type, items: [] };
             if (game.user.isGM || this.object.isOwner || (item.hide !== true && item.qty > 0))
@@ -1412,19 +1428,24 @@ export class ShopSubSheet extends SubSheet {
             let id = data.flags['monks-enhanced-journal'].actor.id;
             let actor = game.actors.find(a => a.id == id);
 
-            for (let item of actor.items) {
-                let type = item.type || 'unknown';
+            for (let aItem of actor.items) {
+                let type = aItem.type || 'unknown';
                 if (groups[type] == undefined)
                     groups[type] = { name: type, items: [] };
-                groups[type].items.push({
-                    id: item.id,
-                    type: item.type,
-                    img: item.img,
-                    name: item.name,
-                    price: item.data.data.price,
-                    cost: item.data.data.price,
-                    qty: item.data.data.quantity
-                });
+
+                let sItem = data.flags['monks-enhanced-journal'].items.find(i => i.uuid == aItem.uuid) || {};
+
+                let item = mergeObject({
+                    id: aItem.id,
+                    uuid: aItem.uuid,
+                    type: aItem.type,
+                    img: aItem.img,
+                    name: aItem.name,
+                    price: aItem.data.data.price,
+                    cost: aItem.data.data.price,
+                    qty: aItem.data.data.quantity
+                }, sItem);
+                groups[type].items.push(item);
             }
         }
 
@@ -1511,10 +1532,8 @@ export class ShopSubSheet extends SubSheet {
             } else {
                 let newitem = {
                     id: item.id,
-                    type: item.type, 
-                    img: item.img,
-                    name: item.name,
-                    price: item.data.data.price,
+                    uuid: item.uuid,
+                    cost: item.data.data.price,
                     qty: item.data.data.quantity
                 };
 
@@ -1555,13 +1574,11 @@ export class ShopSubSheet extends SubSheet {
             //this is an actor item and it hasn't been edited yet
             item = {
                 id: li.dataset.id,
-                cost: item.data.data.price,
-                qty: item.data.data.quantity,
-                hide: true
+                uuid: li.dataset.uuid
             }
             item[action] = true;
 
-            this.object.data.flags["monks-enhanced-journal"].items.push(newitem);
+            this.object.data.flags["monks-enhanced-journal"].items.push(item);
         } else
             item[action] = !item[action];
 
@@ -1569,9 +1586,6 @@ export class ShopSubSheet extends SubSheet {
         
         await MonksEnhancedJournal.journal.saveData();
         this.refresh();
-    }
-
-    async lockItem(event) {
     }
 
     _deleteItem(event) {

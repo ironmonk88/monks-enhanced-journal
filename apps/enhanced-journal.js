@@ -501,10 +501,10 @@ export class EnhancedJournalSheet extends JournalSheet {
 
         let currentTab = this.tabs.active(false);
         if (currentTab?.id != tab.id || this.subdocument == undefined) {
-            if (tab.entity == undefined) {
+            //if (tab.entity == undefined) {
                 //try to find the entity
                 tab.entity = await this.findEntity(tab.entityId, tab.text);
-            }
+            //}
             
         }
 
@@ -856,14 +856,22 @@ export class EnhancedJournalSheet extends JournalSheet {
 
         this.subsheet.activateControls($('#journal-buttons', this.element).empty());
 
-        if (entity.folder) {
-            let idx = entity.folder.content.findIndex(e => e.id == entity.id);
-            $('.navigate-prev', this.element).html(idx == 0 ? '' : '&laquo; ' + entity.folder.content[idx - 1].name).attr('data-entity-id', idx == 0 ? '' : entity.folder.content[idx - 1].id);
-            $('.navigate-next', this.element).html(idx >= entity.folder.content.length - 1 ? '' : entity.folder.content[idx + 1].name + ' &raquo;').attr('data-entity-id', idx >= entity.folder.content.length - 1 ? '' : entity.folder.content[idx + 1].id);
-        } else {
-            $('.navigate-prev', this.element).html('').attr('data-entity-id', '');
-            $('.navigate-next', this.element).html('').attr('data-entity-id', '');
+        if (game.user.isGM || setting('allow-player')) {
+            if (entity.folder) {
+                let idx = entity.folder.content.findIndex(e => e.id == entity.id);
+                if (idx == -1) {
+                    $('.navigate-prev', this.element).html('').attr('data-entity-id', '');
+                    $('.navigate-next', this.element).html('').attr('data-entity-id', '');
+                } else {
+                    $('.navigate-prev', this.element).html(idx == 0 ? '' : '&laquo; ' + entity.folder.content[idx - 1].name).attr('data-entity-id', idx == 0 ? '' : entity.folder.content[idx - 1].id);
+                    $('.navigate-next', this.element).html(idx >= entity.folder.content.length - 1 ? '' : entity.folder.content[idx + 1].name + ' &raquo;').attr('data-entity-id', idx >= entity.folder.content.length - 1 ? '' : entity.folder.content[idx + 1].id);
+                }
+            } else {
+                $('.navigate-prev', this.element).html('').attr('data-entity-id', '');
+                $('.navigate-next', this.element).html('').attr('data-entity-id', '');
+            }
         }
+        $('footer', this.element).toggle(game.user.isGM || setting('allow-player'));
             /*
         if (game.modules.get("polyglot")?.active) {
             let btn = $('.polyglot-button', this.element);
@@ -1077,10 +1085,15 @@ export class EnhancedJournalSheet extends JournalSheet {
             this.subsheet.addItem(data).then(() => {
                 this.display(this.object);
             })
-        } else if (data.type == 'JournalEntry' && (this.entitytype == 'place')) {
-            this.subsheet.addShop(data).then(() => {
-                this.display(this.object);
-            })
+        } else if (data.type == 'JournalEntry') {
+            if (this.entitytype == 'place') {
+                this.subsheet.addShop(data).then(() => {
+                    this.display(this.object);
+                })
+            } else {
+                let entity = game.journal.get(data.id);
+                this.open(entity);
+            }
         } else if(data.type == 'Slide') {
             const target = event.target.closest(".slide") || null;
             if (data.slideId === target.dataset.slideId) return; // Don't drop on yourself
@@ -1129,8 +1142,14 @@ export class EnhancedJournalSheet extends JournalSheet {
             let objective = this.object.data.flags['monks-enhanced-journal'].objectives.find(o => o.id == id);
             if (objective) {
                 objective.status = $(ev.currentTarget).is(':checked');
-                return this.object.update({ 'flags.monks-enhanced-journal': this.object.data.flags['monks-enhanced-journal']});
+                return this.object.update({ 'flags.monks-enhanced-journal': this.object.data.flags['monks-enhanced-journal'] });
             }
+        } else if ($(ev.currentTarget).hasClass('item-field')) {
+            let id = ev.currentTarget.closest('li').dataset.id;
+            let item = this.object.data.flags['monks-enhanced-journal'].items.find(o => o.id == id);
+
+            item[$(ev.currentTarget).attr('name')] = parseInt($(ev.currentTarget).val());
+            return this.object.update({ 'flags.monks-enhanced-journal': this.object.data.flags['monks-enhanced-journal'] });
         } else {
             if (this.form == undefined)
                 this.form = $('.monks-enhanced-journal .body > .content form', this.element).get(0);

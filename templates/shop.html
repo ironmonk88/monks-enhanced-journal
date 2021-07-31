@@ -41,7 +41,7 @@
                     <div class="item-controls item-qty">{{localize 'MonksEnhancedJournal.Qty'}}</div>
                     <div class="item-controls item-price">{{localize 'MonksEnhancedJournal.Price'}}</div>
                     <div class="item-controls item-cost owner-only">{{localize 'MonksEnhancedJournal.Cost'}}</div>
-                    <div class="item-controls flexrow"></div>
+                    <div class="item-controls flexrow owner-only"></div>
                 </li>
 
                 <ol class="items-list">
@@ -51,22 +51,22 @@
                     </li>
                     <ul class="item-list">
                         {{#each this.items}}
-                        <li class="item flexrow" data-pack="{{this.pack}}" data-id="{{this.id}}" data-container="items" data-entity="Item" draggable="true">
+                        <li class="item flexrow" data-pack="{{this.pack}}" data-id="{{this.id}}" data-uuid="{{this.uuid}}" data-container="items" data-entity="Item" draggable="true">
                             <div class="item-name flexrow">
                                 <div class="item-image item-icon" style="background-image: url('{{this.img}}')"></div>
                                 <h4>{{this.name}}</h4>
                             </div>
 
                             <div class="item-controls item-qty">
-                                <input type="text" name="qty" value="{{this.qty}}" style="text-align:center;" />
+                                <input type="text" class="item-field" name="qty" value="{{this.qty}}" style="text-align:center;" />
                             </div>
 
-                            <div class="item-controls item-price owner-only">
-                                <span value="{{this.price}}" style="text-align:center;"></span>
+                            <div class="item-controls item-price owner-only" style="text-align:center;">
+                                <span>{{this.price}}</span>
                             </div>
 
                             <div class="item-controls item-cost">
-                                <input type="text" name="cost" value="{{this.price}}" style="text-align:center;" />
+                                <input type="text" class="item-field" name="cost" value="{{this.cost}}" style="text-align:center;" />
                             </div>
 
                             <div class="item-controls flexrow owner-only">
