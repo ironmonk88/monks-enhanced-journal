@@ -4,6 +4,8 @@ Fixing issues with removing Forien's Quest Folder
 
 Fixing issue with editing the person and city fields.
 
+Fixing issues with importing from compendium
+
 # Version 1.0.19
 
 Added the option to edit the fields that are seen on the person and city sheets
