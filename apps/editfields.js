@@ -20,7 +20,8 @@ export class EditFields extends FormApplication {
     }
 
     async _updateObject(event, formData) {
-        mergeObject(this.object, formData);
+        let fields = mergeObject({}, formData);
+        mergeObject(this.object.data.flags['monks-enhanced-journal'], fields);
         MonksEnhancedJournal.journal.saveData();
         this.change = true;
     }

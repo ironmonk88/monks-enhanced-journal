@@ -259,9 +259,11 @@ export class EnhancedJournalSheet extends JournalSheet {
         $('.sidebar', this.element).empty().append(html);
 
         //if (game.modules.get("forien-quest-log")?.active && !game.settings.get("forien-quest-log", 'showFolder')) {
-            let folder = game.journal.directory.folders.find(f => (f.name == '_fql_quests' && f.parent == null));
+        let folder = game.journal.directory.folders.find(f => (f.name == '_fql_quests' && f.parent == null));
+        if (folder) {
             let elem = html.find(`.folder[data-folder-id="${folder.id}"]`);
             elem.remove();
+        }
         //}
 
         this.activateDirectoryListeners(html);

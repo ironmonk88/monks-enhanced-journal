@@ -343,8 +343,10 @@ export class MonksEnhancedJournal {
                 if (pack.documentName == 'JournalEntry') {
                     //make sure that Enhanced Journal info is added
                     const document = await pack.getDocument(id);
-                    if (document.data.flags['monks-enhanced-journal'])
-                        data.update({ 'flags.monks-enhanced-journal': document.data.flags['monks-enhanced-journal'] });
+                    if (document.data.flags['monks-enhanced-journal']) {
+                        await data.update({ 'flags.monks-enhanced-journal': document.data.flags['monks-enhanced-journal'] });
+                        ui.journal.render();
+                    }
                 }
             });
         }
