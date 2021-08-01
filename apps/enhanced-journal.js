@@ -873,7 +873,7 @@ export class EnhancedJournalSheet extends JournalSheet {
                 $('.navigate-next', this.element).html('').attr('data-entity-id', '');
             }
         }
-        $('footer', this.element).toggle(game.user.isGM || setting('allow-player'));
+        $('footer', this.element).css({ 'display': (game.user.isGM || setting('allow-player') ? 'flex' : 'none') });
             /*
         if (game.modules.get("polyglot")?.active) {
             let btn = $('.polyglot-button', this.element);
@@ -1445,6 +1445,15 @@ export class EnhancedJournalSheet extends JournalSheet {
                 icon: '<i class="fas fa-place-of-worship"></i>',
                 callback: li => {
                     this.object.setFlag('monks-enhanced-journal', 'type', 'place').then(() => {
+                        MonksEnhancedJournal.journal.display(this.object);
+                    });
+                }
+            },
+            {
+                name: i18n("MonksEnhancedJournal.poi"),
+                icon: '<i class="fas fa-map-marker-alt"></i>',
+                callback: li => {
+                    this.object.setFlag('monks-enhanced-journal', 'type', 'poi').then(() => {
                         MonksEnhancedJournal.journal.display(this.object);
                     });
                 }

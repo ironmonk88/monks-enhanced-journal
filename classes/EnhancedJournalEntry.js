@@ -1009,7 +1009,7 @@ export class PlaceSubSheet extends SubSheet {
     getData(data) {
         data = super.getData(data);
 
-        data.townsfolk = data.flags['monks-enhanced-journal'].townsfolk.map(t => {
+        data.townsfolk = data.flags['monks-enhanced-journal'].townsfolk?.map(t => {
             let townsfolk;
             if (t.type == 'actor')
                 townsfolk = game.actors.find(a => a.id == t.id);
@@ -1022,7 +1022,7 @@ export class PlaceSubSheet extends SubSheet {
             });
         });
 
-        data.shops = data.flags['monks-enhanced-journal'].shops.map(s => {
+        data.shops = data.flags['monks-enhanced-journal'].shops?.map(s => {
             let shop = game.journal.find(j => j.id == s.id);
             if (!shop)
                 return null;
@@ -1189,6 +1189,43 @@ export class PlaceSubSheet extends SubSheet {
         let shop = game.journal.find(s => s.id == item.dataset.id);
         if(shop)
             MonksEnhancedJournal.journal.open(shop, event.shiftKey);
+    }
+}
+
+export class POISubSheet extends SubSheet {
+    constructor(data, options) {
+        super(data, options);
+    }
+
+    static get defaultOptions() {
+        return mergeObject(super.defaultOptions, {
+            text: "MonksEnhancedJournal.PointOfInterest",
+            template: "modules/monks-enhanced-journal/templates/poi.html"
+        });
+    }
+
+    get type() {
+        return 'poi';
+    }
+
+    _entityControls() {
+        let ctrls = [
+            { text: '<i class="fas fa-search"></i>', type: 'text' },
+            { id: 'search', type: 'input', text: i18n("MonksEnhancedJournal.SearchPOIDescription"), callback: MonksEnhancedJournal.journal.searchText },
+            { id: 'show', text: i18n("MonksEnhancedJournal.ShowToPlayers"), icon: 'fa-eye', conditional: game.user.isGM, callback: MonksEnhancedJournal.journal.doShowPlayers },
+            { id: 'edit', text: i18n("MonksEnhancedJournal.EditDescription"), icon: 'fa-pencil-alt', conditional: this.isEditable, callback: this.onEditDescription },
+            { id: 'convert', text: i18n("MonksEnhancedJournal.Convert"), icon: 'fa-clipboard-list', conditional: (game.user.isGM && this.isEditable), callback: MonksEnhancedJournal.journal.requestConvert }
+        ];
+        this.addPolyglotButton(ctrls);
+        return ctrls.concat(super._entityControls());
+    }
+
+    refresh() {
+        const owner = this.object.isOwner;
+        const content = TextEditor.enrichHTML(this.object.data.content, { secrets: owner, entities: true });
+
+        $('.editor-content[data-edit="content"]', MonksEnhancedJournal.journal.element).html(content);
+        super.refresh();
     }
 }
 

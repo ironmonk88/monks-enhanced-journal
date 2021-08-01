@@ -480,7 +480,7 @@
     display: none;
 }*/
 
-.person-container, .place-container, .organization-container, .shop-container {
+.person-container, .place-container, .organization-container, .shop-container, .poi-container {
     height: 100%;
 }
 
@@ -579,7 +579,8 @@
 .monks-journal-sheet.sheet .place-container,
 .monks-journal-sheet.sheet .quest-container,
 .monks-journal-sheet.sheet .organization-container,
-.monks-journal-sheet.sheet .shop-container {
+.monks-journal-sheet.sheet .shop-container,
+.monks-journal-sheet.sheet .poi-container {
     height: 100%;
 }
 
@@ -597,6 +598,7 @@
 .monks-journal-sheet.sheet .place-container .sheet-header img.profile,
 .monks-journal-sheet.sheet .quest-container .sheet-header img.profile,
 .monks-journal-sheet.sheet .organization-container .sheet-header img.profile,
+.monks-journal-sheet.sheet .poi-container .sheet-header img.profile,
 .monks-journal-sheet.sheet .shop-container .sheet-header img.profile {
     width: 100%;
     height: 100%;
@@ -667,6 +669,7 @@
 .monks-journal-sheet.sheet .person-container .sheet-header .header-details .form-group label,
 .monks-journal-sheet.sheet .place-container .sheet-header .header-details .form-group label,
 .monks-journal-sheet.sheet .quest-container .sheet-header .header-details .form-group label,
+.monks-journal-sheet.sheet .poi-container .sheet-header .header-details .form-group label,
 .monks-journal-sheet.sheet .organization-container .sheet-header .header-details .form-group label,
 .monks-journal-sheet.sheet .shop-container .sheet-header .header-details .form-group label {
     max-width: 175px;
@@ -675,6 +678,7 @@
 .monks-journal-sheet.sheet .person-container .sheet-header .header-details .form-group,
 .monks-journal-sheet.sheet .place-container .sheet-header .header-details .form-group,
 .monks-journal-sheet.sheet .quest-container .sheet-header .header-details .form-group,
+.monks-journal-sheet.sheet .poi-container .sheet-header .header-details .form-group,
 .monks-journal-sheet.sheet .organization-container .sheet-header .header-details .form-group,
 .monks-journal-sheet.sheet .shop-container .sheet-header .header-details .form-group {
     margin-right: 8px;

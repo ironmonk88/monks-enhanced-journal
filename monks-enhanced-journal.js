@@ -1,7 +1,7 @@
 import { registerSettings } from "./settings.js";
 import { EnhancedJournalSheet } from "./apps/enhanced-journal.js"
 import { SlideshowDisplay } from "./apps/slideshow-display.js"
-import { SubSheet, ActorSubSheet, EncounterSubSheet, JournalEntrySubSheet, PersonSubSheet, PictureSubSheet, PlaceSubSheet, QuestSubSheet, SlideshowSubSheet, OrganizationSubSheet, ShopSubSheet } from "./classes/EnhancedJournalEntry.js"
+import { SubSheet, ActorSubSheet, EncounterSubSheet, JournalEntrySubSheet, PersonSubSheet, PictureSubSheet, PlaceSubSheet, POISubSheet, QuestSubSheet, SlideshowSubSheet, OrganizationSubSheet, ShopSubSheet } from "./classes/EnhancedJournalEntry.js"
 import { backgroundinit } from "./classes/background.plugin.js"
 
 export let debug = (...args) => {
@@ -47,6 +47,7 @@ export class MonksEnhancedJournal {
             picture: PictureSubSheet,
             person: PersonSubSheet,
             place: PlaceSubSheet,
+            poi: POISubSheet,
             quest: QuestSubSheet,
             encounter: EncounterSubSheet,
             organization: OrganizationSubSheet,
@@ -60,7 +61,8 @@ export class MonksEnhancedJournal {
             slideshow: "MonksEnhancedJournal.slideshow",
             picture: "MonksEnhancedJournal.picture",
             person: "MonksEnhancedJournal.person",
-            place: "MonksEnhancedJournal.city",
+            place: "MonksEnhancedJournal.place",
+            poi: "MonksEnhancedJournal.poi",
             quest: "MonksEnhancedJournal.quest",
             encounter: "MonksEnhancedJournal.encounter",
             organization: "MonksEnhancedJournal.organization",
@@ -503,6 +505,7 @@ export class MonksEnhancedJournal {
             case 'actor': return 'fa-users';
             case 'organization': return 'fa-flag';
             case 'shop': return 'fa-dolly-flatbed';
+            case 'poi': return 'fa-map-marker-alt';
             default:
                 return 'fa-book-open';
         }

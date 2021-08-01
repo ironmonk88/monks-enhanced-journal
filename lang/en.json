@@ -154,6 +154,9 @@
   "MonksEnhancedJournal.Military": "Military",
   "MonksEnhancedJournal.Settings": "Settings",
   "MonksEnhancedJournal.EditFields": "Edit Fields",
+  "MonksEnhancedJournal.Type": "Type",
+  "MonksEnhancedJournal.PointOfInterest": "Point of Interest",
+  "MonksEnhancedJournal.SearchPOIDescription": "Search Description",
 
   "MonksEnhancedJournal.Contain": "Contain",
   "MonksEnhancedJournal.Cover": "Cover",
@@ -173,6 +176,7 @@
   "MonksEnhancedJournal.picture": "Picture",
   "MonksEnhancedJournal.person": "Person",
   "MonksEnhancedJournal.place": "Place",
+  "MonksEnhancedJournal.poi": "Point of Interest",
   "MonksEnhancedJournal.city": "City",
   "MonksEnhancedJournal.quest": "Quest",
   "MonksEnhancedJournal.encounter": "Encounter",

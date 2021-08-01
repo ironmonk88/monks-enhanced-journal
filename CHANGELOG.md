@@ -1,3 +1,13 @@
+# Version 1.0.21
+
+Fixed issue with toggling the folder navigation.  Showing an Actor, then going back to a Journal Entry would displace the lines.
+
+Added Point of Interest
+
+Fixed issue where old Place entries weren't loading due to the new features added not being initialised.
+
+Added Type field to Place, so you can show what type of settle ment it is, Village, Town, City, Metropolis, etc.
+
 # Version 1.0.20
 
 Fixing issues with removing Forien's Quest Folder
