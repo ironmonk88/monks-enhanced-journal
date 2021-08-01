@@ -8,6 +8,8 @@ Fixed issue where old Place entries weren't loading due to the new features adde
 
 Added Type field to Place, so you can show what type of settle ment it is, Village, Town, City, Metropolis, etc.
 
+Changed City back to Place
+
 # Version 1.0.20
 
 Fixing issues with removing Forien's Quest Folder
