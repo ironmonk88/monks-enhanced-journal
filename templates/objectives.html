@@ -2,7 +2,24 @@
     <div class="form-group">
         <label for="content">{{localize 'MonksEnhancedJournal.Name'}}</label>
         <div class="form-fields">
-            <textarea type="text" name="content" placeholder="Content" style="height:125px;">{{object.content}}</textarea>
+            <input type="text" name="title" placeholder="Name" value="{{object.title}}" />
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="content">Available</label>
+        <div class="form-fields">
+            <input type="checkbox" name="available" {{checked object.available}} />
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="content">Complete</label>
+        <div class="form-fields">
+            <input type="checkbox" name="complete" {{checked object.status}} />
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="form-fields">
+            <textarea name="content" placeholder="Content" style="height:125px;">{{object.content}}</textarea>
         </div>
     </div>
     <button type="submit" name="submit" value="1"><i class="far fa-save"></i> {{localize "MonksEnhancedJournal.Update"}}</button>

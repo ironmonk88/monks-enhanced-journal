@@ -1,8 +1,9 @@
 import { MonksEnhancedJournal, log, setting, i18n } from '../monks-enhanced-journal.js';
 
 export class TrapConfig extends FormApplication {
-    constructor(object, options = {}) {
+    constructor(object, journalentry, options = {}) {
         super(object, options);
+        this.journalentry = journalentry;
     }
 
     /** @override */
@@ -27,15 +28,15 @@ export class TrapConfig extends FormApplication {
     /** @override */
     async _updateObject(event, formData) {
         log('updating trap', event, formData, this.object);
+
         mergeObject(this.object, formData);
+        let traps = duplicate(this.journalentry.object.data.flags["monks-enhanced-journal"].traps || []);
         if (this.object.id == undefined) {
             this.object.id = makeid();
-            MonksEnhancedJournal.journal.object.data.flags["monks-enhanced-journal"].traps.push(this.object);
+            traps.push(this.object);
         }
 
-        MonksEnhancedJournal.journal.saveData().then(() => {
-            MonksEnhancedJournal.journal.display(MonksEnhancedJournal.journal.object);
-        });
+        this.journalentry.object.setFlag('monks-enhanced-journal', 'traps', traps);
     }
 
     activateListeners(html) {

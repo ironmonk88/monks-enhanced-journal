@@ -1,3 +1,26 @@
+# Version 1.0.22
+
+Oh where to begin with this update.
+The whole module has been rebuilt so instead of overwriting a Journal Entry, the browser part is it's own application and each Journal Type is it's own sheet now.  This gives greater flexibility for improvements int he future as well as inter-module communications.
+
+I am expecting it to break somewhere as the changes are massive.
+
+Things to note... that I'm sure doesn't cover everything, since I fixed things as I went.
+
+Added the option to open the browser with the file menu collapsed.
+
+Changed the Quests from having a status to having the option to "Show the quest to Players", "Show the Quest in the Notifications window", and "compete the quest".  I think this trims down the options nicely.
+
+Added the option of players requesting a purchase, or dragging the item itself if the GM allows it.
+
+Cleaned up the Journal Entries so that when shown to a player, they only reveal what they should reveal.
+
+Changed slideshow text to allow for multiple texts to be added.
+
+Added animations to the texts so they can fade in and out.
+
+Encounters will let you drag and drop the group of monsters onto the scene.
+
 # Version 1.0.21
 
 Fixed issue with toggling the folder navigation.  Showing an Actor, then going back to a Journal Entry would displace the lines.

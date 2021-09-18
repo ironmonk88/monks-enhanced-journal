@@ -1,0 +1,56 @@
+<div class="monks-enhanced-journal request-item item-card monks-journal-sheet sheet">
+    <div class="flexrow">
+        <div class="flexcol" style="align-items:center;">
+            <img src="{{actor.img}}" class="actor-icon" />
+            <h4>{{actor.name}}</h4>
+        </div>
+        <div class="flexcol" style="align-items:center;">
+            <img src="{{shop.img}}" class="shop-icon" />
+            <h4>{{shop.name}}</h4>
+        </div>
+    </div>
+    <ol class="items-list reward-items">
+        <li class="items-header flexrow">
+            <h3 class="item-name flexrow">{{localize 'MonksEnhancedJournal.Items'}}</h3>
+
+            <!--<div class="item-controls item-price">{{localize 'MonksEnhancedJournal.Price'}}</div>-->
+
+            <div class="item-controls item-qty">{{localize 'MonksEnhancedJournal.Qty'}}</div>
+
+            <div class="item-controls item-total">{{localize 'MonksEnhancedJournal.Total'}}</div>
+        </li>
+
+        <ol class="item-list">
+            {{#each items}}
+            <li class="item flexrow" data-id="{{this.id}}" data-uuid="{{this.uuid}}" draggable="false">
+                <div class="item-name flexrow">
+                    <div class="item-image" style="background-image: url('{{this.img}}')"></div>
+                    <h4>{{this.name}}</h4>
+                </div>
+
+                <!--<div class="item-controls item-price">
+                    <input type="text" name="price" value="{{this.price}}" style="text-align:center;" />
+                </div>-->
+
+                <div class="item-controls item-qty">
+                    <!--<input type="text" name="qty" value="{{this.qty}}" style="text-align:center;" />-->
+                    <span>{{this.qty}}</span>
+                </div>
+
+                <div class="item-controls item-total">
+                    <!--<input type="text" name="total" value="{{this.total}}" style="text-align:center;" />-->
+                    <span>{{this.total}}</span>
+                </div>
+            </li>
+            {{/each}}
+        </ol>
+    </ol>
+    <div class="gm-only flexrow request-buttons">
+        <button type="button" class="request-accept"><i class="fas fa-check"></i> Accept</button>
+        <button type="button" class="request-reject"><i class="fas fa-times"></i> Reject</button>
+    </div>
+    <footer class="card-footer">
+        <span class="request-msg"></span>
+        <span class="request-warning"></span>
+    </footer>
+</div>

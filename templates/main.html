@@ -1,4 +1,4 @@
-<div class="monks-enhanced-journal flexrow">
+<div class="monks-enhanced-journal flexrow {{#if collapsed}}collapse{{/if}}">
     <div class="body flexcol">
         <div class="mainbar flexcol">
             <div class="tab-bar flexrow">
@@ -11,7 +11,7 @@
                     {{/each}}
                     <div class="tab-button tab-add"><i class="fas fa-plus"></i></div>
                 </div>
-                <div class="tab-button sidebar-toggle"><i class="fas fa-caret-right"></i></div>
+                <div class="tab-button sidebar-toggle"><i class="fas {{#if collapsed}}fa-caret-left{{else}}fa-caret-right{{/if}}"></i></div>
             </div>
             <div class="bookmark-bar flexrow">
                 <div class="bookmark-button add-bookmark" title="{{localize 'MonksEnhancedJournal.AddBookmark'}}"><i class="fas fa-star"></i></div>
@@ -20,20 +20,14 @@
                 {{/each}}
             </div>
             <div class="navigation flexrow">
-                <div class="nav-button history back-button" title="{{localize 'MonksEnhancedJournal.Back'}}" data-history="back"><i class="fas fa-chevron-left"></i></div>
-                <div class="nav-button history forward-button disabled" title="{{localize 'MonksEnhancedJournal.Forward'}}" data-history="forward"><i class="fas fa-chevron-right"></i></div>
-                <div class="button-group flexrow" id="journal-buttons">
-                    <div class="nav-button search" title="{{localize 'MonksEnhancedJournal.Search'}}"><i class="fas fa-search"></i><input class="search" type="text" name="search-entry" autocomplete="off" /></div>
-                    <div class="nav-button show" title="{{localize 'MonksEnhancedJournal.ShowToPlayers'}}"><i class="fas fa-eye"></i></div>
-                    <div class="nav-button edit" title="{{localize 'MonksEnhancedJournal.Edit'}}"><i class="fas fa-pencil-alt"></i></div>
-                </div>
+                <div class="nav-button history back-button{{#unless canBack}} disabled{{/unless}}" title="{{localize 'MonksEnhancedJournal.Back'}}" data-history="back"><i class="fas fa-chevron-left"></i></div>
+                <div class="nav-button history forward-button{{#unless canForward}} disabled{{/unless}}" title="{{localize 'MonksEnhancedJournal.Forward'}}" data-history="forward"><i class="fas fa-chevron-right"></i></div>
+                <div class="button-group flexrow" id="journal-buttons"></div>
             </div>
         </div>
-        <div class="content">
-            <!--<div class="cancel-send notification info"></div>-->
-            <form class="flexcol editable" autocomplete="off">
-                {{{content}}}
-            </form>
+        <div class="content flexcol editable">
+            <section>
+            </section>
         </div>
         <footer class="flexrow">
             <div class="navigate-prev"></div>
@@ -41,5 +35,5 @@
             <div class="navigate-next"></div>
         </footer>
     </div>
-    <div class="sidebar"></div>
+    <div class="directory-sidebar"></div>
 </div>

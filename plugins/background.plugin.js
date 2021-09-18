@@ -32,7 +32,7 @@ let BackgroundPlugin = {
     },
 
     openDialog: function (editor) {
-        let olddata = MonksEnhancedJournal.journal.object.getFlag('monks-enhanced-journal', 'style') || {};
+        let olddata = editor.enhancedsheet.object.getFlag('monks-enhanced-journal', 'style') || {};
         return editor.windowManager.open({
             title: 'Edit Background',
             body: {
@@ -77,8 +77,8 @@ let BackgroundPlugin = {
                 var data = api.getData();
                 //editor.insertContent('Title: ' + data.title);
                 log(editor);
-                MonksEnhancedJournal.journal.object.setFlag('monks-enhanced-journal', 'style', data);
-                MonksEnhancedJournal.journal.updateStyle(data, $(editor.contentWindow.document.body));
+                editor.enhancedsheet.object.setFlag('monks-enhanced-journal', 'style', data);
+                editor.enhancedsheet.updateStyle(data, $(editor.contentWindow.document));
                 //MonksEnhancedJournal.journal.updateStyle(data);  //this one gets refreshed once the editor closes
                 
                 api.close();

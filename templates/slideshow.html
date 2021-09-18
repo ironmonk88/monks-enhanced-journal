@@ -1,56 +1,55 @@
-<div class="slideshow-container flexcol{{#if playing}} playing{{/if}} {{entrytype}}">
-    <div class="header-name">
-        <input name="name" type="text" value="{{name}}" placeholder="{{localize 'MonksEnhancedJournal.SlideshowName'}}">
+<form class="slideshow-container flexcol{{#if playing}} playing{{/if}} {{entrytype}}">
+    <div class="header-name flexrow">
+        <i class="fas fa-photo-video sheet-icon"></i>
+        <input name="name" type="text" value="{{data.name}}" placeholder="{{localize 'MonksEnhancedJournal.SlideshowName'}}">
+        <div class="slideshow-buttons flexrow">
+            <div class="nav-button play" title="Play" {{#if (eq data.flags.monks-enhanced-journal.state "playing")}}style="display:none;"{{/if}}><i class="fas fa-play"></i></div>
+            <div class="nav-button pause" title="Pause" {{#if (ne data.flags.monks-enhanced-journal.state "playing")}}style="display:none;"{{/if}}><i class="fas fa-pause"></i></div>
+            <div class="nav-button stop" title="Stop" {{#if (eq data.flags.monks-enhanced-journal.state "stopped")}}style="display:none;"{{/if}}><i class="fas fa-stop"></i></div>
+        </div>
     </div>
     <div class="flexcol slideshow-settings">
         <div class="form-group" style="flex: 0 0 30px;">
             <label for="flags.monks-enhanced-journal.showas">{{localize 'MonksEnhancedJournal.ShowAs'}}</label>
             <div class="form-fields">
                 <select name="flags.monks-enhanced-journal.showas">
-                    {{ selectOptions showasOptions selected=flags.monks-enhanced-journal.showas }}
+                    {{ selectOptions showasOptions selected=data.flags.monks-enhanced-journal.showas }}
                 </select>
             </div>
             <label style="padding-left:20px;">{{localize 'MonksEnhancedJournal.Loop'}}</label>
-            <input type="checkbox" name="flags.monks-enhanced-journal.loop" {{checked flags.monks-enhanced-journal.loop}}>
+            <input type="checkbox" name="flags.monks-enhanced-journal.loop" {{checked data.flags.monks-enhanced-journal.loop}}>
         </div>
         <div class="form-group" style="flex: 0 0 30px;">
             <label for="audiofile">{{localize 'MonksEnhancedJournal.AudioFile'}}</label>
             <div class="form-fields">
                 {{ filePicker type="audio" target="flags.monks-enhanced-journal.audiofile" }}
-                <input class="image" style="border-color:#7a7971;" type="text" name="flags.monks-enhanced-journal.audiofile" placeholder="path/audio.mp3" value="{{flags.monks-enhanced-journal.audiofile}}">
+                <input class="image" style="border-color:#7a7971;" type="text" name="flags.monks-enhanced-journal.audiofile" placeholder="path/audio.mp3" value="{{data.flags.monks-enhanced-journal.audiofile}}">
             </div>
         </div>
     </div>
     <div class="slide-showing">
-        <div class="duration" {{#unless slideshowing}}style="display:none;"{{/unless}}>
-            {{#if slideshowing.durlabel}}<div class="duration-label">{{slideshowing.durlabel}}</div>{{/if}}
-            {{#if slideshowing.durprog}}<div class="duration-bar" style="width:{{slideshowing.durprog}}%"></div>{{/if}}
-        </div>
-        {{#if slideshowing}}
-        <div class="slide" data-slide-id="{{slideshowing.id}}">
-            <div class="slide-background"><div style="{{slideshowing.background}}"></div></div>
-            <img src="{{slideshowing.img}}" style="object-fit:{{slideshowing.sizing}}" />
-            <div class="slide-text flexcol" style="text-align:{{slideshowing.text.align}};color:{{slideshowing.text.color}};">
-                <div class="text-upper"><div style="background-color:{{slideshowing.textbackground}};">{{slideshowing.topText}}</div></div>
-                <div class="text-middle"><div style="background-color:{{slideshowing.textbackground}};">{{slideshowing.middleText}}</div></div>
-                <div class="text-lower"><div style="background-color:{{slideshowing.textbackground}};">{{slideshowing.bottomText}}</div></div>
-            </div>
-        </div>
-        {{/if}}
+        <div class="duration"></div>
     </div>
     <div class="slideshow-body-outer">
         <div class="slideshow-body">
             {{#each slides}}
             <div class="slide{{#if this.active}} active{{/if}}" data-slide-id="{{this.id}}">
-                <div class="slide-background"><div style="{{this.background}}"></div></div>
-                <img src="{{this.img}}" style="object-fit:{{this.sizing}}" />
-                <div class="slide-text flexcol" style="text-align:{{this.text.align}};color:{{this.text.color}};">
-                    <div class="text-upper"><div style="background-color:{{this.textbackground}};">{{this.topText}}</div></div>
-                    <div class="text-middle"><div style="background-color:{{this.textbackground}};">{{this.middleText}}</div></div>
-                    <div class="text-lower"><div style="background-color:{{this.textbackground}};">{{this.bottomText}}</div></div>
+                <div class="slide-inner">
+                    <div class="slide-background"><div style="{{this.background}}"></div></div>
+                    <img src="{{this.img}}" style="object-fit:{{this.sizing}}" />
+                    <div class="slide-text flexcol">
+                        <svg viewBox="0 0 200 80" width="100%" height="100%">
+                            {{#each this.texts}}
+                            <text id="{{this.id}}" fill="{{this.color}}" x="{{this.left}}%" y="{{this.top}}%" text-anchor="{{this.align}}">{{this.text}}</text>
+                            {{/each}}
+                        </svg>
+                    </div>
                 </div>
             </div>
             {{/each}}
+            <div class="add-slide">
+                <i class="fas fa-plus"></i>
+            </div>
         </div>
     </div>
-</div>
+</form>

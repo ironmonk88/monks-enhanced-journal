@@ -1,31 +1,40 @@
-<div class="flexcol journal-subsheet sheet-body encounter-body {{entrytype}}" editable="{{editable}}">
+<form class="flexcol journal-subsheet sheet-body encounter-body {{entrytype}}" editable="{{editable}}">
     <div class="header-name flexrow">
-        <input name="name" type="text" value="{{name}}" placeholder="{{localize 'MonksEnhancedJournal.EncounterName'}}">
+        <i class="fas fa-toolbox sheet-icon"></i>
+        <input name="name" type="text" value="{{data.name}}" placeholder="{{localize 'MonksEnhancedJournal.EncounterName'}}">
     </div>
     <nav class="sheet-navigation tabs" data-group="primary">
         <a class="item active" data-tab="description">{{localize 'MonksEnhancedJournal.Description'}}</a>
-        <a class="item" data-tab="details">{{localize 'MonksEnhancedJournal.Details'}}</a>
+        {{#if owner}}<a class="item" data-tab="details">{{localize 'MonksEnhancedJournal.Details'}}</a>{{/if}}
         <a class="item" data-tab="notes">{{localize 'MonksEnhancedJournal.Notes'}}</a>
     </nav>
     <section class="sheet-body">
         <div class="tab description flexcol active" data-group="primary" data-tab="description">
-            {{editor target="content" content=content editable=true button=true owner=owner}}
+            {{editor target="content" content=data.content editable=true button=true owner=owner}}
         </div>
+        {{#if owner}}
         <div class="tab details flexcol" data-group="primary" data-tab="details">
             <div class="encounter-content flexcol">
                 <div style="height:100%;">
                     <ol class="items-list encounter-monsters">
-                        <li class="items-header flexrow">
-                            <h3 class="item-name flexrow">{{localize 'MonksEnhancedJournal.Monsters'}}</h3>
+                        <li class="items-header flexrow" style="position: relative;">
+                            <h3 class="item-name monster-name flexrow" style="padding-left:25px;">
+                                <div class="create-encounter" title="Drag to canvas to add all monsters"><i class="fas fa-bolt"></i></div>{{localize 'MonksEnhancedJournal.Monsters'}}
+                            </h3>
+                            <div class="item-controls item-qty">{{localize 'MonksEnhancedJournal.Qty'}}</div>
                             <div class="item-controls flexrow"></div>
                         </li>
 
                         <ol class="item-list">
-                            {{#each flags.monks-enhanced-journal.monsters}}
-                            <li class="item flexrow " data-pack="{{this.pack}}" data-id="{{this.id}}" data-container="monsters" data-entity="Actor" draggable="true">
+                            {{#each data.flags.monks-enhanced-journal.actors}}
+                            <li class="item flexrow " data-pack="{{this.pack}}" data-id="{{this.id}}" data-container="actors" data-entity="Actor" draggable="false" style="position:relative;">
                                 <div class="item-name flexrow">
-                                    <div class="item-image monster-icon" data-id="{{this.id}}" data-entity="Actor" style="background-image: url('{{this.img}}')" draggable="true"></div>
+                                    <div class="item-image monster-icon" data-id="{{this.id}}" data-entity="Actor" style="background-image: url('{{this.img}}')" draggable="false"></div>
                                     <h4>{{this.name}}</h4>
+                                </div>
+
+                                <div class="item-controls item-qty">
+                                    <input type="text" name="qty" ignoresubmit="true" value="{{this.qty}}" style="text-align:center;" />
                                 </div>
 
                                 <div class="item-controls flexrow">
@@ -46,8 +55,8 @@
                         </li>
 
                         <ol class="item-list">
-                            {{#each flags.monks-enhanced-journal.items}}
-                            <li class="item flexrow{{#if this.received}} received{{/if}}" data-pack="{{this.pack}}" data-id="{{this.id}}" data-container="items" data-entity="Item" draggable="true">
+                            {{#each data.flags.monks-enhanced-journal.items}}
+                            <li class="item flexrow{{#if this.received}} received{{/if}}" data-pack="{{this.pack}}" data-id="{{this.id}}" data-container="items" data-entity="Item" draggable="false">
                                 <div class="item-name flexrow">
                                     <div class="item-image item-icon" style="background-image: url('{{this.img}}')"></div>
                                     <h4>{{this.name}}</h4>
@@ -58,11 +67,11 @@
                                 </div>
 
                                 <div class="item-controls item-assigned">
-                                    <input type="checkbox" name="assigned" {{checked this.assigned}} style="text-align:center;" />
+                                    <input type="checkbox" name="assigned" ignoresubmit="true" {{checked this.assigned}} style="text-align:center;" />
                                 </div>
 
                                 <div class="item-controls item-qty">
-                                    <input type="text" name="qty" value="{{this.qty}}" style="text-align:center;" />
+                                    <input type="text" name="qty" ignoresubmit="true" value="{{this.qty}}" style="text-align:center;" />
                                 </div>
 
                                 <div class="item-controls flexrow">
@@ -89,10 +98,10 @@
                         </li>
 
                         <ol class="item-list">
-                            {{#each flags.monks-enhanced-journal.dcs}}
+                            {{#each dcs}}
                             <li class="item flexrow " data-id="{{this.id}}" data-container="dcs" draggable="false">
                                 <div class="item-name flexrow rollable">
-                                    <div class="item-image" style="background-image: url('{{this.img}}')"></div>
+                                    <div class="item-image" {{#if this.img}} style="background-image: url('{{this.img}}')" {{/if}}></div>
                                     <h4>{{this.name}}</h4>
                                 </div>
 
@@ -129,10 +138,10 @@
                         </li>
 
                         <ol class="item-list">
-                            {{#each flags.monks-enhanced-journal.traps}}
+                            {{#each data.flags.monks-enhanced-journal.traps}}
                             <li class="item flexrow " data-id="{{this.id}}" data-container="traps" draggable="false">
                                 <div class="item-name flexrow rollable">
-                                    <div class="item-image" style="background-image: url('{{this.img}}')"></div>
+                                    <div class="item-image" {{#if this.img}} style="background-image: url('{{this.img}}')" {{/if}}></div>
                                     <h4>{{this.name}}</h4>
                                 </div>
 
@@ -157,6 +166,7 @@
                 </div>
             </div>
         </div>
+        {{/if}}
         <div class="tab notes flexcol" data-group="primary" data-tab="notes">
             <div style="flex: 0 0 20px;">{{localize 'MonksEnhancedJournal.OnlyViewable'}}</div>
             <div>
@@ -164,4 +174,4 @@
             </div>
         </div>
     </section>
-</div>
+</form>

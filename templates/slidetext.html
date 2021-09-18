@@ -1,0 +1,49 @@
+<form class="slide-text" autocomplete="off" onsubmit="event.preventDefault();">
+    <div class="form-group">
+        <label for="text">{{localize 'MonksEnhancedJournal.Text'}}</label>
+        <div class="form-fields">
+            <textarea name="text">{{object.text}}</textarea>
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="top">Top</label>
+        <div class="form-fields">
+            <input type="range" name="top" data-dtype="String" min="0" max="100" step="5" value="{{object.top}}">
+            <span class="range-value">{{object.top}}</span>
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="left">Left</label>
+        <div class="form-fields">
+            <input type="range" name="left" data-dtype="String" min="0" max="100" step="5" value="{{object.left}}">
+            <span class="range-value">{{object.left}}</span>
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="align">{{localize 'MonksEnhancedJournal.Justification'}}</label>
+        <div class="form-fields">
+            <select name="align">
+                {{ selectOptions alignOptions selected=object.align localize=true }}
+            </select>
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="color">{{localize 'MonksEnhancedJournal.TextColour'}}</label>
+        <div class="form-fields">
+            <input type="text" name="color" data-dtype="String" value="{{object.color}}">
+            <input type="color" data-edit="color" value="{{object.color}}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="fadein">Fade In</label>
+        <div class="form-fields">
+            <input type="number" name="fadein" step="any" data-dtype="Number" value="{{object.fadein}}" style="max-width:100px;">
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="fadeout">Fade Out</label>
+        <div class="form-fields">
+            <input type="number" name="fadeout" step="any" data-dtype="Number" value="{{object.fadeout}}" style="max-width:100px;">
+        </div>
+    </div>
+</form>

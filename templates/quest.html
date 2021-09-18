@@ -1,83 +1,127 @@
-<div class="flexcol journal-subsheet quest-container {{entrytype}}" editable="{{editable}}">
-    <img class="fullscreen-image" src="{{img}}" />
+<form class="flexcol journal-subsheet quest-container {{entrytype}}" editable="{{editable}}">
+    <img class="fullscreen-image" src="{{data.img}}" />
     <header class="sheet-header journal-header flexrow">
         <div class="sheet-image">
-            <img class="profile" src="{{img}}" data-edit="img" onerror="this.src='modules/monks-enhanced-journal/assets/quest.png'">
+            <img class="profile" src="{{data.img}}" data-edit="img" onerror="this.src='modules/monks-enhanced-journal/assets/quest.png'">
         </div>
         <section class="header-details">
-            <h1 class="questname"><input name="name" type="text" value="{{name}}" placeholder="{{localize 'MonksEnhancedJournal.QuestName'}}"></h1>
+            <h1 class="questname flexrow">
+                <i class="fas fa-map-signs sheet-icon"></i>
+                <input name="name" type="text" value="{{data.name}}" placeholder="{{localize 'MonksEnhancedJournal.QuestName'}}">
+            </h1>
             <div class="form-group">
                 <label>{{localize 'MonksEnhancedJournal.Source'}}</label>
-                <input type="text" name="flags.monks-enhanced-journal.source" placeholder="{{localize 'MonksEnhancedJournal.Source'}}" value="{{flags.monks-enhanced-journal.source}}" />
+                <input type="text" name="flags.monks-enhanced-journal.source" placeholder="{{localize 'MonksEnhancedJournal.Source'}}" value="{{data.flags.monks-enhanced-journal.source}}" />
             </div>
+            {{#if owner}}
             <div class="form-group">
-                <label>{{localize 'MonksEnhancedJournal.Status'}}</label>
-                <select name="flags.monks-enhanced-journal.status" style="font-size:16px;">
-                    {{ selectOptions statusOptions selected=flags.monks-enhanced-journal.status localize=true }}
-                </select>
+                <div class="flexrow" style="align-items:center;">
+                    <label style="text-align:right;">Show to Players</label>
+                    <input class="show-to-players" type="checkbox" {{checked showtoplayers}}>
+                </div>
+                <div class="flexrow" style="align-items:center;">
+                    <label style="text-align:right;">Display in Notifications</label>
+                    <input name="flags.monks-enhanced-journal.display" type="checkbox" {{checked data.flags.monks-enhanced-journal.display}}>
+                </div>
+                <div class="flexrow" style="align-items:center;">
+                    <label style="text-align:right;">Completed</label>
+                    <input name="flags.monks-enhanced-journal.completed" type="checkbox" {{checked data.flags.monks-enhanced-journal.completed}}>
+                </div>
             </div>
+            {{/if}}
         </section>
+        {{#if data.flags.monks-enhanced-journal.actor}}
+        <div class="actor-img">
+            <div class="quest-source">Source</div>
+            <img src="{{data.flags.monks-enhanced-journal.actor.img}}" data-id="{{data.flags.monks-enhanced-journal.actor.id}}" data-entity="Actor" onerror="$(this).hide();">
+            <div style="text-align: center;font-size:12px;">{{data.flags.monks-enhanced-journal.actor.name}}</div>
+        </div>
+        {{/if}}
     </header>
     <nav class="sheet-navigation tabs" data-group="primary">
         <a class="item active" data-tab="description">{{localize 'MonksEnhancedJournal.Description'}}</a>
-        <a class="item" data-tab="objectives">{{localize 'MonksEnhancedJournal.Objectives'}}</a>
-        <a class="item" data-tab="rewards">{{localize 'MonksEnhancedJournal.Rewards'}}</a>
+        {{#if useobjectives}}<a class="item" data-tab="objectives">{{localize 'MonksEnhancedJournal.Objectives'}}</a>{{/if}}
+        {{#if owner}}<a class="item" data-tab="rewards">{{localize 'MonksEnhancedJournal.Rewards'}}</a>{{/if}}
         <a class="item" data-tab="notes">{{localize 'MonksEnhancedJournal.Notes'}}</a>
     </nav>
     <section class="sheet-body">
         <div class="tab description flexcol active" data-group="primary" data-tab="description">
-            {{editor target="content" content=content editable=true button=true owner=owner}}
+            {{editor target="content" content=data.content editable=true button=true owner=owner}}
         </div>
+        {{#if useobjectives}}
         <div class="tab objectives flexcol active" data-group="primary" data-tab="objectives">
             <ol class="items-list objective-items">
                 <li class="items-header flexrow">
                     <h3 class="item-name flexrow">{{localize 'MonksEnhancedJournal.Objectives'}}</h3>
 
+                    {{#if owner}}
+                    <div class="item-name flexrow" style="flex:0 0 100px;justify-content:center;">
+                        Visible
+                    </div>
+                    {{/if}}
+
                     <div class="item-name flexrow" style="flex:0 0 100px;justify-content:center;">
                         Complete
                     </div>
 
+                    {{#if owner}}
                     <div class="item-controls flexrow">
                         <a class="item-control objective-create" title="{{localize 'MonksEnhancedJournal.CreateObjective'}}" data-type="objective">
                             <i class="fas fa-plus"></i> {{localize 'MonksEnhancedJournal.Add'}}
                         </a>
                     </div>
+                    {{/if}}
                 </li>
 
                 <ol class="item-list">
-                    {{#each flags.monks-enhanced-journal.objectives}}
-                    <li class="item flexrow " data-id="{{this.id}}" data-container="objectives" draggable="true">
-                        <div class="item-name flexrow">
+                    {{#each objectives}}
+                    <li class="item flexcol " data-id="{{this.id}}" data-container="objectives" data-entity="Objective" draggable="true">
+                        <div class="flexrow">
+                            <div class="item-name flexrow">
+                                <h4 style="white-space: normal;font-weight:700;">{{this.title}}</h4>
+                            </div>
+
+                            {{#if @root.owner}}
+                            <div class="item-available flexrow" style="flex:0 0 100px;position:relative;justify-content:center;">
+                                <input class="objective-available" type="checkbox" {{checked this.available}} />
+                            </div>
+                            {{/if}}
+
+                            <div class="item-status flexrow" style="flex:0 0 100px;position:relative;justify-content:center;">
+                                <input class="objective-status" type="checkbox" {{checked this.status}} />
+                            </div>
+
+                            {{#if @root.owner}}
+                            <div class="item-controls flexrow">
+                                <a class="item-control objective-edit" title="Edit Objective"><i class="fas fa-edit"></i></a>
+                                <a class="item-control objective-delete" title="{{localize 'MonksEnhancedJournal.DeleteItem'}}"><i class="fas fa-trash"></i></a>
+                            </div>
+                            {{/if}}
+                        </div>
+                        <div class="item-content" style="width:100%;">
                             <h4 style="white-space: normal;">{{this.content}}</h4>
-                        </div>
-
-                        <div class="item-name flexrow" style="flex:0 0 100px;position:relative;justify-content:center;">
-                            <input class="objective-status" type="checkbox" {{checked this.status}} />
-                        </div>
-
-                        <div class="item-controls flexrow">
-                            <a class="item-control objective-edit" title="Edit Objective"><i class="fas fa-edit"></i></a>
-                            <a class="item-control objective-delete" title="{{localize 'MonksEnhancedJournal.DeleteItem'}}"><i class="fas fa-trash"></i></a>
                         </div>
                     </li>
                     {{/each}}
                 </ol>
             </ol>
         </div>
+        {{/if}}
+        {{#if owner}}
         <div class="tab rewards flexcol active" data-group="primary" data-tab="rewards">
             <div class="details" style="flex-grow:0;">
                 <div class="form-group">
                     <label>{{localize 'MonksEnhancedJournal.Experience'}}</label>
-                    <div class="form-fields">
+                    <div class="form-fields" style="justify-content:flex-end;">
                         <button type="button" class="assign-xp" title="Assign Experience" tabindex="-1">
                             <i class="fas fa-book-medical fa-fw"></i>
                         </button>
-                        <input type="text" name="flags.monks-enhanced-journal.xp" placeholder="{{localize 'MonksEnhancedJournal.Experience'}}" value="{{flags.monks-enhanced-journal.xp}}" />
+                        <input type="text" style="flex: 0 0 150px;text-align:right;" name="flags.monks-enhanced-journal.xp" placeholder="{{localize 'MonksEnhancedJournal.Experience'}}" value="{{data.flags.monks-enhanced-journal.xp}}" />
                     </div>
                 </div>
                 <div class="form-group">
                     <label>{{localize 'MonksEnhancedJournal.Additional'}}</label>
-                    <input type="text" name="flags.monks-enhanced-journal.additional" placeholder="{{localize 'MonksEnhancedJournal.Additional'}}" value="{{flags.monks-enhanced-journal.additional}}" />
+                    <input type="text" name="flags.monks-enhanced-journal.additional" placeholder="{{localize 'MonksEnhancedJournal.Additional'}}" value="{{data.flags.monks-enhanced-journal.additional}}" />
                 </div>
                 <div class="form-group">
                     <label>{{localize 'MonksEnhancedJournal.Currency'}}</label>
@@ -102,8 +146,8 @@
                 </li>
 
                 <ol class="item-list">
-                    {{#each flags.monks-enhanced-journal.items}}
-                    <li class="item flexrow{{#if this.received}} received{{/if}}" data-id="{{this.id}}" data-pack="{{this.pack}}" data-container="items" data-entity="Item" draggable="true">
+                    {{#each data.flags.monks-enhanced-journal.items}}
+                    <li class="item flexrow{{#if this.received}} received{{/if}}" data-id="{{this.id}}" data-pack="{{this.pack}}" data-container="items" data-entity="Item" draggable="false">
                         <div class="item-name flexrow">
                             <div class="item-image" style="background-image: url('{{this.img}}')"></div>
                             <h4>{{this.name}}</h4>
@@ -129,12 +173,13 @@
                 </ol>
             </ol>
         </div>
+        {{/if}}
         <div class="tab notes flexcol active" data-group="primary" data-tab="notes">
             <div style="flex: 0 0 20px;">{{localize 'MonksEnhancedJournal.OnlyViewable'}}</div>
             <div>
                 <textarea name="flags.monks-enhanced-journal.{{userid}}.notes" style="width: calc(100% - 4px);height: calc(100% - 4px)">{{userdata.notes}}</textarea>
             </div>
         </div>
-</section>
+    </section>
     <!-- Picture, Name, Source, Task/Description, Completion, Reward(XP, Items), Notes, isSeen, isComplete-->
-</div>
+</form>

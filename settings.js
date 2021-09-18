@@ -27,6 +27,15 @@ export const registerSettings = function () {
 		config: true
 	});
 
+	game.settings.register(modulename, "use-objectives", {
+		name: i18n("MonksEnhancedJournal.use-objectives.name"),
+		hint: i18n("MonksEnhancedJournal.use-objectives.hint"),
+		scope: "world",
+		config: true,
+		default: false,
+		type: Boolean,
+	});
+
 	game.settings.register(modulename, "show-objectives", {
 		name: i18n("MonksEnhancedJournal.show-objectives.name"),
 		hint: i18n("MonksEnhancedJournal.show-objectives.hint"),
@@ -51,6 +60,15 @@ export const registerSettings = function () {
 		scope: "world",
 		config: true,
 		default: true,
+		type: Boolean,
+	});
+
+	game.settings.register(modulename, "start-collapsed", {
+		name: i18n("MonksEnhancedJournal.start-collapsed.name"),
+		hint: i18n("MonksEnhancedJournal.start-collapsed.hint"),
+		scope: "world",
+		config: true,
+		default: false,
 		type: Boolean,
 	});
 }

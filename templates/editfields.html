@@ -3,7 +3,7 @@
     <div class="form-group">
         <label for="content">{{localize this.name}}</label>
         <div class="form-fields">
-            <input type="checkbox" name="fields.{{@key}}.value" {{checked this.value}} />
+            <input type="checkbox" name="{{@key}}.value" {{checked this.value}} />
         </div>
     </div>
     {{/each}}

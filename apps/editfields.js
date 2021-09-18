@@ -21,8 +21,8 @@ export class EditFields extends FormApplication {
 
     async _updateObject(event, formData) {
         let fields = mergeObject({}, formData);
-        mergeObject(this.object.data.flags['monks-enhanced-journal'], fields);
-        MonksEnhancedJournal.journal.saveData();
+        //mergeObject(this.object.data.flags['monks-enhanced-journal'], fields);
+        this.object.setFlag('monks-enhanced-journal', 'fields', fields)
         this.change = true;
     }
 
@@ -34,9 +34,11 @@ export class EditFields extends FormApplication {
         );
     }
 
+    /*
     async close(options) {
-        if (this.change)
-            MonksEnhancedJournal.journal.subsheet.refresh();
+        //if (this.change)
+        //    MonksEnhancedJournal.journal.subsheet.refresh();
+        MonksEnhancedJournal.journal.render();
         return super.close(options);
-    }
+    }*/
 }

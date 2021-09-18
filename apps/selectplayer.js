@@ -5,10 +5,12 @@ export class SelectPlayer extends FormApplication {
     showpic = false;
     updatepermission = false;
 
-    constructor(object, options = {}) {
-        super(object, options);
+    constructor(sheet, options = {}) {
+        super(sheet.object, options);
         this.showpic = (options.showpic != undefined ? options.showpic : false);
         this.updatepermission = (options.updatepermission != undefined ? options.updatepermission : false);
+
+        this.journalsheet = sheet;
     }
 
     /** @override */
@@ -45,10 +47,8 @@ export class SelectPlayer extends FormApplication {
     }
 
     canShowPic() {
-        let type = this.object.data.flags["monks-enhanced-journal"].type;
-        return (["person", "place", "poi", "quest", "oldentry", "organization", "shop"].includes(type) ||
-            this.object.documentName == 'Actor' ||
-            ((type == 'journalentry' || type == 'oldentry') && this.object.data.img != ''));
+        let type = this.journalsheet.object.data?.flags["monks-enhanced-journal"]?.type || 'oldentry';
+        return ((["person", "place", "poi", "quest", "oldentry", "organization", "shop", "oldentry", "journalentry", "base"].includes(type) || this.object.documentName == 'Actor') && this.object.data.img);
     }
 
     /* -------------------------------------------- */
@@ -88,7 +88,8 @@ export class SelectPlayer extends FormApplication {
         if (mode == 'players' && this.users.length == 0) {
             return;
         }
-        MonksEnhancedJournal.journal._onShowPlayers.call(MonksEnhancedJournal.journal, this.object, (mode == 'all' ? null : this.users), { showpic: this.showpic, updatepermission: this.updatepermission }, event);
+        event.data = {users: (mode == 'all' ? null : this.users), options: { showpic: this.showpic, updatepermission: this.updatepermission }};
+        this.journalsheet._onShowPlayers.call(this.journalsheet, event);
     }
 
     activateListeners(html) {

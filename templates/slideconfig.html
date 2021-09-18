@@ -1,4 +1,4 @@
-<form class="slide-config" autocomplete="off" onsubmit="event.preventDefault();">
+<form class="slide-config monks-journal-sheet sheet" autocomplete="off" onsubmit="event.preventDefault();">
     <header class="form-header">
         <h3><i class="far fa-image"></i> {{localize 'MonksEnhancedJournal.Details'}}</h3>
     </header>
@@ -27,42 +27,35 @@
     <header class="form-header">
         <h3><i class="far fa-image"></i> {{localize 'MonksEnhancedJournal.Text'}}</h3>
     </header>
-    <div class="form-group">
-        <label for="text.content">{{localize 'MonksEnhancedJournal.Text'}}</label>
-        <div class="form-fields">
-            <textarea name="text.content">{{object.text.content}}</textarea>
-        </div>
-    </div>
-    <div class="form-group">
-        <label for="text.color">{{localize 'MonksEnhancedJournal.TextColour'}}</label>
-        <div class="form-fields">
-            <input type="text" name="text.color" data-dtype="String" value="{{object.text.color}}">
-            <input type="color" data-edit="text.color" value="{{object.text.color}}">
-        </div>
-    </div>
-    <div class="form-group">
-        <label for="text.background">{{localize 'MonksEnhancedJournal.BackgroundColour'}}</label>
-        <div class="form-fields">
-            <input type="text" name="text.background" data-dtype="String" value="{{object.text.background}}">
-            <input type="color" data-edit="text.background" value="{{object.text.background}}">
-        </div>
-    </div>
-    <div class="form-group">
-        <label for="text.align">{{localize 'MonksEnhancedJournal.Justification'}}</label>
-        <div class="form-fields">
-            <select name="text.align">
-                {{ selectOptions alignOptions selected=object.text.align localize=true }}
-            </select>
-        </div>
-    </div>
-    <div class="form-group">
-        <label for="text.valign">{{localize 'MonksEnhancedJournal.VAlign'}}</label>
-        <div class="form-fields">
-            <select name="text.valign">
-                {{ selectOptions vAlignOptions selected=object.text.valign localize=true }}
-            </select>
-        </div>
-    </div>
+    <ol class="items-list slide-text-list" style="overflow:visible;flex: 0 0 100px;">
+        <li class="items-header flexrow">
+            <h3 class="item-name slide-name flexrow"></h3>
+            <div class="item-controls"></div>
+            <div class="item-controls flexrow">
+                <a class="item-control text-create" title="Add Text">
+                    <i class="fas fa-plus"></i> {{localize 'MonksEnhancedJournal.Add'}}
+                </a>
+            </div>
+        </li>
+
+        <ol class="item-list" style="overflow:auto;">
+            {{#each object.texts}}
+            <li class="item flexrow" data-id="{{this.id}}">
+                <div class="item-name flexrow">
+                    <h4>{{this.text}}</h4>
+                </div>
+
+                <div class="item-controls">
+                </div>
+
+                <div class="item-controls flexrow">
+                    <a class="item-control text-edit" title="Edit Text"><i class="fas fa-edit"></i></a>
+                    <a class="item-control text-delete" title="Delete Text"><i class="fas fa-trash"></i></a>
+                </div>
+            </li>
+            {{/each}}
+        </ol>
+    </ol>
     <header class="form-header">
         <h3><i class="far fa-image"></i> {{localize 'MonksEnhancedJournal.Transition'}}</h3>
     </header>

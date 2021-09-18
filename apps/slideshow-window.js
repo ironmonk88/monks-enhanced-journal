@@ -1,13 +1,12 @@
 import { MonksEnhancedJournal, log, setting, i18n } from '../monks-enhanced-journal.js';
 
-export class SlideshowDisplay extends FormApplication {
+export class SlideshowWindow extends FormApplication {
     constructor(object, options = {}) {
         super(object, options);
     }
 
     /** @override */
     static get defaultOptions() {
-
         return mergeObject(super.defaultOptions, {
             id: "slideshow-display",
             classes: ["sheet"],
@@ -24,5 +23,9 @@ export class SlideshowDisplay extends FormApplication {
             submitOnChange: false,
             submitOnClose: false,
         });
+    }
+
+    get title() {
+        return this.object.name;
     }
 }

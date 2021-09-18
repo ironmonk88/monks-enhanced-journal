@@ -1,8 +1,9 @@
 import { MonksEnhancedJournal, log, setting, i18n, makeid } from '../monks-enhanced-journal.js';
 
 export class DCConfig extends FormApplication {
-    constructor(object, options = {}) {
+    constructor(object, journalentry, options = {}) {
         super(object, options);
+        this.journalentry = journalentry;
     }
 
     /** @override */
@@ -34,15 +35,15 @@ export class DCConfig extends FormApplication {
     /** @override */
     async _updateObject(event, formData) {
         log('updating dc', event, formData, this.object);
+
         mergeObject(this.object, formData);
+        let dcs = duplicate(this.journalentry.object.data.flags["monks-enhanced-journal"].dcs || []);
         if (this.object.id == undefined) {
             this.object.id = makeid();
-            MonksEnhancedJournal.journal.object.data.flags["monks-enhanced-journal"].dcs.push(this.object);
+            dcs.push(this.object);
         }
             
-        MonksEnhancedJournal.journal.saveData().then(() => {
-            MonksEnhancedJournal.journal.display(MonksEnhancedJournal.journal.object);
-        });
+        this.journalentry.object.setFlag('monks-enhanced-journal', 'dcs', dcs);
     }
 
     activateListeners(html) {
@@ -50,8 +51,9 @@ export class DCConfig extends FormApplication {
     }
 
     async close(options) {
-        if (this.object.id && (this.object.attribute == 'undefined' || this.object.attribute.indexOf(':') < 0))
-            MonksEnhancedJournal.journal.subsheet.deleteItem(this.object.id, 'dcs');    //delete it if it wasn't created properly
+        if (this.object.id && (this.object.attribute == 'undefined' || this.object.attribute.indexOf(':') < 0)) {
+           this.journalentry.deleteItem(this.object.id, 'dcs');    //delete it if it wasn't created properly
+        }
         return super.close(options);
     }
 }
