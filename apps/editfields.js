@@ -33,12 +33,4 @@ export class EditFields extends FormApplication {
             }
         );
     }
-
-    /*
-    async close(options) {
-        //if (this.change)
-        //    MonksEnhancedJournal.journal.subsheet.refresh();
-        MonksEnhancedJournal.journal.render();
-        return super.close(options);
-    }*/
 }

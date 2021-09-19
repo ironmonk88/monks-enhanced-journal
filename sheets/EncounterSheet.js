@@ -203,48 +203,7 @@ export class EncounterSheet extends EnhancedJournalSheet {
         }
     }
 
-    /*
-    async addActor(data) {
-        let actor;
-        if (data.pack) {
-            const pack = game.packs.get(data.pack);
-            let id = data.id;
-            if (data.lookup) {
-                if (!pack.index.length) await pack.getIndex();
-                const entry = pack.index.find(i => (i._id === data.lookup) || (i.name === data.lookup));
-                id = entry.id;
-            }
-            actor = id ? await pack.getDocument(id) : null;
-        } else {
-            actor = game.actors.get(data.id);
-            if (actor.documentName === "Scene" && actor.journal) actor = actor.journal;
-            if (!actor.testUserPermission(game.user, "LIMITED")) {
-                return ui.notifications.warn(`You do not have permission to view this ${actor.entity} sheet.`);
-            }
-        }
-
-        if (this.object.data.flags["monks-enhanced-journal"].actors == undefined || !(this.object.data.flags["monks-enhanced-journal"].actors instanceof Array))
-            this.object.data.flags["monks-enhanced-journal"].actors = [];
-
-        if (actor) {
-            let actor = {
-                id: actor.id,
-                img: actor.img,
-                name: actor.name,
-                qty: 1
-            };
-
-            if (data.pack)
-                actor.pack = data.pack;
-
-            let actors = duplicate(this.object.getFlag("monks-enhanced-journal", "actors") || []);
-            actors.push(actor);
-
-            this.object.setFlag("monks-enhanced-journal", "actors", actors);
-        }
-    }*/
-
-    async addItem(data) {
+   async addItem(data) {
         let item = await this.getEntity(data);
 
         if (item.entity) {
@@ -258,45 +217,6 @@ export class EncounterSheet extends EnhancedJournalSheet {
             }
             this.object.setFlag('monks-enhanced-journal', 'items', items);
         }
-        /*
-        let item;
-
-        if (data.pack) {
-            const pack = game.packs.get(data.pack);
-            let id = data.id;
-            if (data.lookup) {
-                if (!pack.index.length) await pack.getIndex();
-                const entry = pack.index.find(i => (i._id === data.lookup) || (i.name === data.lookup));
-                id = entry.id;
-            }
-            item = id ? await pack.getDocument(id) : null;
-        } else {
-            item = game.items.get(data.id);
-        }
-
-        if (this.object.data.flags["monks-enhanced-journal"].items == undefined)
-            this.object.data.flags["monks-enhanced-journal"].items = [];
-
-        if (item) {
-            let olditem = this.object.data.flags["monks-enhanced-journal"].items.find(i => i.id == item.id);
-            if (olditem) {
-                olditem.qty++;
-            } else {
-                let newitem = {
-                    id: item.id,
-                    img: item.img,
-                    name: item.name,
-                    qty: 1
-                };
-
-                if (data.pack)
-                    newitem.pack = data.pack;
-
-                this.object.data.flags["monks-enhanced-journal"].items.push(newitem);
-            }
-            await MonksEnhancedJournal.journal.saveData();
-            this.render();
-        }*/
     }
 
     clickItem(event) {

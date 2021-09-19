@@ -167,7 +167,7 @@ export class EnhancedJournal extends Application {
 
             let contentform = $('.content > section', this.element);
 
-            const cls = this.object._getSheetClass();
+            const cls = (this.object._getSheetClass ? this.object._getSheetClass() : null);
             if (!cls)
                 this.subsheet = new EnhancedJournalSheet(this.object);
             else
@@ -346,7 +346,7 @@ export class EnhancedJournal extends Application {
     async close(options) {
         if (options?.submit !== false) {
             if (this.checkForChanges()) {
-                if (!confirm('You have unsaved changes, are you sure you want to close this window?'))
+                if (!confirm(i18n("MonksEnhancedJournal.YouHaveChanges")))
                     return false;
             }
             return super.close(options);
@@ -435,7 +435,7 @@ export class EnhancedJournal extends Application {
 
     async activateTab(tab, event) {
         if (this.checkForChanges()) {
-            if (!confirm('You have unsaved changes, are you sure you want to close this window?'))
+            if (!confirm(i18n("MonksEnhancedJournal.YouHaveChanges")))
                 return;
         }
 
@@ -791,14 +791,14 @@ export class EnhancedJournal extends Application {
 
     async splitJournal(event) {
         if ($('.nav-button.split i', this.enhancedjournal.element).hasClass('disabled')) {
-            ui.notifications.warn("Cannot split a journal while it's being edited");
+            ui.notifications.warn(i18n("MonksEnhancedJournal.CannotSplitJournal"));
             return;
         }
 
         let ctrl = window.getSelection().baseNode?.parentNode;
 
         if (ctrl == undefined) {
-            ui.notifications.info("No text selected to split");
+            ui.notifications.info(i18n("MonksEnhancedJournal.NoTextSelected"));
             return;
         }
 
@@ -808,7 +808,7 @@ export class EnhancedJournal extends Application {
             var selectedText = selection.extractContents();
             let selectedHTML = $('<div>').append(selectedText);
             if (selectedHTML.html() != '') {
-                let title = $('h1,h2,h3,h4', selectedHTML).first().text() || 'Extracted Journal Entry';
+                let title = $('h1,h2,h3,h4', selectedHTML).first().text() || i18n("MonksEnhancedJournal.ExtractedJournalEntry");
 
                 //create a new Journal entry in the same folder as the current object
                 //set the content to the extracted text (selectedHTML.html()) and use the title
@@ -821,9 +821,9 @@ export class EnhancedJournal extends Application {
                 //save the current entry and refresh to make sure everything is reset
                 await this.object.update({ content: $(ctrl).closest('div.editor-content').html() });
             } else
-                ui.notifications.warn('Nothing selected');
+                ui.notifications.warn(i18n("MonksEnhancedJournal.NothingSelected"));
         } else {
-            ui.notifications.warn('No editor content selected');
+            ui.notifications.warn(i18n("MonksEnhancedJournal.NoEditorContent"));
         }
     }
 

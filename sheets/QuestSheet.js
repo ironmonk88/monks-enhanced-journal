@@ -199,44 +199,6 @@ export class QuestSheet extends EnhancedJournalSheet {
             }
             this.object.setFlag('monks-enhanced-journal', 'items', items);
         }
-        /*
-        let item;
-
-        if (data.pack) {
-            const pack = game.packs.get(data.pack);
-            let id = data.id;
-            if (data.lookup) {
-                if (!pack.index.length) await pack.getIndex();
-                const entry = pack.index.find(i => (i._id === data.lookup) || (i.name === data.lookup));
-                id = entry.id;
-            }
-            item = id ? await pack.getDocument(id) : null;
-        } else {
-            item = game.items.get(data.id);
-        }
-
-        if (item) {
-            let items = duplicate(this.object.getFlag("monks-enhanced-journal", "items") || []);
-
-            let olditem = items.find(i => i.id == item.id);
-            if (olditem) {
-                olditem.qty++;
-            } else {
-                let newitem = {
-                    id: item.id,
-                    img: item.img,
-                    name: item.name,
-                    qty: 1
-                };
-
-                if (data.pack)
-                    newitem.pack = data.pack;
-
-                items.push(newitem);
-            }
-            this.object.setFlag("monks-enhanced-journal", "items", items);
-            //this.render(); //I think this happens automatically when the object gets changed?
-        }*/
     }
 
     changePermissions(event) {
@@ -252,18 +214,6 @@ export class QuestSheet extends EnhancedJournalSheet {
         event.currentTarget = li;
         TextEditor._onClickEntityLink(event);
     }
-
-    /*
-    _deleteItem(event) {
-        let item = event.currentTarget.closest('.item');
-        this.deleteItem(item.dataset.id, item.dataset.container);
-    }
-
-    deleteItem(id, container) {
-        this.object.data.flags["monks-enhanced-journal"][container].findSplice(i => i.id == id);
-        $(`li[data-id="${id}"]`, this.element).remove();
-        MonksEnhancedJournal.journal.saveData();
-    }*/
 
     createObjective() {
         let objective = { status: false };
@@ -309,7 +259,7 @@ export class QuestSheet extends EnhancedJournalSheet {
                     //const slide = this.object.data.flags["monks-enhanced-journal"].slides.get(li.data("entityId"));
                     Dialog.confirm({
                         title: `${game.i18n.localize("SIDEBAR.Delete")} Actor Link`,
-                        content: 'Are you sure you want to remove a link to this Actor?',
+                        content: i18n("MonksEnhancedJournal.ConfirmRemoveLink"),
                         yes: this.removeActor.bind(this)
                     });
                 }

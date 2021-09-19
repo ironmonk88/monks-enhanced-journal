@@ -1,7 +1,6 @@
 import { registerSettings } from "./settings.js";
 import { EnhancedJournal } from "./apps/enhanced-journal.js"
 import { SlideshowWindow } from "./apps/slideshow-window.js"
-import { EnhancedJournalSheet } from "./sheets/EnhancedJournalSheet.js"
 import { EncounterSheet } from "./sheets/EncounterSheet.js"
 import { JournalEntrySheet } from "./sheets/JournalEntrySheet.js"
 import { PersonSheet } from "./sheets/PersonSheet.js"

@@ -92,18 +92,6 @@ export class SlideshowSheet extends EnhancedJournalSheet {
         if (flags.state !== 'stopped' && data.slides) {
             data.slideshowing = data.slides[flags.slideAt];
 
-            /*
-            if (data.slideshowing.background?.color == '')
-                data.slideshowing.background = `background-image:url(\'${data.slideshowing.img}\');`;
-            else
-                data.slideshowing.background = `background-color:${data.slideshowing.background.color}`;
-
-            data.slideshowing.textbackground = hexToRGBAString(colorStringToHex(data.slideshowing.text?.background || '#000000'), 0.5);
-
-            data.slideshowing.topText = (data.slideshowing.text?.valign == 'top' ? data.slideshowing.text?.content : '');
-            data.slideshowing.middleText = (data.slideshowing.text?.valign == 'middle' ? data.slideshowing.text?.content : '');
-            data.slideshowing.bottomText = (data.slideshowing.text?.valign == 'bottom' ? data.slideshowing.text?.content : '');
-            */
             if (data.slideshowing.transition?.duration > 0) {
                 let time = data.slideshowing.transition.duration * 1000;
                 let timeRemaining = time - ((new Date()).getTime() - data.slideshowing.transition.startTime);
@@ -119,20 +107,10 @@ export class SlideshowSheet extends EnhancedJournalSheet {
         let ctrls = [
             { id: 'add', text: i18n("MonksEnhancedJournal.AddSlide"), icon: 'fa-plus', conditional: game.user.isGM || this.object.isOwner, callback: this.addSlide },
             { id: 'clear', text: i18n("MonksEnhancedJournal.ClearAll"), icon: 'fa-dumpster', conditional: game.user.isGM || this.object.isOwner, callback: this.deleteAll },
-            //{ id: 'play', text: i18n("MonksEnhancedJournal.Play"), icon: 'fa-play', visible: this.object.data.flags["monks-enhanced-journal"].state !== 'playing', conditional: game.user.isGM, callback: this.playSlideshow },
-            //{ id: 'pause', text: i18n("MonksEnhancedJournal.Pause"), icon: 'fa-pause', visible: this.object.data.flags["monks-enhanced-journal"].state === 'playing', conditional: game.user.isGM, callback: this.pauseSlideshow },
-            //{ id: 'stop', text: i18n("MonksEnhancedJournal.Stop"), icon: 'fa-stop', visible: this.object.data.flags["monks-enhanced-journal"].state !== 'stopped', conditional: game.user.isGM, callback: this.stopSlideshow }
-        ];
+         ];
         ctrls = ctrls.concat(super._entityControls());
         return ctrls;
     }
-
-    /*
-    async _render(force, options) {
-        super._render(force, options).then((html) => {
-            
-        });
-    }*/
 
     async refresh() {
         super.refresh();
@@ -285,7 +263,7 @@ export class SlideshowSheet extends EnhancedJournalSheet {
     async playSlideshow(refresh = true) {
         let flags = this.object.data.flags["monks-enhanced-journal"];
         if (flags.slides.length == 0) {
-            ui.notifications.warn('Cannot play a slideshow with no slides');
+            ui.notifications.warn(i18n("MonksEnhancedJournal.CannotPlayNoSlides"));
             return;
         }
 
@@ -418,25 +396,6 @@ export class SlideshowSheet extends EnhancedJournalSheet {
             $('.slide-showing', this.element).append(newSlide);
             newSlide.css({ opacity: 0 }).animate({ opacity: 1 }, 1000, 'linear');
         }
-
-        /*
-        let background = '';
-
-        if (slide.background?.color == '')
-            background = `background-image:url(\'${slide.img}\');`;
-        else
-            background = `background-color:${slide.background?.color}`;
-
-        let textBackground = hexToRGBAString(colorStringToHex(slide.text?.background || '#000000'), 0.5);
-
-        let slideShowing = $('.slide-showing', this.element);
-        $('.slide-background > div', slideShowing).attr({ style: background });
-        $('.slide > img', slideShowing).attr('src', slide.img).css({ 'object-fit': (slide.sizing || 'contain') });
-        $('.slide-text > div', slideShowing).css({ 'text-align': slide.text?.align, color: slide.text?.color });
-        $('.text-upper > div', slideShowing).css({ 'background-color': textBackground }).html(slide.text?.valign == 'top' ? slide.text?.content : '');
-        $('.text-middle > div', slideShowing).css({ 'background-color': textBackground }).html(slide.text?.valign == 'middle' ? slide.text?.content : '');
-        $('.text-lower > div', slideShowing).css({ 'background-color': textBackground }).html(slide.text?.valign == 'bottom' ? slide.text?.content : '');
-        */
 
         $(`.slideshow-body .slide:eq(${idx})`, this.element).addClass('active').siblings().removeClass('active');
         $('.slideshow-body', this.element).scrollLeft((idx * 116));

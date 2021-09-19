@@ -43,34 +43,6 @@ export class SlideConfig extends FormApplication {
         }
 
         this.journalentry.setFlag('monks-enhanced-journal', 'slides', slides);
-
-        /*
-        mergeObject(this.object, formData);
-        if (this.object.id == undefined) {
-            this.object.id = makeid();
-            MonksEnhancedJournal.journal.object.data.flags["monks-enhanced-journal"].slides.push(this.object);
-
-            MonksEnhancedJournal.createSlide(this.object, $('.slideshow-body', MonksEnhancedJournal.journal.element));
-        }
-
-        MonksEnhancedJournal.journal.saveData();
-        .then(() => {
-            MonksEnhancedJournal.journal.render();
-        });
-
-        $(`.slide[data-slide-id="${this.object.id}"] img`, MonksEnhancedJournal.journal.element)
-            .attr('src', this.object.img)
-            .css({ 'object-fit': this.object.sizing });
-
-        $(`.slide[data-slide-id="${this.object.id}"] .slide-background > div`, MonksEnhancedJournal.journal.element).css({ 'background-image': (this.object.background.color == '' ? `url('${this.object.img}')` : ''), 'background-color': (this.object.background.color != '' ? this.object.background.color : '') });
-
-        let textBackground = hexToRGBAString(colorStringToHex(this.object.text?.background || '#000000'), 0.5);
-
-        $(`.slide[data-slide-id="${this.object.id}"] .slide-text`, MonksEnhancedJournal.journal.element).css({ 'text-align': this.object.text?.align || 'center', 'color': this.object.text?.color || '#000000' });
-        $(`.slide[data-slide-id="${this.object.id}"] .slide-text .text-upper div`, MonksEnhancedJournal.journal.element).css({ 'background-color': textBackground}).html(this.object.text?.valign == 'top' ? this.object.text?.content : '');
-        $(`.slide[data-slide-id="${this.object.id}"] .slide-text .text-middle div`, MonksEnhancedJournal.journal.element).css({ 'background-color': textBackground }).html((this.object.text?.valign || 'middle') == 'middle' ? this.object.text?.content : '');
-        $(`.slide[data-slide-id="${this.object.id}"] .slide-text .text-lower div`, MonksEnhancedJournal.journal.element).css({ 'background-color': textBackground }).html(this.object.text?.valign == 'bottom' ? this.object.text?.content : '');
-        */
     }
 
     activateListeners(html) {
@@ -95,8 +67,8 @@ export class SlideConfig extends FormApplication {
             .append($('<div>').addClass('item-name flexrow').append($('<h4>').html(text.text)))
             .append($('<div>').addClass('item-controls'))
             .append($('<div>').addClass('item-controls flexrow')
-                .append($('<a>').addClass('item-control text-edit').attr('title', 'Edit Text').append($('<i>').addClass('fas fa-edit')))
-                .append($('<a>').addClass('item-control text-delete').attr('title', 'Delete Text').append($('<i>').addClass('fas fa-trash')))
+                .append($('<a>').addClass('item-control text-edit').attr('title', i18n("MonksEnhancedJournal.EditText")).append($('<i>').addClass('fas fa-edit')))
+                .append($('<a>').addClass('item-control text-delete').attr('title', i18n("MonksEnhancedJournal.DeleteText")).append($('<i>').addClass('fas fa-trash')))
             )
             .appendTo($('.item-list', this.element));
         new SlideText(text, this).render(true);

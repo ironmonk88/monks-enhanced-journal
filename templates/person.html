@@ -20,7 +20,7 @@
         </section>
         {{#if data.flags.monks-enhanced-journal.actor}}
         <div class="actor-img">
-            <div class="person-actor">Actor</div>
+            <div class="person-actor">{{localize 'MonksEnhancedJournal.Actor'}}</div>
             <img src="{{data.flags.monks-enhanced-journal.actor.img}}" data-id="{{data.flags.monks-enhanced-journal.actor.id}}" data-entity="Actor" onerror="$(this).hide();">
             <div style="text-align: center;">{{data.flags.monks-enhanced-journal.actor.name}}</div>
         </div>

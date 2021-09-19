@@ -113,41 +113,6 @@ export class PersonSheet extends EnhancedJournalSheet {
         if (actor.entity) {
             this.object.setFlag("monks-enhanced-journal", "actor", actor.data);
         }
-
-
-        /*
-        let actor;
-        if (data.pack) {
-            const pack = game.packs.get(data.pack);
-            let id = data.id;
-            if (data.lookup) {
-                if (!pack.index.length) await pack.getIndex();
-                const entry = pack.index.find(i => (i._id === data.lookup) || (i.name === data.lookup));
-                id = entry.id;
-            }
-            actor = id ? await pack.getDocument(id) : null;
-        } else {
-            actor = game.actors.get(data.id);
-            if (actor.documentName === "Scene" && actor.journal) actor = actor.journal;
-            if (!actor.testUserPermission(game.user, "LIMITED")) {
-                return ui.notifications.warn(`You do not have permission to view this ${actor.entity} sheet.`);
-            }
-        }
-
-        if (actor) {
-            let actorLink = {
-                id: actor.id,
-                img: actor.img,
-                name: actor.name
-            };
-
-            if (data.pack)
-                actorLink.pack = data.pack;
-
-            this.object.data.flags["monks-enhanced-journal"].actor = actorLink;
-            MonksEnhancedJournal.journal.saveData();
-            this.render();
-        }*/
     }
 
     openActor(event) {
@@ -172,7 +137,7 @@ export class PersonSheet extends EnhancedJournalSheet {
                     //const slide = this.object.data.flags["monks-enhanced-journal"].slides.get(li.data("entityId"));
                     Dialog.confirm({
                         title: `${game.i18n.localize("SIDEBAR.Delete")} Actor Link`,
-                        content: 'Are you sure you want to remove a link to this Actor?',
+                        content: i18n("MonksEnhancedJournal.ConfirmRemoveLink"),
                         yes: this.removeActor.bind(this)
                     });
                 }

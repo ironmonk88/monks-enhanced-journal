@@ -125,24 +125,6 @@ export class PlaceSheet extends EnhancedJournalSheet {
         log('drop data', event, data);
     }
 
-    /*
-    _deleteItem(event) {
-        let item = event.currentTarget.closest('.item');
-        this.deleteItem(item.dataset.id, item.dataset.container);
-    }
-
-    deleteItem(id, container) {
-        this.object.data.flags["monks-enhanced-journal"][container].findSplice(i => i.id == id);
-        let parent = $(`li[data-id="${id}"]`, this.element).parent();
-        $(`li[data-id="${id}"]`, this.element).remove();
-        if (parent.children().length == 0) {
-            parent.prev().remove();
-            parent.remove();
-        }
-
-        MonksEnhancedJournal.journal.saveData();
-    }*/
-
     async addActor(data) {
         let actor = await this.getEntity(mergeObject(data, { type: 'Actor' }));
 
@@ -156,69 +138,9 @@ export class PlaceSheet extends EnhancedJournalSheet {
             actors.push(actor.data);
             this.object.setFlag('monks-enhanced-journal', 'actors', actors);
         }
-        /*
-        let actor;
-        if (data.pack) {
-            const pack = game.packs.get(data.pack);
-            let id = data.id;
-            if (data.lookup) {
-                if (!pack.index.length) await pack.getIndex();
-                const entry = pack.index.find(i => (i._id === data.lookup) || (i.name === data.lookup));
-                id = entry.id;
-            }
-            actor = id ? await pack.getDocument(id) : null;
-        } else {
-            actor = game.actors.get(data.id);
-            if (actor.documentName === "Scene" && actor.journal) actor = actor.journal;
-            if (!actor.testUserPermission(game.user, "LIMITED")) {
-                return ui.notifications.warn(`You do not have permission to view this ${actor.documentName} sheet.`);
-            }
-        }
-
-        if (actor)
-            this.createTownsfolk(actor, 'actor');*/
     }
-    /*
-    createTownsfolk(actor, type) {
-        let actorData = {
-            id: actor.id,
-            type: type
-        };
-
-        if (actor.pack)
-            actorData.pack = actor.pack;
-
-        if (this.object.data.flags["monks-enhanced-journal"].townsfolk == undefined)
-            this.object.data.flags["monks-enhanced-journal"].townsfolk = [];
-
-        //only add one item
-        if (this.object.data.flags["monks-enhanced-journal"].townsfolk.find(t => t.id == actorData.id) != undefined)
-            return;
-
-        this.object.data.flags["monks-enhanced-journal"].townsfolk.push(actorData);
-        MonksEnhancedJournal.journal.saveData();
-        this.render();
-    }*/
 
     async addShop(data) {
-        /*
-        let shop;
-        if (data.pack) {
-            const pack = game.packs.get(data.pack);
-            let id = data.id;
-            if (data.lookup) {
-                if (!pack.index.length) await pack.getIndex();
-                const entry = pack.index.find(i => (i._id === data.lookup) || (i.name === data.lookup));
-                id = entry.id;
-            }
-            shop = id ? await pack.getDocument(id) : null;
-        } else {
-            shop = game.journal.get(data.id);
-            if (!shop.testUserPermission(game.user, "LIMITED")) {
-                return ui.notifications.warn(`You do not have permission to view this ${shop.documentName} sheet.`);
-            }
-        }*/
-
         let shop = await this.getEntity(data);
 
         if (shop.entity) {
@@ -241,27 +163,6 @@ export class PlaceSheet extends EnhancedJournalSheet {
                 actors.push(mergeObject(shop.data, { type: 'JournalEntry' }));
                 this.object.setFlag('monks-enhanced-journal', 'actors', actors);
             }
-            /*
-            let shopdata = {
-                id: shop.id
-            };
-
-            if (data.pack)
-                shopdata.pack = data.pack;
-
-            if (this.object.data.flags["monks-enhanced-journal"].shops == undefined)
-                this.object.data.flags["monks-enhanced-journal"].shops = [];
-
-            //only add one item
-            if (this.object.data.flags["monks-enhanced-journal"].shops.find(t => t.id == shopdata.id) != undefined)
-                return;
-
-            this.object.data.flags["monks-enhanced-journal"].shops.push(shopdata);
-            MonksEnhancedJournal.journal.saveData();
-            this.render();
-        } else if (shop.data.flags['monks-enhanced-journal']?.type == 'person') {
-            this.createTownsfolk(shop, 'journal');
-        }*/
         }
     }
 

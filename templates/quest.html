@@ -16,15 +16,15 @@
             {{#if owner}}
             <div class="form-group">
                 <div class="flexrow" style="align-items:center;">
-                    <label style="text-align:right;">Show to Players</label>
+                    <label style="text-align:right;">{{localize 'MonksEnhancedJournal.ShowToPlayers'}}</label>
                     <input class="show-to-players" type="checkbox" {{checked showtoplayers}}>
                 </div>
                 <div class="flexrow" style="align-items:center;">
-                    <label style="text-align:right;">Display in Notifications</label>
+                    <label style="text-align:right;">{{localize 'MonksEnhancedJournal.DisplayInNotifications'}}</label>
                     <input name="flags.monks-enhanced-journal.display" type="checkbox" {{checked data.flags.monks-enhanced-journal.display}}>
                 </div>
                 <div class="flexrow" style="align-items:center;">
-                    <label style="text-align:right;">Completed</label>
+                    <label style="text-align:right;">{{localize 'MonksEnhancedJournal.Completed'}}</label>
                     <input name="flags.monks-enhanced-journal.completed" type="checkbox" {{checked data.flags.monks-enhanced-journal.completed}}>
                 </div>
             </div>
@@ -32,7 +32,7 @@
         </section>
         {{#if data.flags.monks-enhanced-journal.actor}}
         <div class="actor-img">
-            <div class="quest-source">Source</div>
+            <div class="quest-source">{{localize 'MonksEnhancedJournal.Source'}}</div>
             <img src="{{data.flags.monks-enhanced-journal.actor.img}}" data-id="{{data.flags.monks-enhanced-journal.actor.id}}" data-entity="Actor" onerror="$(this).hide();">
             <div style="text-align: center;font-size:12px;">{{data.flags.monks-enhanced-journal.actor.name}}</div>
         </div>
@@ -56,12 +56,12 @@
 
                     {{#if owner}}
                     <div class="item-name flexrow" style="flex:0 0 100px;justify-content:center;">
-                        Visible
+                        {{localize 'MonksEnhancedJournal.Visible'}}
                     </div>
                     {{/if}}
 
                     <div class="item-name flexrow" style="flex:0 0 100px;justify-content:center;">
-                        Complete
+                        {{localize 'MonksEnhancedJournal.Completed'}}
                     </div>
 
                     {{#if owner}}
@@ -113,7 +113,7 @@
                 <div class="form-group">
                     <label>{{localize 'MonksEnhancedJournal.Experience'}}</label>
                     <div class="form-fields" style="justify-content:flex-end;">
-                        <button type="button" class="assign-xp" title="Assign Experience" tabindex="-1">
+                        <button type="button" class="assign-xp" title="{{localize 'MonksEnhancedJournal.AssignExperience'}}" tabindex="-1">
                             <i class="fas fa-book-medical fa-fw"></i>
                         </button>
                         <input type="text" style="flex: 0 0 150px;text-align:right;" name="flags.monks-enhanced-journal.xp" placeholder="{{localize 'MonksEnhancedJournal.Experience'}}" value="{{data.flags.monks-enhanced-journal.xp}}" />
@@ -154,7 +154,7 @@
                         </div>
 
                         <div class="item-name item-received">
-                            {{#if this.received}}received by {{this.received}}{{/if}}
+                            {{#if this.received}}{{localize 'MonksEnhancedJournal.ReceivedBy'}} {{this.received}}{{/if}}
                         </div>
 
                         <div class="item-controls item-assigned">

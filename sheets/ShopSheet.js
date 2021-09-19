@@ -324,45 +324,6 @@ export class ShopSheet extends EnhancedJournalSheet {
             }
             this.object.setFlag('monks-enhanced-journal', 'items', items);
         }
-        /*
-        let item;
-
-        if (data.pack) {
-            const pack = game.packs.get(data.pack);
-            let id = data.id;
-            if (data.lookup) {
-                if (!pack.index.length) await pack.getIndex();
-                const entry = pack.index.find(i => (i._id === data.lookup) || (i.name === data.lookup));
-                id = entry.id;
-            }
-            item = id ? await pack.getDocument(id) : null;
-        } else {
-            item = game.items.get(data.id);
-        }
-
-        if (item) {
-            let items = duplicate(this.object.getFlag("monks-enhanced-journal", "items") || []);
-
-            let olditem = items.find(i => i.id == item.id);
-            if (olditem) {
-                olditem.qty++;
-            } else {
-                let newitem = {
-                    id: item.id,
-                    uuid: item.uuid,
-                    cost: item.data.data.price,
-                    qty: item.data.data.quantity
-                };
-
-                if (data.pack)
-                    newitem.pack = data.pack;
-
-                items.push(newitem);
-            }
-            this.object.setFlag("monks-enhanced-journal", "items", items);
-            //this.render(); //I think this happens automatically when the object gets changed?
-        }
-        */
     }
 
     clickItem(event) {
@@ -406,63 +367,12 @@ export class ShopSheet extends EnhancedJournalSheet {
         }
     }
 
-    /*
-    _deleteItem(event) {
-        let item = event.currentTarget.closest('.item');
-        this.deleteItem(item.dataset.id, item.dataset.container);
-    }
-
-    deleteItem(id, container) {
-        this.object.data.flags["monks-enhanced-journal"][container].findSplice(i => i.id == id);
-        let parent = $(`li[data-id="${id}"]`, this.element).parent();
-        $(`li[data-id="${id}"]`, this.element).remove();
-        if (parent.children().length == 0) {
-            parent.prev().remove();
-            parent.remove();
-        }
-            
-        MonksEnhancedJournal.journal.saveData();
-    }*/
-
     async addActor(data) {
         let actor = await this.getEntity(data);
 
         if (actor.entity) {
             this.object.setFlag("monks-enhanced-journal", "actor", actor.data);
         }
-        /*
-        let actor;
-        if (data.pack) {
-            const pack = game.packs.get(data.pack);
-            let id = data.id;
-            if (data.lookup) {
-                if (!pack.index.length) await pack.getIndex();
-                const entry = pack.index.find(i => (i._id === data.lookup) || (i.name === data.lookup));
-                id = entry.id;
-            }
-            actor = id ? await pack.getDocument(id) : null;
-        } else {
-            actor = game.actors.get(data.id);
-            if (actor.documentName === "Scene" && actor.journal) actor = actor.journal;
-            if (!actor.testUserPermission(game.user, "LIMITED")) {
-                return ui.notifications.warn(`You do not have permission to view this ${actor.entity} sheet.`);
-            }
-        }
-
-        if (actor) {
-            let actorLink = {
-                id: actor.id,
-                img: actor.img,
-                name: actor.name
-            };
-
-            if (data.pack)
-                actorLink.pack = data.pack;
-
-            this.object.data.flags["monks-enhanced-journal"].actor = actorLink;
-            MonksEnhancedJournal.journal.saveData();
-            this.render();
-        }*/
     }
 
     openActor(event) {
@@ -487,7 +397,7 @@ export class ShopSheet extends EnhancedJournalSheet {
                     //const slide = this.object.data.flags["monks-enhanced-journal"].slides.get(li.data("entityId"));
                     Dialog.confirm({
                         title: `${game.i18n.localize("SIDEBAR.Delete")} Actor Link`,
-                        content: 'Are you sure you want to remove a link to this Actor?',
+                        content: i18n("MonksEnhancedJournal.ConfirmRemoveLink"),
                         yes: this.removeActor.bind(this)
                     });
                 }

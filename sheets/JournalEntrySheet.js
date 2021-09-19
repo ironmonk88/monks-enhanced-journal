@@ -78,7 +78,7 @@ export class JournalEntrySheet extends EnhancedJournalSheet {
                 callback: li => {
                     Dialog.confirm({
                         title: `${game.i18n.localize("SIDEBAR.Delete")} Picture`,
-                        content: 'Are you sure you want to remove this Picture?',
+                        content: i18n("MonksEnhancedJournal.ConfirmRemovePicture"),
                         yes: this.removePicture.bind(this)
                     });
                 }
@@ -104,9 +104,6 @@ export class JournalEntrySheet extends EnhancedJournalSheet {
 
     async render(data) {
         let element = await super.render(data);
-
-        //if (!this.object.isOwner && ((this.object.data.img != undefined && this.object.data.img != '' && this.object.data.content == '') || ((this.object.data.img == undefined || this.object.data.img == '') && this.object.data.content != '')))
-        //    $('.sheet-navigation.tabs', element).hide();
 
         return element;
     }
