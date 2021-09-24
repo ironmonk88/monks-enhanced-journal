@@ -21,6 +21,10 @@ Added animations to the texts so they can fade in and out.
 
 Encounters will let you drag and drop the group of monsters onto the scene.
 
+You can create a Journal Link that opens up just the picture.  Instead of using @JournalEntry[9WdmdaZAzXSN1nih]{Test Picture} change it to @Picture[9WdmdaZAzXSN1nih]{Test Picture} and when you click on it, it will open just the image.
+
+A new Journal Type has been added, Checklist.  This will let you create a list of items that you can check off.
+
 # Version 1.0.21
 
 Fixed issue with toggling the folder navigation.  Showing an Actor, then going back to a Journal Entry would displace the lines.

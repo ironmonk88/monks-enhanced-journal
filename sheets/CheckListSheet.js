@@ -276,7 +276,6 @@ export class CheckListSheet extends EnhancedJournalSheet {
                 data = foundry.utils.mergeObject(data, fd.toObject());
                 if (!data.folder) delete data["folder"];
 
-                 //+++ create the item/folder and refresh
                 let collection = duplicate((options.type == 'folder' ? that.object.data.flags['monks-enhanced-journal']?.folders : that.object.data.flags['monks-enhanced-journal']?.items) || []);
                 if (data.id == undefined) {
                     data.id = makeid();

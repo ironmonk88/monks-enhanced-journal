@@ -55,13 +55,6 @@ export class JournalEntrySheet extends EnhancedJournalSheet {
 
     activateListeners(html, enhancedjournal) {
         super.activateListeners(html, enhancedjournal);
-        /* //+++This needs to be added back
-        let journaltype = (this.object.data.img != undefined && this.object.data.img != '' && this.object.data.content == '' ? 'picture' : 'description');
-        if(enhancedjournal)
-            enhancedjournal.sheettabs.activate(journaltype);
-            */
-        //$(`.tabs .item[data-tab="${journaltype}"]`, html).addClass('active').siblings().removeClass('active');
-        //$(`.tab[data-tab="${journaltype}"]`, html).addClass('active').siblings().removeClass('active');
 
         const options = this._getContextOptions();
         if (options) {

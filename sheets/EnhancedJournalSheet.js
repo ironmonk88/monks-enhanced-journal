@@ -227,16 +227,15 @@ export class EnhancedJournalSheet extends JournalSheet {
         //}
         if (!document) return;
 
-        if (game.user.isGM) {
+        new ImagePopout(document.data.img, {
+            title: document.name,
+            uuid: document.uuid,
+            shareable: false,
+            editable: false
+        })._render(true);
+
+        if (game.user.isGM)
             this._onShowPlayers({ data: { object: document } });
-        } else {
-            new ImagePopout(document.data.img, {
-                title: document.name,
-                uuid: document.uuid,
-                shareable: false,
-                editable: false
-            })._render(true);
-        }
     }
 
     _onEditImage(event) {
