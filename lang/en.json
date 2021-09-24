@@ -189,6 +189,8 @@
   "MonksEnhancedJournal.ConfirmRemovePicture": "Are you sure you want to remove this Picture?",
   "MonksEnhancedJournal.ConfirmRemoveLink": "Are you sure you want to remove a link to this Actor?",
   "MonksEnhancedJournal.CannotPlayNoSlides": "Cannot play a slideshow with no slides",
+  "MonksEnhancedJournal.SearchChecklist": "Search Checklist",
+  "MonksEnhancedJournal.CreateEntry": "Create Entry",
 
   "MonksEnhancedJournal.Contain": "Contain",
   "MonksEnhancedJournal.Cover": "Cover",
@@ -214,6 +216,7 @@
   "MonksEnhancedJournal.quest": "Quest",
   "MonksEnhancedJournal.encounter": "Encounter",
   "MonksEnhancedJournal.shop": "Shop",
+  "MonksEnhancedJournal.checklist": "Checklist",
 
   "MonksEnhancedJournal.purchasing.locked": "GM Only",
   "MonksEnhancedJournal.purchasing.confirm": "Request Purchase",

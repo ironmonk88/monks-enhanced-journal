@@ -1,6 +1,7 @@
 import { registerSettings } from "./settings.js";
 import { EnhancedJournal } from "./apps/enhanced-journal.js"
 import { SlideshowWindow } from "./apps/slideshow-window.js"
+import { CheckListSheet } from "./sheets/CheckListSheet.js"
 import { EncounterSheet } from "./sheets/EncounterSheet.js"
 import { JournalEntrySheet } from "./sheets/JournalEntrySheet.js"
 import { PersonSheet } from "./sheets/PersonSheet.js"
@@ -51,6 +52,7 @@ export class MonksEnhancedJournal {
 
     static getEntityTypes() {
         return {
+            checklist: CheckListSheet,
             encounter: EncounterSheet,
             organization: OrganizationSheet,
             person: PersonSheet,
@@ -74,7 +76,8 @@ export class MonksEnhancedJournal {
             quest: "MonksEnhancedJournal.quest",
             encounter: "MonksEnhancedJournal.encounter",
             organization: "MonksEnhancedJournal.organization",
-            shop: "MonksEnhancedJournal.shop"
+            shop: "MonksEnhancedJournal.shop",
+            checklist: "MonksEnhancedJournal.checklist"
         };
     }
 
@@ -227,13 +230,19 @@ export class MonksEnhancedJournal {
         }
 
         let oldEnrichHTML = TextEditor.prototype.constructor.enrichHTML;
-        TextEditor.prototype.constructor.enrichHTML = function (content, options) {
+        TextEditor.prototype.constructor.enrichHTML = function (content, options = {}) {
             let data = oldEnrichHTML.call(this, content, options);
 
             const html = document.createElement("div");
             html.innerHTML = String(data);
 
             let text = this._getTextNodes(html);
+
+            if (options.entities) {
+                const rgxe = new RegExp(`@(Picture)\\[([^\\]]+)\\](?:{([^}]+)})?`, 'g');
+                this._replaceTextContent(text, rgxe, MonksEnhancedJournal._createPictureLink);
+            }
+
             //const rgx = /%\[(\/[a-zA-Z]+\s)?(.*?)([0-9]{1,3})(\]%)?/gi;
             const rgx = /%(Request)\[([^\]]+)\](?:{([^}]+)})?/gi;
             this._replaceTextContent(text, rgx, MonksEnhancedJournal._createRequestRoll);
@@ -519,6 +528,39 @@ export class MonksEnhancedJournal {
         return a;
     }
 
+    static _createPictureLink(match, type, target, name) {
+        const data = {
+            cls: ["picture-link"],
+            icon: 'fas fa-image',
+            dataset: {},
+            name: name
+        };
+        let broken = false;
+
+        const doc = /^[a-zA-Z0-9]{16}$/.test(target) ? game.journal.get(target) : game.journal.getName(target);
+        if (!doc) broken = true;
+
+        // Update link data
+        data.name = data.name || (broken ? target : doc.name);
+        data.dataset = { entity: 'JournalEntry', id: broken ? null : doc.id };
+
+        // Flag a link as broken
+        if (broken) {
+            data.icon = "fas fa-unlink";
+            data.cls.push("broken");
+        }
+
+        // Construct the formed link
+        const a = document.createElement('a');
+        a.classList.add(...data.cls);
+        a.draggable = true;
+        for (let [k, v] of Object.entries(data.dataset)) {
+            a.dataset[k] = v;
+        }
+        a.innerHTML = `<i class="${data.icon}"></i> ${data.name}`;
+        return a;
+    }
+
     static async ready() {
         game.socket.on(MonksEnhancedJournal.SOCKET, MonksEnhancedJournal.onMessage);
 
@@ -588,6 +630,7 @@ export class MonksEnhancedJournal {
             case 'organization': return 'fa-flag';
             case 'shop': return 'fa-dolly-flatbed';
             case 'poi': return 'fa-map-marker-alt';
+            case 'checklist': return 'fa-list';
             default:
                 return 'fa-book-open';
         }
@@ -991,6 +1034,9 @@ Hooks.on("preCreateJournalEntry", (entry, data, options, userId) => {
         case 'encounter':
             flags = mergeObject(flags, EncounterSheet.defaultObject);
             break;
+        case 'checklist':
+            flags = mergeObject(flags, CheckListSheet.defaultObject);
+            break;
         case 'shop':
             flags = mergeObject(flags, ShopSheet.defaultObject);
             break;
@@ -1029,6 +1075,8 @@ Hooks.on("updateJournalEntry", (document, data, options, userId) => {
                     data?.flags['monks-enhanced-journal']?.dcs != undefined ||
                     data?.flags['monks-enhanced-journal']?.traps != undefined ||
                     data?.flags['monks-enhanced-journal']?.objectives != undefined ||
+                    data?.flags['monks-enhanced-journal']?.folders != undefined ||
+                    data?.flags['monks-enhanced-journal']?.items != undefined ||
                     data?.flags['core']?.sheetClass != undefined)))) {
             //if (data?.flags['core']?.sheetClass != undefined)
             //    MonksEnhancedJournal.journal.object._sheet = null;

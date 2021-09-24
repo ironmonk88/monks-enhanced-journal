@@ -514,6 +514,15 @@
     border: 1px solid transparent;
 }
 
+.monks-journal-sheet .header-name .header-search{
+    font-size:14px;
+}
+
+.monks-journal-sheet .header-name .create-folder,
+.monks-journal-sheet .header-name .create-item{
+    flex: 0 0 130px;
+}
+
 .monks-journal-sheet.image-popout.dark .header-name input{
     color: #fff;
 }
@@ -1921,4 +1930,77 @@ a.inline-request-roll {
 .monks-enhanced-journal.request-item .card-footer span:last-child {
     border-right: none;
     padding-right: 0;
+}
+
+.monks-journal-sheet .checklist-list{
+    padding-left:0px;
+}
+
+.monks-journal-sheet .checklist-list .entity.item {
+    padding: 6px;
+    line-height: 24px;
+}
+
+.monks-journal-sheet .checklist-list .entity.item:nth-child(even){
+    background-color: rgba(0, 0, 0, 0.1);
+}
+
+.monks-journal-sheet .checklist-list .create-folder,
+.monks-journal-sheet .checklist-list .create-item{
+    flex:0 0 20px;
+}
+
+.monks-journal-sheet .checklist-list .folder header{
+    border-left: 1px solid #000;
+    border-right: 1px solid #000;
+}
+
+.monks-journal-sheet .checklist-list .checklist-item h3{
+    margin-bottom:0px;
+}
+
+.monks-journal-sheet .checklist-list .checklist-item.checked h3{
+    text-decoration:line-through;
+}
+
+.monks-journal-sheet .checklist-list .subdirectory{
+    padding-left:20px;
+    margin-bottom:5px;
+    border-left: 4px solid #808080;
+}
+
+.monks-journal-sheet .checklist-list {
+    height: 100%;
+    overflow: auto;
+}
+
+.monks-journal-sheet .checklist-list .subdirectory .folder {
+    border-left: 0px;
+}
+
+.monks-journal-sheet .checklist-list li.folder > .folder-header{
+    background: rgba(0, 0, 0, 0.3);
+    color: #fff;
+}
+
+.monks-journal-sheet .checklist-list li.folder.collapsed > .folder-header{
+    background: rgba(0, 0, 0, 0.5);
+}
+
+a.picture-link {
+    background: #DDD;
+    padding: 1px 4px;
+    border: 1px solid #4b4a44;
+    border-radius: 2px;
+    white-space: nowrap;
+    word-break: break-all;
+}
+
+a.picture-link i {
+    color: #7a7971;
+}
+
+a.picture-link.broken {
+    background: rgba(255, 0, 0, 0.05);
+    border: 1px dashed red;
 }

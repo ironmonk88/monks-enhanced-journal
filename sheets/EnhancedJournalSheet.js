@@ -113,6 +113,7 @@ export class EnhancedJournalSheet extends JournalSheet {
         super.activateListeners(html);
 
         html.on("click", "a.inline-request-roll", this._onClickInlineRequestRoll);
+        html.on("click", "a.picture-link", this._onClickPictureLink.bind(this));
 
         $('.sheet-image .profile', html).contextmenu(() => { $('.fullscreen-image').show(); });
         $('.fullscreen-image', html).click(() => { $('.fullscreen-image', html).hide(); });
@@ -192,6 +193,49 @@ export class EnhancedJournalSheet extends JournalSheet {
                 game.MonksTokenBar.requestRoll(canvas.tokens.controlled, a.dataset);
             else if (requesttype == 'contested')
                 game.MonksTokenBar.contextedRoll();
+        }
+    }
+
+    async _onClickPictureLink(event) {
+        event.preventDefault();
+        const a = event.currentTarget;
+        let document = null;
+        let id = a.dataset.id;
+
+        /*
+        // Target 1 - Compendium Link
+        if (a.dataset.pack) {
+            const pack = game.packs.get(a.dataset.pack);
+            if (a.dataset.lookup) {
+                if (!pack.index.length) await pack.getIndex();
+                const entry = pack.index.find(i => (i._id === a.dataset.lookup) || (i.name === a.dataset.lookup));
+                if (entry) {
+                    a.dataset.id = id = entry._id;
+                    delete a.dataset.lookup;
+                }
+            }
+            document = id ? await pack.getDocument(id) : null;
+        }
+
+        // Target 2 - World Entity Link
+        else {*/
+            document = game.journal.get(id);
+            if (!document) return;
+            if (!document.testUserPermission(game.user, "LIMITED")) {
+                return ui.notifications.warn(`You do not have permission to view this ${document.documentName} sheet.`);
+            }
+        //}
+        if (!document) return;
+
+        if (game.user.isGM) {
+            this._onShowPlayers({ data: { object: document } });
+        } else {
+            new ImagePopout(document.data.img, {
+                title: document.name,
+                uuid: document.uuid,
+                shareable: false,
+                editable: false
+            })._render(true);
         }
     }
 
@@ -534,39 +578,41 @@ export class EnhancedJournalSheet extends JournalSheet {
         let users = event.data.users;
         let options = event.data.options;
 
+        let object = event.data?.object || this.object;
+
         if (users != undefined)
             users = users.filter(u => u.selected);
         //if we havn't picked anyone to show this to, then exit
         if (users instanceof Array && users.length == 0)
             return;
 
-        if (!this.object.isOwner) throw new Error("You may only request to show Journal Entries which you own.");
+        if (!object.isOwner) throw new Error("You may only request to show Journal Entries which you own.");
 
         let args = {
-            title: this.object.name,
-            uuid: this.object.uuid,
+            title: object.name,
+            uuid: object.uuid,
             users: (users != undefined ? users.map(u => u.id) : users),
             showid: makeid()
         }
-        if (options?.showpic || this.object.data?.flags["monks-enhanced-journal"]?.type == 'picture')
-            args.image = this.object.data.img;
+        if (options?.showpic || object.data?.flags["monks-enhanced-journal"]?.type == 'picture')
+            args.image = object.data.img;
 
         MonksEnhancedJournal.emit("showEntry", args);
 
         ui.notifications.info(game.i18n.format("MonksEnhancedJournal.MsgShowPlayers", {
-            title: this.object.name,
+            title: object.name,
             which: (users == undefined ? 'all players' : users.map(u => u.name).join(', '))
-        }) + (options?.showpic || this.object.data?.flags["monks-enhanced-journal"]?.type == 'picture' ? ', click <a onclick="game.MonksEnhancedJournal.journal.cancelSend(\'' + args.showid + '\', ' + options?.showpic + ');event.preventDefault();">here</a> to cancel' : ''));
+        }) + (options?.showpic || object.data?.flags["monks-enhanced-journal"]?.type == 'picture' ? ', click <a onclick="game.MonksEnhancedJournal.journal.cancelSend(\'' + args.showid + '\', ' + options?.showpic + ');event.preventDefault();">here</a> to cancel' : ''));
 
         if (options?.updatepermission) {
             let permissions = {};
-            Object.assign(permissions, this.object.data.permission);
+            Object.assign(permissions, object.data.permission);
             if (users == undefined)
                 permissions["default"] = CONST.ENTITY_PERMISSIONS.OBSERVER;
             else {
                 users.forEach(user => { permissions[user.id] = CONST.ENTITY_PERMISSIONS.OBSERVER; });
             }
-            this.object.update({ permission: permissions });
+            object.update({ permission: permissions });
         }
         /*
         if (this.entitytype == 'picture') {
