@@ -25,6 +25,8 @@ You can create a Journal Link that opens up just the picture.  Instead of using 
 
 A new Journal Type has been added, Checklist.  This will let you create a list of items that you can check off.
 
+And players can now purchase things from a shop.  Either by dragging it to their character themselves or requesting it from the GM.
+
 # Version 1.0.21
 
 Fixed issue with toggling the folder navigation.  Showing an Actor, then going back to a Journal Entry would displace the lines.
