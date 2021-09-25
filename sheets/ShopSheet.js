@@ -54,24 +54,26 @@ export class ShopSheet extends EnhancedJournalSheet {
             if (sItem?.uuid?.indexOf('Actor') >= 0) //If the item info comes from the Actor, then ignore it, it will get picked up later
                 continue;
             let entity = (sItem.uuid ? await fromUuid(sItem.uuid) : game.items.find((i) => i.id == sItem.id));
-            let type = entity.type || 'unknown';
+            if (entity) {
+                let type = entity.type || 'unknown';
 
-            let item = mergeObject({
-                id: entity.id,
-                uuid: entity.uuid,
-                name: entity.name,
-                type: type,
-                img: entity.img,
-                qty: entity.data.data.quantity,
-                price: entity.data.data.price,
-                cost: entity.data.data.price,
-                fromShop: true
-            }, sItem);
+                let item = mergeObject({
+                    id: entity.id,
+                    uuid: entity.uuid,
+                    name: entity.name,
+                    type: type,
+                    img: entity.img,
+                    qty: entity.data.data.quantity,
+                    price: entity.data.data.price,
+                    cost: entity.data.data.price,
+                    fromShop: true
+                }, sItem);
 
-            if (groups[type] == undefined)
-                groups[type] = { name: type, items: [] };
-            if (game.user.isGM || this.object.isOwner || (item.hide !== true && item.qty > 0))
-                groups[type].items.push(item);
+                if (groups[type] == undefined)
+                    groups[type] = { name: type, items: [] };
+                if (game.user.isGM || this.object.isOwner || (item.hide !== true && item.qty > 0))
+                    groups[type].items.push(item);
+            }
         }
         //get actor items
         if (data.data.flags['monks-enhanced-journal'].actor) {

@@ -169,7 +169,7 @@ export class MonksEnhancedJournal {
             if (entry.data?.flags['monks-enhanced-journal']?.type)
                 entry.data.type = entry.data?.flags['monks-enhanced-journal']?.type;
 
-            if (!(game.user.isGM || setting('allow-player')) || !MonksEnhancedJournal.openJournalEntry(entry))
+            if (!MonksEnhancedJournal.openJournalEntry(entry))
                 wrapped(...args);
         }
 
@@ -187,13 +187,8 @@ export class MonksEnhancedJournal {
 
         let oldRenderPopout = JournalDirectory.prototype.renderPopout;
         JournalDirectory.prototype.renderPopout = function () {
-            if (game.user.isGM || setting('allow-player')) {
-                MonksEnhancedJournal.openJournalEntry();
-                //let entry = new JournalEntry({ name: 'temporary' }); //new JournalEntryData({name:'temporary'})
-                //new EnhancedJournalSheet(entry)._render(true);
-            } else {
+            if (!MonksEnhancedJournal.openJournalEntry())
                 return oldRenderPopout.call(this);
-            }
         }
 
         Journal.prototype.constructor._showEntry = async function(entryId, mode = null, force = true, showid) {
@@ -203,7 +198,7 @@ export class MonksEnhancedJournal {
             if (!entry.data.img && !entry.data.content) return; // Don't show an entry that has no content
 
             // Show the sheet with the appropriate mode
-            if (!(game.user.isGM || setting('allow-player')) || !MonksEnhancedJournal.openJournalEntry(entry)) {
+            if (!MonksEnhancedJournal.openJournalEntry(entry)) {
                 if (entry.data.flags['monks-enhanced-journal']?.type)
                     entry.data.type = entry.data.flags['monks-enhanced-journal']?.type;
                 if (entry.data.type == 'journalentry')
@@ -337,10 +332,10 @@ export class MonksEnhancedJournal {
             }
         }
 
-        //let oldOnCreate = JournalEntry.prototype._onCreate;
+        let oldOnCreate = JournalEntry.prototype._onCreate;
         JournalEntry.prototype._onCreate = async function (data, options, userid) {
-            if (MonksEnhancedJournal.compendium !== true)
-                MonksEnhancedJournal.openJournalEntry(this, options);
+            if (MonksEnhancedJournal.compendium !== true || !MonksEnhancedJournal.openJournalEntry(this, options))
+                return oldOnCreate(data, options, userid);
         }
 
         /*
@@ -436,6 +431,9 @@ export class MonksEnhancedJournal {
     }
 
     static openJournalEntry(entry, options = {}) {
+        if (!game.user.isGM && !setting('allow-player'))
+            return false;
+
         let sheet = (!entry?._sheet ? entry?._getSheetClass() : entry?._sheet);
         if (sheet?.constructor?.name == 'QuestPreviewShim')
             return false;
@@ -842,11 +840,15 @@ export class MonksEnhancedJournal {
             let type = entry.getFlag('monks-enhanced-journal', 'type');// || (entry.data.img != "" && entry.data.content == "" ? 'picture' : 'journalentry'); //we'll add the picture later
             let icon = MonksEnhancedJournal.getIcon(type);
 
-            $('.entity-name', this).prepend($('<i>').addClass('fas fa-fw ' + icon));
+            if ($('.entity-name .journal-type', this).length)
+                $('.entity-name .journal-type', this).attr('class', 'journal-type fas fa-fw ' + icon);
+            else
+                $('.entity-name', this).prepend($('<i>').addClass('journal-type fas fa-fw ' + icon));
 
             if (type == 'quest')
                 $(this).attr('status', entry.getFlag('monks-enhanced-journal', 'status'));
 
+            $('.entity-name .permissions', this).remove();
             if (setting('show-permissions') && game.user.isGM && (entry.data.permission.default > 0 || Object.keys(entry.data.permission).length > 1)) {
                 let permissions = $('<div>').addClass('permissions');
                 if (entry.data.permission.default > 0)

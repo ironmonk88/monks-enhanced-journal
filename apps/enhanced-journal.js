@@ -636,7 +636,7 @@ export class EnhancedJournal extends Application {
             let h = tab.history[i];
             let entity = await this.findEntity(h, '');
             if (tab?.entity?.id != undefined) {
-                let type = entity.getFlag('monks-enhanced-journal', 'type');
+                let type = (entity.getFlag && entity.getFlag('monks-enhanced-journal', 'type'));
                 let icon = MonksEnhancedJournal.getIcon(type);
                 let item = {
                     name: entity.name || 'Unknown',
@@ -997,10 +997,12 @@ export class EnhancedJournal extends Application {
         this.object.update(updates);
     }
 
-    convert(type) {
+    async convert(type) {
         this.object._sheet = null;
         this.object.data.type = type;
-        this.object.setFlag('monks-enhanced-journal', 'type', type);
+        await this.object.setFlag('monks-enhanced-journal', 'type', type);
+        await ui.sidebar.tabs.journal.render(true)
+        //MonksEnhancedJournal.updateDirectory($('#journal'));
     }
 
     async _contextMenu(html) {

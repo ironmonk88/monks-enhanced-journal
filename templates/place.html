@@ -112,6 +112,8 @@
                             <a class="item-control item-delete" title="{{localize 'MonksEnhancedJournal.RemoveActor'}}"><i class="fas fa-trash"></i></a>
                         </div>
                     </li>
+                    {{else}}
+                    <li class="instruction">Drag a Person journal entry here to create townsfolk</li>
                     {{/each}}
                 </ul>
             </div>
@@ -139,6 +141,8 @@
                             <a class="item-control item-delete" title="{{localize 'MonksEnhancedJournal.RemoveShop'}}"><i class="fas fa-trash"></i></a>
                         </div>
                     </li>
+                    {{else}}
+                    <li class="instruction">Drag a Shop journal entry here to create shops</li>
                     {{/each}}
                 </ul>
             </div>

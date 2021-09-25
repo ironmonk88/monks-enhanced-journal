@@ -1,3 +1,15 @@
+# Version 1.0.23
+
+Fixed an issue with players getting an errors when loading a journal entry.
+
+After a journal type is changed, refreshing the main sidebar.
+
+Fixed issue where opening a journal entry as a player was opening up the full version even if it's supposed to be disabled for players.
+
+Fixed an issue where items that no longer exist would crash a Shop.
+
+Added drag and drop instrustions to the Place entry if there are no items.
+
 # Version 1.0.22
 
 Oh where to begin with this update.

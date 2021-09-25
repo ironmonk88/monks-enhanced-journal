@@ -2004,3 +2004,11 @@ a.picture-link.broken {
     background: rgba(255, 0, 0, 0.05);
     border: 1px dashed red;
 }
+
+.monks-journal-sheet .instruction {
+    text-align: center;
+    height: 40%;
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+}
