@@ -436,7 +436,8 @@ export class MonksEnhancedJournal {
     }
 
     static openJournalEntry(entry, options = {}) {
-        if (this.object?.folder?.name == '_fql_quests' && game.modules.get("forien-quest-log")?.active)
+        let sheet = (!entry?._sheet ? entry?._getSheetClass() : entry?._sheet);
+        if (sheet?.constructor?.name == 'QuestPreviewShim')
             return false;
 
         if (options.render == false || options.activate == false)

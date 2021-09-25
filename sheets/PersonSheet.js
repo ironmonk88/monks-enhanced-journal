@@ -85,6 +85,15 @@ export class PersonSheet extends EnhancedJournalSheet {
 
         if (data.type == 'Actor') {
             this.addActor(data);
+
+            /*
+            if (this.object.name == '') {
+                //let's fill in the information as best we can
+                let actor = game.actors.get(data.id);
+                if (actor) {
+                    let data = { name: actor.name };
+                }
+            }*/
         }
 
         log('drop data', event, data);

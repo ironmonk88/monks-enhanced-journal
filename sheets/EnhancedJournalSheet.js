@@ -19,6 +19,7 @@ export class EnhancedJournalSheet extends JournalSheet {
             title: i18n("MonksEnhancedJournal.NewTab"),
             template: "modules/monks-enhanced-journal/templates/blank.html",
             classes: defOptions.classes.concat(['monks-journal-sheet']),
+            dragDrop: [{ dragSelector: "null", dropSelector: ".blank-body" }],
             popOut: true,
             width: 1025,
             height: 700,
@@ -102,11 +103,30 @@ export class EnhancedJournalSheet extends JournalSheet {
     }
 
     async _render(force, options = {}) {
-        super._render(force, options);
+        await super._render(force, options);
 
         log('Subsheet rendering');
 
         this.updateStyle();
+    }
+
+    _canDragDrop(selector) {
+        return game.user.isGM;
+    }
+
+    _onDrop(event) {
+        let data;
+        try {
+            data = JSON.parse(event.dataTransfer.getData('text/plain'));
+        }
+        catch (err) {
+            return false;
+        }
+
+        if (data.type == 'JournalEntry' && this.enhancedjournal) {
+            let entity = game.journal.find(j => j.id == data.id);
+            this.enhancedjournal.open(entity);
+        }
     }
 
     activateListeners(html, enhancedjournal) {
