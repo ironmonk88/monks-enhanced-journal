@@ -1,3 +1,7 @@
+# Version 1.0.24
+
+Fixing a filename issue.  SlideshowSheet vs SlideShowSheet
+
 # Version 1.0.23
 
 Fixed an issue with players getting an errors when loading a journal entry.
