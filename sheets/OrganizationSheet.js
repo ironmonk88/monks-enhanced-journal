@@ -11,7 +11,8 @@ export class OrganizationSheet extends EnhancedJournalSheet {
             title: i18n("MonksEnhancedJournal.organization"),
             template: "modules/monks-enhanced-journal/templates/organization.html",
             tabs: [{ navSelector: ".tabs", contentSelector: ".sheet-body", initial: "description" }],
-            dragDrop: [{ dragSelector: ".entity.actor", dropSelector: ".organization-container" }]
+            dragDrop: [{ dragSelector: ".entity.actor", dropSelector: ".organization-container" }],
+            scrollY: [".description"]
         });
     }
 

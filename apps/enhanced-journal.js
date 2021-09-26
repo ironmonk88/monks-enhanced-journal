@@ -88,9 +88,9 @@ export class EnhancedJournal extends Application {
         );
     }
 
-    checkForChanges() {
-        return this.subsheet?.editors?.content?.active && this.subsheet.editors?.content?.mce?.isDirty();
-    }
+    //checkForChanges() {
+    //    return this.subsheet?.editors?.content?.active && this.subsheet.editors?.content?.mce?.isDirty();
+    //}
 
     _render(force, options = {}) {
         return super._render(force, options).then(() => {
@@ -238,10 +238,16 @@ export class EnhancedJournal extends Application {
             this._dragDrop = this._dragDrop.concat(subDragDrop);
 
             if (this.subsheet.options.scrollY) {
+                this._scrollPositions = this._scrollPositions || {};
+                for (let [k, v] of Object.entries(this.subsheet._scrollPositions || {})) {
+                    this._scrollPositions[k] = v;
+                }
                 let oldScrollY = this.options.scrollY;
                 this.options.scrollY = this.options.scrollY.concat(this.subsheet.options.scrollY);
                 this._restoreScrollPositions(contentform);
                 this.options.scrollY = oldScrollY;
+
+                this.subsheet._scrollPositions = {};
             }
 
             this.subsheet.activateListeners($(this.subdocument), this);
@@ -345,10 +351,8 @@ export class EnhancedJournal extends Application {
 
     async close(options) {
         if (options?.submit !== false) {
-            if (this.checkForChanges()) {
-                if (!confirm(i18n("MonksEnhancedJournal.YouHaveChanges")))
-                    return false;
-            }
+            if (await this?.subsheet?.close() === false)
+                return false;
             return super.close(options);
         }
     }
@@ -360,12 +364,16 @@ export class EnhancedJournal extends Application {
     canBack(tab) {
         if (tab == undefined)
             tab = this.tabs.active();
+        if (tab == undefined)
+            return false;
         return tab.history?.length > 1 && (tab.historyIdx == undefined || tab.historyIdx < tab.history.length - 1);
     }
 
     canForward(tab) {
         if (tab == undefined)
             tab = this.tabs.active();
+        if (tab == undefined)
+            return false;
         return tab.history?.length > 1 && tab.historyIdx && tab.historyIdx > 0;
     }
 
@@ -434,10 +442,8 @@ export class EnhancedJournal extends Application {
     }
 
     async activateTab(tab, event) {
-        if (this.checkForChanges()) {
-            if (!confirm(i18n("MonksEnhancedJournal.YouHaveChanges")))
-                return;
-        }
+        if (await this?.subsheet?.close() === false)
+            return false;
 
         if (tab == undefined)
             tab = this.addTab();
@@ -720,9 +726,7 @@ export class EnhancedJournal extends Application {
         if (this.tabs.length == 0) {
             this.addTab(entity);
         } else {
-            if (!game.user.isGM && !setting('allow-player'))
-                this.updateTab(this.tabs[0], entity);   //if this is a player and they're not seeing the full journal, then only ever use the first tab
-            else if (newtab === true) {
+            if (newtab === true) {
                 //the journal is getting created
                 //lets see if we can find  tab with this entity?
                 let tab = this.tabs.find(t => t.entityId == entity.id);
@@ -731,7 +735,7 @@ export class EnhancedJournal extends Application {
                 else
                     this.addTab(entity);
             } else {
-                if (this.checkForChanges())
+                if (await this?.subsheet?.close() === false)
                     this.addTab(entity, { activate: false}); //If we're editing, then open in a new tab but don't activate
                 else
                     this.updateTab(this.tabs.active(), entity);

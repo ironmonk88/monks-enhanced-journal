@@ -20,7 +20,8 @@ export class JournalEntrySheet extends EnhancedJournalSheet {
         return mergeObject(super.defaultOptions, {
             title: i18n("MonksEnhancedJournal.journalentry"),
             template: "modules/monks-enhanced-journal/templates/journalentry.html",
-            tabs: [{ navSelector: ".tabs", contentSelector: ".sheet-body", initial: 'description' }]
+            tabs: [{ navSelector: ".tabs", contentSelector: ".sheet-body", initial: 'description' }],
+            scrollY: [".description"]
         });
     }
 

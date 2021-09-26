@@ -20,7 +20,7 @@ export class ShopSheet extends EnhancedJournalSheet {
                 { dragSelector: ".entity.actor", dropSelector: ".shop-container" },
                 { dragSelector: ".entity.item", dropSelector: ".shop-container" },
                 { dragSelector: ".shop-items .item-list .item .item-icon", dropSelector: "null" }],
-            scrollY: [".shop-items"]
+            scrollY: [".shop-items", ".description"]
         });
     }
 

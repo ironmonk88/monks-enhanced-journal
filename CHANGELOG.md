@@ -1,3 +1,15 @@
+# Version 1.0.25
+
+Enhanced Journals will now save the last scroll position of the entry that you're on.  So if you change tabs and then come back you don't have to scroll to find where you were.
+
+If Active Tiles is trying to select a journal entry, then Enhanced Journals will bypass opening the entry.
+
+Fixed issue when creating a Journal Entry.
+
+Fixed an issue when a slideshow is closed while a slide text is set to fade out.
+
+Fixed an issue with Quest objectives.
+
 # Version 1.0.24
 
 Fixing a filename issue.  SlideshowSheet vs SlideShowSheet

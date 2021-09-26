@@ -14,7 +14,7 @@ export class PlaceSheet extends EnhancedJournalSheet {
             dragDrop: [
                 { dragSelector: ".entity.actor", dropSelector: ".place-container" },
                 { dragSelector: ".entity.item", dropSelector: ".place-container" }],
-            scrollY: [".tab.details", ".tab.townsfolk", ".tab.shops"]
+            scrollY: [".tab.details", ".tab.townsfolk", ".tab.shops", ".description"]
         });
     }
 

@@ -10,6 +10,10 @@ export class EnhancedJournalSheet extends JournalSheet {
             this.options.tabs[0].initial = lasttab;
             this._tabs[0].active = lasttab;
         }
+
+        try {
+            this._scrollPositions = JSON.parse(this.object.data.flags['monks-enhanced-journal']?.scrollPos || {});
+        } catch (e) { }
     }
 
     static get defaultOptions() {
@@ -585,8 +589,22 @@ export class EnhancedJournalSheet extends JournalSheet {
     async close(options) {
         if (options?.submit !== false) {
             if (this.checkForChanges()) {
-                if (!confirm('You have unsaved changes, are you sure you want to close this window?'))
+                if (!confirm(i18n("MonksEnhancedJournal.YouHaveChanges")))
                     return false;
+            }
+
+            if (this.object.data.type == 'blank')
+                return;
+
+            //go through the scroll Y's and save the last position
+            if (this.options.scrollY?.length) {
+                const selectors = this.options.scrollY || [];
+                let scrollPos = selectors.reduce((pos, sel) => {
+                    const el = $(this.element).find(sel);
+                    if (el.length === 1) pos[sel] = el[0].scrollTop;
+                    return pos;
+                }, {});
+                this.object.setFlag('monks-enhanced-journal', 'scrollPos', JSON.stringify(scrollPos));
             }
 
             return super.close(options);

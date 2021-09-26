@@ -18,7 +18,7 @@ export class QuestSheet extends EnhancedJournalSheet {
                 { dragSelector: ".reward-items .item-list .item", dropSelector: "null" },
                 { dragSelector: ".objective-items .item-list .item", dropSelector: ".quest-container" }
             ],
-            scrollY: [".objective-items", ".reward-items"]
+            scrollY: [".objective-items", ".reward-items", ".description"]
         });
     }
 
@@ -31,7 +31,7 @@ export class QuestSheet extends EnhancedJournalSheet {
             return { name: k, value: this.object.getFlag('monks-enhanced-journal', k) };
         });
 
-        data.objectives = this.object.data.flags["monks-enhanced-journal"].objectives.filter(o => {
+        data.objectives = this.object.data.flags["monks-enhanced-journal"].objectives?.filter(o => {
             return this.object.isOwner || o.available;
         });
 

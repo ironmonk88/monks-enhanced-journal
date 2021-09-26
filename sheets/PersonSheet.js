@@ -12,7 +12,7 @@ export class PersonSheet extends EnhancedJournalSheet {
             template: "modules/monks-enhanced-journal/templates/person.html",
             tabs: [{ navSelector: ".tabs", contentSelector: ".sheet-body", initial: "description" }],
             dragDrop: [{ dragSelector: ".entity.actor", dropSelector: ".person-container" }],
-            scrollY: [".tab.details"]
+            scrollY: [".tab.details", ".description"]
         });
     }
 

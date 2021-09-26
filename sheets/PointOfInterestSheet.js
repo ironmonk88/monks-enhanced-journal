@@ -10,7 +10,8 @@ export class PointOfInterestSheet extends EnhancedJournalSheet {
         return mergeObject(super.defaultOptions, {
             title: i18n("MonksEnhancedJournal.PointOfInterest"),
             template: "modules/monks-enhanced-journal/templates/poi.html",
-            tabs: [{ navSelector: ".tabs", contentSelector: ".sheet-body", initial: "description" }]
+            tabs: [{ navSelector: ".tabs", contentSelector: ".sheet-body", initial: "description" }],
+            scrollY: [".description"]
         });
     }
 

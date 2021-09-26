@@ -20,7 +20,7 @@ export class EncounterSheet extends EnhancedJournalSheet {
                 { dragSelector: ".encounter-items .item-list .item .item-icon", dropSelector: "null" },
                 { dragSelector: ".create-encounter", dropSelector: "null" }
             ],
-            scrollY: [".encounter-content"]
+            scrollY: [".encounter-content", ".description"]
         });
     }
 

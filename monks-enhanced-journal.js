@@ -169,7 +169,7 @@ export class MonksEnhancedJournal {
             if (entry.data?.flags['monks-enhanced-journal']?.type)
                 entry.data.type = entry.data?.flags['monks-enhanced-journal']?.type;
 
-            if (!MonksEnhancedJournal.openJournalEntry(entry))
+            if (game.MonksActiveTiles?.waitingInput || !MonksEnhancedJournal.openJournalEntry(entry))
                 wrapped(...args);
         }
 
@@ -334,8 +334,10 @@ export class MonksEnhancedJournal {
 
         let oldOnCreate = JournalEntry.prototype._onCreate;
         JournalEntry.prototype._onCreate = async function (data, options, userid) {
-            if (MonksEnhancedJournal.compendium !== true || !MonksEnhancedJournal.openJournalEntry(this, options))
-                return oldOnCreate(data, options, userid);
+            if (MonksEnhancedJournal.compendium !== true) {
+                if (!MonksEnhancedJournal.openJournalEntry(this, options)) 
+                    return oldOnCreate.call(this, data, options, userid);
+            }
         }
 
         /*
@@ -747,12 +749,12 @@ export class MonksEnhancedJournal {
                 for (let text of slide.texts) {
                     if (!isNaN(text.fadein)) {
                         window.setTimeout(function () {
-                            $('.slide-showing text[id="' + text.id + '"]', MonksEnhancedJournal.slideshow.element).animate({ opacity: 1 }, 500, 'linear');
+                            $('.slide-showing text[id="' + text.id + '"]', MonksEnhancedJournal.slideshow?.element).animate({ opacity: 1 }, 500, 'linear');
                         }, text.fadein * 1000);
                     }
                     if (!isNaN(text.fadeout)) {
                         window.setTimeout(function () {
-                            $('.slide-showing text[id="' + text.id + '"]', MonksEnhancedJournal.slideshow.element).animate({ opacity: 0 }, 500, 'linear');
+                            $('.slide-showing text[id="' + text.id + '"]', MonksEnhancedJournal.slideshow?.element).animate({ opacity: 0 }, 500, 'linear');
                         }, text.fadeout * 1000);
                     }
                 }
@@ -1066,7 +1068,7 @@ Hooks.on("updateJournalEntry", (document, data, options, userId) => {
             MonksEnhancedJournal.journal.updateTabNames(document.uuid, document.name);
         }
 
-        if (MonksEnhancedJournal.journal.tabs.active().entityId.endsWith(data._id) &&
+        if (MonksEnhancedJournal.journal.tabs.active().entityId?.endsWith(data._id) &&
             (data.content != undefined || 
                 (data?.flags && (data?.flags['monks-enhanced-journal']?.actor != undefined ||
                     data?.flags['monks-enhanced-journal']?.actors != undefined ||
