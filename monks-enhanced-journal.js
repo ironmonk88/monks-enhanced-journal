@@ -209,7 +209,9 @@ export class MonksEnhancedJournal {
 
         let clickNote = function (wrapped, ...args) {
             if (this.entry) {
-                if (!MonksEnhancedJournal.openJournalEntry(this.entry)) {
+                if (this.data.flags['monks-enhanced-journal']?.chatbubble === true) {
+                    MonksEnhancedJournal.showAsChatBubble(this, this.document.entry);
+                }else if (!MonksEnhancedJournal.openJournalEntry(this.entry)) {
                     return wrapped(...args);
                 }
             }
@@ -289,7 +291,7 @@ export class MonksEnhancedJournal {
 
             // Action 2 - Render the Entity sheet
             if (document.documentName == 'Actor' || document.documentName == 'JournalEntry') {
-                if (!MonksEnhancedJournal.openJournalEntry(document, { newtab: event.ctrlKey })) {
+                if (event.altKey || setting('open-outside') || !MonksEnhancedJournal.openJournalEntry(document, { newtab: event.ctrlKey })) {
                     return document.sheet.render(true);
                 }
             }
@@ -332,11 +334,21 @@ export class MonksEnhancedJournal {
             }
         }
 
-        let oldOnCreate = JournalEntry.prototype._onCreate;
-        JournalEntry.prototype._onCreate = async function (data, options, userid) {
+        let createJournalEntry = async function (wrapped, ...args) {
+            let [ data, options, userid ] = args;
             if (MonksEnhancedJournal.compendium !== true) {
                 if (!MonksEnhancedJournal.openJournalEntry(this, options)) 
-                    return oldOnCreate.call(this, data, options, userid);
+                    return wrapped(...args);
+            } else
+                wrapped(...args);
+        }
+
+        if (game.modules.get("lib-wrapper")?.active) {
+            libWrapper.register("monks-enhanced-journal", "JournalEntry.prototype._onCreate", createJournalEntry, "MIXED");
+        } else {
+            const oldOnCreate = JournalEntry.prototype._onCreate;
+            JournalEntry.prototype._onCreate = function (event) {
+                return createJournalEntry.call(this, oldOnCreate.bind(this), ...arguments);
             }
         }
 
@@ -429,24 +441,97 @@ export class MonksEnhancedJournal {
                 this.object.sheet.render(true);
         }
 
+        let canView = function (wrapped, ...args) {
+            let [ user ] = args;
+            if (!user.isGM && this.data.flags['monks-enhanced-journal'].chatbubble)
+                return true;
+            else
+                return wrapped(...args);
+        }
+
+        if (game.modules.get("lib-wrapper")?.active) {
+            libWrapper.register("monks-enhanced-journal", "Token.prototype._canView", canView, "MIXED");
+        } else {
+            const oldCanView = Token.prototype._canView;
+            Token.prototype._canView = function (event) {
+                return canView.call(this, oldCanView.bind(this), ...arguments);
+            }
+        }
+
+        let onTokenClickLeft2 = function (wrapped, ...args) {
+            if (!game.user.isGM && this.data.flags['monks-enhanced-journal'].chatbubble) {
+                let journal = game.journal.get(this.data.flags['monks-enhanced-journal'].chatbubble);
+                if(journal)
+                    return MonksEnhancedJournal.showAsChatBubble(this, journal);
+            }
+            return wrapped(...args);
+        }
+
+        if (game.modules.get("lib-wrapper")?.active) {
+            libWrapper.register("monks-enhanced-journal", "Token.prototype._onClickLeft2", onTokenClickLeft2, "MIXED");
+        } else {
+            const oldOnClickEntry2 = Token.prototype._onClickLeft2;
+            Token.prototype._onClickLeft2 = function (event) {
+                return onTokenClickLeft2.call(this, oldOnClickEntry2.bind(this), ...arguments);
+            }
+        }
+
         Handlebars.registerHelper({ selectGroups: MonksEnhancedJournal.selectGroups });
+    }
+
+    static showAsChatBubble(object, journal) {
+        let content = journal.data.content;
+        let $el = $(content);
+
+        let text = '';
+        let tagName = $el.prop("tagName").toLowerCase();
+        if (tagName == 'ul' || tagName == 'ol') {
+            let items = $('li', $el);
+            let idx = 0;
+            if (tagName == 'ul') {
+                idx = Math.floor(Math.random() * items.length);
+            } else {
+                idx = object.data.flags['monks-enhanced-journal']?.chatbubbleidx || 0;
+                idx = (idx + 1) % items.length;
+                idx = Math.clamped(idx, 0, items.length - 1);
+                if (game.user.isGM)
+                    object.document.setFlag('monks-enhanced-journal', 'chatbubbleidx', idx);
+                else
+                    MonksEnhancedJournal.emit("setChatBubbleIdx", { uuid: object.uuid, idx: idx });
+            }
+            text = items[idx].innerHTML;
+        } else {
+            text = content;
+        }
+
+        if (!object.w)
+            object.w = 0;
+
+        canvas.hud.bubbles.say(object, text);
     }
 
     static openJournalEntry(entry, options = {}) {
         if (!game.user.isGM && !setting('allow-player'))
             return false;
 
-        let sheet = (!entry?._sheet ? entry?._getSheetClass() : entry?._sheet);
-        if (sheet?.constructor?.name == 'QuestPreviewShim')
-            return false;
+        if (entry) {
+            let entrytype = entry.data.type;
+            entry.data.type = (entrytype == 'journalentry' || entrytype == 'oldentry' ? 'base' : entrytype);
+            let sheet = (!entry?._sheet ? entry?._getSheetClass() : entry?._sheet);
+            if (sheet?.constructor?.name == 'QuestPreviewShim')
+                return false;
+            entry.data.type = entrytype;
+        }
 
         if (options.render == false || options.activate == false)
             return false;
 
         //if the enhanced journal is already open, then just pass it the new object, if not then let it render as normal
         if (MonksEnhancedJournal.journal) {
-            if (entry) MonksEnhancedJournal.journal.open(entry, options.newtab);
-            MonksEnhancedJournal.journal.render(true);
+            if (entry)
+                MonksEnhancedJournal.journal.open(entry, options.newtab);
+            else
+                MonksEnhancedJournal.journal.render(true);
         }
         else
             MonksEnhancedJournal.journal = new EnhancedJournal(entry).render(true);
@@ -667,6 +752,12 @@ export class MonksEnhancedJournal {
                 Journal._showEntry(data.uuid, null, true);
             }
         }
+    }
+
+    static async setChatBubbleIdx(data) {
+        let object = await fromUuid(data.uuid);
+        if(object)
+            object.setFlag('monks-enhanced-journal', 'chatbubbleidx', data.idx);
     }
 
     static cancelShow(data) {
@@ -1010,6 +1101,48 @@ export class MonksEnhancedJournal {
         if (entity)
             entity.sheet.render(true);
     }
+
+    static journalListing(ctrl, html, id, name, entryId = 'entryId') {
+        function selectItem(event) {
+            event.preventDefault();
+            event.stopPropagation();
+            $(`[name="${entryId}"]`, html).val(this.id);
+            $('.journal-select > div > span', html).html(this.name);
+            $('.journal-list.open').removeClass('open');
+            $(event.currentTarget).addClass('selected').siblings('.selected').removeClass('selected');
+        }
+
+        function getFolders(folders) {
+            return folders.sort((a, b) => { return a.data.sort < b.data.sort ? -1 : a.data.sort > b.data.sort ? 1 : 0; }).map(f => {
+                return $('<li>').addClass('journal-item folder flexcol collapse').append($('<div>').addClass('journal-title').html(f.name)).append(
+                    $('<ul>')
+                        .addClass('subfolder')
+                        .append(getFolders(f.children))
+                        .append(f.content
+                            .sort((a, b) => { return a.data.sort < b.data.sort ? -1 : a.data.sort > b.data.sort ? 1 : 0; })
+                            .map(e => { return $('<li>').addClass('journal-item flexrow').toggleClass('selected', id == e.id).attr('id', e.id).html($('<div>').addClass('journal-title').html(e.name)).click(selectItem.bind(e)) })))
+                    .click(function (event) { event.preventDefault(); event.stopPropagation(); $(this).toggleClass('collapse'); });
+            });
+        }
+
+        let list = $('<ul>')
+            .addClass('journal-list')
+            .append($('<li>').addClass('journal-item flexrow').toggleClass('selected', !id).attr('id', '').html($('<div>').addClass('journal-title').html('')).click(selectItem.bind({ id: '', name: '' })))
+            .append(getFolders(game.journal.directory.folders.filter(f => f.parentFolder == null)))
+            .append(game.journal.contents
+                .filter(j => j.folder == null)
+                .sort((a, b) => { return a.data.sort < b.data.sort ? -1 : a.data.sort > b.data.sort ? 1 : 0; })
+                .map(j => { return $('<li>').addClass('journal-item').attr('id', j.id).html($('<div>').addClass('journal-title').html(j.name)).click(selectItem.bind(j)); }));
+
+        return $('<div>')
+            .addClass('journal-select')
+            .attr('tabindex', '0')
+            .append($('<div>').addClass('flexrow').css({ font: ctrl.css('font') }).append($('<span>').html(name)).append($('<i>').addClass('fas fa-chevron-down')))
+            .append(list)
+            //.focus(function () { list.addClass('open') })
+            //.blur(function () { list.removeClass('open') })
+            .click(function () { list.toggleClass('open') });
+    }
 }
 
 Hooks.on("renderJournalDirectory", async (app, html, options) => {
@@ -1179,45 +1312,39 @@ Hooks.on("renderFolderConfig", (app, html, options) => {
 Hooks.on('renderNoteConfig', (app, html, data) => {
     let ctrl = $('select[name="entryId"]', html);
 
-    function selectItem(event) {
-        event.preventDefault();
-        event.stopPropagation();
-        $('[name="entryId"]', html).val(this.id);
-        $('.journal-select > div > span').html(this.name);
-        $('.journal-select').removeClass('open');
-    }
-
-    function getFolders(folders) {
-        return folders.sort((a, b) => { return a.data.sort < b.data.sort ? -1 : a.data.sort > b.data.sort ? 1 : 0; }).map(f => {
-            return $('<li>').addClass('journal-item folder flexcol collapse').append($('<div>').addClass('journal-title').html(f.name)).append(
-                $('<ul>')
-                    .addClass('subfolder')
-                    .append(getFolders(f.children))
-                    .append(f.content
-                        .sort((a, b) => { return a.data.sort < b.data.sort ? -1 : a.data.sort > b.data.sort ? 1 : 0; })
-                        .map(e => { return $('<li>').addClass('journal-item flexrow').toggleClass('selected', app.object.data.entryId == e.id).attr('id', e.id).html($('<div>').addClass('journal-title').html(e.name)).click(selectItem.bind(e)) })))
-                .click(function (event) { event.preventDefault(); event.stopPropagation(); $(this).toggleClass('collapse'); });
-        });
-    }
-
+    MonksEnhancedJournal.journalListing(ctrl, html, app.object.data.entryId, data.entry.name).insertAfter(ctrl);
     ctrl.hide();
 
-    $('<div>')
-        .addClass('journal-select')
-        .attr('tabindex', '0')
-        .append($('<div>').addClass('flexrow').css({ font: ctrl.css('font') }).append($('<span>').html(data.entry.name)).append($('<i>').addClass('fas fa-chevron-down')))
-        .append($('<ul>')
-            .addClass('journal-list')
-            .append($('<li>').addClass('journal-item flexrow').toggleClass('selected', app.object.data.entryId == '').attr('id', '').html($('<div>').addClass('journal-title').html('')).click(selectItem.bind({id:'', name:''})))
-            .append(getFolders(game.journal.directory.folders.filter(f => f.parentFolder == null)))
-            .append(game.journal.contents
-                .filter(j => j.folder == null)
-                .sort((a, b) => { return a.data.sort < b.data.sort ? -1 : a.data.sort > b.data.sort ? 1 : 0; })
-                .map(j => { return $('<li>').addClass('journal-item').attr('id', j.id).html($('<div>').addClass('journal-title').html(j.name)).click(selectItem.bind(j)); })))
-        .focus(function () { $(this).addClass('open') })
-        .blur(function () { $(this).removeClass('open') })
-        .click(function () { $(this).addClass('open') })
-        .insertAfter(ctrl);
+    $('<div>').addClass('form-group')
+        .append($('<label>').html(i18n("MonksEnhancedJournal.ChatBubble")))
+        .append(
+            $('<div>').addClass('form-fields')
+                .append($('<input>').attr('type', 'checkbox').attr('name', 'flags.monks-enhanced-journal.chatbubble').prop('checked', app.object.data.flags['monks-enhanced-journal']?.chatbubble))
+    ).insertAfter($('select[name="textAnchor"]', html).closest('.form-group'));
+
+    app.setPosition({ height: 'auto' });
+});
+
+Hooks.on("renderTokenConfig", (app, html, data) => {
+    let ctrl = $('<input>').attr('type', 'text').attr('name', 'flags.monks-enhanced-journal.chatbubble');
+    let group = $('<div>').addClass('form-group')
+        .append($('<label>').html('Token Dialog Journal Entry'))
+        .append(ctrl);
+
+    let journalId = app.object.data.flags['monks-enhanced-journal']?.chatbubble;
+    let journal = game.journal.get(journalId);
+
+    let journalSelect = MonksEnhancedJournal.journalListing(ctrl, group, journal?.id, journal?.name, 'flags.monks-enhanced-journal.chatbubble');
+    ctrl.hide();
+    group.append(journalSelect);
+
+    let select = $('.journal-select', group);
+    let ul = $('.journal-list', group).appendTo(app.element);
+    window.setTimeout(function () {
+        ul.css({ left: select.position().left, top: (select.position().top + select.height() + 1), width: select.outerWidth() });
+    }, 100);
+
+    $('div[data-tab="character"]', html).append(group);
 });
 
 Hooks.on("preDocumentSheetRegistrarInit", (settings) => {

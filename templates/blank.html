@@ -6,7 +6,7 @@
         <div style="margin-bottom: 20px;border-radius: 6px;background-color: rgba(255, 255, 255, 0.5);border: 1px solid rgba(255, 255, 255, 0.8);">{{localize 'MonksEnhancedJournal.RecentlyViewed'}}</div>
         <div class="flexrow" style="font-size:16px;">
             {{#each recent}}
-            <div class="recent-link" data-entity-id="{{this.id}}"><div><i class="fas {{this.img}}"></i></div>{{this.name}}</div>
+            <div class="recent-link" data-entity-id="{{this.id}}" data-entity-uuid="{{this.uuid}}"><div><i class="fas {{this.img}}"></i></div>{{this.name}}</div>
             {{/each}}
         </div>
     </div>

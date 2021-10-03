@@ -15,7 +15,7 @@ export class EnhancedJournal extends Application {
     constructor(object, options = {}) {
         super(options);
 
-        this.tabs = duplicate(game.user.getFlag('monks-enhanced-journal', 'tabs') || [])
+        this.tabs = duplicate(game.user.getFlag('monks-enhanced-journal', 'tabs') || [{ "id": makeid(), "text": i18n("MonksEnhancedJournal.NewTab"), "active": true, "history": [] }])
             /*.map(t => {
             if(t.entityId != undefined)
                 t.history = [t.entityId];
@@ -92,14 +92,17 @@ export class EnhancedJournal extends Application {
     //    return this.subsheet?.editors?.content?.active && this.subsheet.editors?.content?.mce?.isDirty();
     //}
 
-    _render(force, options = {}) {
-        return super._render(force, options).then(() => {
+    async _render(force, options = {}) {
+        let result = await super._render(force, options);
+
+        if (this.element) {
             this.renderDirectory().then((html) => {
                 MonksEnhancedJournal.updateDirectory(html);
             })
 
             this.renderSubSheet();
-        })
+        }
+        return result;
     }
 
     async renderDirectory() {
@@ -299,7 +302,7 @@ export class EnhancedJournal extends Application {
 
     _saveScrollPositions(html) {
         super._saveScrollPositions(html);
-        if (this.subsheet.options.scrollY && this.subsheet.object.id == this.object.id) {   //only save if we're refreshing the sheet
+        if (this.subsheet && this.subsheet.options.scrollY && this.subsheet.object.id == this.object.id) {   //only save if we're refreshing the sheet
             const selectors = this.subsheet.options.scrollY || [];
 
             this._scrollPositions = selectors.reduce((pos, sel) => {
@@ -315,12 +318,12 @@ export class EnhancedJournal extends Application {
     }
 
     activateEditor() {
-        $('.nav-button.edit i', this.element).removeClass('fa-pencil-alt').addClass('fa-download');
+        $('.nav-button.edit i', this.element).removeClass('fa-pencil-alt').addClass('fa-download').attr('title', i18n("MonksEnhancedJournal.SaveChanges"));
         $('.nav-button.split', this.element).addClass('disabled');
     }
 
     saveEditor(name) {
-        $('.nav-button.edit i', this.element).addClass('fa-pencil-alt').removeClass('fa-download');
+        $('.nav-button.edit i', this.element).addClass('fa-pencil-alt').removeClass('fa-download').attr('title', i18n("MonksEnhancedJournal.EditDescription"));
         $('.nav-button.split', this.element).removeClass('disabled');
         const editor = this.subsheet.editors[name];
         editor.button.style.display = "";
@@ -353,6 +356,7 @@ export class EnhancedJournal extends Application {
         if (options?.submit !== false) {
             if (await this?.subsheet?.close() === false)
                 return false;
+            MonksEnhancedJournal.journal = null;
             return super.close(options);
         }
     }
@@ -497,6 +501,9 @@ export class EnhancedJournal extends Application {
     }
 
     updateTab(tab, entity) {
+        if (!entity)
+            return;
+
         if (tab != undefined) {
             if (tab.entityId != entity.uuid) {
                 tab.text = entity.data.name;
@@ -528,6 +535,9 @@ export class EnhancedJournal extends Application {
             //this.updateHistory();
             this.updateRecent(tab.entity);
         }
+
+        if (!this.rendered)
+            return;
 
         this.render(true);
     }
@@ -747,7 +757,7 @@ export class EnhancedJournal extends Application {
         if (entity.id) {
             let recent = game.user.getFlag("monks-enhanced-journal", "_recentlyViewed") || [];
             recent.findSplice(e => e.id == entity.id || typeof e != 'object');
-            recent.unshift({ id: entity.id, name: entity.name, type: entity.getFlag("monks-enhanced-journal", "type") });
+            recent.unshift({ id: entity.id, uuid: entity.uuid, name: entity.name, type: entity.getFlag("monks-enhanced-journal", "type") });
             if (recent.length > 5)
                 recent = recent.slice(0, 5);
             await game.user.setFlag("monks-enhanced-journal", "_recentlyViewed", recent);

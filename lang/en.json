@@ -18,6 +18,8 @@
   "MonksEnhancedJournal.start-collapsed.hint": "Start with the side directory collapsed",
   "MonksEnhancedJournal.use-objectives.name": "Use Quest Objectives",
   "MonksEnhancedJournal.use-objectives.hint": "Add Objectives to Quests entries",
+  "MonksEnhancedJournal.open-outside.name": "Open Chat Links",
+  "MonksEnhancedJournal.open-outside.hint": "Open Chat Links outside of Enhanced Journal instead of a new tab",
 
   "MonsEnhancedJournal.SlideConfiguration": "Slide Configuration",
   "MonsEnhancedJournal.DCConfiguration": "DC Configuration",
@@ -36,6 +38,7 @@
   "MonksEnhancedJournal.SearchDescription": "Search Description",
   "MonksEnhancedJournal.ShowToPlayers": "Show to Players",
   "MonksEnhancedJournal.EditDescription": "Edit Description",
+  "MonksEnhancedJournal.SaveChanges": "Save Changes",
   "MonksEnhancedJournal.AddSlide": "Add Slide",
   "MonksEnhancedJournal.ClearAll": "Clear All",
   "MonksEnhancedJournal.Play": "Play",
@@ -191,6 +194,7 @@
   "MonksEnhancedJournal.CannotPlayNoSlides": "Cannot play a slideshow with no slides",
   "MonksEnhancedJournal.SearchChecklist": "Search Checklist",
   "MonksEnhancedJournal.CreateEntry": "Create Entry",
+  "MonksEnhancedJournal.ChatBubble": "Show as Chat Bubble",
 
   "MonksEnhancedJournal.Contain": "Contain",
   "MonksEnhancedJournal.Cover": "Cover",

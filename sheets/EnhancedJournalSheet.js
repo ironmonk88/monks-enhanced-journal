@@ -56,7 +56,7 @@ export class EnhancedJournalSheet extends JournalSheet {
     }
 
     _onChangeTab(event) {
-        if(this.object.isOwner)
+        if(this.object.isOwner && this.isEditable)
             this.object.setFlag('monks-enhanced-journal', '_lasttab', this._tabs[0].active);
     }
 
@@ -145,9 +145,14 @@ export class EnhancedJournalSheet extends JournalSheet {
         html.find('img[data-edit]').click(this._onEditImage.bind(this));
 
         if (enhancedjournal) {
-            html.find('.recent-link').click(ev => {
+            html.find('.recent-link').click(async (ev) => {
+                let uuid = ev.currentTarget.dataset.entityUuid;
                 let id = ev.currentTarget.dataset.entityId;
-                let entity = game.journal.find(j => j.id == id);
+                let entity;
+                if (uuid)
+                    entity = await fromUuid(uuid);
+                else
+                    entity = game.journal.find(j => j.id == id);
                 if (entity)
                     enhancedjournal.open(entity);
             });
@@ -604,7 +609,8 @@ export class EnhancedJournalSheet extends JournalSheet {
                     if (el.length === 1) pos[sel] = el[0].scrollTop;
                     return pos;
                 }, {});
-                this.object.setFlag('monks-enhanced-journal', 'scrollPos', JSON.stringify(scrollPos));
+                if (this.isEditable)
+                    this.object.setFlag('monks-enhanced-journal', 'scrollPos', JSON.stringify(scrollPos));
             }
 
             return super.close(options);

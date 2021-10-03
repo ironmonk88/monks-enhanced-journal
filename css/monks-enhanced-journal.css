@@ -386,8 +386,14 @@
     background: #cfcdc2;
 }
 
+#journal-directory .directory-list .directory-item{
+    align-items:flex-start;
+    justify-content: flex-start;
+}
+
 #journal-directory li.folder > .folder-header {
     background: rgba(0, 0, 0, 0.1);
+    flex: 1;
 }
 
 #journal-directory li.folder:not(.collapsed) > .folder-header {
@@ -404,6 +410,7 @@
 #journal-directory li.folder.collapsed > .folder-header {
     border-top: 1px solid rgba(0, 0, 0, 0.1);
     border-bottom: none;
+    width:100%;
 }
 
 #journal-directory li.folder.collapsed > .folder-header:not(.customcolor),
@@ -425,6 +432,7 @@
     border-left: 4px solid rgba(0, 0, 0, 0.3);
     border-bottom: 4px solid rgba(0, 0, 0, 0.3);
     margin-bottom: 0px;
+    width:100%;
 }
 
 #journal-directory .subdirectory .subdirectory {
@@ -1754,30 +1762,29 @@
     color: #000;
 }
 
-.journal-select ul {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-}
-
 .journal-list {
     display: none;
     max-height: 300px;
     overflow-y: auto;
     margin: 0px 5px;
+    color: black;
     position: absolute;
     float: left;
-    left:0px;
+    left: 0px;
     top: 100%;
     background: url(../../../ui/parchment.jpg) repeat;
     border: 1px solid #808080;
     width: 100%;
     border-bottom-right-radius: 5px;
     border-bottom-left-radius: 5px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
 }
 
-.journal-select.open .journal-list{
-    display:block;
+.journal-select.open .journal-list,
+.journal-list.open {
+    display: block;
 }
 
 .journal-list .journal-item .journal-title {
@@ -2011,4 +2018,37 @@ a.picture-link.broken {
     display: flex;
     justify-content: center;
     align-items: flex-end;
+}
+
+.monks-enhanced-journal .mainbar .navigation .button-group .nav-text i.fa-search {
+    padding-top: 4px;
+}
+
+.monks-enhanced-journal .mainbar .navigation #context-menu li{
+    text-align:left;
+}
+
+.d35ecustom .monks-enhanced-journal .content .sheet.monks-journal-sheet{
+    border:0px;
+}
+
+.d35ecustom .monks-enhanced-journal .content .sheet.monks-journal-sheet input[name="name"]{
+    height:32px;
+}
+
+.sfrpg.monks-enhanced-journal .tab-bar .tab-button.sidebar-toggle,
+.sw5e.monks-enhanced-journal .tab-bar .tab-button.sidebar-toggle {
+    top: -4px;
+}
+
+.sfrpg.monks-enhanced-journal .directory-sidebar,
+.sw5e.monks-enhanced-journal .directory-sidebar {
+    margin-top: -8px;
+    margin-right: -8px;
+    height: calc(100% + 16px);
+}
+
+.sfrpg.monks-enhanced-journal .directory .action-buttons button,
+.sw5e.monks-enhanced-journal .directory .action-buttons button {
+    line-height: 20px;
 }

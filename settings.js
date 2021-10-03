@@ -71,4 +71,13 @@ export const registerSettings = function () {
 		default: false,
 		type: Boolean,
 	});
+
+	game.settings.register(modulename, "open-outside", {
+		name: i18n("MonksEnhancedJournal.open-outside.name"),
+		hint: i18n("MonksEnhancedJournal.open-outside.hint"),
+		scope: "world",
+		config: true,
+		default: false,
+		type: Boolean,
+	});
 }

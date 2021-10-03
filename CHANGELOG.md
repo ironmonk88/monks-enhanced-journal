@@ -1,3 +1,23 @@
+# Version 1.0.26
+
+Fixed issue when Enhanced Journal opens on a brand new world and no tabs have ever been opened.
+
+Fixed rendering issue, it wasn't waiting for the parent to finish rendering first before trying to render the subsheet.
+
+Fixed issue where it was trying to save scroll positions even if a subsheet didn't exist.
+
+Updating the tooltip text of the edit/save button so it displays the correct text.
+
+Clearing out the journal value when the journal closes.
+
+Changing the recently opened to use uuid instead of just id in case Compendium entities are opened.
+
+Correcting styling issues with various systems (DnD3.5, SFRPG, SW5e)
+
+Added option to open chat links outside of Enhanced Journal by holding the Alt key while clicking.
+
+Added option to double click on a Note or Token and display the text of a Journal Entry as a chat bubble instead of opening up the Journal Entry.  If the Journal Entry contains just a unordered list then one of the entries will ranbdomly be used.  If an ordered list is used, then it will select each item in sequence.  With no list, it will use the text in the Journal Entry.  Turn on this feature by selecting the "Show as Chat Bubble" setting.
+
 # Version 1.0.25
 
 Enhanced Journals will now save the last scroll position of the entry that you're on.  So if you change tabs and then come back you don't have to scroll to find where you were.
