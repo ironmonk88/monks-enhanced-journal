@@ -1,3 +1,7 @@
+# Version 1.0.27
+
+Fixed issue with chatbubbles
+
 # Version 1.0.26
 
 Fixed issue when Enhanced Journal opens on a brand new world and no tabs have ever been opened.

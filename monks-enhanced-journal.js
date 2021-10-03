@@ -443,7 +443,7 @@ export class MonksEnhancedJournal {
 
         let canView = function (wrapped, ...args) {
             let [ user ] = args;
-            if (!user.isGM && this.data.flags['monks-enhanced-journal'].chatbubble)
+            if (!user.isGM && this.data.flags['monks-enhanced-journal']?.chatbubble)
                 return true;
             else
                 return wrapped(...args);
@@ -459,8 +459,8 @@ export class MonksEnhancedJournal {
         }
 
         let onTokenClickLeft2 = function (wrapped, ...args) {
-            if (!game.user.isGM && this.data.flags['monks-enhanced-journal'].chatbubble) {
-                let journal = game.journal.get(this.data.flags['monks-enhanced-journal'].chatbubble);
+            if (!game.user.isGM && this.data.flags['monks-enhanced-journal']?.chatbubble) {
+                let journal = game.journal.get(this.data.flags['monks-enhanced-journal']?.chatbubble);
                 if(journal)
                     return MonksEnhancedJournal.showAsChatBubble(this, journal);
             }
