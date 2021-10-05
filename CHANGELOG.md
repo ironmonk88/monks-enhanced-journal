@@ -1,3 +1,11 @@
+# Version 1.0.28
+
+Fixed an issue where newly created Journal Entries were being opened for players that were allowed to use the Enhanced Journal browser.
+
+Added Spanish translations, thank you lozalojo!
+
+Added French translations, thank you remiverdel!
+
 # Version 1.0.27
 
 Fixed issue with chatbubbles

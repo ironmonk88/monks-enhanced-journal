@@ -335,12 +335,12 @@ export class MonksEnhancedJournal {
         }
 
         let createJournalEntry = async function (wrapped, ...args) {
-            let [ data, options, userid ] = args;
-            if (MonksEnhancedJournal.compendium !== true) {
-                if (!MonksEnhancedJournal.openJournalEntry(this, options)) 
-                    return wrapped(...args);
-            } else
-                wrapped(...args);
+            let [data, options, userid] = args;
+            if (game.user.id !== userid)
+                return;
+
+            if (MonksEnhancedJournal.compendium !== true && !MonksEnhancedJournal.openJournalEntry(this, options))
+                return wrapped(...args);
         }
 
         if (game.modules.get("lib-wrapper")?.active) {
@@ -459,7 +459,7 @@ export class MonksEnhancedJournal {
         }
 
         let onTokenClickLeft2 = function (wrapped, ...args) {
-            if (!game.user.isGM && this.data.flags['monks-enhanced-journal']?.chatbubble) {
+            if (!game.user.isGM && this.data.flags['monks-enhanced-journal']?.chatbubble && !this.isOwner) {
                 let journal = game.journal.get(this.data.flags['monks-enhanced-journal']?.chatbubble);
                 if(journal)
                     return MonksEnhancedJournal.showAsChatBubble(this, journal);
