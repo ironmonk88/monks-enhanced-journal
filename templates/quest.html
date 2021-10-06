@@ -123,6 +123,7 @@
                     <label>{{localize 'MonksEnhancedJournal.Additional'}}</label>
                     <input type="text" name="flags.monks-enhanced-journal.additional" placeholder="{{localize 'MonksEnhancedJournal.Additional'}}" value="{{data.flags.monks-enhanced-journal.additional}}" />
                 </div>
+                {{#if currency.length}}
                 <div class="form-group">
                     <label>{{localize 'MonksEnhancedJournal.Currency'}}</label>
                     <div class="form-fields">
@@ -132,6 +133,7 @@
                         {{/each}}
                     </div>
                 </div>
+                {{/if}}
             </div>
             <ol class="items-list reward-items">
                 <li class="items-header flexrow">

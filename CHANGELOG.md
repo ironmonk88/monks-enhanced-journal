@@ -1,3 +1,7 @@
+# Version 1.0.29
+
+Fixed issue with Quest currencies when the system doesn't have any.
+
 # Version 1.0.28
 
 Fixed an issue where newly created Journal Entries were being opened for players that were allowed to use the Enhanced Journal browser.

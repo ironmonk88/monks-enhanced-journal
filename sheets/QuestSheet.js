@@ -27,7 +27,7 @@ export class QuestSheet extends EnhancedJournalSheet {
 
         data.showtoplayers = this.object.data.permission["default"] >= CONST.ENTITY_PERMISSIONS.OBSERVER;
 
-        data.currency = Object.entries(CONFIG[game.system.id.toUpperCase()]?.currencies).map(([k, v]) => {
+        data.currency = Object.entries(CONFIG[game.system.id.toUpperCase()]?.currencies || {}).map(([k, v]) => {
             return { name: k, value: this.object.getFlag('monks-enhanced-journal', k) };
         });
 
