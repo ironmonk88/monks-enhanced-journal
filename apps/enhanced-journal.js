@@ -205,7 +205,7 @@ export class EnhancedJournal extends Application {
             let html = await renderTemplate(this.subsheet.template, templateData);
             this.subdocument = $(html).get(0);
             this.subsheet.form = (this.subdocument.tagName == 'FORM' ? this.subdocument : $('form:first', this.subdocument));
-            this.subsheet._element = this.subdocument;
+            this.subsheet._element = $(this.subdocument);
             this.subsheet.enhancedjournal = this;
             if(this.subsheet.refresh)
                 this.subsheet.refresh();
@@ -275,10 +275,10 @@ export class EnhancedJournal extends Application {
                 return oldActivateEditor.call(this, ...args);
             }
 
-            Hooks.callAll('renderJournalSheet', this.subsheet, contentform, this.object);
+            if (this.object.data.type != 'blank')
+                Hooks.callAll('renderJournalSheet', this.subsheet, contentform, this.object);
 
-            if (this.subsheet.activateControls)
-                this.subsheet.activateControls($('#journal-buttons', this.element).empty());
+            this.activateControls($('#journal-buttons', this.element).empty());
 
             $('.navigate-prev', this.element).html('').attr('data-entity-id', '');
             $('.navigate-next', this.element).html('').attr('data-entity-id', '');
@@ -331,6 +331,53 @@ export class EnhancedJournal extends Application {
         const owner = this.object.isOwner;
         const content = TextEditor.enrichHTML(this.object.data.content, { secrets: owner, entities: true });
         $('.editor-content[data-edit="content"]', this.element).html(content);
+    }
+
+    activateControls(html) {
+        let ctrls = [];
+        if (this.subsheet._entityControls)
+            ctrls = this.subsheet._entityControls();
+
+        Hooks.callAll('activateControls', this, ctrls);
+        if (ctrls) {
+            for (let ctrl of ctrls) {
+                if (ctrl.conditional != undefined) {
+                    if (typeof ctrl.conditional == 'function') {
+                        if (!ctrl.conditional.call(this.subsheet))
+                            continue;
+                    }
+                    else if (!ctrl.conditional)
+                        continue;
+                }
+                let div = '';
+                switch (ctrl.type || 'button') {
+                    case 'button':
+                        div = $('<div>')
+                            .addClass('nav-button ' + ctrl.id)
+                            .attr('title', ctrl.text)
+                            .append($('<i>').addClass('fas ' + ctrl.icon))
+                            .on('click', ctrl.callback.bind(this.subsheet));
+                        break;
+                    case 'input':
+                        div = $('<input>')
+                            .addClass('nav-input ' + ctrl.id)
+                            .attr(mergeObject({ 'type': 'text', 'autocomplete': 'off', 'placeholder': ctrl.text }, (ctrl.attributes || {})))
+                            .on('keyup', function (event) {
+                                ctrl.callback.call(this.subsheet, this.value, event);
+                            });
+                        break;
+                    case 'text':
+                        div = $('<div>').addClass('nav-text ' + ctrl.id).html(ctrl.text);
+                        break;
+                }
+
+                if (div != '') {
+                    if (ctrl.visible === false)
+                        div.hide();
+                    html.append(div);
+                }
+            }
+        }
     }
 
     get getEntityTypes() {

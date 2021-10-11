@@ -515,6 +515,9 @@ export class MonksEnhancedJournal {
             return false;
 
         if (entry) {
+            if (entry.data.content.includes('QuickEncountersTutorial'))
+                return false;
+
             let entrytype = entry.data.type;
             entry.data.type = (entrytype == 'journalentry' || entrytype == 'oldentry' ? 'base' : entrytype);
             let sheet = (!entry?._sheet ? entry?._getSheetClass() : entry?._sheet);

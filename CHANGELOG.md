@@ -1,3 +1,15 @@
+# Version 1.0.30
+
+Fixed an issue with some modules having a rendering issue.  I wasn't creating the subsheets element properly.  At least not in the way they would be expecting.
+
+Fixed an issue where blank tabs were callign the render Hook.  Which made no sense to any modules that tried to capture that.
+
+Moved the creation of control buttons to the Enhanced Journal rather than the pages themselves.  And updated the Hook appropriately.  This will allow other modules to add buttons as needed.
+
+Ignoring the creation of Quick Encounters journal entries.
+
+Fixed an issue, I think, where the confirm box was preventing the Journal Entry from being edited again on the stand alone app.
+
 # Version 1.0.29
 
 Fixed issue with Quest currencies when the system doesn't have any.

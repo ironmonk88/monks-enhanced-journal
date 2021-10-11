@@ -313,52 +313,6 @@ export class EnhancedJournalSheet extends JournalSheet {
             return this.object.update(formData);
     }
 
-    activateControls(html) {
-        let ctrls = this._entityControls();
-        Hooks.callAll('activateControls', this, ctrls);
-        let that = this;
-        if (ctrls) {
-            for (let ctrl of ctrls) {
-                if (ctrl.conditional != undefined) {
-                    if (typeof ctrl.conditional == 'function') {
-                        if (!ctrl.conditional.call(this))
-                            continue;
-                    }
-                    else if (!ctrl.conditional)
-                        continue;
-                }
-                let div = '';
-                switch (ctrl.type || 'button') {
-                    case 'button':
-                        div = $('<div>')
-                            .addClass('nav-button ' + ctrl.id)
-                            .attr('title', ctrl.text)
-                            .append($('<i>').addClass('fas ' + ctrl.icon))
-                            .on('click', ctrl.callback.bind(this));
-                        break;
-                    case 'input':
-                        div = $('<input>')
-                            .addClass('nav-input ' + ctrl.id)
-                            .attr(mergeObject({ 'type': 'text', 'autocomplete': 'off', 'placeholder': ctrl.text }, (ctrl.attributes || {})))
-                            .on('keyup', function (event) {
-                                ctrl.callback.call(that, this.value, event);
-                            });
-                        break;
-                    case 'text':
-                        div = $('<div>').addClass('nav-text ' + ctrl.id).html(ctrl.text);
-                        break;
-                }
-
-                if (div != '') {
-                    if (ctrl.visible === false)
-                        div.hide();
-                    html.append(div);
-                }
-                //<div class="nav-button search" title="Search"><i class="fas fa-search"></i><input class="search" type="text" name="search-entry" autocomplete="off"></div>
-            }
-        }
-    }
-
     _entityControls() {
         let ctrls = [];
         if (this.object.id)
@@ -594,8 +548,11 @@ export class EnhancedJournalSheet extends JournalSheet {
     async close(options) {
         if (options?.submit !== false) {
             if (this.checkForChanges()) {
-                if (!confirm(i18n("MonksEnhancedJournal.YouHaveChanges")))
-                    return false;
+                const confirm = await Dialog.confirm({
+                    title: i18n("MonksEnhancedJournal.SaveChanges"),
+                    content: `<p>${i18n("MonksEnhancedJournal.YouHaveChanges")}</p>`
+                });
+                if (!confirm) return false;
             }
 
             if (this.object.data.type == 'blank')
