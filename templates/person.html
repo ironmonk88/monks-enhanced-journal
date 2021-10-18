@@ -29,6 +29,7 @@
     <nav class="sheet-navigation tabs" data-group="primary">
         <a class="item" data-tab="description">{{localize 'MonksEnhancedJournal.Description'}}</a>
         <a class="item" data-tab="details">{{localize 'MonksEnhancedJournal.Details'}}</a>
+        <a class="item" data-tab="relationships">{{localize 'MonksEnhancedJournal.Relationships'}}</a>
         <a class="item" data-tab="notes">{{localize 'MonksEnhancedJournal.Notes'}}</a>
     </nav>
     <section class="sheet-body">
@@ -119,6 +120,37 @@
                     <label>{{localize 'MonksEnhancedJournal.Secret'}}</label>
                     <textarea name="flags.monks-enhanced-journal.secret">{{data.flags.monks-enhanced-journal.secret}}</textarea>
                 </div>
+            </div>
+        </div>
+        <div class="tab notes flexcol" data-group="primary" data-tab="relationships">
+            <div class="relationships flexrow">
+                <ul class="items-list">
+                    {{#each relationships}}
+                    <li class="items-header flexrow">
+                        <h3 class="item-name flexrow">{{this.name}}</h3>
+                        <h3 class="item-name flexrow">{{localize 'MonksEnhancedJournal.Relationship'}}</h3>
+                        <div class="item-controls flexrow"></div>
+                    </li>
+                    {{#each actors}}
+                    <li class="item flexrow" data-id="{{this.id}}" data-container="actors" data-entity="Actor" draggable="false">
+                        <div class="item-name flexrow">
+                            <img class="item-image actor-icon" src="{{this.img}}" onerror="this.src='modules/monks-enhanced-journal/assets/person.png'" />
+                            <h4>{{this.name}}</h4>
+                        </div>
+
+                        <div class="item-name item-relationship flexrow">
+                            <input type="text" class="item-field" name="relationship" value="{{this.relationship}}" />
+                        </div>
+
+                        <div class="item-controls flexrow owner">
+                            <a class="item-control item-delete" title="{{localize 'MonksEnhancedJournal.RemoveActor'}}"><i class="fas fa-trash"></i></a>
+                        </div>
+                    </li>
+                    {{/each}}
+                    {{else}}
+                    <li class="instruction">Drag a Person, Place, or Organization here to make a relationship</li>
+                    {{/each}}
+                </ul>
             </div>
         </div>
         <div class="tab notes flexcol" data-group="primary" data-tab="notes">

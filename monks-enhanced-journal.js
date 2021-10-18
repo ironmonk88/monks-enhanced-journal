@@ -476,6 +476,39 @@ export class MonksEnhancedJournal {
             }
         }
 
+        let onSceneContextMenu = function (wrapped, ...args) {
+            let context = wrapped(...args);
+
+            let menu = context.find(c => c.name == "SCENES.Notes");
+            if (menu) {
+                let oldcallback = 
+                menu.callback = (li) => {
+                    const scene = game.scenes.get(li.data("sceneId"));
+                    const entry = scene.journal;
+                    if (entry) {
+                        if (!MonksEnhancedJournal.openJournalEntry(entry)) {
+                            const sheet = entry.sheet;
+                            sheet.options.sheetMode = "text";
+                            sheet.render(true);
+                        }
+                    }
+                }
+            }
+
+            return context;
+        }
+
+        if (game.modules.get("lib-wrapper")?.active) {
+            libWrapper.register("monks-enhanced-journal", "SceneNavigation.prototype._getContextMenuOptions", onSceneContextMenu, "WRAPPER");
+        } else {
+            const oldSceneContextMenu = SceneNavigation.prototype._getContextMenuOptions;
+            SceneNavigation.prototype._getContextMenuOptions = function (event) {
+                return onSceneContextMenu.call(this, oldSceneContextMenu.bind(this), ...arguments);
+            }
+        }
+
+        SceneNavigation._getContextMenuOptions
+
         Handlebars.registerHelper({ selectGroups: MonksEnhancedJournal.selectGroups });
     }
 
@@ -941,14 +974,19 @@ export class MonksEnhancedJournal {
             else
                 $('.entity-name', this).prepend($('<i>').addClass('journal-type fas fa-fw ' + icon));
 
-            if (type == 'quest')
-                $(this).attr('status', entry.getFlag('monks-enhanced-journal', 'status'));
+            if (type == 'quest') {
+                let permission = entry.data.permission.default;
+                let completed = entry.getFlag('monks-enhanced-journal', 'completed')
+                $(this).attr('status', (completed ? 'completed' : (permission >= CONST.ENTITY_PERMISSIONS.OBSERVER ? 'inprogress' : (permission == CONST.ENTITY_PERMISSIONS.LIMITED ? 'available' : ''))));
+            }
 
             $('.entity-name .permissions', this).remove();
             if (setting('show-permissions') && game.user.isGM && (entry.data.permission.default > 0 || Object.keys(entry.data.permission).length > 1)) {
                 let permissions = $('<div>').addClass('permissions');
-                if (entry.data.permission.default > 0)
-                    permissions.append($('<i>').addClass('fas fa-users').attr('title', 'Everyone'));
+                if (entry.data.permission.default > 0) {
+                    const permission = Object.keys(CONST.ENTITY_PERMISSIONS)[entry.data.permission.default];
+                    permissions.append($('<i>').addClass('fas fa-users').attr('title', i18n(`PERMISSION.${permission}`)));
+                }
                 else {
                     for (let [key, value] of Object.entries(entry.data.permission)) {
                         let user = game.users.find(u => {
@@ -1189,6 +1227,9 @@ Hooks.on("preCreateJournalEntry", (entry, data, options, userId) => {
             break;
         case 'quest':
             flags = mergeObject(flags, QuestSheet.defaultObject);
+            break;
+        case 'person':
+            flags = mergeObject(flags, PersonSheet.defaultObject);
             break;
     }
     entry.data._source.flags['monks-enhanced-journal'] = flags;

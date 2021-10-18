@@ -1,3 +1,15 @@
+# Version 1.0.31
+
+Added styling fixed for Warhammer
+
+Fixed an issue where Scene Notes wouldn't open in Enhanced Journals
+
+Fixed issue where the correct quest colours weren't being shown.
+
+Added tooltip to show what kind of permissions everyone has in the Journal Directory.
+
+Added relationships to the Person entry
+
 # Version 1.0.30
 
 Fixed an issue with some modules having a rendering issue.  I wasn't creating the subsheets element properly.  At least not in the way they would be expecting.

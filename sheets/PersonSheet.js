@@ -20,6 +20,24 @@ export class PersonSheet extends EnhancedJournalSheet {
         return 'person';
     }
 
+    static get defaultObject() {
+        return { actors: [] };
+    }
+
+    async getData() {
+        let data = super.getData();
+
+        data.relationships = {};
+        for (let item of (data.data.flags['monks-enhanced-journal']?.actors || [])) {
+            if (!data.relationships[item.type])
+                data.relationships[item.type] = { type: item.type, name: i18n(`MonksEnhancedJournal.${item.type.toLowerCase()}`), actors: [] };
+
+            data.relationships[item.type].actors.push(item);
+        }
+
+        return data;
+    }
+
     fieldlist() {
         return {
             'race': { name: "MonksEnhancedJournal.Race", value: true },
@@ -60,14 +78,28 @@ export class PersonSheet extends EnhancedJournalSheet {
     activateListeners(html, enhancedjournal) {
         super.activateListeners(html, enhancedjournal);
 
-        $('.actor-img img', html).click(this.openActor.bind(this));
+        $('.journal-header .actor-img img', html).click(this.openActor.bind(this));
         html.on('dragstart', ".actor-img img", TextEditor._onDragEntityLink);
 
         //onkeyup="textAreaAdjust(this)" style="overflow:hidden"
         $('.entity-details textarea', html).keyup(this.textAreaAdjust.bind(this));
 
+        $('.item-delete', html).on('click', $.proxy(this._deleteItem, this));
+
         const actorOptions = this._getPersonActorContextOptions();
         if (actorOptions) new ContextMenu($(html), ".actor-img", actorOptions);
+
+        let that = this;
+        $('.item-relationship input', html).on('change', function (event) {
+            let id = $(event.currentTarget).closest('li').attr('data-id');
+            let items = that.object.data.flags['monks-enhanced-journal'].actors;
+            let item = items.find(i => i.id == id);
+            if (item) {
+                item.relationship = $(this).val();
+                that.object.setFlag('monks-enhanced-journal', 'actors', items);
+            }
+        });
+        $('.items-list .actor-icon', html).click(this.openRelationship.bind(this));
     }
 
     _canDragDrop(selector) {
@@ -85,15 +117,8 @@ export class PersonSheet extends EnhancedJournalSheet {
 
         if (data.type == 'Actor') {
             this.addActor(data);
-
-            /*
-            if (this.object.name == '') {
-                //let's fill in the information as best we can
-                let actor = game.actors.get(data.id);
-                if (actor) {
-                    let data = { name: actor.name };
-                }
-            }*/
+        } else if (data.type == 'JournalEntry') {
+            this.addRelationship(data);
         }
 
         log('drop data', event, data);
@@ -114,6 +139,31 @@ export class PersonSheet extends EnhancedJournalSheet {
         let element = event.currentTarget;
         element.style.height = "1px";
         element.style.height = (25 + element.scrollHeight) + "px";
+    }
+
+    async addRelationship(data) {
+        let relationship = await this.getEntity(data);
+
+        if (relationship.entity) {
+            let type = relationship.entity.data.flags['monks-enhanced-journal']?.type
+            relationship.data.type = type;
+            if (['organization','person','place'].includes(type)) {
+                let actors = duplicate(this.object.data.flags["monks-enhanced-journal"].actors || []);
+
+                //only add one item
+                if (actors.find(t => t.id == relationship.data.id) != undefined)
+                    return;
+
+                actors.push(relationship.data);
+                this.object.setFlag("monks-enhanced-journal", "actors", actors);
+            }
+        }
+    }
+
+    openRelationship(event) {
+        let item = event.currentTarget.closest('.item');
+        let relationship = game.journal.find(s => s.id == item.dataset.id);
+        this.open(relationship);
     }
 
     async addActor(data) {

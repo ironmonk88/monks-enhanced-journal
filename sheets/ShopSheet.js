@@ -150,6 +150,8 @@ export class ShopSheet extends EnhancedJournalSheet {
         $('.item-hide', html).on('click', this.alterItem.bind(this));
         $('.item-delete', html).on('click', $.proxy(this._deleteItem, this));
 
+        $('.item-name h4', html).click(this._onItemSummary.bind(this));
+
         $('.shop-state', html).change(this.changeState.bind(this));
 
         $('.request-item', html).prop('disabled', function () { return $(this).attr('locked') == 'true' }).click(this.requestItem.bind(this));
@@ -405,5 +407,29 @@ export class ShopSheet extends EnhancedJournalSheet {
                 }
             }
         ];
+    }
+
+    async _onItemSummary(event) {
+        event.preventDefault();
+
+        let li = $(event.currentTarget).closest('li.item');
+
+        const uuid = li.data("uuid");
+        const item = await fromUuid(uuid);
+        const chatData = item.getChatData({ secrets: false });
+
+        // Toggle summary
+        if (li.hasClass("expanded")) {
+            let summary = li.children(".item-summary");
+            summary.slideUp(200, () => summary.remove());
+        } else {
+            let div = $(`<div class="item-summary">${chatData.description.value}</div>`);
+            let props = $('<div class="item-properties"></div>');
+            chatData.properties.forEach(p => props.append(`<span class="tag">${p}</span>`));
+            div.append(props);
+            li.append(div.hide());
+            div.slideDown(200);
+        }
+        li.toggleClass("expanded");
     }
 }

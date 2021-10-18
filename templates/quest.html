@@ -16,15 +16,15 @@
             {{#if owner}}
             <div class="form-group">
                 <div class="flexrow" style="align-items:center;">
-                    <label style="text-align:right;">{{localize 'MonksEnhancedJournal.ShowToPlayers'}}</label>
+                    <label style="text-align:right;background: none; border: none;">{{localize 'MonksEnhancedJournal.ShowToPlayers'}}</label>
                     <input class="show-to-players" type="checkbox" {{checked showtoplayers}}>
                 </div>
                 <div class="flexrow" style="align-items:center;">
-                    <label style="text-align:right;">{{localize 'MonksEnhancedJournal.DisplayInNotifications'}}</label>
+                    <label style="text-align: right; background: none; border: none;">{{localize 'MonksEnhancedJournal.DisplayInNotifications'}}</label>
                     <input name="flags.monks-enhanced-journal.display" type="checkbox" {{checked data.flags.monks-enhanced-journal.display}}>
                 </div>
                 <div class="flexrow" style="align-items:center;">
-                    <label style="text-align:right;">{{localize 'MonksEnhancedJournal.Completed'}}</label>
+                    <label style="text-align: right; background: none; border: none;">{{localize 'MonksEnhancedJournal.Completed'}}</label>
                     <input name="flags.monks-enhanced-journal.completed" type="checkbox" {{checked data.flags.monks-enhanced-journal.completed}}>
                 </div>
             </div>
@@ -113,7 +113,7 @@
                 <div class="form-group">
                     <label>{{localize 'MonksEnhancedJournal.Experience'}}</label>
                     <div class="form-fields" style="justify-content:flex-end;">
-                        <button type="button" class="assign-xp" title="{{localize 'MonksEnhancedJournal.AssignExperience'}}" tabindex="-1">
+                        <button type="button" class="assign-xp" title="{{localize 'MonksEnhancedJournal.AssignExperience'}}" tabindex="-1" style="flex: 0 0 35px; width: 35px;">
                             <i class="fas fa-book-medical fa-fw"></i>
                         </button>
                         <input type="text" style="flex: 0 0 150px;text-align:right;" name="flags.monks-enhanced-journal.xp" placeholder="{{localize 'MonksEnhancedJournal.Experience'}}" value="{{data.flags.monks-enhanced-journal.xp}}" />
@@ -126,7 +126,7 @@
                 {{#if currency.length}}
                 <div class="form-group">
                     <label>{{localize 'MonksEnhancedJournal.Currency'}}</label>
-                    <div class="form-fields">
+                    <div class="form-fields" style="flex-wrap:nowrap;">
                         {{#each currency}}
                         <label>{{localize this.name}}</label>
                         <input type="text" name="flags.monks-enhanced-journal.{{this.name}}" placeholder="0" value="{{this.value}}" />

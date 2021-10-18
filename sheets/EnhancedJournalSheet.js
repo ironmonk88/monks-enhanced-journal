@@ -135,8 +135,9 @@ export class EnhancedJournalSheet extends JournalSheet {
 
     activateListeners(html, enhancedjournal) {
         super.activateListeners(html);
+        this._contextMenu(html);
 
-        html.on("click", "a.inline-request-roll", this._onClickInlineRequestRoll);
+        $("a.inline-request-roll", html).click(this._onClickInlineRequestRoll.bind(this));//.contextmenu(this._onClickInlineRequestRoll);
         html.on("click", "a.picture-link", this._onClickPictureLink.bind(this));
 
         $('.sheet-image .profile', html).contextmenu(() => { $('.fullscreen-image').show(); });
@@ -204,6 +205,9 @@ export class EnhancedJournalSheet extends JournalSheet {
 
             }
         }
+    }
+
+    _contextMenu(html) {
     }
 
     _disableFields(form) {
@@ -516,7 +520,7 @@ export class EnhancedJournalSheet extends JournalSheet {
             result.data = {
                 id: entity.id,
                 uuid: entity.uuid,
-                img: entity.img,
+                img: entity.img || entity.data?.img,
                 name: entity.name,
                 qty: 1
             };
