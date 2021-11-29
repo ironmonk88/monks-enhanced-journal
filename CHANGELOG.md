@@ -1,3 +1,53 @@
+# Version 1.0.32
+
+Added styling fixes for Rippers UI
+
+Fixed keyup issue with the search input
+
+Added some error trapping when trying to find the entity for the Journal Sheet
+
+Removed the option to open a new tab if you are currently editing one.  It just ended up causing too many issues.
+
+Moved item drops to their respective sheets so they are independant of the Enhanced Journal and can function on their own.
+
+Added a HUD to the Notes layer, so you can now right click to hide/show a note to players, begin an encounter, and assign loot to a loot character.
+
+Fixed an issue with TinyMCE styling if the system doesn't set it as an array
+
+Fixed an issue where clicking on an entry in the sidebar wasn't opening the entry.
+
+Added checks for Monk's Common Display so that the entries aren't opened in the Enhanced Journal
+
+Fixed issue when checking for Quick Encounters
+
+Added Hook so other modules can determine if a journal entry should be handled by Enhanced Journal.
+
+Added option to show if folders are sorted alphabetically or manually.
+
+Showing the players actual permission levels in the tooltip on the sidebar.
+
+Added remaining quantity for items.  So you can set what it's supposed to be and keep track of how many have been removed.
+
+Also added a button to refill the quantity.
+
+Added option to assign an Actor as the one to receive items.  So you can have a loot character.
+
+Fixed an issue that data toolbox was creating
+
+Fixed issue with Checkbox List context menu
+
+Added create encounter, create combat and select combatants draggables and buttons to encounter sheet
+
+Fixed issue with entry that has limited permissions and how it opens for the player
+
+Fixed issue with the Sheet configuration button showing for players
+
+Added pronouns to the Person Sheet
+
+Added statuses back to the Quest sheet.  I tried to work around it, but it's just doesn't make sense without them.
+
+Added multiple rewards in case you need to have a different set of things depending on how the players perform.
+
 # Version 1.0.31
 
 Added styling fixed for Warhammer

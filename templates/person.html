@@ -11,11 +11,11 @@
             </h1>
             <div class="form-group">
                 <label>{{localize 'MonksEnhancedJournal.Role'}}</label>
-                <input type="text" name="flags.monks-enhanced-journal.role" placeholder="{{localize 'MonksEnhancedJournal.Role'}}" value="{{data.flags.monks-enhanced-journal.role}}" />
+                <input type="text" name="flags.monks-enhanced-journal.role" alue="{{data.flags.monks-enhanced-journal.role}}" />
             </div>
             <div class="form-group">
                 <label>{{localize 'MonksEnhancedJournal.Location'}}</label>
-                <input type="text" name="flags.monks-enhanced-journal.location" placeholder="{{localize 'MonksEnhancedJournal.Location'}}" value="{{data.flags.monks-enhanced-journal.location}}" />
+                <input type="text" name="flags.monks-enhanced-journal.location" value="{{data.flags.monks-enhanced-journal.location}}" />
             </div>
         </section>
         {{#if data.flags.monks-enhanced-journal.actor}}
@@ -51,6 +51,10 @@
                         <li {{#unless fields.age.value}} style="display:none;" {{/unless}}>
                             <label>{{localize 'MonksEnhancedJournal.Age'}}</label>
                             <input type="text" name="flags.monks-enhanced-journal.age" value="{{data.flags.monks-enhanced-journal.age}}" />
+                        </li>
+                        <li {{#unless fields.pronoun.value}} style="display:none;" {{/unless}}>
+                            <label>{{localize 'MonksEnhancedJournal.Pronoun'}}</label>
+                            <input type="text" name="flags.monks-enhanced-journal.pronoun" value="{{data.flags.monks-enhanced-journal.pronoun}}" />
                         </li>
                         <li {{#unless fields.eyes.value}} style="display:none;" {{/unless}}>
                             <label>{{localize 'MonksEnhancedJournal.Eyes'}}</label>

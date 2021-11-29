@@ -194,7 +194,6 @@ export class CheckListSheet extends EnhancedJournalSheet {
         checklist.on("click", ".folder-header", this._toggleFolder.bind(this));
         const dh = this._onDragHighlight.bind(this);
         html.find(".folder").on("dragenter", dh).on("dragleave", dh);
-        this._contextMenu(html);
 
         entries.on("click", ".item-checked", this._onCheckItem.bind(this))
 

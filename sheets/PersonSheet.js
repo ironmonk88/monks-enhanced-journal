@@ -46,6 +46,7 @@ export class PersonSheet extends EnhancedJournalSheet {
             'eyes': { name: "MonksEnhancedJournal.Eyes", value: true },
             'skin': { name: "MonksEnhancedJournal.Skin", value: false },
             'hair': { name: "MonksEnhancedJournal.Hair", value: true },
+            'pronoun': { name: "MonksEnhancedJournal.Pronoun", value: false },
             'profession': { name: "MonksEnhancedJournal.Profession", value: false },
             'voice': { name: "MonksEnhancedJournal.Voice", value: true },
             'faction': { name: "MonksEnhancedJournal.Faction", value: false },

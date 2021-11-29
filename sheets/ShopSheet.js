@@ -19,7 +19,7 @@ export class ShopSheet extends EnhancedJournalSheet {
             dragDrop: [
                 { dragSelector: ".entity.actor", dropSelector: ".shop-container" },
                 { dragSelector: ".entity.item", dropSelector: ".shop-container" },
-                { dragSelector: ".shop-items .item-list .item .item-icon", dropSelector: "null" }],
+                { dragSelector: ".shop-items .item-list .item .item-name", dropSelector: "null" }],
             scrollY: [".shop-items", ".description"]
         });
     }
@@ -157,6 +157,7 @@ export class ShopSheet extends EnhancedJournalSheet {
         $('.request-item', html).prop('disabled', function () { return $(this).attr('locked') == 'true' }).click(this.requestItem.bind(this));
 
         let that = this;
+/*
         $('.item-assigned input', html).on('change', function (event) {
             let id = $(event.currentTarget).closest('li').attr('data-id');
             let items = that.object.data.flags['monks-enhanced-journal'].items;
@@ -167,10 +168,49 @@ export class ShopSheet extends EnhancedJournalSheet {
                 that.object.setFlag('monks-enhanced-journal', 'items', items);
                 $(event.currentTarget).parent().siblings('.item-received').html('');
             }
-        });
+        });*/
 
         const actorOptions = this._getPersonActorContextOptions();
         if (actorOptions) new ContextMenu($(html), ".actor-img", actorOptions);
+    }
+
+    _getSubmitData() {
+        let data = expandObject(super._getSubmitData());
+
+        let items = null;
+        if (data.items) {
+            for (let [k, v] of Object.entries(data.items)) {
+                let values = (v instanceof Array ? v : [v]);
+                if (items == undefined) {
+                    items = values.map(item => { let obj = {}; obj[k] = (k == 'qty' ? parseInt(item) : (k == 'price' || k == 'cost' ? parseFloat(item) : item)); return obj; });
+                } else {
+                    for (let i = 0; i < values.length; i++) {
+                        items[i][k] = (k == 'qty' ? parseInt(values[i]) : (k == 'price' || k == 'cost' ? parseFloat(values[i]) : values[i]));
+                    }
+                }
+            }
+            delete data.items;
+        }
+
+        //save the reward data
+        let olditems = duplicate(this.object.getFlag("monks-enhanced-journal", "items"));
+        if (items) {
+            for (let item of items) {
+                let olditem = olditems.find(i => i.id == item.id);
+                if (olditem) {
+                    olditem = Object.assign(olditem, item);
+                    if (!olditem.assigned && olditem.received)
+                        delete olditem.received;
+                }
+                else
+                    olditems.push(item);
+            }
+        }
+
+        data['flags.monks-enhanced-journal.items'] = olditems;
+        delete data.items;
+
+        return flattenObject(data);
     }
 
     _canDragStart(selector) {
@@ -191,6 +231,7 @@ export class ShopSheet extends EnhancedJournalSheet {
             return;
         }
 
+        let id = li.dataset.id;
         let uuid = li.dataset.uuid;
         let item;
         if (uuid.indexOf('Actor') >= 0) {
@@ -199,12 +240,13 @@ export class ShopSheet extends EnhancedJournalSheet {
                 return;
             dragData.data = item?.data;
         } else {
-            item = this.object.data.flags["monks-enhanced-journal"].items.find(i => i.id == id);
-            if (item == undefined || item?.lock === true)
+            item = this.object.data.flags["monks-enhanced-journal"].items.find(i => i.uuid == uuid || i.id == id);
+            if (item == undefined || (!game.user.isGM && (item?.lock === true || item.qty <= 0)))
                 return;
         }
 
-        dragData.id = li.dataset.id;
+        dragData.id = id;
+        dragData.uuid = this.object.uuid;
         dragData.pack = li.dataset.pack;
         dragData.type = "Item";
 
@@ -235,6 +277,7 @@ export class ShopSheet extends EnhancedJournalSheet {
         log('drop data', event, data);
     }
 
+    /*
     async _onSubmit(ev) {
         if ($(ev.currentTarget).attr('ignoresubmit') == 'true')
             return;
@@ -261,7 +304,7 @@ export class ShopSheet extends EnhancedJournalSheet {
             }
         } else
             return super._onSubmit(ev);
-    }
+    }*/
 
     changeState(event) {
         let show = ($(event.currentTarget).val() != 'hidden');
@@ -367,6 +410,27 @@ export class ShopSheet extends EnhancedJournalSheet {
             if (item) {
                 item[action] = !item[action];
                 this.object.setFlag('monks-enhanced-journal', 'items', items);
+            }
+        }
+    }
+
+    static itemDropped(id, actor) {
+        let items = duplicate(this.getFlag('monks-enhanced-journal', 'items'));
+        if (items) {
+            let item = items.find(i => i.id == id);
+            if (item) {
+                if (game.user.isGM) {
+                    item.qty = Math.max(item.qty - 1, 0);
+                    this.setFlag('monks-enhanced-journal', 'items', items);
+                } else {
+                    MonksEnhancedJournal.emit("purchaseItem",
+                        {
+                            uuid: this.object.uuid,
+                            itemid: id,
+                            qty: 1
+                        }
+                    );
+                }
             }
         }
     }

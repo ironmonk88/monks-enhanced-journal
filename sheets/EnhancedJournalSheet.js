@@ -18,11 +18,12 @@ export class EnhancedJournalSheet extends JournalSheet {
 
     static get defaultOptions() {
         let defOptions = super.defaultOptions;
+        let classes = defOptions.classes.concat(['monks-journal-sheet']);
         return foundry.utils.mergeObject(defOptions, {
             id: "enhanced-journal-sheet",
             title: i18n("MonksEnhancedJournal.NewTab"),
             template: "modules/monks-enhanced-journal/templates/blank.html",
-            classes: defOptions.classes.concat(['monks-journal-sheet']),
+            classes: classes,
             dragDrop: [{ dragSelector: "null", dropSelector: ".blank-body" }],
             popOut: true,
             width: 1025,
@@ -43,11 +44,18 @@ export class EnhancedJournalSheet extends JournalSheet {
     }
 
     _inferDefaultMode() {
+        const hasImage = !!this.object.data.img;
+        if (this.object.limited) return hasImage ? "image" : null;
+
         return "text";
     }
 
     _getHeaderButtons() {
         let buttons = super._getHeaderButtons();
+
+        let canConfigure = this.isEditable && game.user.isGM;
+        if (!canConfigure)
+            buttons.findSplice(b => b.class == "configure-sheet");
 
         buttons.findSplice(b => b.class == "entry-text");
         buttons.findSplice(b => b.class == "entry-image");
@@ -107,6 +115,18 @@ export class EnhancedJournalSheet extends JournalSheet {
     }
 
     async _render(force, options = {}) {
+        let mode = options.sheetMode || this._sheetMode;
+        if (this.object.limited && mode === "image" && this.object.data.img) {
+            const img = this.object.data.img;
+            new ImagePopout(this.object.data.img, {
+                title: this.object.name,
+                uuid: this.object.uuid,
+                shareable: false,
+                editable: false
+            })._render(true);
+            return;
+        }
+
         await super._render(force, options);
 
         log('Subsheet rendering');
@@ -188,7 +208,7 @@ export class EnhancedJournalSheet extends JournalSheet {
                 let count = 0;
                 let that = this;
                 let data = this.object.getFlag('monks-enhanced-journal', 'style');
-                if (data) {
+                //if (data) {
                     let timer = window.setInterval(function () {
                         count++;
                         if (count > 20) {
@@ -201,8 +221,7 @@ export class EnhancedJournalSheet extends JournalSheet {
                             window.clearInterval(timer);
                         }
                     }, 100);
-                }
-
+                //}
             }
         }
     }

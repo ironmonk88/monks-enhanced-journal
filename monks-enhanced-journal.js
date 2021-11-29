@@ -13,6 +13,7 @@ import { SlideshowSheet } from "./sheets/SlideshowSheet.js"
 import { OrganizationSheet } from "./sheets/OrganizationSheet.js"
 import { ShopSheet } from "./sheets/ShopSheet.js"
 import { backgroundinit } from "./plugins/background.plugin.js"
+import { NoteHUD } from "./apps/notehud.js"
 
 export let debug = (...args) => {
     if (debugEnabled > 1) console.log("DEBUG: monks-enhanced-journal | ", ...args);
@@ -115,6 +116,8 @@ export class MonksEnhancedJournal {
         game.system.entityTypes.JournalEntry = game.system.entityTypes.JournalEntry.concat(Object.keys(types)).sort();
         CONFIG.JournalEntry.typeLabels = mergeObject((CONFIG.JournalEntry.typeLabels || {}), labels);
 
+        if (!(CONFIG.TinyMCE.content_css instanceof Array))
+            CONFIG.TinyMCE.content_css = [CONFIG.TinyMCE.content_css];
         CONFIG.TinyMCE.content_css.push('modules/monks-enhanced-journal/css/editor.css');
         if (game.modules.get("polyglot")?.active)
             CONFIG.TinyMCE.content_css.push('modules/polyglot/css/polyglot.css');
@@ -124,6 +127,55 @@ export class MonksEnhancedJournal {
                 { block: "section", classes: "readaloud", title: "Read Aloud", wrapper: true },
                 { inline: "span", classes: "drop-cap", title: "Drop Cap" }]
         });
+
+        Note.prototype._canHUD = function(user, event) {
+            return game.user.isGM;
+        }
+
+        Object.defineProperty(NotesLayer.prototype, 'hud', {
+            get: function () {
+                return canvas.hud.note;
+            }
+        });
+
+        let oldOnLayerClickRight = TokenLayer.prototype._onClickRight;
+        TokenLayer.prototype._onClickRight = function (event) {
+            oldOnLayerClickRight.call(this, event);
+            canvas.hud.note.clear();
+        }
+
+        let oldOnLayerClickLeft = TokenLayer.prototype._onClickLeft;
+        TokenLayer.prototype._onClickLeft = function (event) {
+            oldOnLayerClickLeft.call(this, event);
+            canvas.hud.note.clear();
+        }
+
+        let oldOnClickRight = Token.prototype._onClickRight;
+        Token.prototype._onClickRight = function (event) {
+            oldOnClickRight.call(this, event);
+            canvas.hud.note.clear();
+        }
+
+        /*
+        let oldEntryContextOptions = ActorDirectory.prototype._getEntryContextOptions;
+        ActorDirectory.prototype._getEntryContextOptions = function () {
+            const options = oldEntryContextOptions.call(this);
+
+            const directory = this;
+            return [
+                {
+                    name: "Assign Items to this Actor",
+                    icon: '<i class="fas fa-suitcase"></i>',
+                    condition: li => {
+                        return game.user.idGM;
+                    },
+                    callback: li => {
+                        game.settings.set("monks-enhanced-journal", "assign-actor", li.data("entityId"));
+                        directory.render(true);
+                    }
+                }
+            ].concat(options);
+        }*/
 
         /*
         CONFIG.JournalEntry.noteIcons = mergeObject(CONFIG.JournalEntry.noteIcons, {
@@ -168,6 +220,8 @@ export class MonksEnhancedJournal {
 
             if (entry.data?.flags['monks-enhanced-journal']?.type)
                 entry.data.type = entry.data?.flags['monks-enhanced-journal']?.type;
+            if (entry.data.type == 'journalentry')
+                entry.data.type = 'base';
 
             if (game.MonksActiveTiles?.waitingInput || !MonksEnhancedJournal.openJournalEntry(entry))
                 wrapped(...args);
@@ -462,13 +516,13 @@ export class MonksEnhancedJournal {
             if (!game.user.isGM && this.data.flags['monks-enhanced-journal']?.chatbubble && !this.isOwner) {
                 let journal = game.journal.get(this.data.flags['monks-enhanced-journal']?.chatbubble);
                 if(journal)
-                    return MonksEnhancedJournal.showAsChatBubble(this, journal);
+                    MonksEnhancedJournal.showAsChatBubble(this, journal);
             }
             return wrapped(...args);
         }
 
         if (game.modules.get("lib-wrapper")?.active) {
-            libWrapper.register("monks-enhanced-journal", "Token.prototype._onClickLeft2", onTokenClickLeft2, "MIXED");
+            libWrapper.register("monks-enhanced-journal", "Token.prototype._onClickLeft2", onTokenClickLeft2, "WRAPPER");
         } else {
             const oldOnClickEntry2 = Token.prototype._onClickLeft2;
             Token.prototype._onClickLeft2 = function (event) {
@@ -547,8 +601,16 @@ export class MonksEnhancedJournal {
         if (!game.user.isGM && !setting('allow-player'))
             return false;
 
+        if (game.modules.get('monks-common-display')?.active) {
+            let data = game.settings.get("monks-common-display", 'playerdata');
+            let playerdata = data[game.user.id] || { display: false, mirror: false, selection: false };
+
+            if (playerdata.display)
+                return false;
+        }
+
         if (entry) {
-            if (entry.data.content.includes('QuickEncountersTutorial'))
+            if (entry.data?.content?.includes('QuickEncountersTutorial'))
                 return false;
 
             let entrytype = entry.data.type;
@@ -561,6 +623,23 @@ export class MonksEnhancedJournal {
 
         if (options.render == false || options.activate == false)
             return false;
+
+        const allowed = Hooks.call(`openJournalEntry`, entry, options, game.user.id);
+        if (allowed === false)
+            return false;
+
+        if (!game.user.isGM && entry.getUserLevel(game.user) === CONST.ENTITY_PERMISSIONS.LIMITED) {
+            if (entry.data.img) {
+                let img = new ImagePopout(entry.data.img, {
+                    title: entry.name,
+                    uuid: entry.uuid,
+                    shareable: false,
+                    editable: false
+                });
+                img._render(true);
+            }
+            return true;
+        }
 
         //if the enhanced journal is already open, then just pass it the new object, if not then let it render as normal
         if (MonksEnhancedJournal.journal) {
@@ -963,6 +1042,16 @@ export class MonksEnhancedJournal {
     }
 
     static updateDirectory(html) {
+        if (setting("show-folder-sort")) {
+            $('.folder', html).each(function () {
+                let id = this.dataset.folderId;
+                const folder = game.folders.get(id);
+
+                if (folder.data?.sorting !== "a") {
+                    $('header h3 i', this).removeClass('fas').addClass('far');
+                }
+            });
+        }
         $('.entity.journal', html).each(function () {
             let id = this.dataset.entityId;
             let entry = game.journal.get(id);
@@ -975,9 +1064,10 @@ export class MonksEnhancedJournal {
                 $('.entity-name', this).prepend($('<i>').addClass('journal-type fas fa-fw ' + icon));
 
             if (type == 'quest') {
-                let permission = entry.data.permission.default;
-                let completed = entry.getFlag('monks-enhanced-journal', 'completed')
-                $(this).attr('status', (completed ? 'completed' : (permission >= CONST.ENTITY_PERMISSIONS.OBSERVER ? 'inprogress' : (permission == CONST.ENTITY_PERMISSIONS.LIMITED ? 'available' : ''))));
+                //let permission = entry.data.permission.default;
+                //let completed = entry.getFlag('monks-enhanced-journal', 'completed');
+                let status = entry.getFlag('monks-enhanced-journal', 'status') || (entry.getFlag('monks-enhanced-journal', 'completed') ? 'completed' : 'inactive');
+                $(this).attr('status', status);
             }
 
             $('.entity-name .permissions', this).remove();
@@ -985,15 +1075,17 @@ export class MonksEnhancedJournal {
                 let permissions = $('<div>').addClass('permissions');
                 if (entry.data.permission.default > 0) {
                     const permission = Object.keys(CONST.ENTITY_PERMISSIONS)[entry.data.permission.default];
-                    permissions.append($('<i>').addClass('fas fa-users').attr('title', i18n(`PERMISSION.${permission}`)));
+                    permissions.append($('<i>').addClass('fas fa-users').attr('title', 'Everyone: ' + i18n(`PERMISSION.${permission}`)));
                 }
                 else {
                     for (let [key, value] of Object.entries(entry.data.permission)) {
                         let user = game.users.find(u => {
                             return u.id == key && !u.isGM;
                         });
-                        if (user != undefined && value > 0)
-                            permissions.append($('<div>').css({ backgroundColor: user.data.color }).html(user.name[0]).attr('title', user.name));
+                        if (user != undefined && value > 0) {
+                            const permission = Object.keys(CONST.ENTITY_PERMISSIONS)[value];
+                            permissions.append($('<div>').css({ backgroundColor: user.data.color }).html(user.name[0]).attr('title', user.name + ': ' + i18n(`PERMISSION.${permission}`)));
+                        }
                     }
                 }
                 $('h4', this).append(permissions);
@@ -1022,7 +1114,7 @@ export class MonksEnhancedJournal {
         if (items) {
             let item = items.find(i => i.id == data.itemid);
             if (item) {
-                item.qty -= data.qty;
+                item.remaining = Math.max(item.remaining - 1, 0);
                 this.object.setFlag('monks-enhanced-journal', 'items', items);
             }
         }
@@ -1258,7 +1350,8 @@ Hooks.on("updateJournalEntry", (document, data, options, userId) => {
                     data?.flags['monks-enhanced-journal']?.traps != undefined ||
                     data?.flags['monks-enhanced-journal']?.objectives != undefined ||
                     data?.flags['monks-enhanced-journal']?.folders != undefined ||
-                    data?.flags['monks-enhanced-journal']?.items != undefined ||
+                    data?.flags['monks-enhanced-journal']?.reward != undefined ||
+                    data?.flags['monks-enhanced-journal']?.rewards != undefined ||
                     data?.flags['core']?.sheetClass != undefined)))) {
             //if (data?.flags['core']?.sheetClass != undefined)
             //    MonksEnhancedJournal.journal.object._sheet = null;
@@ -1282,14 +1375,20 @@ Hooks.on('renderSceneControls', (controls) => {
         MonksEnhancedJournal.refreshObjectives();
 });
 
-Hooks.on('dropActorSheetData', (actor, sheet, data) => {
+Hooks.on('dropActorSheetData', async (actor, sheet, data) => {
     //check to see if an item was dropped from either the encounter or quest and record what actor it was
     if (MonksEnhancedJournal.journal && data.id == MonksEnhancedJournal._dragItem) {
-        if (MonksEnhancedJournal.journal.object.data.flags['monks-enhanced-journal']?.type == 'shop') {
-            //start the purchase process
-            MonksEnhancedJournal.journal.itemPurchased(data.id, actor);
-        } else {
-            MonksEnhancedJournal.journal.itemDropped(data.id, actor);
+        let entry = await fromUuid(data.uuid);
+        const cls = (entry._getSheetClass ? entry._getSheetClass() : null);
+        if (cls && cls.itemDropped) {
+            cls.itemDropped.call(entry, data.id, actor);
+            /*
+            if (MonksEnhancedJournal.journal.object.data.flags['monks-enhanced-journal']?.type == 'shop') {
+                //start the purchase process
+                MonksEnhancedJournal.journal.itemPurchased(data.id, actor);
+            } else {
+                MonksEnhancedJournal.journal.itemDropped(data.id, actor);
+            }*/
         }
         MonksEnhancedJournal._dragItem = null;
     }
@@ -1302,32 +1401,16 @@ Hooks.on('dropCanvasData', async (canvas, data) => {
             let entity = await fromUuid(data.uuid);
             if (entity)
                 entity.sheet.render(true);
-        } else if (data.type == 'CreateEncounter') {
+        } else if (data.type == 'CreateEncounter' || data.type == 'CreateCombat') {
             if (!game.user.can("TOKEN_CREATE")) {
                 return ui.notifications.warn(`You do not have permission to create new Tokens!`);
             }
 
             let encounter = game.journal.get(data.id);
             if (encounter) {
-                const cls = getDocumentClass("Token");
-                for (let ea of (encounter.data.flags['monks-enhanced-journal']?.actors || [])) {
-                    let actor = await Actor.implementation.fromDropData(ea);
-                    if (!actor.isOwner) {
-                        return ui.notifications.warn(`You do not have permission to create a new Token for the ${actor.name} Actor.`);
-                    }
-                    if (actor.compendium) {
-                        const actorData = game.actors.fromCompendium(actor);
-                        actor = await Actor.implementation.create(actorData);
-                    }
-
-                    // Prepare the Token data
-                    for (let i = 0; i < (ea.qty || 1); i++) {
-                        let td = await actor.getTokenData({ x: data.x, y: data.y });
-                        let newSpot = MonksEnhancedJournal.findVacantSpot({ x: data.x, y: data.y }, { width: td.width, height: td.height });
-                        td.update(newSpot);
-
-                        await cls.create(td, { parent: canvas.scene });
-                    }
+                const cls = (encounter._getSheetClass ? encounter._getSheetClass() : null);
+                if (cls && cls.createEncounter) {
+                    cls.createEncounter.call(encounter, data.x, data.y, data.type == 'CreateCombat');
                 }
             }
         }
@@ -1409,4 +1492,40 @@ Hooks.on("renderChatMessage", (message, html, data) => {
         $('.shop-icon', html).click(MonksEnhancedJournal.openRequestItem.bind(message, 'shop')).attr('onerror', "$(this).attr('src', 'modules/monks-enhanced-journal/assets/shop.png');");
         $('.item-list .item-name .item-image', html).click(MonksEnhancedJournal.openRequestItem.bind(message, 'item'));
     }
+});
+
+Hooks.on('canvasInit', () => {
+    canvas.hud.note = new NoteHUD();
+});
+
+Hooks.on("renderActorDirectory", (app, html, data) => {
+    if (setting("assign-actor")) {
+        $(`li[data-entity-id="${setting("assign-actor")}"] h4`, html).append(
+            $('<div>').addClass('assign-icon').attr('title', 'Assign items to this Actor').append(
+                $('<i>').addClass('fas fa-suitcase')
+            )
+        );
+    }
+});
+
+Hooks.on("getActorDirectoryEntryContext", (html, entries) => {
+    entries.push({
+        name: "Assign Items to this Actor",
+        icon: '<i class="fas fa-suitcase"></i>',
+        condition: li => {
+            return game.user.isGM;
+        },
+        callback: async (li) => {
+            await game.settings.set("monks-enhanced-journal", "assign-actor", li.data("entityId"));
+            ui.actors.render(true);
+        }
+    });
+});
+
+//Try and fix what data toolbox is breaking
+Hooks.on('getJournalSheetHeaderButtons', (app, actions) => {
+    if (app.object.data?.flags['monks-enhanced-journal']?.type)
+        app.object.data.type = app.object.data?.flags['monks-enhanced-journal']?.type;
+    if (app.object.data.type == 'journalentry')
+        app.object.data.type = 'base';
 });

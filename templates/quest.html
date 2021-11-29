@@ -11,21 +11,23 @@
             </h1>
             <div class="form-group">
                 <label>{{localize 'MonksEnhancedJournal.Source'}}</label>
-                <input type="text" name="flags.monks-enhanced-journal.source" placeholder="{{localize 'MonksEnhancedJournal.Source'}}" value="{{data.flags.monks-enhanced-journal.source}}" />
+                <input type="text" name="flags.monks-enhanced-journal.source" value="{{data.flags.monks-enhanced-journal.source}}" />
             </div>
             {{#if owner}}
             <div class="form-group">
-                <div class="flexrow" style="align-items:center;">
-                    <label style="text-align:right;background: none; border: none;">{{localize 'MonksEnhancedJournal.ShowToPlayers'}}</label>
+                <label>{{localize 'MonksEnhancedJournal.Status'}}</label>
+                <select name="flags.monks-enhanced-journal.status" style="font-size: inherit; font-family: inherit;">
+                    {{ selectOptions statusOptions selected=data.flags.monks-enhanced-journal.status localize=true }}
+                </select>
+            </div>
+            <div class="flexrow">
+                <div class="form-group">
+                    <label>{{localize 'MonksEnhancedJournal.ShowToPlayers'}}</label>
                     <input class="show-to-players" type="checkbox" {{checked showtoplayers}}>
                 </div>
-                <div class="flexrow" style="align-items:center;">
-                    <label style="text-align: right; background: none; border: none;">{{localize 'MonksEnhancedJournal.DisplayInNotifications'}}</label>
+                <div class="form-group">
+                    <label>{{localize 'MonksEnhancedJournal.DisplayInNotifications'}}</label>
                     <input name="flags.monks-enhanced-journal.display" type="checkbox" {{checked data.flags.monks-enhanced-journal.display}}>
-                </div>
-                <div class="flexrow" style="align-items:center;">
-                    <label style="text-align: right; background: none; border: none;">{{localize 'MonksEnhancedJournal.Completed'}}</label>
-                    <input name="flags.monks-enhanced-journal.completed" type="checkbox" {{checked data.flags.monks-enhanced-journal.completed}}>
                 </div>
             </div>
             {{/if}}
@@ -79,16 +81,17 @@
                         <div class="flexrow">
                             <div class="item-name flexrow">
                                 <h4 style="white-space: normal;font-weight:700;">{{this.title}}</h4>
+                                <input type="hidden" name="objectives.id" value="{{this.id}}" />
                             </div>
 
                             {{#if @root.owner}}
                             <div class="item-available flexrow" style="flex:0 0 100px;position:relative;justify-content:center;">
-                                <input class="objective-available" type="checkbox" {{checked this.available}} />
+                                <input class="objective-available" name="objectives.available" type="checkbox" {{checked this.available}} />
                             </div>
                             {{/if}}
 
                             <div class="item-status flexrow" style="flex:0 0 100px;position:relative;justify-content:center;">
-                                <input class="objective-status" type="checkbox" {{checked this.status}} />
+                                <input class="objective-status" name="objectives.status" type="checkbox" {{checked this.status}} />
                             </div>
 
                             {{#if @root.owner}}
@@ -109,71 +112,111 @@
         {{/if}}
         {{#if owner}}
         <div class="tab rewards flexcol active" data-group="primary" data-tab="rewards">
-            <div class="details" style="flex-grow:0;">
-                <div class="form-group">
-                    <label>{{localize 'MonksEnhancedJournal.Experience'}}</label>
-                    <div class="form-fields" style="justify-content:flex-end;">
-                        <button type="button" class="assign-xp" title="{{localize 'MonksEnhancedJournal.AssignExperience'}}" tabindex="-1" style="flex: 0 0 35px; width: 35px;">
-                            <i class="fas fa-book-medical fa-fw"></i>
-                        </button>
-                        <input type="text" style="flex: 0 0 150px;text-align:right;" name="flags.monks-enhanced-journal.xp" placeholder="{{localize 'MonksEnhancedJournal.Experience'}}" value="{{data.flags.monks-enhanced-journal.xp}}" />
+            <div class="tab-bar flexrow reward-list" style="flex: 0 0 30px; border-bottom: 1px solid #C0C0C0;">
+                <div class="tab-row flexrow">
+                    {{#each rewards}}
+                    <div class="journal-tab reward-tab flexrow {{#if (eq this.id @root.reward.id)}}active{{/if}}" data-reward-id="{{this.id}}" title="{{this.name}}">
+                        <div class="tab-content">{{#if this.active}}<i class="fas fa-check"></i> {{/if}}{{this.name}}</div>
+                        <div class="close"><i class="fas fa-times"></i></div>
                     </div>
+                    {{/each}}
+                    <div class="tab-button tab-add"><i class="fas fa-plus"></i></div>
                 </div>
-                <div class="form-group">
-                    <label>{{localize 'MonksEnhancedJournal.Additional'}}</label>
-                    <input type="text" name="flags.monks-enhanced-journal.additional" placeholder="{{localize 'MonksEnhancedJournal.Additional'}}" value="{{data.flags.monks-enhanced-journal.additional}}" />
-                </div>
-                {{#if currency.length}}
-                <div class="form-group">
-                    <label>{{localize 'MonksEnhancedJournal.Currency'}}</label>
-                    <div class="form-fields" style="flex-wrap:nowrap;">
-                        {{#each currency}}
-                        <label>{{localize this.name}}</label>
-                        <input type="text" name="flags.monks-enhanced-journal.{{this.name}}" placeholder="0" value="{{this.value}}" />
-                        {{/each}}
-                    </div>
-                </div>
-                {{/if}}
             </div>
-            <ol class="items-list reward-items">
-                <li class="items-header flexrow">
-                    <h3 class="item-name flexrow">{{localize 'MonksEnhancedJournal.Items'}}</h3>
-
-                    <div class="item-controls item-assigned">{{localize 'MonksEnhancedJournal.Assigned'}}</div>
-
-                    <div class="item-controls item-qty">{{localize 'MonksEnhancedJournal.Qty'}}</div>
-
-                    <div class="item-controls flexrow">
+            <div class="reward-container">
+                {{#if reward}}
+                <div class="details" style="flex-grow:0;">
+                    <div class="flexrow">
+                        <div class="form-group">
+                            <label>{{localize 'MonksEnhancedJournal.Name'}}</label>
+                            <input type="text" name="reward.name" value="{{reward.name}}" />
+                        </div>
+                        <div class="form-group" style="flex:0 0 200px;">
+                            <label>{{localize 'MonksEnhancedJournal.Active'}}</label>
+                            <div class="form-fields" style="justify-content:flex-end;">
+                                <input type="checkbox" name="reward.active" {{checked reward.active}} />
+                            </div>
+                        </div>
                     </div>
-                </li>
 
-                <ol class="item-list">
-                    {{#each data.flags.monks-enhanced-journal.items}}
-                    <li class="item flexrow{{#if this.received}} received{{/if}}" data-id="{{this.id}}" data-pack="{{this.pack}}" data-container="items" data-entity="Item" draggable="false">
-                        <div class="item-name flexrow">
-                            <div class="item-image" style="background-image: url('{{this.img}}')"></div>
-                            <h4>{{this.name}}</h4>
+                    <div class="form-group">
+                        <label>{{localize 'MonksEnhancedJournal.Experience'}}</label>
+                        <div class="form-fields" style="justify-content:flex-end;flex:0 0 300px;">
+                            <button type="button" class="assign-xp" title="{{localize 'MonksEnhancedJournal.AssignExperience'}}" tabindex="-1" style="flex: 0 0 35px; width: 35px;">
+                                <i class="fas fa-book-medical fa-fw"></i>
+                            </button>
+                            <input type="text" style="text-align: right; border-top-right-radius: 0px; border-bottom-right-radius: 0px;" name="reward.xp" placeholder="{{localize 'MonksEnhancedJournal.Experience'}}" value="{{reward.xp}}" />
                         </div>
+                    </div>
 
-                        <div class="item-name item-received">
-                            {{#if this.received}}{{localize 'MonksEnhancedJournal.ReceivedBy'}} {{this.received}}{{/if}}
+                    <div class="form-group">
+                        <label>{{localize 'MonksEnhancedJournal.Additional'}}</label>
+                        <textarea type="text" name="reward.additional" value="{{reward.additional}}" style="height:50px;"></textarea>
+                    </div>
+                    {{#if reward.currency}}
+                    <div class="form-group currency-group">
+                        <label>{{localize 'MonksEnhancedJournal.Currency'}}</label>
+                        <div class="form-fields" style="flex-wrap:nowrap;">
+                            {{#each reward.currency}}
+                            <label>{{localize @key}}</label>
+                            <input type="text" name="reward.currency.{{@key}}" placeholder="0" value="{{this}}" style="text-align:right;" />
+                            {{/each}}
                         </div>
+                    </div>
+                    {{/if}}
+                </div>
+                <ol class="items-list reward-items">
+                    <li class="items-header flexrow">
+                        <div class="encounter-buttons flexrow">
+                            <div class="assign-items" title="{{localize 'MonksEnhancedJournal.AssignItems'}}"><i class="fas fa-suitcase"></i></div>
+                        </div>
+                        <h3 class="item-name flexrow">{{localize 'MonksEnhancedJournal.Items'}}</h3>
 
-                        <div class="item-controls item-assigned">
-                            <input type="checkbox" name="assigned" {{checked this.assigned}} style="text-align:center;" />
-                        </div>
+                        <div class="item-controls item-assigned">{{localize 'MonksEnhancedJournal.Assigned'}}</div>
 
-                        <div class="item-controls item-qty">
-                            <input type="text" name="qty" value="{{this.qty}}" style="text-align:center;" />
-                        </div>
+                        <div class="item-controls item-qty">{{localize 'MonksEnhancedJournal.Quantity'}}</div>
+
+                        <div class="item-controls item-remaining">{{localize 'MonksEnhancedJournal.Remaining'}}</div>
 
                         <div class="item-controls flexrow">
-                            <a class="item-control item-delete" title="{{localize 'MonksEnhancedJournal.DeleteItem'}}"><i class="fas fa-trash"></i></a>
                         </div>
                     </li>
-                    {{/each}}
+
+                    <ol class="item-list">
+                        {{#each reward.items}}
+                        <li class="item flexrow{{#if this.received}} received{{/if}}" data-id="{{this.id}}" data-uuid="{{this.uuid}}" data-pack="{{this.pack}}" data-container="items" data-entity="Item" draggable="false">
+                            <div class="item-name flexrow">
+                                <div class="item-image" style="background-image: url('{{this.img}}')"></div>
+                                <h4>{{this.name}}</h4>
+                                <input type="hidden" name="reward.items.id" value="{{this.id}}" />
+                            </div>
+
+                            <div class="item-name item-received">
+                                {{#if this.received}}{{localize 'MonksEnhancedJournal.ReceivedBy'}} {{this.received}}{{/if}}
+                            </div>
+
+                            <div class="item-controls item-assigned">
+                                <input type="checkbox" name="reward.items.assigned" {{checked this.assigned}} style="text-align:center;" />
+                            </div>
+
+                            <div class="item-controls item-qty">
+                                <input type="number" min="0" name="reward.items.qty" value="{{this.qty}}" style="text-align:center;" />
+                            </div>
+
+                            <div class="item-controls item-remaining">
+                                <input type="number" name="reward.items.remaining" value="{{this.remaining}}" style="text-align:center;" />
+                            </div>
+
+                            <div class="item-controls flexrow">
+                                <a class="item-control item-refill" title="{{localize 'MonksEnhancedJournal.RefillItem'}}"><i class="fas fa-cart-arrow-down"></i></a>
+                                <a class="item-control item-delete" title="{{localize 'MonksEnhancedJournal.DeleteItem'}}"><i class="fas fa-trash"></i></a>
+                            </div>
+                        </li>
+                        {{/each}}
+                    </ol>
                 </ol>
-            </ol>
+                {{/if}}
+            </div>
         </div>
         {{/if}}
         <div class="tab notes flexcol active" data-group="primary" data-tab="notes">

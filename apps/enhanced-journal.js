@@ -43,11 +43,14 @@ export class EnhancedJournal extends Application {
     }
 
     static get defaultOptions() {
+        let classes = ["monks-enhanced-journal", `${game.system.id}`];
+        if (game.modules.get("rippers-ui")?.active)
+            classes.push('rippers-ui');
         return mergeObject(super.defaultOptions, {
             id: "MonksEnhancedJournal",
             template: "modules/monks-enhanced-journal/templates/main.html",
             title: i18n("MonksEnhancedJournal.Title"),
-            classes: ["monks-enhanced-journal", `${game.system.id}`], //"sheet", "journal-sheet", 
+            classes: classes, //"sheet", "journal-sheet", 
             popOut: true,
             width: 1025,
             height: 700,
@@ -338,6 +341,8 @@ export class EnhancedJournal extends Application {
         if (this.subsheet._entityControls)
             ctrls = this.subsheet._entityControls();
 
+        let that = this;
+
         Hooks.callAll('activateControls', this, ctrls);
         if (ctrls) {
             for (let ctrl of ctrls) {
@@ -363,7 +368,7 @@ export class EnhancedJournal extends Application {
                             .addClass('nav-input ' + ctrl.id)
                             .attr(mergeObject({ 'type': 'text', 'autocomplete': 'off', 'placeholder': ctrl.text }, (ctrl.attributes || {})))
                             .on('keyup', function (event) {
-                                ctrl.callback.call(this.subsheet, this.value, event);
+                                ctrl.callback.call(that.subsheet, this.value, event);
                             });
                         break;
                     case 'text':
@@ -433,9 +438,11 @@ export class EnhancedJournal extends Application {
             return { data: { flags: { 'monks-enhanced-journal': { type: 'blank' } }, content: "" } };
         else {
             let entity;
-            if (entityId.indexOf('.') >= 0)
-                entity = await fromUuid(entityId);
-            else {
+            if (entityId.indexOf('.') >= 0) {
+                try {
+                    entity = await fromUuid(entityId);
+                } catch (err) { log('Error find entity', entityId, err); }
+            } else {
                 if (entity == undefined)
                     entity = game.journal.get(entityId);
                 if (entity == undefined)
@@ -464,7 +471,7 @@ export class EnhancedJournal extends Application {
         this.saveTabs();
     }
 
-    addTab(entity, options = { activate: true }) {
+    addTab(entity, options = { activate: true, refresh: true }) {
         if (entity?.currentTarget != undefined)
             entity = null;
 
@@ -484,7 +491,8 @@ export class EnhancedJournal extends Application {
             this.activateTab(tab);  //activating the tab should save it
         else {
             this.saveTabs();
-            this.render(true);
+            if (options.refresh)
+                this.render(true);
         }
 
         this.updateRecent(tab.entity);
@@ -792,9 +800,9 @@ export class EnhancedJournal extends Application {
                 else
                     this.addTab(entity);
             } else {
-                if (await this?.subsheet?.close() === false)
-                    this.addTab(entity, { activate: false}); //If we're editing, then open in a new tab but don't activate
-                else
+                if (await this?.subsheet?.close() !== false)
+                    //this.addTab(entity, { activate: false, refresh: false }); //If we're editing, then open in a new tab but don't activate
+                //else
                     this.updateTab(this.tabs.active(), entity);
             }
         }
@@ -910,28 +918,34 @@ export class EnhancedJournal extends Application {
             return this.subsheet._onDragStart(event);
     }
 
+    /*
     async itemDropped(id, actor) {
-        let items = this.object.getFlag('monks-enhanced-journal', 'items');
-        if (items) {
-            let item = items.find(i => i.id == id);
-            if (item) {
-                item.received = actor.name;
-                item.assigned = true;
-                this.object.setFlag('monks-enhanced-journal', 'items', items).then(() => {
-                    log('Item Dropped', item);
-                    this.render(true);
-                });
+        if (this.object.type == 'quest') {
+
+        } else {
+            let items = this.object.getFlag('monks-enhanced-journal', 'items');
+            if (items) {
+                let item = items.find(i => i.id == id);
+                if (item) {
+                    item.received = actor.name;
+                    item.assigned = true;
+                    this.object.setFlag('monks-enhanced-journal', 'items', items).then(() => {
+                        log('Item Dropped', item);
+                        this.render(true);
+                    });
+                }
             }
         }
     }
 
     async itemPurchased(id, actor) {
+        //this is exclusively for the Shop
         let items = this.object.getFlag('monks-enhanced-journal', 'items');
         if (items) {
             let item = items.find(i => i.id == id);
             if (item) {
                 if (game.user.isGM) {
-                    item.qty -= 1;
+                    item.remaining = Math.max(item.remaining - 1, 0);
                     this.object.setFlag('monks-enhanced-journal', 'items', items);
                 } else {
                     MonksEnhancedJournal.emit("purchaseItem",
@@ -944,7 +958,7 @@ export class EnhancedJournal extends Application {
                 }
             }
         }
-    }
+    }*/
 
     _onDrop(event) {
         log('enhanced journal drop', event);

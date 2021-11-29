@@ -13,6 +13,7 @@ export class JournalEntrySheet extends EnhancedJournalSheet {
     }
 
     _inferDefaultMode() {
+        if (super._inferDefaultMode() == undefined) return;
         return (this.object.data.img != undefined && this.object.data.img != '' && this.object.data.content == '' ? 'image' : 'text');
     }
 

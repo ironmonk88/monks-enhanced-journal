@@ -80,4 +80,20 @@ export const registerSettings = function () {
 		default: false,
 		type: Boolean,
 	});
+
+	game.settings.register(modulename, "show-folder-sort", {
+		name: i18n("MonksEnhancedJournal.show-folder-sort.name"),
+		hint: i18n("MonksEnhancedJournal.show-folder-sort.hint"),
+		scope: "world",
+		config: true,
+		default: false,
+		type: Boolean,
+	});
+
+	game.settings.register(modulename, "assign-actor", {
+		scope: "world",
+		config: false,
+		default: null,
+		type: String,
+	});
 }

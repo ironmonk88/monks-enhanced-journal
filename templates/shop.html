@@ -11,15 +11,15 @@
             </h1>
             <div class="form-group">
                 <label style="background: none; border: none;">{{localize 'MonksEnhancedJournal.ShopType'}}</label>
-                <input type="text" name="flags.monks-enhanced-journal.shoptype" placeholder="{{localize 'MonksEnhancedJournal.ShopType'}}" value="{{data.flags.monks-enhanced-journal.shoptype}}" />
+                <input type="text" name="flags.monks-enhanced-journal.shoptype" value="{{data.flags.monks-enhanced-journal.shoptype}}" />
             </div>
             <div class="form-group">
                 <label style="background: none; border: none;">{{localize 'MonksEnhancedJournal.Location'}}</label>
-                <input type="text" name="flags.monks-enhanced-journal.location" placeholder="{{localize 'MonksEnhancedJournal.Location'}}" value="{{data.flags.monks-enhanced-journal.location}}" />
+                <input type="text" name="flags.monks-enhanced-journal.location" value="{{data.flags.monks-enhanced-journal.location}}" />
             </div>
             <div class="form-group owner-only">
                 <label style="background: none; border: none;">{{localize 'MonksEnhancedJournal.PlayerPurchasing'}}</label>
-                <select class="shop-state" name="flags.monks-enhanced-journal.purchasing" style="font-size:16px;">
+                <select class="shop-state" name="flags.monks-enhanced-journal.purchasing" style="font-size: inherit; font-family: inherit;">
                     {{ selectGroups purchaseOptions selected=data.flags.monks-enhanced-journal.purchasing localize=true }}
                 </select>
             </div>
@@ -69,18 +69,19 @@
                             <div class="item-name flexrow">
                                 <div class="item-image item-icon" style="background-image: url('{{this.img}}')"></div>
                                 <h4>{{#if @root.owner}}{{#unless this.fromShop}}<i class="fas fa-user" title="{{localize 'MonksEnhancedJournal.FromShopOwner'}}"></i> {{/unless}}{{/if}}{{this.name}}</h4>
+                                <input type="hidden" name="items.id" value="{{this.id}}" />
                             </div>
 
                             <div class="item-controls item-qty">
-                                <input type="text" class="item-field" name="qty" value="{{this.qty}}" style="text-align:center;" />
+                                <input type="number" min="0" name="items.qty" value="{{this.qty}}" style="text-align:center;" />
                             </div>
 
                             <div class="item-controls item-price owner-only" style="text-align:center;">
-                                <input type="text" class="item-field" name="price" value="{{this.price}}" style="text-align:center;" />
+                                <input type="number" min="0" step="any" name="items.price" value="{{this.price}}" style="text-align:center;" />
                             </div>
 
                             <div class="item-controls item-cost">
-                                <input type="text" class="item-field" name="cost" value="{{this.cost}}" style="text-align:center;" />
+                                <input type="number" min="0" step="any" name="items.cost" value="{{this.cost}}" style="text-align:center;" />
                             </div>
 
                             {{#if @root.showrequest}}

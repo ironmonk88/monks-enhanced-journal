@@ -18,8 +18,13 @@
                 <div style="height:100%;">
                     <ol class="items-list encounter-monsters">
                         <li class="items-header flexrow" style="position: relative;">
-                            <h3 class="item-name monster-name flexrow" style="padding-left:25px;">
-                                <div class="create-encounter" title="{{localize 'MonksEnhancedJournal.DragMonsters'}}"><i class="fas fa-bolt"></i></div>{{localize 'MonksEnhancedJournal.Monsters'}}
+                            <div class="encounter-buttons flexrow">
+                                <div class="create-combat" title="{{localize 'MonksEnhancedJournal.DragMonstersCombat'}}"><i class="fas fa-fist-raised"></i></div>
+                                <div class="create-encounter" title="{{localize 'MonksEnhancedJournal.DragMonsters'}}"><i class="fas fa-user-plus"></i></div>
+                                <div class="select-encounter" title="{{localize 'MonksEnhancedJournal.SelectEncounter'}}"><i class="fas fa-expand"></i></div>
+                            </div>
+                            <h3 class="item-name monster-name flexrow">
+                                {{localize 'MonksEnhancedJournal.Monsters'}}
                             </h3>
                             <div class="item-controls item-qty">{{localize 'MonksEnhancedJournal.Qty'}}</div>
                             <div class="item-controls flexrow"></div>
@@ -48,6 +53,9 @@
                 <div>
                     <ol class="items-list encounter-items">
                         <li class="items-header flexrow">
+                            <div class="encounter-buttons flexrow">
+                                <div class="assign-items" title="{{localize 'MonksEnhancedJournal.AssignItems'}}"><i class="fas fa-suitcase"></i></div>
+                            </div>
                             <h3 class="item-name flexrow">{{localize 'MonksEnhancedJournal.Items'}}</h3>
                             <div class="item-controls item-assigned">{{localize 'MonksEnhancedJournal.Assigned'}}</div>
                             <div class="item-controls item-qty">{{localize 'MonksEnhancedJournal.Qty'}}</div>
@@ -56,10 +64,11 @@
 
                         <ol class="item-list">
                             {{#each data.flags.monks-enhanced-journal.items}}
-                            <li class="item flexrow{{#if this.received}} received{{/if}}" data-pack="{{this.pack}}" data-id="{{this.id}}" data-container="items" data-entity="Item" draggable="false">
+                            <li class="item flexrow{{#if this.received}} received{{/if}}" data-pack="{{this.pack}}" data-id="{{this.id}}" data-uuid="{{this.uuid}}" data-container="items" data-entity="Item" draggable="false">
                                 <div class="item-name flexrow">
                                     <div class="item-image item-icon" style="background-image: url('{{this.img}}')"></div>
                                     <h4>{{this.name}}</h4>
+                                    <input type="hidden" name="items.id" value="{{this.id}}" />
                                 </div>
 
                                 <div class="item-name item-received">
@@ -67,15 +76,20 @@
                                 </div>
 
                                 <div class="item-controls item-assigned">
-                                    <input type="checkbox" name="assigned" ignoresubmit="true" {{checked this.assigned}} style="text-align:center;" />
+                                    <input type="checkbox" name="items.assigned" {{checked this.assigned}} style="text-align:center;" />
                                 </div>
 
                                 <div class="item-controls item-qty">
-                                    <input type="text" name="qty" ignoresubmit="true" value="{{this.qty}}" style="text-align:center;" />
+                                    <input type="number" min="0" name="items.qty" value="{{this.qty}}" style="text-align:center;" />
+                                </div>
+
+                                <div class="item-controls item-remaining">
+                                    <input type="number" name="items.remaining" value="{{this.remaining}}" style="text-align:center;" />
                                 </div>
 
                                 <div class="item-controls flexrow">
-                                    <a class="item-control item-delete" title="Delete Item"><i class="fas fa-trash"></i></a>
+                                    <a class="item-control item-refill" title="{{localize 'MonksEnhancedJournal.RefillItem'}}"><i class="fas fa-cart-arrow-down"></i></a>
+                                    <a class="item-control item-delete" title="{{localize 'MonksEnhancedJournal.DeleteItem'}}"><i class="fas fa-trash"></i></a>
                                 </div>
                             </li>
                             {{/each}}

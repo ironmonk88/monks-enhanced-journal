@@ -17,6 +17,10 @@ export class PictureSheet extends EnhancedJournalSheet {
         return 'picture';
     }
 
+    _inferDefaultMode() {
+        return "image";
+    }
+
     _entityControls() {
         let ctrls = [
             { id: 'show', text: i18n("MonksEnhancedJournal.ShowToPlayers"), icon: 'fa-eye', conditional: game.user.isGM, callback: this.enhancedjournal.doShowPlayers },

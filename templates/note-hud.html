@@ -1,0 +1,34 @@
+<form id="{{id}}" class="{{classes}}" data-appid="{{appId}}" autocomplete="off" onsubmit="event.preventDefault();">
+    <div class="col left" style="justify-content: center;">
+        {{#if (eq type "encounter")}}
+        <div class="control-icon" data-action="start-encounter">
+            <i class="fas fa-fist-raised" title="Start Encounter"></i>
+        </div>
+
+        <div class="control-icon" data-action="select-encounter">
+            <i class="fas fa-expand" title="Select Encounter"></i>
+        </div>
+
+        <div class="control-icon" data-action="assign-items">
+            <i class="fas fa-suitcase" title="Assign Items"></i>
+        </div>
+        {{/if}}
+        {{#if (eq type "quest")}}
+        <div class="control-icon" data-action="assign-items">
+            <i class="fas fa-suitcase" title="Assign Items"></i>
+        </div>
+        {{/if}}
+    </div>
+
+    <div class="col middle">
+    </div>
+
+    <div class="col right" style="justify-content: center;">
+
+        {{#if isGM}}
+        <div class="control-icon {{visibilityClass}}" data-action="visibility">
+            <img src="{{icons.visibility}}" width="36" height="36" title="{{localize "HUD.ToggleVis"}}">
+        </div>
+        {{/if}}
+    </div>
+</form>
