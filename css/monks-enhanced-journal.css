@@ -1487,7 +1487,7 @@
 }
 
 .monks-journal-sheet.sheet .items-list .item-controls {
-    flex: 0 0 60px;
+    flex: 0 0 80px;
     justify-content: space-between;
 }
 
@@ -1498,6 +1498,10 @@
 
 .monks-journal-sheet.sheet .journal-subsheet .items-list .item-controls {
     align-items: center;
+}
+
+.monks-journal-sheet.sheet .journal-subsheet .items-list .item-controls .request-item:disabled {
+    cursor: no-drop;
 }
 
 .monks-journal-sheet.sheet .items-list .item-controls a {

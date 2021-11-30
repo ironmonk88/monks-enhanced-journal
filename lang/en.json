@@ -22,6 +22,8 @@
   "MonksEnhancedJournal.open-outside.hint": "Open Chat Links outside of Enhanced Journal instead of a new tab",
   "MonksEnhancedJournal.show-folder-sort.name": "Show Folder Sorting",
   "MonksEnhancedJournal.show-folder-sort.hint": "Show an outlined image if your folder is sorted manually",
+  "MonksEnhancedJournal.show-zero-quantity.name": "Show Zero Quantity",
+  "MonksEnhancedJournal.show-zero-quantity.hint": "Show zero quantity items, from the shop, to players",
 
   "MonsEnhancedJournal.SlideConfiguration": "Slide Configuration",
   "MonsEnhancedJournal.DCConfiguration": "DC Configuration",

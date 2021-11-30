@@ -48,6 +48,12 @@ Added statuses back to the Quest sheet.  I tried to work around it, but it's jus
 
 Added multiple rewards in case you need to have a different set of things depending on how the players perform.
 
+Added option to show or hide shop items from the player if the quantity is zero.
+
+Fixed issue where purchasing from the shop wasn't decreasing the quantity available.
+
+Fixed an issue where hidden items in the shop where still showing as an empty category to the players.
+
 # Version 1.0.31
 
 Added styling fixed for Warhammer

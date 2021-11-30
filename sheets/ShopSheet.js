@@ -69,10 +69,11 @@ export class ShopSheet extends EnhancedJournalSheet {
                     fromShop: true
                 }, sItem);
 
-                if (groups[type] == undefined)
-                    groups[type] = { name: type, items: [] };
-                if (game.user.isGM || this.object.isOwner || (item.hide !== true && item.qty > 0))
+                if (game.user.isGM || this.object.isOwner || (item.hide !== true && (item.qty > 0 || setting('show-zero-quantity')))) {
+                    if (groups[type] == undefined)
+                        groups[type] = { name: type, items: [] };
                     groups[type].items.push(item);
+                }
             }
         }
         //get actor items
@@ -101,18 +102,20 @@ export class ShopSheet extends EnhancedJournalSheet {
                         fromShop: false
                     }, aItem.data.flags['monks-enhanced-journal']);
 
-                    if (groups[type] == undefined)
-                        groups[type] = { name: type, items: [] };
-                    if (game.user.isGM || this.object.isOwner || (item.hide !== true && item.qty > 0))
+
+                    if (game.user.isGM || this.object.isOwner || (item.hide !== true && (item.qty > 0 || setting('show-zero-quantity')))) {
+                        if (groups[type] == undefined)
+                            groups[type] = { name: type, items: [] };
                         groups[type].items.push(item);
+                    }
                 }
             }
         }
 
+        data.groups = groups;
+
         data.hideitems = (['hidden', 'visible'].includes(data.data.flags['monks-enhanced-journal'].purchasing) && !this.object.isOwner);
         data.showrequest = (data.data.flags['monks-enhanced-journal'].purchasing == 'confirm' && !this.object.isOwner);
-
-        data.groups = groups;
 
         return data;
     }
@@ -334,7 +337,7 @@ export class ShopSheet extends EnhancedJournalSheet {
         let price = (item.data?.data?.price || item.price);
         let messageContent = {
             actor: { id: speaker.actor, name: actor.name, img: actor.img },
-            items: [{ uuid: uuid, name: item.name, img: item.img, price: price, qty: 1, total: price }],
+            items: [{ id: item.id, uuid: uuid, name: item.name, img: item.img, price: price, qty: 1, total: price }],
             shop: { id: this.object.id, name: this.object.name, img: this.object.img }
         }
 

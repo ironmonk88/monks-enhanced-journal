@@ -90,6 +90,15 @@ export const registerSettings = function () {
 		type: Boolean,
 	});
 
+	game.settings.register(modulename, "show-zero-quantity", {
+		name: i18n("MonksEnhancedJournal.show-zero-quantity.name"),
+		hint: i18n("MonksEnhancedJournal.show-zero-quantity.hint"),
+		scope: "world",
+		config: true,
+		default: false,
+		type: Boolean,
+	});
+
 	game.settings.register(modulename, "assign-actor", {
 		scope: "world",
 		config: false,

@@ -1195,7 +1195,7 @@ export class MonksEnhancedJournal {
         return checkspot;
     }
 
-    static async requestItem(accept) {
+    static async acceptItem(accept) {
         let message = this;
 
         let content = $(message.data.content);
@@ -1207,14 +1207,23 @@ export class MonksEnhancedJournal {
             let msgactor = message.getFlag('monks-enhanced-journal', 'actor');
             let actor = game.actors.get(msgactor.id);
             //find the item
-            let msgitem = message.getFlag('monks-enhanced-journal', 'items');
-            let item = await fromUuid(msgitem[0].uuid);
+            let msgitems = message.getFlag('monks-enhanced-journal', 'items');
+            let item = await fromUuid(msgitems[0].uuid);
             //Add it to the actor
             const additem = await Item.implementation.fromDropData({ type: 'Item', data: item.data });
             const itemData = additem.toObject();
             actor.createEmbeddedDocuments("Item", [itemData]);
             //deduct the gold
 
+            //shop
+            let msgshop = message.getFlag('monks-enhanced-journal', 'shop');
+            let shop = game.journal.get(msgshop.id);
+            if (shop) {
+                let items = duplicate(shop.getFlag('monks-enhanced-journal', 'items'));
+                let itm = items.find(i => i.id == msgitems[0].id);
+                itm.qty = Math.max(itm.qty - 1, 0);
+                await shop.setFlag('monks-enhanced-journal', 'items', items);
+            }
         }
 
         message.update({ content: content[0].outerHTML, flags: { 'monks-enhanced-journal': { accepted: accept } } });
@@ -1485,8 +1494,8 @@ Hooks.on("renderChatMessage", (message, html, data) => {
         if (game.user.isGM)
             html.find(".player-only").remove();
 
-        $('.request-accept', html).click(MonksEnhancedJournal.requestItem.bind(message, true));
-        $('.request-reject', html).click(MonksEnhancedJournal.requestItem.bind(message, false));
+        $('.request-accept', html).click(MonksEnhancedJournal.acceptItem.bind(message, true));
+        $('.request-reject', html).click(MonksEnhancedJournal.acceptItem.bind(message, false));
 
         $('.actor-icon', html).click(MonksEnhancedJournal.openRequestItem.bind(message, 'actor')).attr('onerror', "$(this).attr('src', 'icons/svg/mystery-man.svg');");
         $('.shop-icon', html).click(MonksEnhancedJournal.openRequestItem.bind(message, 'shop')).attr('onerror', "$(this).attr('src', 'modules/monks-enhanced-journal/assets/shop.png');");
