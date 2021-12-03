@@ -1,3 +1,11 @@
+# Version 1.0.33
+
+Fixing issue with Pathfinder drop down
+
+Generalized the default object created by Enhanced Journal
+
+Fixed some issues with converting between old reward and new rewards
+
 # Version 1.0.32
 
 Added styling fixes for Rippers UI
@@ -44,7 +52,7 @@ Fixed issue with the Sheet configuration button showing for players
 
 Added pronouns to the Person Sheet
 
-Added statuses back to the Quest sheet.  I tried to work around it, but it's just doesn't make sense without them.
+Added statuses back to the Quest sheet.  I tried to work around it, but it just doesn't make sense without them.
 
 Added multiple rewards in case you need to have a different set of things depending on how the players perform.
 

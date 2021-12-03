@@ -1310,6 +1310,13 @@ Hooks.once("ready", async function () {
 
 Hooks.on("preCreateJournalEntry", (entry, data, options, userId) => {
     let flags = { type: data.type };//(data.type == 'base' ? 'journalentry' : data.type) };
+    if (data.type) {
+        entry.data.type = data.type;
+        const cls = (entry._getSheetClass ? entry._getSheetClass() : null);
+        if (cls && cls.defaultObject)
+            flags = mergeObject(flags, cls.defaultObject);
+    }
+    /*
     switch (data.type) {
         case 'encounter':
             flags = mergeObject(flags, EncounterSheet.defaultObject);
@@ -1333,6 +1340,7 @@ Hooks.on("preCreateJournalEntry", (entry, data, options, userId) => {
             flags = mergeObject(flags, PersonSheet.defaultObject);
             break;
     }
+    */
     entry.data._source.flags['monks-enhanced-journal'] = flags;
 });
 

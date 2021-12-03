@@ -46,6 +46,8 @@
                                     <a class="item-control monster-delete" title="{{localize 'MonksEnhancedJournal.DeleteMonster'}}"><i class="fas fa-trash"></i></a>
                                 </div>
                             </li>
+                            {{else}}
+                            <li class="instruction">Drag a Person here to add it to the encounter</li>
                             {{/each}}
                         </ol>
                     </ol>
@@ -92,6 +94,8 @@
                                     <a class="item-control item-delete" title="{{localize 'MonksEnhancedJournal.DeleteItem'}}"><i class="fas fa-trash"></i></a>
                                 </div>
                             </li>
+                            {{else}}
+                            <li class="instruction">Drag an Item onto the encounter to add it to the rewards</li>
                             {{/each}}
                         </ol>
                     </ol>
@@ -131,6 +135,8 @@
                                     <a class="item-control dc-delete" title="{{localize 'MonksEnhancedJournal.DeleteDC'}}"><i class="fas fa-trash"></i></a>
                                 </div>
                             </li>
+                            {{else}}
+                            <li class="instruction">No DCs added yet, press the Add button to create one</li>
                             {{/each}}
                         </ol>
                     </ol>

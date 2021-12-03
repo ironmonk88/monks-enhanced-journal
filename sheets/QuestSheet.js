@@ -52,7 +52,11 @@ export class QuestSheet extends EnhancedJournalSheet {
 
     getRewardData() {
         let rewards;
-        if (this.object.data.flags["monks-enhanced-journal"].rewards == undefined) {
+        if (this.object.data.flags["monks-enhanced-journal"].rewards == undefined &&
+                (this.object.data.flags["monks-enhanced-journal"].items != undefined ||
+            this.object.data.flags["monks-enhanced-journal"].xp != undefined ||
+            this.object.data.flags["monks-enhanced-journal"].additional != undefined)) {
+
             let currency = Object.keys(CONFIG[game.system.id.toUpperCase()]?.currencies || {}).reduce((a, v) => ({ ...a, [v]: this.object.data.flags["monks-enhanced-journal"][v] }), {});
             rewards = [{
                 id: makeid(),
@@ -65,12 +69,12 @@ export class QuestSheet extends EnhancedJournalSheet {
                 hasCurrency: Object.keys(currency).length > 0
             }];
         } else {
-            rewards = this.object.data.flags["monks-enhanced-journal"].rewards;
+            rewards = this.object.data.flags["monks-enhanced-journal"].rewards || [];
             rewards = rewards.map(reward => {
                 if (reward.currency instanceof Array)
                     reward.currency = reward.currency.reduce((a, v) => ({ ...a, [v.name]: v.value }), {});
                 return reward;
-            })
+            });
         }
 
         return rewards;
@@ -113,7 +117,7 @@ export class QuestSheet extends EnhancedJournalSheet {
             return super._onSubmit(ev);
     }*/
 
-    get defaultObject() {
+    static get defaultObject() {
         return { rewards: [], objectives: [], seen: false, status: 'inactive' };
     }
 
@@ -238,7 +242,7 @@ export class QuestSheet extends EnhancedJournalSheet {
         let data = expandObject(super._getSubmitData());
 
         let items = null;
-        if (data.reward.items) {
+        if (data.reward?.items) {
             for (let [k, v] of Object.entries(data.reward.items)) {
                 let values = (v instanceof Array ? v : [v]);
                 if (items == undefined) {
@@ -311,6 +315,8 @@ export class QuestSheet extends EnhancedJournalSheet {
     }
 
     async changeReward(event) {
+        if (event == undefined)
+            return;
         let id = (typeof event == 'string' ? event : $(event.currentTarget).closest('.reward-tab').data('rewardId'));
 
         this.object.setFlag('monks-enhanced-journal', 'reward', id);

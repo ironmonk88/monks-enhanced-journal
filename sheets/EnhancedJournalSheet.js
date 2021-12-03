@@ -68,7 +68,7 @@ export class EnhancedJournalSheet extends JournalSheet {
             this.object.setFlag('monks-enhanced-journal', '_lasttab', this._tabs[0].active);
     }
 
-    get defaultObject() {
+    static get defaultObject() {
         return {};
     }
 

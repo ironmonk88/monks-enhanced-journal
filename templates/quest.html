@@ -105,6 +105,8 @@
                             <h4 style="white-space: normal;">{{this.content}}</h4>
                         </div>
                     </li>
+                    {{else}}
+                    <li class="instruction">No objectives yet, press the add button to create one</li>
                     {{/each}}
                 </ol>
             </ol>
@@ -215,6 +217,8 @@
                         {{/each}}
                     </ol>
                 </ol>
+                {{else}}
+                <div class="instruction">No rewards yet, click the plus to add one</div>
                 {{/if}}
             </div>
         </div>

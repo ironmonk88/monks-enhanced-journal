@@ -86,7 +86,7 @@
 
                             {{#if @root.showrequest}}
                             <div class="item-controls item-request">
-                                <button type="button" title="Purchase" {{#if (or this.lock (eq this.qty 0))}}locked="true"{{/if}} class="request-item"><i class="fas fa-dollar-sign"></i></button>
+                                <button type="button" title="Purchase" {{#if (or this.lock (eq this.qty 0))}} locked="true" {{/if}} class="request-item"><i class="fas fa-dollar-sign"></i></button>
                             </div>
                             {{/if}}
 
@@ -98,6 +98,8 @@
                         </li>
                         {{/each}}
                     </ul>
+                    {{else}}
+                    <li class="instruction">Drag Items here to add them to the shop</li>
                     {{/each}}
                 </ol>
             </ol>
