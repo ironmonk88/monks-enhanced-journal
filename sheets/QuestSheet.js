@@ -57,17 +57,10 @@ export class QuestSheet extends EnhancedJournalSheet {
             this.object.data.flags["monks-enhanced-journal"].xp != undefined ||
             this.object.data.flags["monks-enhanced-journal"].additional != undefined)) {
 
-            let currency = Object.keys(CONFIG[game.system.id.toUpperCase()]?.currencies || {}).reduce((a, v) => ({ ...a, [v]: this.object.data.flags["monks-enhanced-journal"][v] }), {});
-            rewards = [{
-                id: makeid(),
-                name: "Rewards",
-                active: true,
-                items: this.object.data.flags["monks-enhanced-journal"].items,
-                xp: this.object.data.flags["monks-enhanced-journal"].xp,
-                additional: this.object.data.flags["monks-enhanced-journal"].additional,
-                currency: currency,
-                hasCurrency: Object.keys(currency).length > 0
-            }];
+            rewards = this.convertRewards();
+            this.object.data.flags['monks-enhanced-journal'].reward = rewards[0].id;
+            this.object.setFlag('monks-enhanced-journal', 'rewards', rewards);
+            this.object.setFlag('monks-enhanced-journal', 'reward', rewards[0].id);
         } else {
             rewards = this.object.data.flags["monks-enhanced-journal"].rewards || [];
             rewards = rewards.map(reward => {
@@ -80,6 +73,20 @@ export class QuestSheet extends EnhancedJournalSheet {
         return rewards;
     }
 
+    convertRewards() {
+        let currency = Object.keys(CONFIG[game.system.id.toUpperCase()]?.currencies || {}).reduce((a, v) => ({ ...a, [v]: this.object.data.flags["monks-enhanced-journal"][v] }), {});
+        return [{
+            id: makeid(),
+            name: "Rewards",
+            active: true,
+            items: this.object.data.flags["monks-enhanced-journal"].items,
+            xp: this.object.data.flags["monks-enhanced-journal"].xp,
+            additional: this.object.data.flags["monks-enhanced-journal"].additional,
+            currency: currency,
+            hasCurrency: Object.keys(currency).length > 0
+        }];
+    }
+
     getActiveReward() {
         let rewards = this.getRewardData();
         if (!rewards || rewards.length == 0)
@@ -90,7 +97,12 @@ export class QuestSheet extends EnhancedJournalSheet {
 
     getReward(rewards) {
         let id = this.object.getFlag('monks-enhanced-journal', 'reward') || 0;
-        return rewards.find(r => r.id == id);
+        let reward = rewards.find(r => r.id == id);
+        if (reward == undefined && rewards.length > 0) {
+            reward = rewards[0];
+            this.object.setFlag('monks-enhanced-journal', 'reward', reward.id);
+        }
+        return reward;
     }
 
     /*

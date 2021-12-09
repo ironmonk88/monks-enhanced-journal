@@ -6,6 +6,6 @@
     </header>
     <div class="flexcol" style="overflow:hidden;position:relative;">
         <!--<div class="img-background" style="background-image: url('{{data.img}}')"></div>-->
-        <img class="picture-img" src="{{data.img}}" data-edit="img" onerror="this.src = 'icons/svg/mystery-man.svg'" />
+        <div class="picture-img lightbox-image" name="img" src="{{data.img}}" style="background-image: url({{data.img}})" data-edit="img" onerror="$(this).css({ backgroundImage: 'url(icons/svg/mystery-man.svg)' }" ></div>
     </div>
 </form>

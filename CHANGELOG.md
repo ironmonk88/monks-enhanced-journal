@@ -1,3 +1,11 @@
+# Version 1.0.34
+
+Added a function to re-convert quest rewards.  There was some conversion problems with a previous version, the old data is still saved, but if the new data is created in error then it won't check the old data again.  The new function should correct the issues.
+
+Changed the images to divs so that Journal Scaler will function properly.
+
+Fixed issue with journal sheets being displayed in Monk's COmmon Display
+
 # Version 1.0.33
 
 Fixing issue with Pathfinder drop down

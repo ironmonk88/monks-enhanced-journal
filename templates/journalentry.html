@@ -13,7 +13,7 @@
             {{editor target="content" content=data.content editable=true button=true owner=owner}}
         </div>
         <div class="tab picture flexrow active" data-group="primary" data-tab="picture" style="position:relative;">
-            <img class="picture-img" src="{{data.img}}" data-edit="img" onerror="$(this).css({opacity:0});" />
+            <div class="picture-img lightbox-image" name="img" src="{{data.img}}" style="background-image: url({{data.img}})" data-edit="img" onerror="$(this).css({opacity:0});"></div>
         </div>
     </section>
 </form>

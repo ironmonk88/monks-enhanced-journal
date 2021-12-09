@@ -1285,6 +1285,21 @@ export class MonksEnhancedJournal {
             //.blur(function () { list.removeClass('open') })
             .click(function () { list.toggleClass('open') });
     }
+
+    static convertReward() {
+        if (MonksEnhancedJournal.journal) {
+            if (!(MonksEnhancedJournal.journal.subsheet instanceof QuestSheet)) {
+                console.log('Invalid journal type');
+                return;
+            }
+
+            let rewards = MonksEnhancedJournal.journal.subsheet.convertRewards();
+            MonksEnhancedJournal.journal.object.data.flags['monks-enhanced-journal'].reward = rewards[0].id;
+            MonksEnhancedJournal.journal.object.setFlag('monks-enhanced-journal', 'rewards', rewards);
+            MonksEnhancedJournal.journal.object.setFlag('monks-enhanced-journal', 'reward', rewards[0].id);
+            MonksEnhancedJournal.journal.render(true);
+        }
+    }
 }
 
 Hooks.on("renderJournalDirectory", async (app, html, options) => {

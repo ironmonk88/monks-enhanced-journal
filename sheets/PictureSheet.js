@@ -28,4 +28,12 @@ export class PictureSheet extends EnhancedJournalSheet {
         ];
         return ctrls.concat(super._entityControls());
     }
+
+    _getSubmitData() {
+        let data = expandObject(super._getSubmitData());
+
+        data.img = $('.picture-img', this.element).attr('src');
+
+        return flattenObject(data);
+    }
 }

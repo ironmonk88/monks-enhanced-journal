@@ -32,6 +32,14 @@ export class JournalEntrySheet extends EnhancedJournalSheet {
         let owner = this.object.isOwner;
         data.hideTabs = (!owner && ((this.object.data.img != undefined && this.object.data.img != '' && this.object.data.content == '') || ((this.object.data.img == undefined || this.object.data.img == '') && this.object.data.content != '')));
 
+        if (game.modules.get('monks-common-display')?.active) {
+            let playerdata = game.settings.get("monks-common-display", 'playerdata');
+            let pd = playerdata[game.user.id] || { display: false, mirror: false, selection: false };
+
+            if (pd.display)
+                data.hideTabs = true;
+        }
+
         return data;
     }
 
@@ -93,7 +101,7 @@ export class JournalEntrySheet extends EnhancedJournalSheet {
     }
 
     removePicture() {
-        $('img[data-edit="img"]').css({ opacity: 0 });
+        $('[data-edit="img"]').css({ opacity: 0 });
         this.object.update({ img: '' });
     }
 
@@ -101,5 +109,13 @@ export class JournalEntrySheet extends EnhancedJournalSheet {
         let element = await super.render(data);
 
         return element;
+    }
+
+    _getSubmitData() {
+        let data = expandObject(super._getSubmitData());
+
+        data.img = $('.picture-img', this.element).attr('src');
+
+        return flattenObject(data);
     }
 }

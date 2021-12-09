@@ -163,7 +163,7 @@ export class EnhancedJournalSheet extends JournalSheet {
         $('.sheet-image .profile', html).contextmenu(() => { $('.fullscreen-image').show(); });
         $('.fullscreen-image', html).click(() => { $('.fullscreen-image', html).hide(); });
 
-        html.find('img[data-edit]').click(this._onEditImage.bind(this));
+        html.find('img[data-edit],div.picture-img').click(this._onEditImage.bind(this));
 
         if (enhancedjournal) {
             html.find('.recent-link').click(async (ev) => {
@@ -298,10 +298,10 @@ export class EnhancedJournalSheet extends JournalSheet {
             type: "image",
             current: this.object.data.img,
             callback: path => {
-                event.currentTarget.src = path;
+                $(event.currentTarget).attr('src', path).css({ backgroundImage: `url(${path})` });
                 //I have no idea why the form gets deleted sometimes, but add it back.
-                if (this.form == undefined)
-                    this.form = $('.monks-enhanced-journal .body > .content form', this.element).get(0);
+                //if (this.form == undefined)
+                //    this.form = $('.monks-enhanced-journal .body > .content form', this.element).get(0);
                 $('img[data-edit="img"]').css({ opacity: '' });
                 this._onSubmit(event, { preventClose: true });
             },
@@ -312,9 +312,6 @@ export class EnhancedJournalSheet extends JournalSheet {
     }
 
     _onSubmit(ev) {
-        if ($(ev.currentTarget).attr('ignoresubmit') == 'true')
-            return;
-
         const formData = expandObject(this._getSubmitData());
 
         if (Object.keys(formData).length == 0)

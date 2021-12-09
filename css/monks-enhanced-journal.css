@@ -891,8 +891,8 @@
 
 .monks-journal-sheet .picture-container img,
 .monks-journal-sheet .slide img,
-#slideshow-canvas .slide img,
-.monks-journal-sheet .picture-img {
+#slideshow-canvas .slide img
+ {
     height: 100%;
     width: 100%;
     object-fit: contain;
@@ -901,6 +901,19 @@
     position:absolute;
     top:0px;
     left:0px;
+}
+
+.monks-journal-sheet .picture-img {
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    height: 100%;
+    width: 100%;
+    border: 0px;
+    z-index: 1;
+    position: absolute;
+    top: 0px;
+    left: 0px;
 }
 
 .monks-journal-sheet .picture-container .img-background {
