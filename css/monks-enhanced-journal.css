@@ -1820,11 +1820,11 @@
     color: black;
     position: absolute;
     float: left;
-    left: 0px;
+    left: -1px;
     top: 100%;
     background: url(../../../ui/parchment.jpg) repeat;
     border: 1px solid #808080;
-    width: 100%;
+    width: calc(100% + 2px);
     border-bottom-right-radius: 5px;
     border-bottom-left-radius: 5px;
     list-style: none;
@@ -1874,6 +1874,11 @@
 
 .journal-list .journal-item.folder.collapse > ul {
     display: none;
+}
+
+.journal-select .journal-list .subfolder {
+    padding-left: 0.5em;
+    margin-top: 0px;
 }
 
 .select-player .options {

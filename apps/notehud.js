@@ -81,10 +81,10 @@ export class NoteHUD extends BasePlaceableHUD {
         const c = 70;
         const p = 10;
         const position = {
-            width: width + 177,
-            height: height + (p * 2),
-            left: this.object.data.x - 55,
-            top: y + this.object.data.y - p
+            width: (width / ratio) + (c * 2),
+            height: height,
+            left: this.object.data.x - (c * ratio) - (width / 2),
+            top: this.object.data.y - (height / 2)
         };
         if (ratio !== 1) position.transform = `scale(${ratio})`;
         this.element.css(position);

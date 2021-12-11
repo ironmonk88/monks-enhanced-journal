@@ -129,7 +129,7 @@ export class MonksEnhancedJournal {
         });
 
         Note.prototype._canHUD = function(user, event) {
-            return game.user.isGM;
+            return game.user.isGM && this.entry;
         }
 
         Object.defineProperty(NotesLayer.prototype, 'hud', {

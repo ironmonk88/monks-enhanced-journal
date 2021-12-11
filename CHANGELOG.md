@@ -1,3 +1,14 @@
+# Version 1.0.35
+
+Fixed issue with Person sheet.  Rolle value wasn't saving due to a spelling mistake in the code.
+
+Fixed the positioning of the Note HUD.
+
+Cleaned up the NOte drop down to select a journal.
+
+Fixed an error when trying to open the Note HUD and there wasn't a valid JOurnal Entry attached
+
+
 # Version 1.0.34
 
 Added a function to re-convert quest rewards.  There was some conversion problems with a previous version, the old data is still saved, but if the new data is created in error then it won't check the old data again.  The new function should correct the issues.
