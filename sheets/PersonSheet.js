@@ -11,7 +11,7 @@ export class PersonSheet extends EnhancedJournalSheet {
             title: i18n("MonksEnhancedJournal.person"),
             template: "modules/monks-enhanced-journal/templates/person.html",
             tabs: [{ navSelector: ".tabs", contentSelector: ".sheet-body", initial: "description" }],
-            dragDrop: [{ dragSelector: ".entity.actor", dropSelector: ".person-container" }],
+            dragDrop: [{ dragSelector: ".document.actor", dropSelector: ".person-container" }],
             scrollY: [".tab.details", ".description"]
         });
     }
@@ -63,7 +63,7 @@ export class PersonSheet extends EnhancedJournalSheet {
         };
     }
 
-    _entityControls() {
+    _documentControls() {
         let ctrls = [
             { text: '<i class="fas fa-search"></i>', type: 'text' },
             { id: 'search', type: 'input', text: i18n("MonksEnhancedJournal.SearchDescription"), callback: this.enhancedjournal.searchText },
@@ -73,17 +73,17 @@ export class PersonSheet extends EnhancedJournalSheet {
             { id: 'convert', text: i18n("MonksEnhancedJournal.Convert"), icon: 'fa-clipboard-list', conditional: (game.user.isGM && this.isEditable), callback: () => { } }
         ];
         //this.addPolyglotButton(ctrls);
-        return ctrls.concat(super._entityControls());
+        return ctrls.concat(super._documentControls());
     }
 
     activateListeners(html, enhancedjournal) {
         super.activateListeners(html, enhancedjournal);
 
         $('.journal-header .actor-img img', html).click(this.openActor.bind(this));
-        html.on('dragstart', ".actor-img img", TextEditor._onDragEntityLink);
+        html.on('dragstart', ".actor-img img", TextEditor._onDragContentLink);
 
         //onkeyup="textAreaAdjust(this)" style="overflow:hidden"
-        $('.entity-details textarea', html).keyup(this.textAreaAdjust.bind(this));
+        $('.document-details textarea', html).keyup(this.textAreaAdjust.bind(this));
 
         $('.item-delete', html).on('click', $.proxy(this._deleteItem, this));
 
@@ -129,7 +129,7 @@ export class PersonSheet extends EnhancedJournalSheet {
         let html = super.render(data);
 
         let that = this;
-        $('.entity-details textarea', html).each(function () {
+        $('.document-details textarea', html).each(function () {
             that.textAreaAdjust({ currentTarget: this });
         })
 
@@ -194,7 +194,6 @@ export class PersonSheet extends EnhancedJournalSheet {
                 condition: () => game.user.isGM,
                 callback: li => {
                     const id = li.data("id");
-                    //const slide = this.object.data.flags["monks-enhanced-journal"].slides.get(li.data("entityId"));
                     Dialog.confirm({
                         title: `${game.i18n.localize("SIDEBAR.Delete")} Actor Link`,
                         content: i18n("MonksEnhancedJournal.ConfirmRemoveLink"),

@@ -138,6 +138,10 @@
     padding-left: 30px;
 }
 
+.monks-enhanced-journal .sidebar-directory.directory .directory-header .header-search input {
+    height: var(--form-field-height);
+}
+
 .monks-enhanced-journal .tab-bar .journal-tab .tab-content {
     overflow: hidden;
     text-overflow: ellipsis;
@@ -329,7 +333,7 @@
     text-align: right;
 }
 
-.monks-enhanced-journal .content[entity-type="actor"] + footer {
+.monks-enhanced-journal .content[document-type="actor"] + footer {
     display: none;
 }
 
@@ -342,18 +346,18 @@
     height: calc(100% - 75px);
 }
 
-#journal-directory li.journal {
+#journal-directory li.journalentry {
     line-height: 32px;
     border-top: 1px solid rgba(0, 0, 0, 0.1);
     border-bottom: 1px solid rgba(0, 0, 0, 0.3);
 }
 
-#journal-directory li.journal .entity-name {
+#journal-directory li.journalentry .document-name {
     margin: 0 0.25em;
 }
 
-#journal li.journal .entity-name,
-#journal-directory li.journal .entity-name {
+#journal li.journalentry .document-name,
+#journal-directory li.journalentry .document-name {
     flex-wrap: nowrap;
     align-items: center;
     display: flex;
@@ -361,34 +365,34 @@
     justify-content: flex-start;
 }
 
-#journal li.journal[status] .entity-name i,
-#journal-directory li.journal[status] .entity-name i {
+#journal li.journalentry[status] .document-name i,
+#journal-directory li.journalentry[status] .document-name i {
     margin-left: 1px;
 }
 
-#journal li.journal[status] .entity-name,
-#journal-directory li.journal[status] .entity-name {
+#journal li.journalentry[status] .document-name,
+#journal-directory li.journalentry[status] .document-name {
     border-left: 0.45em solid #808080;
     margin-left: 0px;
 }
 
-#journal li.journal[status="available"] .entity-name,
-#journal-directory li.journal[status="available"] .entity-name {
+#journal li.journalentry[status="available"] .document-name,
+#journal-directory li.journalentry[status="available"] .document-name {
     border-left-color: #2f96b4;
 }
 
-#journal li.journal[status="inprogress"] .entity-name,
-#journal-directory li.journal[status="inprogress"] .entity-name {
+#journal li.journalentry[status="inprogress"] .document-name,
+#journal-directory li.journalentry[status="inprogress"] .document-name {
     border-left-color: #f89406;
 }
 
-#journal li.journal[status="completed"] .entity-name,
-#journal-directory li.journal[status="completed"] .entity-name {
+#journal li.journalentry[status="completed"] .document-name,
+#journal-directory li.journalentry[status="completed"] .document-name {
     border-left-color: #51a351;
 }
 
-#journal li.journal[status="failed"] .entity-name,
-#journal-directory li.journal[status="failed"] .entity-name {
+#journal li.journalentry[status="failed"] .document-name,
+#journal-directory li.journalentry[status="failed"] .document-name {
     border-left-color: #bd362f;
 }
 
@@ -412,7 +416,7 @@
 
 /*#journal-directory li.folder .folder-header h3,
 #journal-directory li.folder > .folder-header .create-folder,
-#journal-directory li.folder > .folder-header .create-entity {
+#journal-directory li.folder > .folder-header .create-document {
     color: #333;
 }*/
 
@@ -425,7 +429,7 @@
 
 #journal-directory li.folder.collapsed > .folder-header:not(.customcolor),
 #journal-directory li.folder.collapsed > .folder-header .create-folder,
-#journal-directory li.folder.collapsed > .folder-header .create-entity {
+#journal-directory li.folder.collapsed > .folder-header .create-document {
     color: #333;
 }
 
@@ -434,7 +438,7 @@
 }
 
 #journal-directory li.folder.collapsed > .folder-header.customcolor .create-folder,
-#journal-directory li.folder.collapsed > .folder-header.customcolor .create-entity {
+#journal-directory li.folder.collapsed > .folder-header.customcolor .create-document {
     color: #CCC;
 }
 
@@ -455,15 +459,15 @@
     border-color: transparent;
 }
 
-#journal-directory .sidebar-tab .directory-list .entity {
+#journal-directory .sidebar-tab .directory-list .document {
     border: none;
 }
 
-#journal-directory .sidebar-tab .directory-list .entity.selected {
+#journal-directory .sidebar-tab .directory-list .document.selected {
     background: rgba(0, 0, 0, 0.03);
 }
 
-#journal-directory .sidebar-tab .directory-list .entity.selected h4 {
+#journal-directory .sidebar-tab .directory-list .document.selected h4 {
     font-weight: bold;
 }
 
@@ -489,11 +493,11 @@
 }
 
 /*
-.journal-sheet .monks-enhanced-journal .content[entity-type="oldentry"] form,
-.journal-sheet .monks-enhanced-journal .content[entity-type="journalentry"] form {
+.journal-sheet .monks-enhanced-journal .content[document-type="oldentry"] form,
+.journal-sheet .monks-enhanced-journal .content[document-type="journalentry"] form {
     padding: 0px 8px;
 }*/
-.monks-journal-sheet .content[entity-type="actor"] form {
+.monks-journal-sheet .content[document-type="actor"] form {
     overflow-y: auto;
 }
 
@@ -620,8 +624,8 @@
 }*/
 
 /*
-.monks-journal-sheet .content[entity-type="journalentry"] .sheet-navigation,
-.monks-journal-sheet .content[entity-type="journalentry"] .tab.picture{
+.monks-journal-sheet .content[document-type="journalentry"] .sheet-navigation,
+.monks-journal-sheet .content[document-type="journalentry"] .tab.picture{
     display: none;
 }*/
 
@@ -826,8 +830,8 @@
     max-width: 175px;
 }
 
-.monks-journal-sheet.sheet .person-container .entity-details,
-.monks-journal-sheet.sheet .place-container .entity-details {
+.monks-journal-sheet.sheet .person-container .document-details,
+.monks-journal-sheet.sheet .place-container .document-details {
     background: var(--faintest-color);
     border-radius: 5px;
     padding: 8px;
@@ -837,8 +841,8 @@
     font-size: 0.8em;
 }
 
-.monks-journal-sheet.sheet .person-container .entity-details ul,
-.monks-journal-sheet.sheet .place-container .entity-details ul {
+.monks-journal-sheet.sheet .person-container .document-details ul,
+.monks-journal-sheet.sheet .place-container .document-details ul {
     margin: 0;
     padding: 0;
     display: flex;
@@ -848,14 +852,14 @@
     list-style: none;
 }
 
-.monks-journal-sheet.sheet .person-container .entity-details ul li,
-.monks-journal-sheet.sheet .place-container .entity-details ul li {
+.monks-journal-sheet.sheet .person-container .document-details ul li,
+.monks-journal-sheet.sheet .place-container .document-details ul li {
     display: flex;
     flex: 0 0 215px;
 }
 
-.monks-journal-sheet.sheet .person-container .tab.details .details .entity-details ul li label,
-.monks-journal-sheet.sheet .place-container .tab.details .details .entity-details ul li label {
+.monks-journal-sheet.sheet .person-container .tab.details .details .document-details ul li label,
+.monks-journal-sheet.sheet .place-container .tab.details .details .document-details ul li label {
     flex: 0 0 60px;
 }
 /*
@@ -876,7 +880,7 @@
     overflow-y: auto;
 }
 
-#journal .entity-name > i, #journal-directory .entity-name > i {
+#journal .document-name > i, #journal-directory .document-name > i {
     margin-right: 8px;
     margin-left: 4px;
     flex: 0 0 15px;
@@ -1658,11 +1662,11 @@
     width: 100%;
 }
 
-.sidebar-tab.directory .directory-item.journal{
+.sidebar-tab.directory .directory-item.journalentry{
     position:relative;
 }
 
-.sidebar-tab.directory .directory-item.journal .permissions {
+.sidebar-tab.directory .directory-item.journalentry .permissions {
     background-color: rgba(0, 0, 0, 0.5);
     position: absolute;
     top: 0px;
@@ -1674,20 +1678,20 @@
     line-height: 14px;
 }
 
-#journal-directory .directory-item.journal .permissions {
+#journal-directory .directory-item.journalentry .permissions {
     background-color: rgba(255, 255, 255, 0.5);
 }
 
-.sidebar-tab.directory .directory-item.journal .permissions i {
+.sidebar-tab.directory .directory-item.journalentry .permissions i {
     font-size: 13px;
     text-shadow: 1px 1px 3px #000;
 }
 
-.sidebar-tab.directory .directory-item.journal .permissions:empty {
+.sidebar-tab.directory .directory-item.journalentry .permissions:empty {
     display: none;
 }
 
-.sidebar-tab.directory .directory-item.journal .permissions div {
+.sidebar-tab.directory .directory-item.journalentry .permissions div {
     width: 14px;
     height: 14px;
     display: inline-block;
@@ -1701,8 +1705,8 @@
     text-shadow: none;
 }
 
-.sidebar-tab.directory .directory-item.journal .permissions i + div,
-.sidebar-tab.directory .directory-item.journal .permissions i + i {
+.sidebar-tab.directory .directory-item.journalentry .permissions i + div,
+.sidebar-tab.directory .directory-item.journalentry .permissions i + i {
     margin-left: 5px;
 }
 
@@ -2003,12 +2007,12 @@ a.inline-request-roll {
     padding-left:0px;
 }
 
-.monks-journal-sheet .checklist-list .entity.item {
+.monks-journal-sheet .checklist-list .document.item {
     padding: 6px;
     line-height: 24px;
 }
 
-.monks-journal-sheet .checklist-list .entity.item:nth-child(even){
+.monks-journal-sheet .checklist-list .document.item:nth-child(even){
     background-color: rgba(0, 0, 0, 0.1);
 }
 
@@ -2150,7 +2154,7 @@ a.picture-link.broken {
     display: inline-block;
 }
 
-.wfrp4e.monks-enhanced-journal #journal-directory li.folder.collapsed > .folder-header .create-entity {
+.wfrp4e.monks-enhanced-journal #journal-directory li.folder.collapsed > .folder-header .create-document {
     color: #dadada;
 }
 
@@ -2162,7 +2166,7 @@ a.picture-link.broken {
     color: #dadada;
 }
 
-.wfrp4e.monks-enhanced-journal .directory-sidebar #journal-directory .directory-list .directory-item.journal {
+.wfrp4e.monks-enhanced-journal .directory-sidebar #journal-directory .directory-list .directory-item.journalentry {
     line-height: 19px;
 }
 
@@ -2263,11 +2267,19 @@ a.picture-link.broken {
     line-height: 1px;
 }
 
-.rippers-ui.monks-enhanced-journal .sidebar-directory .directory-list .entity {
+.rippers-ui.monks-enhanced-journal .sidebar-directory .directory-list .document {
     text-shadow: 1px 2px white;
 }
 
 .pf2e.monks-enhanced-journal .journal-sheet form select {
     display:inline-block;
     margin-top:0px;
+}
+
+.monks-enhanced-journal .nav-button.convert #context-menu{
+    margin-left:-60px;
+}
+
+.monks-enhanced-journal .checklist #context-menu {
+    max-width: 200px;
 }

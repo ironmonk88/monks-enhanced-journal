@@ -35,7 +35,7 @@
         {{#if data.flags.monks-enhanced-journal.actor}}
         <div class="actor-img">
             <div class="quest-source">{{localize 'MonksEnhancedJournal.Source'}}</div>
-            <img src="{{data.flags.monks-enhanced-journal.actor.img}}" data-id="{{data.flags.monks-enhanced-journal.actor.id}}" data-entity="Actor" onerror="$(this).hide();">
+            <img src="{{data.flags.monks-enhanced-journal.actor.img}}" data-id="{{data.flags.monks-enhanced-journal.actor.id}}" data-document="Actor" onerror="$(this).hide();">
             <div style="text-align: center;font-size:12px;">{{data.flags.monks-enhanced-journal.actor.name}}</div>
         </div>
         {{/if}}
@@ -77,7 +77,7 @@
 
                 <ol class="item-list">
                     {{#each objectives}}
-                    <li class="item flexcol " data-id="{{this.id}}" data-container="objectives" data-entity="Objective" draggable="true">
+                    <li class="item flexcol " data-id="{{this.id}}" data-container="objectives" data-document="Objective" draggable="true">
                         <div class="flexrow">
                             <div class="item-name flexrow">
                                 <h4 style="white-space: normal;font-weight:700;">{{this.title}}</h4>
@@ -186,7 +186,7 @@
 
                     <ol class="item-list">
                         {{#each reward.items}}
-                        <li class="item flexrow{{#if this.received}} received{{/if}}" data-id="{{this.id}}" data-uuid="{{this.uuid}}" data-pack="{{this.pack}}" data-container="items" data-entity="Item" draggable="false">
+                        <li class="item flexrow{{#if this.received}} received{{/if}}" data-id="{{this.id}}" data-uuid="{{this.uuid}}" data-pack="{{this.pack}}" data-container="items" data-document="Item" draggable="false">
                             <div class="item-name flexrow">
                                 <div class="item-image" style="background-image: url('{{this.img}}')"></div>
                                 <h4>{{this.name}}</h4>

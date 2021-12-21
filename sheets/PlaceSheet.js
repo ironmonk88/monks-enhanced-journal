@@ -12,8 +12,8 @@ export class PlaceSheet extends EnhancedJournalSheet {
             template: "modules/monks-enhanced-journal/templates/place.html",
             tabs: [{ navSelector: ".tabs", contentSelector: ".sheet-body", initial: "description" }],
             dragDrop: [
-                { dragSelector: ".entity.actor", dropSelector: ".place-container" },
-                { dragSelector: ".entity.item", dropSelector: ".place-container" }],
+                { dragSelector: ".document.actor", dropSelector: ".place-container" },
+                { dragSelector: ".document.item", dropSelector: ".place-container" }],
             scrollY: [".tab.details", ".tab.townsfolk", ".tab.shops", ".description"]
         });
     }
@@ -82,7 +82,7 @@ export class PlaceSheet extends EnhancedJournalSheet {
         return data;
     }
 
-    _entityControls() {
+    _documentControls() {
         let ctrls = [
             { text: '<i class="fas fa-search"></i>', type: 'text' },
             { id: 'search', type: 'input', text: i18n("MonksEnhancedJournal.SearchDescription"), callback: this.enhancedjournal.searchText },
@@ -91,7 +91,7 @@ export class PlaceSheet extends EnhancedJournalSheet {
             { id: 'convert', text: i18n("MonksEnhancedJournal.Convert"), icon: 'fa-clipboard-list', conditional: (game.user.isGM && this.isEditable), callback: () => { } }
         ];
         //this.addPolyglotButton(ctrls);
-        return ctrls.concat(super._entityControls());
+        return ctrls.concat(super._documentControls());
     }
 
     activateListeners(html, enhancedjournal) {

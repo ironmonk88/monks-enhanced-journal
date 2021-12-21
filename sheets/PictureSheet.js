@@ -21,12 +21,12 @@ export class PictureSheet extends EnhancedJournalSheet {
         return "image";
     }
 
-    _entityControls() {
+    _documentControls() {
         let ctrls = [
             { id: 'show', text: i18n("MonksEnhancedJournal.ShowToPlayers"), icon: 'fa-eye', conditional: game.user.isGM, callback: this.enhancedjournal.doShowPlayers },
             { id: 'convert', text: i18n("MonksEnhancedJournal.Convert"), icon: 'fa-clipboard-list', conditional: (game.user.isGM && this.isEditable), callback: () => { } }
         ];
-        return ctrls.concat(super._entityControls());
+        return ctrls.concat(super._documentControls());
     }
 
     _getSubmitData() {

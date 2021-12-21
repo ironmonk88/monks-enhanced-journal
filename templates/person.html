@@ -21,7 +21,7 @@
         {{#if data.flags.monks-enhanced-journal.actor}}
         <div class="actor-img">
             <div class="person-actor">{{localize 'MonksEnhancedJournal.Actor'}}</div>
-            <img src="{{data.flags.monks-enhanced-journal.actor.img}}" data-id="{{data.flags.monks-enhanced-journal.actor.id}}" data-entity="Actor" onerror="$(this).hide();">
+            <img src="{{data.flags.monks-enhanced-journal.actor.img}}" data-id="{{data.flags.monks-enhanced-journal.actor.id}}" data-document="Actor" onerror="$(this).hide();">
             <div style="text-align: center;">{{data.flags.monks-enhanced-journal.actor.name}}</div>
         </div>
         {{/if}}
@@ -38,7 +38,7 @@
         </div>
         <div class="tab details flexcol" data-group="primary" data-tab="details">
             <div class="details flexrow" style="border-bottom: 2px groove #eeede0;">
-                <div class="entity-details">
+                <div class="document-details">
                     <ul>
                         <li {{#unless fields.race.value}} style="display:none;" {{/unless}}>
                             <label>{{localize 'MonksEnhancedJournal.Race'}}</label>
@@ -136,7 +136,7 @@
                         <div class="item-controls flexrow"></div>
                     </li>
                     {{#each actors}}
-                    <li class="item flexrow" data-id="{{this.id}}" data-container="actors" data-entity="Actor" draggable="false">
+                    <li class="item flexrow" data-id="{{this.id}}" data-container="actors" data-document="Actor" draggable="false">
                         <div class="item-name flexrow">
                             <img class="item-image actor-icon" src="{{this.img}}" onerror="this.src='modules/monks-enhanced-journal/assets/person.png'" />
                             <h4>{{this.name}}</h4>

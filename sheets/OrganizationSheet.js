@@ -11,7 +11,7 @@ export class OrganizationSheet extends EnhancedJournalSheet {
             title: i18n("MonksEnhancedJournal.organization"),
             template: "modules/monks-enhanced-journal/templates/organization.html",
             tabs: [{ navSelector: ".tabs", contentSelector: ".sheet-body", initial: "description" }],
-            dragDrop: [{ dragSelector: ".entity.actor", dropSelector: ".organization-container" }],
+            dragDrop: [{ dragSelector: ".document.actor", dropSelector: ".organization-container" }],
             scrollY: [".description"]
         });
     }
@@ -20,7 +20,7 @@ export class OrganizationSheet extends EnhancedJournalSheet {
         return 'organization';
     }
 
-    _entityControls() {
+    _documentControls() {
         let ctrls = [
             { text: '<i class="fas fa-search"></i>', type: 'text' },
             { id: 'search', type: 'input', text: i18n("MonksEnhancedJournal.SearchDescription"), callback: this.enhancedjournal.searchText },
@@ -29,7 +29,7 @@ export class OrganizationSheet extends EnhancedJournalSheet {
             { id: 'convert', text: i18n("MonksEnhancedJournal.Convert"), icon: 'fa-clipboard-list', conditional: (game.user.isGM && this.isEditable), callback: () => { } }
         ];
         //this.addPolyglotButton(ctrls);
-        return ctrls.concat(super._entityControls());
+        return ctrls.concat(super._documentControls());
     }
 
     _canDragDrop(selector) {

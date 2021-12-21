@@ -16,7 +16,7 @@
             <div class="bookmark-bar flexrow">
                 <div class="bookmark-button add-bookmark" title="{{localize 'MonksEnhancedJournal.AddBookmark'}}"><i class="fas fa-star"></i></div>
                 {{#each bookmarks}}
-                <div class="bookmark-button" title="{{this.text}}" data-bookmark-id="{{this.id}}" data-entity-id="{{this.entityId}}"><div><i class="fas {{this.icon}}"></i> {{this.text}}</div></div>
+                <div class="bookmark-button" title="{{this.text}}" data-bookmark-id="{{this.id}}" data-document-id="{{this.entityId}}"><div><i class="fas {{this.icon}}"></i> {{this.text}}</div></div>
                 {{/each}}
             </div>
             <div class="navigation flexrow">

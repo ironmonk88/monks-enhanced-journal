@@ -103,12 +103,12 @@ export class SlideshowSheet extends EnhancedJournalSheet {
         return data;
     }
 
-    _entityControls() {
+    _documentControls() {
         let ctrls = [
             { id: 'add', text: i18n("MonksEnhancedJournal.AddSlide"), icon: 'fa-plus', conditional: game.user.isGM || this.object.isOwner, callback: this.addSlide },
             { id: 'clear', text: i18n("MonksEnhancedJournal.ClearAll"), icon: 'fa-dumpster', conditional: game.user.isGM || this.object.isOwner, callback: this.deleteAll },
          ];
-        ctrls = ctrls.concat(super._entityControls());
+        ctrls = ctrls.concat(super._documentControls());
         return ctrls;
     }
 

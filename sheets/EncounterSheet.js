@@ -14,8 +14,8 @@ export class EncounterSheet extends EnhancedJournalSheet {
             template: "modules/monks-enhanced-journal/templates/encounter.html",
             tabs: [{ navSelector: ".tabs", contentSelector: ".sheet-body", initial: "description" }],
             dragDrop: [
-                { dragSelector: ".entity.actor", dropSelector: ".encounter-body" },
-                { dragSelector: ".entity.item", dropSelector: ".encounter-body" },
+                { dragSelector: ".document.actor", dropSelector: ".encounter-body" },
+                { dragSelector: ".document.item", dropSelector: ".encounter-body" },
                 { dragSelector: ".encounter-monsters .item-list .item .item-image", dropSelector: "null" },
                 { dragSelector: ".encounter-items .item-list .item .item-name", dropSelector: "null" },
                 { dragSelector: ".create-encounter", dropSelector: "null" },
@@ -68,7 +68,7 @@ export class EncounterSheet extends EnhancedJournalSheet {
         return data;
     }
 
-    _entityControls() {
+    _documentControls() {
         let ctrls = [
             { text: '<i class="fas fa-search"></i>', type: 'text' },
             { id: 'search', type: 'input', text: i18n("MonksEnhancedJournal.SearchDescription"), callback: this.enhancedjournal.searchText },
@@ -77,7 +77,7 @@ export class EncounterSheet extends EnhancedJournalSheet {
             { id: 'convert', text: i18n("MonksEnhancedJournal.Convert"), icon: 'fa-clipboard-list', conditional: (game.user.isGM && this.isEditable), callback: () => { } }
         ];
         //this.addPolyglotButton(ctrls);
-        return ctrls.concat(super._entityControls());
+        return ctrls.concat(super._documentControls());
     }
 
     activateListeners(html, enhancedjournal) {
@@ -92,7 +92,7 @@ export class EncounterSheet extends EnhancedJournalSheet {
         //monster
         $('.monster-icon', html).click(this.clickItem.bind(this));
         $('.monster-delete', html).on('click', $.proxy(this._deleteItem, this));
-        html.on('dragstart', ".monster-icon", TextEditor._onDragEntityLink);
+        html.on('dragstart', ".monster-icon", TextEditor._onDragContentLink);
         $('.select-encounter', html).click(this.constructor.selectEncounter.bind(this.object));
 
         //item
@@ -154,32 +154,6 @@ export class EncounterSheet extends EnhancedJournalSheet {
         return flattenObject(data);
     }
 
-    /*
-    changeAssigned(event) {
-        let id = $(event.currentTarget).closest('li').attr('data-id');
-        let items = this.object.data.flags['monks-enhanced-journal'].items;
-        let item = items.find(i => i.id == id);
-        if (item) {
-            item.assigned = $(event.currentTarget).is(':checked');
-            delete item.received;
-            this.object.setFlag('monks-enhanced-journal', 'items', items);
-            //$(event.currentTarget).parent().siblings('.item-received').html('');
-        }
-    }
-
-    changeQuantity(event) {
-        let li = $(event.currentTarget).closest('li');
-        let id = li.attr('data-id');
-        let container = li.attr('data-container');
-
-        let entities = this.object.data.flags['monks-enhanced-journal'][container];
-        let entity = entities.find(i => i.id == id);
-        if (entity) {
-            entity.qty = parseInt($(event.currentTarget).val());
-            this.object.setFlag('monks-enhanced-journal', container, entities);
-        }
-    }*/
-
     _canDragDrop(selector) {
         return game.user.isGM || this.object.isOwner;
     }
@@ -208,7 +182,7 @@ export class EncounterSheet extends EnhancedJournalSheet {
             dragData.id = id;
             dragData.uuid = this.object.uuid;
             dragData.pack = li.dataset.pack;
-            dragData.type = li.dataset.entity;
+            dragData.type = li.dataset.document;
 
             log('Drag Start', dragData);
             MonksEnhancedJournal._dragItem = id;

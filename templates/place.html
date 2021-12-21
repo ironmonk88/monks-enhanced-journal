@@ -29,7 +29,7 @@
     <section class="sheet-body">
         <div class="tab details flexcol active" data-group="primary" data-tab="details">
             <div class="details flexrow" style="border-bottom: 2px groove #eeede0;">
-                <div class="entity-details">
+                <div class="document-details">
                     <ul>
                         <li {{#unless fields.age.value}} style="display:none;"{{/unless}}>
                             <label>{{localize 'MonksEnhancedJournal.Age'}}</label>
@@ -98,7 +98,7 @@
                         <div class="item-controls flexrow"></div>
                     </li>
                     {{#each townsfolk}}
-                    <li class="item flexrow" data-id="{{this.id}}" data-container="actors" data-entity="Actor" draggable="false">
+                    <li class="item flexrow" data-id="{{this.id}}" data-container="actors" data-document="Actor" draggable="false">
                         <div class="item-name flexrow">
                             <img class="item-image actor-icon" src="{{this.img}}" onerror="this.src='modules/monks-enhanced-journal/assets/person.png'" />
                             <h4>{{this.name}}</h4>
@@ -127,7 +127,7 @@
                         <div class="item-controls flexrow"></div>
                     </li>
                     {{#each shops}}
-                    <li class="item flexrow" data-id="{{this.id}}" data-container="shops" data-entity="Shop" draggable="false">
+                    <li class="item flexrow" data-id="{{this.id}}" data-container="shops" data-document="Shop" draggable="false">
                         <div class="item-name flexrow">
                             <img class="item-image shop-icon" src="{{this.img}}" onerror="this.src='modules/monks-enhanced-journal/assets/shop.png'" />
                             <h4>{{this.name}}</h4>

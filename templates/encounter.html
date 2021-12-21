@@ -32,9 +32,9 @@
 
                         <ol class="item-list">
                             {{#each data.flags.monks-enhanced-journal.actors}}
-                            <li class="item flexrow " data-pack="{{this.pack}}" data-id="{{this.id}}" data-container="actors" data-entity="Actor" draggable="false" style="position:relative;">
+                            <li class="item flexrow " data-pack="{{this.pack}}" data-id="{{this.id}}" data-container="actors" data-document="Actor" draggable="false" style="position:relative;">
                                 <div class="item-name flexrow">
-                                    <div class="item-image monster-icon" data-id="{{this.id}}" data-entity="Actor" style="background-image: url('{{this.img}}')" draggable="false"></div>
+                                    <div class="item-image monster-icon" data-id="{{this.id}}" data-document="Actor" style="background-image: url('{{this.img}}')" draggable="false"></div>
                                     <h4>{{this.name}}</h4>
                                 </div>
 
@@ -66,7 +66,7 @@
 
                         <ol class="item-list">
                             {{#each data.flags.monks-enhanced-journal.items}}
-                            <li class="item flexrow{{#if this.received}} received{{/if}}" data-pack="{{this.pack}}" data-id="{{this.id}}" data-uuid="{{this.uuid}}" data-container="items" data-entity="Item" draggable="false">
+                            <li class="item flexrow{{#if this.received}} received{{/if}}" data-pack="{{this.pack}}" data-id="{{this.id}}" data-uuid="{{this.uuid}}" data-container="items" data-document="Item" draggable="false">
                                 <div class="item-name flexrow">
                                     <div class="item-image item-icon" style="background-image: url('{{this.img}}')"></div>
                                     <h4>{{this.name}}</h4>

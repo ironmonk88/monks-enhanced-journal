@@ -22,7 +22,7 @@ export class CheckListSheet extends EnhancedJournalSheet {
             template: "modules/monks-enhanced-journal/templates/checklist.html",
             dragDrop: [{ dragSelector: ".checklist-item", dropSelector: ".checklist-list" }],
             filters: [{ inputSelector: 'input[name="search"]', contentSelector: ".checklist-list" }],
-            contextMenuSelector: ".entity",
+            contextMenuSelector: ".document",
             scrollY: [".checklist-list"]
         });
     }
@@ -123,7 +123,7 @@ export class CheckListSheet extends EnhancedJournalSheet {
 
      _onSearchFilter(event, query, rgx, html) {
         const isSearch = !!query;
-        let entityIds = new Set();
+        let documentIds = new Set();
         let folderIds = new Set();
 
         // Match documents and folders
@@ -132,7 +132,7 @@ export class CheckListSheet extends EnhancedJournalSheet {
             // Match document names
             for ( let d of this.items ) {
                 if ( rgx.test(SearchFilter.cleanQuery(d.data.text)) ) {
-                    entityIds.add(d.id);
+                    documentIds.add(d.id);
                     if ( d.data.folder ) folderIds.add(d.data.folder);
                 }
             }
@@ -153,8 +153,8 @@ export class CheckListSheet extends EnhancedJournalSheet {
         for ( let el of html.querySelectorAll(".checklist-item") ) {
 
             // Entities
-            if (el.classList.contains("entity")) {
-                el.style.display = (!isSearch || entityIds.has(el.dataset.entityId)) ? "flex" : "none";
+            if (el.classList.contains("document")) {
+                el.style.display = (!isSearch || documentIds.has(el.dataset.entityId)) ? "flex" : "none";
             }
 
             // Folders
@@ -190,7 +190,7 @@ export class CheckListSheet extends EnhancedJournalSheet {
         if (game.user.isGM) html.find('.create-folder').click(ev => this._onCreateFolder(ev));
 
         // Entry-level events
-        checklist.on("dblclick", ".entity.item", this._onClickEntityName.bind(this));
+        checklist.on("dblclick", ".document.item", this._onClickDocumentName.bind(this));
         checklist.on("click", ".folder-header", this._toggleFolder.bind(this));
         const dh = this._onDragHighlight.bind(this);
         html.find(".folder").on("dragenter", dh).on("dragleave", dh);
@@ -203,11 +203,11 @@ export class CheckListSheet extends EnhancedJournalSheet {
         }).forEach(f => f.bind(html[0]));
     }
 
-    _onClickEntityName(event) {
+    _onClickDocumentName(event) {
         event.preventDefault();
         const element = event.currentTarget;
         let li = $(element).closest('li')[0];
-        let item = this.items.find(i => i.id === li.dataset.entityId);
+        let item = this.items.find(i => i.id === li.dataset.documentId);
 
         //edit the item
         const options = { width: 520, left: window.innerWidth - 630, top: li.offsetTop, type: 'item' };
@@ -220,7 +220,7 @@ export class CheckListSheet extends EnhancedJournalSheet {
         let li = $(element).closest('li')[0];
 
         let items = duplicate(this.object.data.flags['monks-enhanced-journal']?.items || []);
-        let item = items.find(i => i.id == li.dataset.entityId);
+        let item = items.find(i => i.id == li.dataset.documentId);
 
         if (item) {
             item.checked = $(element).prop('checked');
@@ -280,8 +280,8 @@ export class CheckListSheet extends EnhancedJournalSheet {
                     data.id = makeid();
                     collection.push(data);
                 } else {
-                    let entity = collection.find(i => i.id == data.id);
-                    entity = mergeObject(entity, data);
+                    let document = collection.find(i => i.id == data.id);
+                    document = mergeObject(document, data);
                 }
 
                 that.object.setFlag('monks-enhanced-journal', (options.type == 'folder' ? 'folders' : 'items'), collection);
@@ -318,7 +318,7 @@ export class CheckListSheet extends EnhancedJournalSheet {
         const isFolder = li.classList.contains("folder");
         const dragData = isFolder ?
             { type: "Folder", id: li.dataset.folderId } :
-            { type: "Item", id: li.dataset.entityId };
+            { type: "Item", id: li.dataset.documentId };
         event.dataTransfer.setData("text/plain", JSON.stringify(dragData));
         this._dragType = dragData.type;
     }
@@ -390,7 +390,7 @@ export class CheckListSheet extends EnhancedJournalSheet {
         if (target == undefined)
             delete item.folder;
         else {
-            if (data.id === target.dataset.entityId) return; // Don't drop on yourself
+            if (data.id === target.dataset.documentId) return; // Don't drop on yourself
 
             if ($(target).hasClass('folder')) {
                 //if this is dropping on a folder then add to the end of a folder
@@ -402,42 +402,13 @@ export class CheckListSheet extends EnhancedJournalSheet {
                 //if this is dropping on an item...
                 if (item.folder != closestFolderId)
                     item.folder = closestFolderId;
-                to = items.findIndex(a => a.id == target.dataset.entityId);
+                to = items.findIndex(a => a.id == target.dataset.documentId);
             }
         }
 
         if (from != to)
             items.splice(to, 0, items.splice(from, 1)[0]);
         await this.object.setFlag('monks-enhanced-journal', 'items', items);
-
-        /*
-
-
-
-
-
-        // Sort relative to another Document
-        const sortData = { sortKey: "sort", sortBefore: true };
-        const isRelative = target && target.dataset.entityId;
-        if (isRelative) {
-            if (document.id === target.dataset.entityId) return; // Don't drop on yourself
-            const targetDocument = this.items.find(i => i.id == target.dataset.entityId);
-            sortData.target = targetDocument;
-            sortData.folderId = targetDocument.data.folder;
-        }
-
-        // Sort relative to the closest Folder
-        else {
-            sortData.target = null;
-            sortData.folderId = closestFolderId;
-        }
-
-        // Determine siblings and perform sort
-        sortData.siblings = collection.filter(doc => {
-            return (doc.data.folder === sortData.folderId) && (doc.id !== data.id);
-        });
-        sortData.updateData = { folder: sortData.folderId };
-        return document.sortRelative(sortData);*/
     }
 
     async _handleDroppedFolder(target, data) {
@@ -595,7 +566,7 @@ export class CheckListSheet extends EnhancedJournalSheet {
                 icon: '<i class="fas fa-edit"></i>',
                 condition: game.user.isGM,
                 callback: li => {
-                    const item = that.items.find(i => i.id == li[0].dataset.entityId);
+                    const item = that.items.find(i => i.id == li[0].dataset.documentId);
                     if (!item) return;
                     const options = { top: li.offsetTop, left: window.innerWidth - 310 - FolderConfig.defaultOptions.width, type: 'item' };
                     this.createDialog(item.data, options);
@@ -606,7 +577,7 @@ export class CheckListSheet extends EnhancedJournalSheet {
                 icon: '<i class="fas fa-trash"></i>',
                 condition: () => game.user.isGM,
                 callback: li => {
-                    const item = that.items.find(i => i.id == li[0].dataset.entityId);
+                    const item = that.items.find(i => i.id == li[0].dataset.documentId);
                     if (!item) return;
                     return Dialog.confirm({
                         title: `Delete Item`,
@@ -630,7 +601,7 @@ export class CheckListSheet extends EnhancedJournalSheet {
                 condition: () => game.user.isGM,
                 callback: li => {
                     let items = (that.object.data.flags['monks-enhanced-journal'].items || []);
-                    const original = items.find(i => i.id == li.data("entityId"));
+                    const original = items.find(i => i.id == li.data("documentId"));
                     let newItem = duplicate(original);
                     items.push(newItem);
                     that.object.setFlag('monks-enhanced-journal', 'items', items);

@@ -17,8 +17,8 @@ export class ShopSheet extends EnhancedJournalSheet {
             template: "modules/monks-enhanced-journal/templates/shop.html",
             tabs: [{ navSelector: ".tabs", contentSelector: ".sheet-body", initial: "description" }],
             dragDrop: [
-                { dragSelector: ".entity.actor", dropSelector: ".shop-container" },
-                { dragSelector: ".entity.item", dropSelector: ".shop-container" },
+                { dragSelector: ".document.actor", dropSelector: ".shop-container" },
+                { dragSelector: ".document.item", dropSelector: ".shop-container" },
                 { dragSelector: ".shop-items .item-list .item .item-name", dropSelector: "null" }],
             scrollY: [".shop-items", ".description"]
         });
@@ -130,7 +130,7 @@ export class ShopSheet extends EnhancedJournalSheet {
         super.render(force, options);
     }
 
-    _entityControls() {
+    _documentControls() {
         let ctrls = [
             { text: '<i class="fas fa-search"></i>', type: 'text' },
             { id: 'search', type: 'input', text: i18n("MonksEnhancedJournal.SearchDescription"), callback: this.enhancedjournal.searchText },
@@ -139,7 +139,7 @@ export class ShopSheet extends EnhancedJournalSheet {
             { id: 'convert', text: i18n("MonksEnhancedJournal.Convert"), icon: 'fa-clipboard-list', conditional: (game.user.isGM && this.isEditable), callback: () => { } }
         ];
         //this.addPolyglotButton(ctrls);
-        return ctrls.concat(super._entityControls());
+        return ctrls.concat(super._documentControls());
     }
 
     activateListeners(html, enhancedjournal) {
@@ -465,7 +465,6 @@ export class ShopSheet extends EnhancedJournalSheet {
                 condition: () => game.user.isGM,
                 callback: li => {
                     const id = li.data("id");
-                    //const slide = this.object.data.flags["monks-enhanced-journal"].slides.get(li.data("entityId"));
                     Dialog.confirm({
                         title: `${game.i18n.localize("SIDEBAR.Delete")} Actor Link`,
                         content: i18n("MonksEnhancedJournal.ConfirmRemoveLink"),

@@ -1,13 +1,16 @@
+# Version 1.0.36 
+
+Updating the code to make it v9 compliant.
+
 # Version 1.0.35
 
 Fixed issue with Person sheet.  Rolle value wasn't saving due to a spelling mistake in the code.
 
 Fixed the positioning of the Note HUD.
 
-Cleaned up the NOte drop down to select a journal.
+Cleaned up the Note drop down to select a journal.
 
-Fixed an error when trying to open the Note HUD and there wasn't a valid JOurnal Entry attached
-
+Fixed an error when trying to open the Note HUD and there wasn't a valid Journal Entry attached
 
 # Version 1.0.34
 

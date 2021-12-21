@@ -148,8 +148,8 @@ export class EnhancedJournalSheet extends JournalSheet {
         }
 
         if (data.type == 'JournalEntry' && this.enhancedjournal) {
-            let entity = game.journal.find(j => j.id == data.id);
-            this.enhancedjournal.open(entity);
+            let document = game.journal.find(j => j.id == data.id);
+            this.enhancedjournal.open(document);
         }
     }
 
@@ -167,15 +167,15 @@ export class EnhancedJournalSheet extends JournalSheet {
 
         if (enhancedjournal) {
             html.find('.recent-link').click(async (ev) => {
-                let uuid = ev.currentTarget.dataset.entityUuid;
-                let id = ev.currentTarget.dataset.entityId;
-                let entity;
+                let uuid = ev.currentTarget.dataset.documentUuid;
+                let id = ev.currentTarget.dataset.documentId;
+                let document;
                 if (uuid)
-                    entity = await fromUuid(uuid);
+                    document = await fromUuid(uuid);
                 else
-                    entity = game.journal.find(j => j.id == id);
-                if (entity)
-                    enhancedjournal.open(entity);
+                    document = game.journal.find(j => j.id == id);
+                if (document)
+                    enhancedjournal.open(document);
             });
 
             for (let dragdrop of enhancedjournal._dragDrop)
@@ -318,13 +318,13 @@ export class EnhancedJournalSheet extends JournalSheet {
             return;
 
         if (this.type == 'quest') {
-            $(`li[data-entity-id="${this.object.id}"]`, '#journal,#journal-directory').attr('status', formData.flags['monks-enhanced-journal'].status);
+            $(`li[data-document-id="${this.object.id}"]`, '#journal,#journal-directory').attr('status', formData.flags['monks-enhanced-journal'].status);
         }
 
         if (!this.isEditable && foundry.utils.getProperty(formData, 'flags.monks-enhanced-journal.' + game.user.id)) {
             //need to have the GM update this, but only the user notes
             MonksEnhancedJournal.emit("saveUserData", {
-                entityId: this.object.id,
+                documentId: this.object.id,
                 userId: game.user.id,
                 userdata: formData.flags["monks-enhanced-journal"][game.user.id]
             });
@@ -333,7 +333,7 @@ export class EnhancedJournalSheet extends JournalSheet {
             return this.object.update(formData);
     }
 
-    _entityControls() {
+    _documentControls() {
         let ctrls = [];
         if (this.object.id)
             ctrls.push({ id: 'locate', text: i18n("SIDEBAR.JumpPin"), icon: 'fa-crosshairs', conditional: game.user.isGM, callback: this.enhancedjournal.findMapEntry.bind(this) });
@@ -342,13 +342,13 @@ export class EnhancedJournalSheet extends JournalSheet {
         return ctrls;
     }
 
-    open(entity) {
-        if (entity) {
+    open(document) {
+        if (document) {
             //if (game.user.isGM || actor.testUserPermission(game.user, "OBSERVER")) {
             if (this.enhancedjournal)
-                this.enhancedjournal.open(entity, event.shiftKey);
+                this.enhancedjournal.open(document, event.shiftKey);
             else
-                entity.sheet.render(true);
+                document.sheet.render(true);
         }
     }
 
@@ -512,7 +512,7 @@ export class EnhancedJournalSheet extends JournalSheet {
     }
 
     async getEntity(data) {
-        let entity;
+        let document;
         if (data.pack) {
             const pack = game.packs.get(data.pack);
             let id = data.id;
@@ -521,23 +521,23 @@ export class EnhancedJournalSheet extends JournalSheet {
                 const entry = pack.index.find(i => (i._id === data.lookup) || (i.name === data.lookup));
                 id = entry.id;
             }
-            entity = id ? await pack.getDocument(id) : null;
+            document = id ? await pack.getDocument(id) : null;
         } else {
-            entity = game.collections.get(data.type).get(data.id);
-            if (entity.documentName === "Scene" && entity.journal)
-                entity = entity.journal;
-            if (!entity.testUserPermission(game.user, "LIMITED")) {
-                return ui.notifications.warn(`You do not have permission to view this ${entity.documentName} sheet.`);
+            document = game.collections.get(data.type).get(data.id);
+            if (document.documentName === "Scene" && document.journal)
+                document = document.journal;
+            if (!document.testUserPermission(game.user, "LIMITED")) {
+                return ui.notifications.warn(`You do not have permission to view this ${document.documentName} sheet.`);
             }
         }
 
-        let result = { entity: entity, data: {} };
-        if (entity) {
+        let result = { document: document, data: {} };
+        if (document) {
             result.data = {
-                id: entity.id,
-                uuid: entity.uuid,
-                img: entity.img || entity.data?.img,
-                name: entity.name,
+                id: document.id,
+                uuid: document.uuid,
+                img: document.img || document.data?.img,
+                name: document.name,
                 qty: 1
             };
 
@@ -634,42 +634,5 @@ export class EnhancedJournalSheet extends JournalSheet {
             }
             object.update({ permission: permissions });
         }
-        /*
-        if (this.entitytype == 'picture') {
-            game.socket.emit("shareImage", {
-                image: this.object.data.img,
-                title: this.object.name,
-                uuid: this.object.uuid
-            });
-            ui.notifications.info(game.i18n.format("JOURNAL.ActionShowSuccess", {
-                mode: "image",
-                title: this.object.name,
-                which: "all"
-            }));
-        } else {
-            super._onShowPlayers(event);
-        }*/
     }
-
-    /*
-     * let checklang = !game.user.isGM && this.object.permission < CONST.ENTITY_PERMISSIONS.OWNER;
-            let known_languages = new Set();
-            if (checklang)
-                [known_languages] = MonksEnhancedJournal.polyglot.getUserLanguages([game.user.character]);
-            let userunes = !game.user.isGM || (this.object && !this.object.ignore && (this.object.getFlag('monks-enhanced-journal', 'use-runes') != undefined ? this.object.getFlag('monks-enhanced-journal', 'use-runes') : setting('use-runes')));
-            if (userunes) {
-                $('span.polyglot-journal', this.element).each(function () {
-                    const lang = this.dataset.language;
-                    if (lang) {
-                        const known = known_languages.has(lang);
-                        if (checklang && known)
-                            return; //Do not show the runes if the language is known and it's not the GM
-
-                        $(this).data({ 'text': this.textContent, 'font': this.style.font, 'converted': true });
-                        this.textContent = MonksEnhancedJournal.polyglot.scrambleString(this.textContent, game.settings.get('polyglot', 'useUniqueSalt') ? that.object.id : lang);
-                        this.style.font = MonksEnhancedJournal.polyglot._getFontStyle(lang);
-                    }
-                });
-            }
-    */
 }

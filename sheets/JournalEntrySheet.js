@@ -49,7 +49,7 @@ export class JournalEntrySheet extends EnhancedJournalSheet {
         this._tabs[0].active = journaltype;
     }
 
-    _entityControls() {
+    _documentControls() {
         let ctrls = [
             { text: '<i class="fas fa-search"></i>', type: 'text' },
             { id: 'search', type: 'input', text: i18n("MonksEnhancedJournal.SearchDescription"), callback: this.enhancedjournal.searchText },
@@ -60,7 +60,7 @@ export class JournalEntrySheet extends EnhancedJournalSheet {
         ];
 
         //this.addPolyglotButton(ctrls);
-        return ctrls.concat(super._entityControls());
+        return ctrls.concat(super._documentControls());
     }
 
     activateListeners(html, enhancedjournal) {

@@ -15,12 +15,7 @@ export class EnhancedJournal extends Application {
     constructor(object, options = {}) {
         super(options);
 
-        this.tabs = duplicate(game.user.getFlag('monks-enhanced-journal', 'tabs') || [{ "id": makeid(), "text": i18n("MonksEnhancedJournal.NewTab"), "active": true, "history": [] }])
-            /*.map(t => {
-            if(t.entityId != undefined)
-                t.history = [t.entityId];
-            return t;
-        });*/
+        this.tabs = duplicate(game.user.getFlag('monks-enhanced-journal', 'tabs') || [{ "id": makeid(), "text": i18n("MonksEnhancedJournal.NewTab"), "active": true, "history": [] }]);
         this.tabs.active = (findone = true) => {
             let tab = this.tabs.find(t => t.active);
             if (findone) {
@@ -115,7 +110,9 @@ export class EnhancedJournal extends Application {
             tree: ui.journal.tree,
             canCreate: cfg.documentClass.canUserCreate(game.user),
             sidebarIcon: cfg.sidebarIcon,
-            user: game.user
+            user: game.user,
+            label: "Entry",
+            labelPlural: "Journal Entries"
         };
 
         let html = await renderTemplate(template, data);
@@ -140,22 +137,6 @@ export class EnhancedJournal extends Application {
 
     async renderSubSheet() {
         try {
-            /*
-            if (this.object) {
-                if (!this.object.compendium && !this.object.ignore && !this.object.testUserPermission(game.user, this.options.viewPermission)) {
-                    if (!force) return; // If rendering is not being forced, fail silently
-                    const err = game.i18n.localize("SHEETS.EntitySheetPrivate");
-                    ui.notifications.warn(err);
-                    return console.warn(err);
-                }
-    
-                // Update editable permission
-                options.editable = options.editable ?? this.object.isOwner;
-    
-                // Register the active Application with the referenced Documents
-                this.object.apps[this.appId] = this;
-            }*/
-
             let currentTab = this.tabs.active();
             if (!currentTab.entity)
                 currentTab.entity = await this.findEntity(currentTab.entityId);
@@ -332,14 +313,14 @@ export class EnhancedJournal extends Application {
         editor.button.style.display = "";
 
         const owner = this.object.isOwner;
-        const content = TextEditor.enrichHTML(this.object.data.content, { secrets: owner, entities: true });
+        const content = TextEditor.enrichHTML(this.object.data.content, { secrets: owner, documents: true });
         $('.editor-content[data-edit="content"]', this.element).html(content);
     }
 
     activateControls(html) {
         let ctrls = [];
-        if (this.subsheet._entityControls)
-            ctrls = this.subsheet._entityControls();
+        if (this.subsheet._documentControls)
+            ctrls = this.subsheet._documentControls();
 
         let that = this;
 
@@ -385,8 +366,8 @@ export class EnhancedJournal extends Application {
         }
     }
 
-    get getEntityTypes() {
-        return mergeObject(MonksEnhancedJournal.getEntityTypes(), {
+    get getDocumentTypes() {
+        return mergeObject(MonksEnhancedJournal.getDocumentTypes(), {
             blank: EnhancedJournalSheet
         });
     }
@@ -1192,13 +1173,13 @@ export class EnhancedJournal extends Application {
         const entries = directory.find(".directory-item");
 
         // Directory-level events
-        html.find('.create-entity').click(ev => ui.journal._onCreateDocument(ev));
+        html.find('.create-document').click(ev => ui.journal._onCreateDocument(ev));
         html.find('.collapse-all').click(ui.journal.collapseAll.bind(this));
         html.find(".folder .folder .folder .create-folder").remove(); // Prevent excessive folder nesting
         if (game.user.isGM) html.find('.create-folder').click(ev => ui.journal._onCreateFolder(ev));
 
         // Entry-level events
-        directory.on("click", ".entity-name", ui.journal._onClickEntityName.bind(ui.journal));
+        directory.on("click", ".document-name", ui.journal._onClickDocumentName.bind(ui.journal));
         directory.on("click", ".folder-header", ui.journal._toggleFolder.bind(this));
         //this._contextMenu(html);
 

@@ -51,7 +51,7 @@ export class MonksEnhancedJournal {
     constructor() {
     }
 
-    static getEntityTypes() {
+    static getDocumentTypes() {
         return {
             checklist: CheckListSheet,
             encounter: EncounterSheet,
@@ -99,23 +99,6 @@ export class MonksEnhancedJournal {
         //MonksEnhancedJournal._oldSheetClass = CONFIG.JournalEntry.sheetClass;
         //CONFIG.JournalEntry.sheetClass = EnhancedJournalSheet;
 
-        let types = MonksEnhancedJournal.getEntityTypes();
-        let labels = MonksEnhancedJournal.getTypeLabels();
-
-        for (let [k, v] of Object.entries(labels)) {
-            //if (k != 'base') {
-            Journal.registerSheet?.("monks-enhanced-journal", types[k] || JournalEntrySheet, {
-                types: [k],
-                makeDefault: true,
-                label: i18n(v)
-            });
-            //}
-        }
-        CONFIG.JournalEntry.sheetClasses.base.JournalEntry.default = false;
-
-        game.system.entityTypes.JournalEntry = game.system.entityTypes.JournalEntry.concat(Object.keys(types)).sort();
-        CONFIG.JournalEntry.typeLabels = mergeObject((CONFIG.JournalEntry.typeLabels || {}), labels);
-
         if (!(CONFIG.TinyMCE.content_css instanceof Array))
             CONFIG.TinyMCE.content_css = [CONFIG.TinyMCE.content_css];
         CONFIG.TinyMCE.content_css.push('modules/monks-enhanced-journal/css/editor.css');
@@ -156,67 +139,12 @@ export class MonksEnhancedJournal {
             canvas.hud.note.clear();
         }
 
-        /*
-        let oldEntryContextOptions = ActorDirectory.prototype._getEntryContextOptions;
-        ActorDirectory.prototype._getEntryContextOptions = function () {
-            const options = oldEntryContextOptions.call(this);
-
-            const directory = this;
-            return [
-                {
-                    name: "Assign Items to this Actor",
-                    icon: '<i class="fas fa-suitcase"></i>',
-                    condition: li => {
-                        return game.user.idGM;
-                    },
-                    callback: li => {
-                        game.settings.set("monks-enhanced-journal", "assign-actor", li.data("entityId"));
-                        directory.render(true);
-                    }
-                }
-            ].concat(options);
-        }*/
-
-        /*
-        CONFIG.JournalEntry.noteIcons = mergeObject(CONFIG.JournalEntry.noteIcons, {
-            "One": "modules/monks-enhanced-journal/assets/tile_1.png"
-        });*/
-
-        /*
-        let noteOptions = NoteConfig.defaultOptions;
-        Object.defineProperty(NoteConfig, 'defaultOptions', {
-            get: function () {
-                noteOptions.template = "modules/monks-enhanced-journal/templates/note-config.html";
-                return noteOptions;
-            }
-        });
-
-        let oldGetData = NoteConfig.prototype.getData;
-        NoteConfig.prototype.getData = function (options) {
-            let data = oldGetData.call(this, options);
-
-            function getFolders(folders) {
-                return folders.sort((a, b) => { return a.data.sort < b.data.sort ? -1 : a.data.sort > b.data.sort ? 1 : 0; }).map(f => {
-                    let entries = f.content.map(e => { return { key: e.id, name: e.name } });
-                    let folders = getFolders(f.children);
-                    return { text: f.name, folders: folders, entries: entries };
-                });
-            }
-
-            let folders = getFolders(game.journal.directory.folders.filter(f => f.parentFolder == null));
-            let entries = game.journal.contents.filter(j => j.folder == null).map(j => { return { key: j.id, name: j.name } });
-
-            data.entries = { folders: folders, entries: entries };
-
-            return data;
-        }*/
-
-        let clickEntityName = function (wrapped, ...args) {
+        let clickDocumentName = function (wrapped, ...args) {
             let event = args[0];
             event.preventDefault();
             const element = event.currentTarget;
-            const entityId = element.parentElement.dataset.entityId;
-            const entry = this.constructor.collection.get(entityId);
+            const documentId = element.parentElement.dataset.documentId;
+            const entry = this.constructor.collection.get(documentId);
 
             if (entry.data?.flags['monks-enhanced-journal']?.type)
                 entry.data.type = entry.data?.flags['monks-enhanced-journal']?.type;
@@ -228,16 +156,16 @@ export class MonksEnhancedJournal {
         }
 
         if (game.modules.get("lib-wrapper")?.active) {
-            libWrapper.register("monks-enhanced-journal", "JournalDirectory.prototype._onClickEntityName", clickEntityName, "MIXED");
+            libWrapper.register("monks-enhanced-journal", "JournalDirectory.prototype._onClickDocumentName", clickDocumentName, "MIXED");
         } else {
-            const oldClickEntityName = JournalDirectory.prototype._onClickEntityName;
-            JournalDirectory.prototype._onClickEntityName = function () {
-                return clickEntityName.call(this, oldClickEntityName.bind(this), ...arguments);
+            const oldClickDocumentName = JournalDirectory.prototype._onClickDocumentName;
+            JournalDirectory.prototype._onClickDocumentName = function () {
+                return clickDocumentName.call(this, oldClickDocumentName.bind(this), ...arguments);
             }
         }
 
         if (game.modules.get("lib-wrapper")?.active)
-            libWrapper.ignore_conflicts("monks-enhanced-journal", "monks-active-tiles", "JournalDirectory.prototype._onClickEntityName");
+            libWrapper.ignore_conflicts("monks-enhanced-journal", "monks-active-tiles", "JournalDirectory.prototype._onClickDocumentName");
 
         let oldRenderPopout = JournalDirectory.prototype.renderPopout;
         JournalDirectory.prototype.renderPopout = function () {
@@ -289,7 +217,7 @@ export class MonksEnhancedJournal {
 
             let text = this._getTextNodes(html);
 
-            if (options.entities) {
+            if (options.documents) {
                 const rgxe = new RegExp(`@(Picture)\\[([^\\]]+)\\](?:{([^}]+)})?`, 'g');
                 this._replaceTextContent(text, rgxe, MonksEnhancedJournal._createPictureLink);
             }
@@ -305,7 +233,7 @@ export class MonksEnhancedJournal {
         TextEditor.prototype.constructor._onClickContentLink = async function (event) {
             event.preventDefault();
             const a = event.currentTarget;
-            let document = null;
+            let doc = null;
             let id = a.dataset.id;
 
             // Target 1 - Compendium Link
@@ -319,41 +247,51 @@ export class MonksEnhancedJournal {
                         delete a.dataset.lookup;
                     }
                 }
-                document = id ? await pack.getDocument(id) : null;
+                doc = id ? await pack.getDocument(id) : null;
             }
 
-            // Target 2 - World Entity Link
+            // Target 2 - PlaylistSound Link
+            else if (a.dataset.soundId) {
+                const playlist = game.playlists.get(a.dataset.playlistId);
+                doc = playlist?.sounds.get(a.dataset.soundId);
+            }
+
+            // Target 3 - World Document Link
             else {
                 const collection = game.collections.get(a.dataset.entity);
                 if (!collection)
                     return;
-                document = collection.get(id);
-                if ((document.documentName === "Scene") && document.journal) document = document.journal;
-                if (!document.testUserPermission(game.user, "LIMITED")) {
-                    return ui.notifications.warn(`You do not have permission to view this ${document.documentName} sheet.`);
+                doc = collection.get(id);
+                if (!doc) return;
+                if ((doc.documentName === "Scene") && doc.journal) doc = doc.journal;
+                if (!doc.testUserPermission(game.user, "LIMITED")) {
+                    return ui.notifications.warn(`You do not have permission to view this ${doc.documentName} sheet.`);
                 }
             }
-            if (!document) return;
+            if (!doc) return;
 
             // Action 1 - Execute an Action
-            if (document.documentName === "Macro") {
-                if (!document.testUserPermission(game.user, "LIMITED")) {
-                    return ui.notifications.warn(`You do not have permission to use this ${document.documentName}.`);
+            if (doc.documentName === "Macro") {
+                if (!doc.testUserPermission(game.user, "LIMITED")) {
+                    return ui.notifications.warn(`You do not have permission to use this ${doc.documentName}.`);
                 }
-                return document.execute();
+                return doc.execute();
             }
 
-            // Action 2 - Render the Entity sheet
-            if (document.documentName == 'Actor' || document.documentName == 'JournalEntry') {
-                if (event.altKey || setting('open-outside') || !MonksEnhancedJournal.openJournalEntry(document, { newtab: event.ctrlKey })) {
-                    return document.sheet.render(true);
+            // Action 2 - Play the sound
+            else if (doc.documentName === "PlaylistSound") return TextEditor._onPlaySound(doc);
+
+            // Action 3 - Render the Entity sheet
+            if (doc.documentName == 'Actor' || doc.documentName == 'JournalEntry') {
+                if (event.altKey || setting('open-outside') || !MonksEnhancedJournal.openJournalEntry(doc, { newtab: event.ctrlKey })) {
+                    return doc.sheet.render(true);
                 }
             }
             else {
-                if (document.documentName === "Scene")
+                if (doc.documentName === "Scene")
                     game.scenes.get(id).view();
                 else
-                    return document.sheet.render(true);
+                    return doc.sheet.render(true);
             }
         }
         /*
@@ -466,7 +404,7 @@ export class MonksEnhancedJournal {
             });
         }
 
-        EntitySheetConfig.prototype._updateObject = async function (event, formData) {
+        DocumentSheetConfig.prototype._updateObject = async function (event, formData) {
             event.preventDefault();
             const original = this.getData({});
 
@@ -481,11 +419,12 @@ export class MonksEnhancedJournal {
             // Update world settings
             if (game.user.isGM && (formData.defaultClass !== original.defaultClass)) {
                 const setting = await game.settings.get("core", "sheetClasses") || {};
-                foundry.utils.mergeObject(setting, { [`${this.object.documentName}.${this.object.data.type}`]: formData.defaultClass });
+                const type = this.object.data.type || CONST.BASE_DOCUMENT_TYPE;
+                foundry.utils.mergeObject(setting, { [`${this.object.documentName}.${type}`]: formData.defaultClass });
                 await game.settings.set("core", "sheetClasses", setting);
             }
 
-            // Update the Entity-specific override
+            // Update the document-specific override
             if (formData.sheetClass !== original.sheetClass) {
                 await this.object.setFlag("core", "sheetClass", formData.sheetClass);
             }
@@ -564,6 +503,25 @@ export class MonksEnhancedJournal {
         SceneNavigation._getContextMenuOptions
 
         Handlebars.registerHelper({ selectGroups: MonksEnhancedJournal.selectGroups });
+    }
+
+    static registerSheetClasses() {
+        let types = MonksEnhancedJournal.getDocumentTypes();
+        let labels = MonksEnhancedJournal.getTypeLabels();
+
+        for (let [k, v] of Object.entries(labels)) {
+            if (CONFIG.JournalEntry.sheetClasses[k] == undefined)
+                CONFIG.JournalEntry.sheetClasses[k] = {};
+            Journal.registerSheet?.("monks-enhanced-journal", types[k] || JournalEntrySheet, {
+                types: [k],
+                makeDefault: true,
+                label: i18n(v)
+            });
+        }
+        //CONFIG.JournalEntry.sheetClasses.base.JournalEntry.default = false;
+
+        game.system.documentTypes.JournalEntry = game.system.documentTypes.JournalEntry.concat(Object.keys(types)).sort();
+        CONFIG.JournalEntry.typeLabels = mergeObject((CONFIG.JournalEntry.typeLabels || {}), labels);
     }
 
     static showAsChatBubble(object, journal) {
@@ -765,6 +723,8 @@ export class MonksEnhancedJournal {
     static async ready() {
         game.socket.on(MonksEnhancedJournal.SOCKET, MonksEnhancedJournal.onMessage);
 
+        MonksEnhancedJournal.registerSheetClasses();
+
         for (let entry of game.journal) {
             if (entry.data?.flags['monks-enhanced-journal']?.type) {
                 let type = entry.data?.flags['monks-enhanced-journal']?.type;
@@ -843,11 +803,11 @@ export class MonksEnhancedJournal {
 
     static saveUserData(data) {
         if (game.user.isGM) {
-            let entity = game.journal.get(data.entityId);
+            let document = game.journal.get(data.entityId);
             let update = {};
             update["flags.monks-enhanced-journal." + data.userId] = data.userdata;
 
-            entity.update(update);
+            document.update(update);
         }
     }
 
@@ -1052,33 +1012,33 @@ export class MonksEnhancedJournal {
                 }
             });
         }
-        $('.entity.journal', html).each(function () {
-            let id = this.dataset.entityId;
-            let entry = game.journal.get(id);
-            let type = entry.getFlag('monks-enhanced-journal', 'type');// || (entry.data.img != "" && entry.data.content == "" ? 'picture' : 'journalentry'); //we'll add the picture later
+        $('.document.journalentry', html).each(function () {
+            let id = this.dataset.documentId;
+            let document = game.journal.get(id);
+            let type = document.getFlag('monks-enhanced-journal', 'type');// || (entry.data.img != "" && entry.data.content == "" ? 'picture' : 'journalentry'); //we'll add the picture later
             let icon = MonksEnhancedJournal.getIcon(type);
 
-            if ($('.entity-name .journal-type', this).length)
-                $('.entity-name .journal-type', this).attr('class', 'journal-type fas fa-fw ' + icon);
+            if ($('.document-name .journal-type', this).length)
+                $('.document-name .journal-type', this).attr('class', 'journal-type fas fa-fw ' + icon);
             else
-                $('.entity-name', this).prepend($('<i>').addClass('journal-type fas fa-fw ' + icon));
+                $('.document-name', this).prepend($('<i>').addClass('journal-type fas fa-fw ' + icon));
 
             if (type == 'quest') {
                 //let permission = entry.data.permission.default;
                 //let completed = entry.getFlag('monks-enhanced-journal', 'completed');
-                let status = entry.getFlag('monks-enhanced-journal', 'status') || (entry.getFlag('monks-enhanced-journal', 'completed') ? 'completed' : 'inactive');
+                let status = document.getFlag('monks-enhanced-journal', 'status') || (document.getFlag('monks-enhanced-journal', 'completed') ? 'completed' : 'inactive');
                 $(this).attr('status', status);
             }
 
-            $('.entity-name .permissions', this).remove();
-            if (setting('show-permissions') && game.user.isGM && (entry.data.permission.default > 0 || Object.keys(entry.data.permission).length > 1)) {
+            $('.document-name .permissions', this).remove();
+            if (setting('show-permissions') && game.user.isGM && (document.data.permission.default > 0 || Object.keys(document.data.permission).length > 1)) {
                 let permissions = $('<div>').addClass('permissions');
-                if (entry.data.permission.default > 0) {
-                    const permission = Object.keys(CONST.ENTITY_PERMISSIONS)[entry.data.permission.default];
+                if (document.data.permission.default > 0) {
+                    const permission = Object.keys(CONST.ENTITY_PERMISSIONS)[document.data.permission.default];
                     permissions.append($('<i>').addClass('fas fa-users').attr('title', 'Everyone: ' + i18n(`PERMISSION.${permission}`)));
                 }
                 else {
-                    for (let [key, value] of Object.entries(entry.data.permission)) {
+                    for (let [key, value] of Object.entries(document.data.permission)) {
                         let user = game.users.find(u => {
                             return u.id == key && !u.isGM;
                         });
@@ -1109,8 +1069,8 @@ export class MonksEnhancedJournal {
     }
 
     static async purchaseItem(data) {
-        let entity = await fromUuid(data.uuid); 
-        let items = entity.getFlag('monks-enhanced-journal', 'items');
+        let document = await fromUuid(data.uuid);
+        let items = document.getFlag('monks-enhanced-journal', 'items');
         if (items) {
             let item = items.find(i => i.id == data.itemid);
             if (item) {
@@ -1230,25 +1190,25 @@ export class MonksEnhancedJournal {
     }
 
     static async openRequestItem(type, event) {
-        let entity;
+        let document;
         if (type == 'actor') {
-            entity = game.actors.get(this.data.flags['monks-enhanced-journal'].actor.id);
+            document = game.actors.get(this.data.flags['monks-enhanced-journal'].actor.id);
         } else if (type == 'shop') {
-            entity = game.journal.get(this.data.flags['monks-enhanced-journal'].shop.id);
+            document = game.journal.get(this.data.flags['monks-enhanced-journal'].shop.id);
         } else if (type == 'item') {
             let li = $(event.currentTarget).closest('li')[0]
-            entity = await fromUuid(li.dataset.uuid);
+            document = await fromUuid(li.dataset.uuid);
         }
 
-        if (entity)
-            entity.sheet.render(true);
+        if (document)
+            document.sheet.render(true);
     }
 
-    static journalListing(ctrl, html, id, name, entryId = 'entryId') {
+    static journalListing(ctrl, html, id, name, documentId = 'documentId') {
         function selectItem(event) {
             event.preventDefault();
             event.stopPropagation();
-            $(`[name="${entryId}"]`, html).val(this.id);
+            $(`[name="${documentId}"]`, html).val(this.id);
             $('.journal-select > div > span', html).html(this.name);
             $('.journal-list.open').removeClass('open');
             $(event.currentTarget).addClass('selected').siblings('.selected').removeClass('selected');
@@ -1430,9 +1390,9 @@ Hooks.on('dropCanvasData', async (canvas, data) => {
     //check to see if an item was dropped from either the encounter or quest and record what actor it was
     if (MonksEnhancedJournal.journal) {
         if (data.type == 'JournalTab' && data.uuid) {
-            let entity = await fromUuid(data.uuid);
-            if (entity)
-                entity.sheet.render(true);
+            let document = await fromUuid(data.uuid);
+            if (document)
+                document.sheet.render(true);
         } else if (data.type == 'CreateEncounter' || data.type == 'CreateCombat') {
             if (!game.user.can("TOKEN_CREATE")) {
                 return ui.notifications.warn(`You do not have permission to create new Tokens!`);
@@ -1532,7 +1492,7 @@ Hooks.on('canvasInit', () => {
 
 Hooks.on("renderActorDirectory", (app, html, data) => {
     if (setting("assign-actor")) {
-        $(`li[data-entity-id="${setting("assign-actor")}"] h4`, html).append(
+        $(`li[data-document-id="${setting("assign-actor")}"] h4`, html).append(
             $('<div>').addClass('assign-icon').attr('title', 'Assign items to this Actor').append(
                 $('<i>').addClass('fas fa-suitcase')
             )
@@ -1548,7 +1508,7 @@ Hooks.on("getActorDirectoryEntryContext", (html, entries) => {
             return game.user.isGM;
         },
         callback: async (li) => {
-            await game.settings.set("monks-enhanced-journal", "assign-actor", li.data("entityId"));
+            await game.settings.set("monks-enhanced-journal", "assign-actor", li.data("documentId"));
             ui.actors.render(true);
         }
     });

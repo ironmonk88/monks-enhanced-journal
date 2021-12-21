@@ -16,8 +16,8 @@ export class QuestSheet extends EnhancedJournalSheet {
             template: "modules/monks-enhanced-journal/templates/quest.html",
             tabs: [{ navSelector: ".tabs", contentSelector: ".sheet-body", initial: "description" }],
             dragDrop: [
-                { dragSelector: ".entity.actor", dropSelector: ".quest-container" },
-                { dragSelector: ".entity.item", dropSelector: ".quest-container" },
+                { dragSelector: ".document.actor", dropSelector: ".quest-container" },
+                { dragSelector: ".document.item", dropSelector: ".quest-container" },
                 { dragSelector: ".reward-items .item-list .item .item-name", dropSelector: "null" },
                 { dragSelector: ".objective-items .item-list .item", dropSelector: ".quest-container" }
             ],
@@ -105,30 +105,6 @@ export class QuestSheet extends EnhancedJournalSheet {
         return reward;
     }
 
-    /*
-    _onSubmit(ev) {
-        //let type = this.entitytype;
-
-        //if (type == 'encounter')
-        //    $('.sheet-body', this.element).removeClass('editing');
-        if ($(ev.currentTarget).hasClass('objective-status')) {
-            let id = ev.currentTarget.closest('li').dataset.id;
-            let objective = this.object.data.flags['monks-enhanced-journal'].objectives.find(o => o.id == id);
-            if (objective) {
-                objective.status = $(ev.currentTarget).is(':checked');
-                return this.object.update({ 'flags.monks-enhanced-journal': this.object.data.flags['monks-enhanced-journal'] });
-            }
-        } else if ($(ev.currentTarget).hasClass('objective-available')) {
-            let id = ev.currentTarget.closest('li').dataset.id;
-            let objective = this.object.data.flags['monks-enhanced-journal'].objectives.find(o => o.id == id);
-            if (objective) {
-                objective.available = $(ev.currentTarget).is(':checked');
-                return this.object.update({ 'flags.monks-enhanced-journal': this.object.data.flags['monks-enhanced-journal'] });
-            }
-        } else 
-            return super._onSubmit(ev);
-    }*/
-
     static get defaultObject() {
         return { rewards: [], objectives: [], seen: false, status: 'inactive' };
     }
@@ -137,7 +113,7 @@ export class QuestSheet extends EnhancedJournalSheet {
         return 'quest';
     }
 
-    _entityControls() {
+    _documentControls() {
         let ctrls = [
             { text: '<i class="fas fa-search"></i>', type: 'text' },
             { id: 'search', type: 'input', text: i18n("MonksEnhancedJournal.SearchDescription"), callback: this.enhancedjournal.searchText },
@@ -146,7 +122,7 @@ export class QuestSheet extends EnhancedJournalSheet {
             { id: 'convert', text: i18n("MonksEnhancedJournal.Convert"), icon: 'fa-clipboard-list', conditional: (game.user.isGM && this.isEditable), callback: () => { } }
         ];
         //this.addPolyglotButton(ctrls);
-        return ctrls.concat(super._entityControls());
+        return ctrls.concat(super._documentControls());
     }
 
     activateListeners(html, enhancedjournal) {
@@ -423,7 +399,7 @@ export class QuestSheet extends EnhancedJournalSheet {
 
         const dragData = { from: 'monks-enhanced-journal' };
 
-        if (li.dataset.entity == 'Item') {
+        if (li.dataset.document == 'Item') {
             let reward = this.getActiveReward();
             if (reward == undefined)
                 return;
@@ -439,7 +415,7 @@ export class QuestSheet extends EnhancedJournalSheet {
             dragData.pack = li.dataset.pack;
             dragData.type = "Item";
             dragData.uuid = this.object.uuid;
-        } else if (li.dataset.entity == 'Objective') {
+        } else if (li.dataset.document == 'Objective') {
             dragData.id = id;
             dragData.type = "Objective";
         }
@@ -490,7 +466,7 @@ export class QuestSheet extends EnhancedJournalSheet {
     async addItem(data) {
         let item = await this.getEntity(data);
 
-        if (item.entity) {
+        if (item.document) {
             let id = this.object.getFlag('monks-enhanced-journal', 'reward');
 
             let rewards = duplicate(this.getRewardData());
@@ -524,7 +500,7 @@ export class QuestSheet extends EnhancedJournalSheet {
         let target = event.currentTarget;
         let li = target.closest('li');
         event.currentTarget = li;
-        TextEditor._onClickEntityLink(event);
+        TextEditor._onClickContentLink(event);
     }
 
     static itemDropped(id, actor) {
@@ -585,7 +561,6 @@ export class QuestSheet extends EnhancedJournalSheet {
                 condition: () => game.user.isGM,
                 callback: li => {
                     const id = li.data("id");
-                    //const slide = this.object.data.flags["monks-enhanced-journal"].slides.get(li.data("entityId"));
                     Dialog.confirm({
                         title: `${game.i18n.localize("SIDEBAR.Delete")} Actor Link`,
                         content: i18n("MonksEnhancedJournal.ConfirmRemoveLink"),
@@ -631,20 +606,20 @@ export class QuestSheet extends EnhancedJournalSheet {
             for (let item of items) {
                 //add item to actor, including quantity
                 if (item.remaining > 0) {
-                    let entity;
+                    let document;
                     if (item.pack) {
                         const pack = game.packs.get(item.pack);
                         if (pack) {
-                            entity = await pack.getDocument(item.id);
+                            document = await pack.getDocument(item.id);
                         }
                     } else {
-                        entity = game.items.get(item.id);
+                        document = game.items.get(item.id);
                     }
 
-                    if (!entity)
+                    if (!document)
                         continue;
 
-                    let data = entity.toObject();
+                    let data = document.toObject();
                     data.data.quantity = item.remaining;
                     itemData.push(data);
 
