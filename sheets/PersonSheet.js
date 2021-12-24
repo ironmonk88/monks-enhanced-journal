@@ -145,8 +145,8 @@ export class PersonSheet extends EnhancedJournalSheet {
     async addRelationship(data) {
         let relationship = await this.getEntity(data);
 
-        if (relationship.entity) {
-            let type = relationship.entity.data.flags['monks-enhanced-journal']?.type
+        if (relationship.document) {
+            let type = relationship.document.data.flags['monks-enhanced-journal']?.type
             relationship.data.type = type;
             if (['organization','person','place'].includes(type)) {
                 let actors = duplicate(this.object.data.flags["monks-enhanced-journal"].actors || []);
@@ -170,7 +170,7 @@ export class PersonSheet extends EnhancedJournalSheet {
     async addActor(data) {
         let actor = await this.getEntity(data);
 
-        if (actor.entity) {
+        if (actor.document) {
             this.object.setFlag("monks-enhanced-journal", "actor", actor.data);
         }
     }

@@ -363,7 +363,7 @@ export class ShopSheet extends EnhancedJournalSheet {
     async addItem(data) {
         let item = await this.getEntity(data);
 
-        if (item.entity) {
+        if (item.document) {
             let items = duplicate(this.object.data.flags["monks-enhanced-journal"].items || []);
 
             let olditem = items.find(i => i.id == item.data.id);
@@ -441,7 +441,7 @@ export class ShopSheet extends EnhancedJournalSheet {
     async addActor(data) {
         let actor = await this.getEntity(data);
 
-        if (actor.entity) {
+        if (actor.document) {
             this.object.setFlag("monks-enhanced-journal", "actor", actor.data);
         }
     }

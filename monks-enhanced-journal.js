@@ -258,7 +258,7 @@ export class MonksEnhancedJournal {
 
             // Target 3 - World Document Link
             else {
-                const collection = game.collections.get(a.dataset.entity);
+                const collection = game.collections.get(a.dataset.type);
                 if (!collection)
                     return;
                 doc = collection.get(id);
