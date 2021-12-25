@@ -77,8 +77,16 @@ export class SlideshowSheet extends EnhancedJournalSheet {
 
                 slide.texts = slide.texts.map(t => {
                     let text = duplicate(t);
-                    text.background = hexToRGBAString(colorStringToHex(t.background || '#000000'), 0.5);
-                    text.anchor = (t.align == 'right' ? 'end' : (t.align == 'center' ? 'middle' : 'start'));
+                    let style = {
+                        color: t.color,
+                        'background-color': hexToRGBAString(colorStringToHex(t.background || '#000000'), (t.opacity != undefined ? t.opacity : 0.5)),
+                        'text-align': (t.align == 'middle' ? 'center' : t.align),
+                        top: (t.top || 0) + "%",
+                        left: (t.left || 0) + "%",
+                        right: (t.right || 0) + "%",
+                        bottom: (t.bottom || 0) + "%",
+                    };
+                    text.style = Object.entries(style).filter(([k, v]) => v).map(([k, v]) => `${k}:${v}`).join(';');
                     return text;
                 });
 
@@ -134,6 +142,12 @@ export class SlideshowSheet extends EnhancedJournalSheet {
                 that.editSlide(id);
             });
         html.find('.slide-showing').click(this.advanceSlide.bind(this, 1)).contextmenu(this.advanceSlide.bind(this, -1));
+
+        new ResizeObserver(() => {
+            //change font size to match height
+            let size = $('.slide-showing .slide-textarea', html).outerHeight() / 20;
+            $('.slide-showing .slide-textarea', html).css({ 'font-size': `${size}px`});
+        }).observe(this.element[0]);
 
         $('.add-slide', html).click(this.addSlide.bind(this));
         $('.nav-button.play').click(this.playSlideshow.bind(this));
@@ -368,10 +382,12 @@ export class SlideshowSheet extends EnhancedJournalSheet {
         let idx = this.object.data.flags["monks-enhanced-journal"].slideAt;
         let slide = this.object.data.flags["monks-enhanced-journal"].slides[idx];
         let newSlide = MonksEnhancedJournal.createSlide(slide);
+        $('.slide-textarea', newSlide).css({'font-size':'25px'});
         $('.slide-showing', this.element).append(newSlide);
     }
 
     playSlide(idx, animate = true) {
+        let that = this;
         if (idx == undefined)
             idx = this.object.data.flags["monks-enhanced-journal"].slideAt;
         else { //if (idx != this.object.data.flags["monks-enhanced-journal"].slideAt)
@@ -393,6 +409,7 @@ export class SlideshowSheet extends EnhancedJournalSheet {
 
             //bring in the new slide
             let newSlide = MonksEnhancedJournal.createSlide(slide);
+            $('.slide-textarea', newSlide).css({ 'font-size': '25px' });
             $('.slide-showing', this.element).append(newSlide);
             newSlide.css({ opacity: 0 }).animate({ opacity: 1 }, 1000, 'linear');
         }
@@ -408,21 +425,26 @@ export class SlideshowSheet extends EnhancedJournalSheet {
             //set up the transition
             let time = slide.transition.duration * 1000;
             slide.transition.startTime = (new Date()).getTime();
-            slide.transition.timer = window.setTimeout(this.advanceSlide.bind(this, 1), time);
+            slide.transition.timer = window.setTimeout(function () {
+                if (that.object.getFlag("monks-enhanced-journal", "state") == 'playing')
+                    that.advanceSlide.call(that, 1);
+            }, time);
             $('.slide-showing .duration', this.element).append($('<div>').addClass('duration-bar').css({ width: '0' }).show().animate({ width: '100%' }, time, 'linear'));
         } else {
             $('.slide-showing .duration', this.element).append($('<div>').addClass('duration-label').html(i18n("MonksEnhancedJournal.ClickForNext")));
         }
 
         for (let text of slide.texts) {
-            if (text.fadein && !isNaN(text.fadein)) {
-                window.setTimeout(function () {
-                    $('.slide-showing text[id="' + text.id + '"]', this.element).animate({ opacity: 1 }, 500, 'linear');
+            if ($.isNumeric(text.fadein)) {
+                window.setTimeout(() => {
+                    if (that.object.getFlag("monks-enhanced-journal", "state") == 'playing')
+                        $('.slide-showing .slide-text[data-id="' + text.id + '"]', this.element).animate({ opacity: 1 }, 500, 'linear');
                 }, text.fadein * 1000);
             }
-            if (text.fadeout && !isNaN(text.fadeout)) {
-                window.setTimeout(function () {
-                    $('.slide-showing text[id="' + text.id + '"]', this.element).animate({ opacity: 0 }, 500, 'linear');
+            if ($.isNumeric(text.fadeout)) {
+                window.setTimeout(() => {
+                    if (that.object.getFlag("monks-enhanced-journal", "state") == 'playing')
+                        $('.slide-showing .slide-text[data-id="' + text.id + '"]', this.element).animate({ opacity: 0 }, 500, 'linear');
                 }, text.fadeout * 1000);
             }
         }

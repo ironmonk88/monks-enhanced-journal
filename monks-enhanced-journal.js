@@ -258,7 +258,7 @@ export class MonksEnhancedJournal {
 
             // Target 3 - World Document Link
             else {
-                const collection = game.collections.get(a.dataset.entity);
+                const collection = game.collections.get(a.dataset.type);
                 if (!collection)
                     return;
                 doc = collection.get(id);
@@ -734,6 +734,11 @@ export class MonksEnhancedJournal {
 
         $('<div>').attr('id', 'slideshow-canvas').addClass('monks-journal-sheet flexrow').append($('<div>').addClass('slideshow-container flexcol playing').append($('<div>').addClass('slide-showing'))).append($('<div>').addClass('slide-padding')).appendTo($('body'));
         new SlideshowWindow().render(true);
+        new ResizeObserver(() => {
+            //change font size to match height
+            let size = $('#slideshow-canvas .slide-textarea').outerHeight() / 20;
+            $('#slideshow-canvas .slide-textarea').css({ 'font-size': `${size}px` });
+        }).observe($('#slideshow-canvas')[0]);
         //this.journal = new EnhancedJournal();
         //this.hookSwapMode();
         //Hooks.on("closeJournalSheet", (app, html, data) => {
@@ -864,6 +869,11 @@ export class MonksEnhancedJournal {
                     if ($('#slideshow-display').length == 0) {
                         let display = new SlideshowWindow();
                         await display._render(true);
+                        new ResizeObserver(() => {
+                            //change font size to match height
+                            let size = $('#slideshow-display .slide-textarea').outerHeight() / 20;
+                            $('#slideshow-display .slide-textarea').css({ 'font-size': `${size}px` });
+                        }).observe($('#slideshow-display')[0]);
                     }
                     $('#slideshow-display header h4.window-title').html(MonksEnhancedJournal.slideshow.object.data.name)
                     MonksEnhancedJournal.slideshow.element = $('#slideshow-display');
@@ -896,7 +906,6 @@ export class MonksEnhancedJournal {
             if (MonksEnhancedJournal.slideshow.element == undefined) {
                 MonksEnhancedJournal.slideshow.callback = data;
             } else {
-
                 let slide = MonksEnhancedJournal.slideshow.content.slides[data.idx];
 
                 //remove any that are still on the way out
@@ -908,19 +917,22 @@ export class MonksEnhancedJournal {
 
                 //bring in the new slide
                 let newSlide = MonksEnhancedJournal.createSlide(slide);
+                $('.slide-textarea', newSlide).css({ 'font-size': '48px' });
                 $('.slide-showing', MonksEnhancedJournal.slideshow.element).append(newSlide);
                 if (newSlide)
                     newSlide.css({ opacity: 0 }).animate({ opacity: 1 }, 1000, 'linear');
 
                 for (let text of slide.texts) {
-                    if (!isNaN(text.fadein)) {
+                    if ($.isNumeric(text.fadein)) {
                         window.setTimeout(function () {
-                            $('.slide-showing text[id="' + text.id + '"]', MonksEnhancedJournal.slideshow?.element).animate({ opacity: 1 }, 500, 'linear');
+                            if (MonksEnhancedJournal.slideshow)
+                                $('.slide-showing .slide-text[data-id="' + text.id + '"]', MonksEnhancedJournal.slideshow?.element).animate({ opacity: 1 }, 500, 'linear');
                         }, text.fadein * 1000);
                     }
-                    if (!isNaN(text.fadeout)) {
+                    if ($.isNumeric(text.fadeout)) {
                         window.setTimeout(function () {
-                            $('.slide-showing text[id="' + text.id + '"]', MonksEnhancedJournal.slideshow?.element).animate({ opacity: 0 }, 500, 'linear');
+                            if (MonksEnhancedJournal.slideshow)
+                                $('.slide-showing .slide-text[data-id="' + text.id + '"]', MonksEnhancedJournal.slideshow?.element).animate({ opacity: 0 }, 500, 'linear');
                         }, text.fadeout * 1000);
                     }
                 }
@@ -951,29 +963,28 @@ export class MonksEnhancedJournal {
         else
             background = `background-color:${slide.background?.color}`;
 
-        let textBackground = hexToRGBAString(colorStringToHex(slide.text?.background || '#000000'), 0.5);
+        let textarea = $('<div>').addClass('slide-textarea');
+        for (let t of slide.texts) {
+            
+            let style = {
+                color: t.color,
+                'background-color': hexToRGBAString(colorStringToHex(t.background || '#000000'), (t.opacity != undefined ? t.opacity : 0.5)),
+                'text-align': (t.align == 'middle' ? 'center' : t.align),
+                top: (t.top || 0) + "%",
+                left: (t.left || 0) + "%",
+                right: (t.right || 0) + "%",
+                bottom: (t.bottom || 0) + "%",
+            };
+            if ($.isNumeric(t.fadein))
+                style.opacity = 0;
 
-        function getNode(n, v) {
-            n = document.createElementNS("http://www.w3.org/2000/svg", n);
-            for (var p in v)
-                n.setAttributeNS(null, p.replace(/[A-Z]/g, function (m, p, o, s) { return "-" + m.toLowerCase(); }), v[p]);
-            return n
-        }
-
-        let svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-        svg.setAttributeNS(null, 'viewBox', '0 0 350 80');
-        for (let text of slide.texts) {
-            let svgtext = getNode('text', { id: text.id, fill: text.color, x: text.left + "%", y: text.top + "%", textAnchor: text.align });
-            svgtext.textContent = text.text;
-            if (text.fadein && !isNaN(text.fadein))
-                svgtext.setAttribute("style", "opacity:0");
-            svg.appendChild(svgtext);
+            textarea.append($('<div>').addClass('slide-text').attr({'data-id': t.id}).html(t.text).css(style));
         }
 
         return $('<div>').addClass("slide").attr('data-slide-id', slide.id)
             .append($('<div>').addClass('slide-background').append($('<div>').attr('style', background)))
-            .append($('<img>').attr('src', slide.img).css({ 'object-fit': slide.sizing}))
-            .append($('<div>').addClass('slide-text flexcol').append(svg));
+            .append($('<img>').addClass('slide-image').attr('src', slide.img).css({ 'object-fit': slide.sizing}))
+            .append(textarea);
     }
 
     static refreshObjectives() {

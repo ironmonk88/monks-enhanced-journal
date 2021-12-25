@@ -36,13 +36,11 @@
             <div class="slide{{#if this.active}} active{{/if}}" data-slide-id="{{this.id}}">
                 <div class="slide-inner">
                     <div class="slide-background"><div style="{{this.background}}"></div></div>
-                    <img src="{{this.img}}" style="object-fit:{{this.sizing}}" />
-                    <div class="slide-text flexcol">
-                        <svg viewBox="0 0 200 80" width="100%" height="100%">
-                            {{#each this.texts}}
-                            <text id="{{this.id}}" fill="{{this.color}}" x="{{this.left}}%" y="{{this.top}}%" text-anchor="{{this.align}}">{{this.text}}</text>
-                            {{/each}}
-                        </svg>
+                    <img class="slide-image" src="{{this.img}}" style="object-fit:{{this.sizing}}" />
+                    <div class="slide-textarea flexcol">
+                        {{#each this.texts}}
+                        <div class="slide-text" data-id="{{this.id}}" style="{{this.style}}">{{this.text}}</div>
+                        {{/each}}
                     </div>
                 </div>
             </div>

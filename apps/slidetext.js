@@ -1,9 +1,9 @@
 import { MonksEnhancedJournal, log, setting, i18n, makeid } from '../monks-enhanced-journal.js';
 
 export class SlideText extends FormApplication {
-    constructor(object, slide, options = {}) {
+    constructor(object, config, options = {}) {
         super(object, options);
-        this.slide = slide;
+        this.config = config;
     }
 
     /** @override */
@@ -13,7 +13,7 @@ export class SlideText extends FormApplication {
             classes: ["form", "slide-sheet"],
             title: "Slide Text",
             template: "modules/monks-enhanced-journal/templates/slidetext.html",
-            width: 680,
+            width: 350,
             submitOnChange: true
         });
     }
@@ -21,7 +21,7 @@ export class SlideText extends FormApplication {
     getData(options) {
         return mergeObject(super.getData(options),
             {
-                alignOptions: { left: "MonksEnhancedJournal.Left", middle: "MonksEnhancedJournal.Middle", right: "MonksEnhancedJournal.Right" }
+                alignOptions: { left: "MonksEnhancedJournal.Left", center: "MonksEnhancedJournal.Center", right: "MonksEnhancedJournal.Right" }
             }, { recursive: false }
         );
     }
@@ -33,6 +33,6 @@ export class SlideText extends FormApplication {
             return;
 
         mergeObject(this.object, formData);
-        $('.item[data-id="' + this.object.id + '"] .item-name h4', this.slide.element).html(this.object.text);
+        this.config.refreshText(this.object.id);
     }
 }

@@ -1,3 +1,13 @@
+# Version 1.0.37
+
+Fixed issues with drag and drop
+
+Changed the slide show config to allow you to visually create text.
+
+Fixed some issue with slideshows not stopping properly.  And with the text not showing properly.
+
+Added option to change the background colour for slide show texts, and set the transparency of the text.
+
 # Version 1.0.36 
 
 Updating the code to make it v9 compliant.

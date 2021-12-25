@@ -511,7 +511,7 @@ export class EnhancedJournalSheet extends JournalSheet {
         });
     }
 
-    async getEntity(data) {
+    async getDocument(data) {
         let document;
         if (data.pack) {
             const pack = game.packs.get(data.pack);

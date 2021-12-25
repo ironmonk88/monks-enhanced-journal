@@ -126,9 +126,9 @@ export class PlaceSheet extends EnhancedJournalSheet {
     }
 
     async addActor(data) {
-        let actor = await this.getEntity(mergeObject(data, { type: 'Actor' }));
+        let actor = await this.getDocument(mergeObject(data, { type: 'Actor' }));
 
-        if (actor.entity) {
+        if (actor.document) {
             let actors = duplicate(this.object.data.flags["monks-enhanced-journal"].actors || []);
 
             //only add one item
@@ -141,10 +141,10 @@ export class PlaceSheet extends EnhancedJournalSheet {
     }
 
     async addShop(data) {
-        let shop = await this.getEntity(data);
+        let shop = await this.getDocument(data);
 
-        if (shop.entity) {
-            if (shop.entity.data.flags['monks-enhanced-journal']?.type == 'shop') {
+        if (shop.document) {
+            if (shop.document.data.flags['monks-enhanced-journal']?.type == 'shop') {
                 let shops = duplicate(this.object.data.flags["monks-enhanced-journal"].shops || []);
 
                 //only add one item
@@ -153,7 +153,7 @@ export class PlaceSheet extends EnhancedJournalSheet {
 
                 shops.push(shop.data);
                 this.object.setFlag("monks-enhanced-journal", "shops", shops);
-            } else if (shop.entity.data.flags['monks-enhanced-journal']?.type == 'person') {
+            } else if (shop.document.data.flags['monks-enhanced-journal']?.type == 'person') {
                 let actors = duplicate(this.object.data.flags["monks-enhanced-journal"].actors || []);
 
                 //only add one item

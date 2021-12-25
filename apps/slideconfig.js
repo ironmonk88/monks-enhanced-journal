@@ -14,25 +14,72 @@ export class SlideConfig extends FormApplication {
             classes: ["form", "slide-sheet"],
             title: i18n("MonsEnhancedJournal.SlideConfiguration"),
             template: "modules/monks-enhanced-journal/templates/slideconfig.html",
-            width: 500
+            width: 620
         });
     }
 
     getData(options) {
-        return mergeObject(super.getData(options),
+        let data = mergeObject(super.getData(options),
             {
                 sizingOptions: { contain: "MonksEnhancedJournal.Contain", cover: "MonksEnhancedJournal.Cover", fill: "MonksEnhancedJournal.Stretch" }
             }, { recursive: false }
         );
+
+        data.texts = this.object.texts.map(t => {
+            let text = duplicate(t);
+            let x = (((t.left || 0) / 100) * 600);
+            let y = (((t.top || 0) / 100) * 400);
+            let x2 = (((t.right || 0) / 100) * 600);
+            let y2 = (((t.bottom || 0) / 100) * 400);
+            let style = {
+                color: t.color,
+                'background-color': hexToRGBAString(colorStringToHex(t.background || '#000000'), (t.opacity != undefined ? t.opacity : 0.5)),
+                'text-align': (t.align == 'middle' ? 'center' : t.align),
+                top: y + "px",
+                left: x + "px",
+                width: (600 - x2 - x) + "px",
+                height: (400 - y2 - y) + "px",
+            };
+            text.style = Object.entries(style).filter(([k, v]) => v).map(([k, v]) => `${k}:${v}`).join(';');
+            return text;
+        });
+
+        if (this.object.background?.color == '') {
+            data.background = `background-image:url(\'${this.object.img}\');`;
+        }
+        else
+            data.background = `background-color:${this.object.color}`;
+
+        return data;
     }
 
     /* -------------------------------------------- */
 
     /** @override */
+    _getSubmitData() {
+        let data = expandObject(super._getSubmitData());
+
+        let texts = this.object.texts;
+
+        $('.slide-text', this.element).each(function () {
+            let text = texts.find(t => t.id == this.dataset.id);
+            let pos = $(this).position();
+            text.left = (pos.left / 600) * 100;
+            text.top = (pos.top / 400) * 100;
+            text.right = ((600 - (pos.left + $(this).outerWidth())) / 600) * 100;
+            text.bottom = ((400 - (pos.top + $(this).outerHeight())) / 400) * 100;
+            text.text = $(this).val();
+        });
+
+        data.texts = texts;
+
+        return flattenObject(data);
+    }
+
     async _updateObject(event, formData) {
         log('updating slide', event, formData, this.object);
         let slides = duplicate(this.journalentry.data.flags["monks-enhanced-journal"].slides || []);
-        
+
         if (this.object.id == undefined) {
             this.object.id = makeid();
             mergeObject(this.object, formData);
@@ -48,42 +95,187 @@ export class SlideConfig extends FormApplication {
     activateListeners(html) {
         super.activateListeners(html);
 
-        $('.text-create', html).click(this.createText.bind(this));
-        $('.text-edit', html).click(this.editText.bind(this));
         $('.text-delete', html).click(this.deleteText.bind(this));
+
+        $('.slide-text', html)
+            .on('mousedown', (ev) => { console.log('text mouse down'); ev.stopPropagation(); $(ev.currentTarget).focus(); })
+            .on('dblclick', this.editText.bind(this))
+            .on('focus', this.selectText.bind(this))
+            .on('blur', (ev) => {
+                if ($(ev.currentTarget).val() == '')
+                    this.deleteText($(ev.currentTarget));
+            });
+
+        $('.slide-textarea', html)
+            .on('mousedown', (ev) => {
+                if ($('.slide-text.selected', html).length == 0) {
+                    let pos = $('.slide-textarea', html).offset();
+                    this.orig = { x: ev.clientX - pos.left, y: ev.clientY - pos.top };
+                    $('.slide-textarea', html).append($('<div>').addClass('text-create').css({ left: this.orig.x, top: this.orig.y }));
+                } else {
+                    this.clearText.call(this, ev);
+                }
+            })
+            .on('mousemove', (ev) => {
+                let pos = $('.slide-textarea', html).offset();
+                let pt = { x: ev.clientX - pos.left, y: ev.clientY - pos.top};
+                let mover = $('.mover.moving', html);
+                let creator = $('.text-create', html);
+                if (mover.length) {
+                    mover.parent().css({ left: pt.x, top: pt.y });
+                    $('.slide-text.selected', html).css({ left: pt.x, top: pt.y });
+                } else if (creator.length) {
+                    //creating a new text
+                    creator.css({ left: Math.min(pt.x, this.orig.x), top: Math.min(pt.y, this.orig.y), width: Math.abs(pt.x - this.orig.x), height: Math.abs(pt.y - this.orig.y) });
+                }
+            })
+            .on('mouseup', (ev) => {
+                let mover = $('.mover.moving', html);
+                let creator = $('.text-create', html);
+                if (mover.length) {
+                    mover.removeClass('moving');
+                    $('.slide-text.selected', html).focus();
+                } else if (creator.length) {
+                    //create text
+                    if (creator.outerWidth() > 50 && creator.outerHeight() > 20) {
+                        let pos = creator.position();
+                        let data = {
+                            left: (pos.left / 600) * 100,
+                            top: (pos.top / 400) * 100,
+                            right: ((600 - (pos.left + creator.outerWidth())) / 600) * 100,
+                            bottom: ((400 - (pos.top + creator.outerHeight())) / 400) * 100
+                        }
+                        this.createText(data);
+                    }
+                    $('.text-create', html).remove();
+                }
+            });
+
+        $('.mover', html).on('mousedown', (ev) => {
+            ev.preventDefault();
+            ev.stopPropagation();
+            let mover = $(ev.currentTarget);
+            mover.addClass('moving');
+        });
+
+        var that = this;
+        $('input[name="img"]', html).on('change', this.updateImage.bind(this));
+        $('select[name="sizing"]', html).on('change', this.updateImage.bind(this));
+        $('input[name="background.color"]', html).on('change', this.updateImage.bind(this));
+        $('input[data-edit="background.color"]', html).on('change', function () {
+            window.setTimeout(function () { that.updateImage.call(that) }, 200);
+        });
     }
 
-    createText() {
+    updateImage() {
+        /*
+         <div class="slide-background"><div style="{{this.background}}"></div></div>
+            <img class="slide-image" src="{{object.img}}" style="object-fit:{{object.sizing}}" />
+            */
+        if ($('input[name="background.color"]').val() == '')
+            $('.slide-background div', this.element).css({ 'background-image': `url(${$('input[name="img"]').val()})`, 'background-color':'' });
+        else
+            $('.slide-background div', this.element).css({ 'background-image': '', 'background-color': $('input[name="background.color"]').val() });
+
+        $('.slide-image', this.element).attr('src', $('input[name="img"]').val()).css({ 'object-fit': $('select[name="sizing"]').val()});
+
+    }
+
+    selectText(ev) {
+        let element = $(ev.currentTarget);
+        element.addClass('selected').siblings().removeClass('selected');
+        $('.slide-hud', this.element).css({ left: element.position().left, top: element.position().top, width: element.width(), height: element.height() }).show();
+    }
+
+    editText(ev) {
+        ev.preventDefault();
+        ev = ev || window.event;
+        let isRightMB = false;
+        if ("which" in ev) { // Gecko (Firefox), WebKit (Safari/Chrome) & Opera
+            isRightMB = ev.which == 3;
+        } else if ("button" in ev) { // IE, Opera 
+            isRightMB = ev.button == 2;
+        }
+
+        if (!isRightMB) {
+            let text = this.object.texts.find(t => t.id == ev.currentTarget.dataset.id);
+            new SlideText(text, this).render(true);
+        }
+    }
+
+    clearText(ev) {
+        $('.slide-textarea .slide-text.selected').removeClass('selected');
+        $('.slide-hud', this.element).hide();
+    }
+
+    createText(data) {
         let text = {
             id: makeid(),
-            align: 'middle',
-            left: 50,
-            top: 50,
-            color: '#FFFFFF'
+            align: 'left',
+            left: data.left,
+            top: data.top,
+            right: data.right,
+            bottom: data.bottom,
+            color: '#FFFFFF',
+            background: '#000000'
         };
         this.object.texts.push(text);
 
-        $('<li>').addClass('item flexrow').attr('data-id', text.id)
-            .append($('<div>').addClass('item-name flexrow').append($('<h4>').html(text.text)))
-            .append($('<div>').addClass('item-controls'))
-            .append($('<div>').addClass('item-controls flexrow')
-                .append($('<a>').addClass('item-control text-edit').attr('title', i18n("MonksEnhancedJournal.EditText")).append($('<i>').addClass('fas fa-edit')))
-                .append($('<a>').addClass('item-control text-delete').attr('title', i18n("MonksEnhancedJournal.DeleteText")).append($('<i>').addClass('fas fa-trash')))
-            )
-            .appendTo($('.item-list', this.element));
-        new SlideText(text, this).render(true);
+        let x = (((text.left || 0) / 100) * 600);
+        let y = (((text.top || 0) / 100) * 400);
+        let x2 = (((text.right || 0) / 100) * 600);
+        let y2 = (((text.bottom || 0) / 100) * 400);
+        let style = {
+            color: text.color,
+            'background-color': hexToRGBAString(colorStringToHex(text.background || '#000000'), (t.opacity != undefined ? t.opacity : 0.5)),
+            'text-align': (text.align == 'middle' ? 'center' : text.align),
+            top: y + "px",
+            left: x + "px",
+            width: (600 - x2 - x) + "px",
+            height: (400 - y2 - y) + "px",
+        };
+
+        let textarea = $('<textarea>')
+            .addClass('slide-text')
+            .attr({ 'data-id': text.id })
+            .css(style)
+            .on('mousedown', (ev) => { ev.stopPropagation(); $(ev.currentTarget).focus(); })
+            .on('dblclick', this.editText.bind(this))
+            .on('focus', this.selectText.bind(this))
+            .on('blur', (ev) => {
+                if ($(ev.currentTarget).val() == '')
+                    this.deleteText($(ev.currentTarget));
+            });
+        $('.slide-textarea', this.element).append(textarea);
+        textarea.focus();
     }
 
-    editText(event) {
-        let item = event.currentTarget.closest('.item');
-        let text = this.object.texts.find(t => t.id == item.dataset.id);
-        if (text != undefined)
-            new SlideText(text, this).render(true);
+    refreshText(id) {
+        let t = this.object.texts.find(x => x.id == id);
+        if (t) {
+            let x = (((t.left || 0) / 100) * 600);
+            let y = (((t.top || 0) / 100) * 400);
+            let x2 = (((t.right || 0) / 100) * 600);
+            let y2 = (((t.bottom || 0) / 100) * 400);
+            let style = {
+                color: t.color,
+                'background-color': hexToRGBAString(colorStringToHex(t.background || '#000000'), (t.opacity != undefined ? t.opacity : 0.5)),
+                'text-align': (t.align == 'middle' ? 'center' : t.align),
+                top: y + "px",
+                left: x + "px",
+                width: (600 - x2 - x) + "px",
+                height: (400 - y2 - y) + "px",
+            };
+            $(`.slide-text[data-id="${id}"]`, this.element).css(style);
+        }
     }
 
-    deleteText(event) {
-        let item = event.currentTarget.closest('.item');
-        this.object.texts.findSplice(i => i.id == item.dataset.id);
-        $(`li[data-id="${item.dataset.id}"]`, this.element).remove();
+    deleteText(element) {
+        if (element.length && element.hasClass('slide-text')) {
+            let id = element[0].dataset.id;
+            this.object.texts.findSplice(i => i.id == id);
+            element.remove();
+            $('.slide-hud', this.element).hide();
+        }
     }
 }

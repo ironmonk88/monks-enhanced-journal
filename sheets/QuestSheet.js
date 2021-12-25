@@ -464,7 +464,7 @@ export class QuestSheet extends EnhancedJournalSheet {
     }
 
     async addItem(data) {
-        let item = await this.getEntity(data);
+        let item = await this.getDocument(data);
 
         if (item.document) {
             let id = this.object.getFlag('monks-enhanced-journal', 'reward');
@@ -535,9 +535,9 @@ export class QuestSheet extends EnhancedJournalSheet {
     }
 
     async addActor(data) {
-        let actor = await this.getEntity(data);
+        let actor = await this.getDocument(data);
 
-        if (actor.entity) {
+        if (actor.document) {
             this.object.update({ 'flags.monks-enhanced-journal.actor': actor.data, 'flags.monks-enhanced-journal.source' : actor.data.name});
         }
     }

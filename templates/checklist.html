@@ -21,7 +21,7 @@
 {{/inline}}
 
 {{#*inline "documentPartial"}}
-<li class="checklist-item document item flexrow{{#if this.data.checked}} checked{{/if}}" data-entity-id="{{this.data.id}}">
+<li class="checklist-item document item flexrow{{#if this.data.checked}} checked{{/if}}" data-document-id="{{this.data.id}}">
     <div class="flexrow">
         <input class="item-checked" style="flex: 0 0 30px;" type="checkbox" name="data.checked" {{checked this.data.checked}}>
         <h3>{{this.data.text}}</h3>

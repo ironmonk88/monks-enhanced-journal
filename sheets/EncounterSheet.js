@@ -213,9 +213,9 @@ export class EncounterSheet extends EnhancedJournalSheet {
     }
 
     async addActor(data) {
-        let actor = await this.getEntity(data);
+        let actor = await this.getDocument(data);
 
-        if (actor.entity) {
+        if (actor.document) {
             let actors = duplicate(this.object.getFlag("monks-enhanced-journal", "actors") || []);
             actors.push(actor.data);
 
@@ -223,10 +223,10 @@ export class EncounterSheet extends EnhancedJournalSheet {
         }
     }
 
-   async addItem(data) {
-        let item = await this.getEntity(data);
+    async addItem(data) {
+        let item = await this.getDocument(data);
 
-        if (item.entity) {
+        if (item.document) {
             let items = duplicate(this.object.data.flags["monks-enhanced-journal"].items || []);
 
             let olditem = items.find(i => i.id == item.data.id);

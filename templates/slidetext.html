@@ -1,22 +1,26 @@
 <form class="slide-text" autocomplete="off" onsubmit="event.preventDefault();">
     <div class="form-group">
-        <label for="text">{{localize 'MonksEnhancedJournal.Text'}}</label>
-        <div class="form-fields">
-            <textarea name="text">{{object.text}}</textarea>
-        </div>
-    </div>
-    <div class="form-group">
         <label for="top">{{localize 'MonksEnhancedJournal.Top'}}</label>
         <div class="form-fields">
-            <input type="range" name="top" data-dtype="String" min="0" max="100" step="5" value="{{object.top}}">
-            <span class="range-value">{{object.top}}</span>
+            <input type="number" name="top" step="any" data-dtype="Number" value="{{object.top}}" style="max-width:100px;text-align:right;">
         </div>
     </div>
     <div class="form-group">
-        <label for="left">{{localize 'MonksEnhancedJournal.Left'}}</label>
+        <label for="top">{{localize 'MonksEnhancedJournal.Left'}}</label>
         <div class="form-fields">
-            <input type="range" name="left" data-dtype="String" min="0" max="100" step="5" value="{{object.left}}">
-            <span class="range-value">{{object.left}}</span>
+            <input type="number" name="left" step="any" data-dtype="Number" value="{{object.left}}" style="max-width: 100px; text-align: right;">
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="top">{{localize 'MonksEnhancedJournal.Right'}}</label>
+        <div class="form-fields">
+            <input type="number" name="right" step="any" data-dtype="Number" value="{{object.right}}" style="max-width: 100px; text-align: right;">
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="top">{{localize 'MonksEnhancedJournal.Bottom'}}</label>
+        <div class="form-fields">
+            <input type="number" name="bottom" step="any" data-dtype="Number" value="{{object.bottom}}" style="max-width: 100px; text-align: right;">
         </div>
     </div>
     <div class="form-group">
@@ -35,15 +39,29 @@
         </div>
     </div>
     <div class="form-group">
+        <label for="color">{{localize 'MonksEnhancedJournal.BackgroundColour'}}</label>
+        <div class="form-fields">
+            <input type="text" name="background" data-dtype="String" value="{{object.background}}">
+            <input type="color" data-edit="background" value="{{object.background}}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="top">{{localize 'MonksEnhancedJournal.BackgroundOpacity'}}</label>
+        <div class="form-fields">
+            <input type="range" name="opacity" data-dtype="String" min="0" max="1" step="0.05" value="{{object.opacity}}">
+            <span class="range-value">{{object.opacity}}</span>
+        </div>
+    </div>
+    <div class="form-group">
         <label for="fadein">{{localize 'MonksEnhancedJournal.FadeIn'}}</label>
         <div class="form-fields">
-            <input type="number" name="fadein" step="any" data-dtype="Number" value="{{object.fadein}}" style="max-width:100px;">
+            <input type="number" name="fadein" step="any" data-dtype="Number" value="{{object.fadein}}" style="max-width: 100px; text-align: right;">
         </div>
     </div>
     <div class="form-group">
         <label for="fadeout">{{localize 'MonksEnhancedJournal.FadeOut'}}</label>
         <div class="form-fields">
-            <input type="number" name="fadeout" step="any" data-dtype="Number" value="{{object.fadeout}}" style="max-width:100px;">
+            <input type="number" name="fadeout" step="any" data-dtype="Number" value="{{object.fadeout}}" style="max-width: 100px; text-align: right;">
         </div>
     </div>
 </form>
