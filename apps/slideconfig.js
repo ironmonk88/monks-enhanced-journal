@@ -227,7 +227,7 @@ export class SlideConfig extends FormApplication {
         let y2 = (((text.bottom || 0) / 100) * 400);
         let style = {
             color: text.color,
-            'background-color': hexToRGBAString(colorStringToHex(text.background || '#000000'), (t.opacity != undefined ? t.opacity : 0.5)),
+            'background-color': hexToRGBAString(colorStringToHex(text.background || '#000000'), (text.opacity != undefined ? text.opacity : 0.5)),
             'text-align': (text.align == 'middle' ? 'center' : text.align),
             top: y + "px",
             left: x + "px",

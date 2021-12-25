@@ -1242,6 +1242,7 @@
     position: absolute;
     display: none;
     pointer-events: none;
+    z-index: 10;
 }
 
 .slide-config .slide-textarea .mover {
