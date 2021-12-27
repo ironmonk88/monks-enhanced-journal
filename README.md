@@ -1,3 +1,5 @@
+** If you are having problems running Enhanced Journals in v9 and get an error `Cannot set property type of #<JournalEntryData> which has only a getter` please deselect Lib: Document Sheet Registrar as it is causing issues. **
+
 # Monk's Enhanced Journal
 Add-On Module for Foundry VTT
 This is an enhanced version of the journal.  It allows for multiple types of journal entries, and adds increased functionality such as searching, private notes, bookmarks, and tabs.
