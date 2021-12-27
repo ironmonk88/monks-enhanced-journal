@@ -105,4 +105,11 @@ export const registerSettings = function () {
 		default: null,
 		type: String,
 	});
+
+	game.settings.register(modulename, "show-dialog", {
+		scope: "client",
+		default: true,
+		type: Boolean,
+		config: false
+	});
 }

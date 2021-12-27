@@ -66,6 +66,10 @@
                         {{localize 'MonksEnhancedJournal.Completed'}}
                     </div>
 
+                    <div class="item-name flexrow" style="flex:0 0 100px;justify-content:center;">
+                        {{localize 'MonksEnhancedJournal.Counter'}}
+                    </div>
+
                     {{#if owner}}
                     <div class="item-controls flexrow">
                         <a class="item-control objective-create" title="{{localize 'MonksEnhancedJournal.CreateObjective'}}" data-type="objective">
@@ -92,6 +96,10 @@
 
                             <div class="item-status flexrow" style="flex:0 0 100px;position:relative;justify-content:center;">
                                 <input class="objective-status" name="objectives.status" type="checkbox" {{checked this.status}} />
+                            </div>
+
+                            <div class="item-status flexrow" style="flex: 0 0 100px; text-align: center;">
+                                <span class="objective-counter">{{this.counter}}</span>
                             </div>
 
                             {{#if @root.owner}}

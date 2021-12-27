@@ -555,7 +555,13 @@ export class MonksEnhancedJournal {
         canvas.hud.bubbles.say(object, text);
     }
 
-    static openJournalEntry(entry, options = {}) {
+    static openObjectiveLink(ev) {
+        let id = $(ev.currentTarget).closest('li')[0].dataset.documentId;
+        let document = game.journal.get(id);
+        MonksEnhancedJournal.openJournalEntry(document);
+    }
+
+    static openJournalEntry(document, options = {}) {
         if (!game.user.isGM && !setting('allow-player'))
             return false;
 
@@ -567,30 +573,30 @@ export class MonksEnhancedJournal {
                 return false;
         }
 
-        if (entry) {
-            if (entry.data?.content?.includes('QuickEncountersTutorial'))
+        if (document) {
+            if (document.data?.content?.includes('QuickEncountersTutorial'))
                 return false;
 
-            let entrytype = entry.data.type;
-            entry.data.type = (entrytype == 'journalentry' || entrytype == 'oldentry' ? 'base' : entrytype);
-            let sheet = (!entry?._sheet ? entry?._getSheetClass() : entry?._sheet);
+            let entrytype = document.data.type;
+            document.data.type = (entrytype == 'journalentry' || entrytype == 'oldentry' ? 'base' : entrytype);
+            let sheet = (!document?._sheet ? document?._getSheetClass() : document?._sheet);
             if (sheet?.constructor?.name == 'QuestPreviewShim')
                 return false;
-            entry.data.type = entrytype;
+            document.data.type = entrytype;
         }
 
         if (options.render == false || options.activate == false)
             return false;
 
-        const allowed = Hooks.call(`openJournalEntry`, entry, options, game.user.id);
+        const allowed = Hooks.call(`openJournalEntry`, document, options, game.user.id);
         if (allowed === false)
             return false;
 
-        if (!game.user.isGM && entry.getUserLevel(game.user) === CONST.ENTITY_PERMISSIONS.LIMITED) {
-            if (entry.data.img) {
-                let img = new ImagePopout(entry.data.img, {
-                    title: entry.name,
-                    uuid: entry.uuid,
+        if (!game.user.isGM && document.getUserLevel(game.user) === CONST.ENTITY_PERMISSIONS.LIMITED) {
+            if (document.data.img) {
+                let img = new ImagePopout(document.data.img, {
+                    title: document.name,
+                    uuid: document.uuid,
                     shareable: false,
                     editable: false
                 });
@@ -601,32 +607,13 @@ export class MonksEnhancedJournal {
 
         //if the enhanced journal is already open, then just pass it the new object, if not then let it render as normal
         if (MonksEnhancedJournal.journal) {
-            if (entry)
-                MonksEnhancedJournal.journal.open(entry, options.newtab);
+            if (document)
+                MonksEnhancedJournal.journal.open(document, options.newtab);
             else
                 MonksEnhancedJournal.journal.render(true);
         }
         else
-            MonksEnhancedJournal.journal = new EnhancedJournal(entry).render(true);
-        /*
-        if (MonksEnhancedJournal.journal != undefined) {
-            log('JournalID', MonksEnhancedJournal.journal.appId, MonksEnhancedJournal.journal.tabs);
-            if (!MonksEnhancedJournal.journal.rendered) {
-                MonksEnhancedJournal.journal._render(true).then(() => {
-                    MonksEnhancedJournal.journal.open(entry);
-                })
-            } else
-                MonksEnhancedJournal.journal.open(entry, options.newtab);
-        }
-        else {
-            const sheet = entry.sheet;
-
-            if (sheet._minimized) return sheet.maximize();
-            else return sheet._render(true).then(() => {
-                if (MonksEnhancedJournal.journal)
-                    MonksEnhancedJournal.journal.open(entry);
-            });
-        }*/
+            MonksEnhancedJournal.journal = new EnhancedJournal(document).render(true);
 
         return true;
     }
@@ -990,25 +977,37 @@ export class MonksEnhancedJournal {
     static refreshObjectives() {
         let display = $('#objective-display').empty();
 
-        let quests = $('<ul>');
-        //find all in progress quests
-        for (let quest of game.journal) {
-            if (quest.getFlag('monks-enhanced-journal', 'type') == 'quest' && quest.testUserPermission(game.user, "OBSERVER") && quest.getFlag('monks-enhanced-journal', 'display') && quest.getFlag('monks-enhanced-journal', 'display')) {
-                //find all objectives
-                let objectives = $('<ul>');
-                $('<li>').append(quest.getFlag('monks-enhanced-journal', 'completed') ? '<i class="fas fa-check"></i> ' : '').append(`<b>${quest.name}</b>`).append(objectives).appendTo(quests);
+        if (setting('show-dialog')) {
+            let quests = $('<ul>');
+            //find all in progress quests
+            for (let quest of game.journal) {
+                if (quest.getFlag('monks-enhanced-journal', 'type') == 'quest' && quest.testUserPermission(game.user, "OBSERVER") && quest.getFlag('monks-enhanced-journal', 'display') && quest.getFlag('monks-enhanced-journal', 'display')) {
+                    //find all objectives
+                    let objectives = $('<ul>');
+                    $('<li>')
+                        .attr('data-document-id', quest.id)
+                        .append(quest.getFlag('monks-enhanced-journal', 'completed') ? '<i class="fas fa-check"></i> ' : '')
+                        .append(`<b>${quest.name}</b>`)
+                        .append(objectives)
+                        .on('click', MonksEnhancedJournal.openObjectiveLink.bind(this))
+                        .appendTo(quests);
 
-                if (setting('use-objectives')) {
-                    for (let objective of (quest.getFlag('monks-enhanced-journal', 'objectives') || [])) {
-                        if (objective.available)
-                            objectives.append($('<li>').html(objective.title || objective.content).attr('completed', objective.status));
+                    if (setting('use-objectives')) {
+                        for (let objective of (quest.getFlag('monks-enhanced-journal', 'objectives') || [])) {
+                            if (objective.available) {
+                                let li = $('<li>').addClass('flexrow').append($('<span>').html(objective.title || objective.content)).attr('completed', objective.status);
+                                if ($.isNumeric(objective.required))
+                                    li.append($('<span>').html(`${objective.done || 0}/${objective.required}`).css({ 'flex': '0 0 50px', 'text-align': 'right' }));
+                                objectives.append(li);
+                            }
+                        }
                     }
                 }
             }
-        }
 
-        if (quests.children().length > 0) {
-            display.append($('<div>').addClass('title').html('Quests')).append(quests);
+            if (quests.children().length > 0) {
+                display.append($('<div>').addClass('title').html('Quests')).append(quests);
+            }
         }
     }
 
@@ -1531,4 +1530,21 @@ Hooks.on('getJournalSheetHeaderButtons', (app, actions) => {
         app.object.data.type = app.object.data?.flags['monks-enhanced-journal']?.type;
     if (app.object.data.type == 'journalentry')
         app.object.data.type = 'base';
+});
+
+Hooks.on("getSceneControlButtons", (controls) => {
+    if (setting('show-objectives')) {
+        let noteControls = controls.find(control => control.name === "notes")
+        noteControls.tools.push({
+            name: "toggledialog",
+            title: "MonksEnhancedJournal.toggledialog",
+            icon: "fas fa-calendar-day",
+            toggle: true,
+            active: setting('show-dialog'),
+            onClick: toggled => {
+                game.settings.set('monks-enhanced-journal', 'show-dialog', toggled);
+                MonksEnhancedJournal.refreshObjectives();
+            }
+        });
+    }
 });

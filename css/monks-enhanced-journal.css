@@ -533,7 +533,9 @@
 
 .monks-journal-sheet .header-name input {
     background: none;
-    border: 1px solid transparent;
+    border: 1px solid transparent !important;
+    font-size: 32px !important;
+    height: 36px !important;
 }
 
 .monks-journal-sheet .header-name .header-search{

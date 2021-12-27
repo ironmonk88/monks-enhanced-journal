@@ -1,3 +1,13 @@
+# Version 1.0.38
+
+Added option to open a Journal Entry by clicking on an Objective link.
+
+Added the option for a counter on objectives.  In case they require doing multiple of the same thing.
+
+Added the option to display Objectives using a toggle button on the toolbar.
+
+Fixed an issue with saving lists on a Journal Entry.  Core changed some things and I think introduced an error.
+
 # Version 1.0.37
 
 Fixed issues with drag and drop

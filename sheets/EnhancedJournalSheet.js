@@ -635,4 +635,26 @@ export class EnhancedJournalSheet extends JournalSheet {
             object.update({ permission: permissions });
         }
     }
+
+    _getSubmitData(updateData = {}) {
+        const data = super._getSubmitData(updateData);
+        //Fix an issue with Foundry core not retrieving all the form inputs
+        for (let el of this.form.elements) {
+            if (!el.name || el.disabled || (el.tagName === "BUTTON")) continue;
+            const field = this.form.elements[el.name];
+
+            // Duplicate Fields
+            if (field instanceof RadioNodeList) {
+                const values = [];
+                for (let f of field) {
+                    if (f.type === "checkbox")
+                        values.push(f.checked);
+                }
+                if (values.length)
+                    data[el.name] = values;
+            }
+        }
+
+        return data;
+    }
 }

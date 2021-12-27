@@ -39,6 +39,9 @@ export class QuestSheet extends EnhancedJournalSheet {
 
         data.objectives = this.object.data.flags["monks-enhanced-journal"].objectives?.filter(o => {
             return this.object.isOwner || o.available;
+        }).map(o => {
+            let counter = { counter: ($.isNumeric(o.required) ? (o.done || 0) + '/' + o.required : '') };
+            return mergeObject(o, counter);
         });
 
         data.useobjectives = setting('use-objectives');
@@ -226,8 +229,8 @@ export class QuestSheet extends EnhancedJournalSheet {
         return await super._onSubmit(ev);
     }*/
 
-    _getSubmitData(){
-        let data = expandObject(super._getSubmitData());
+    _getSubmitData(updateData = {}) {
+        let data = expandObject(super._getSubmitData(updateData));
 
         let items = null;
         if (data.reward?.items) {

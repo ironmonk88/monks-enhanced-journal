@@ -195,7 +195,7 @@ export class EnhancedJournal extends Application {
                 this.subsheet.refresh();
 
             $('.content', this.element).attr('entity-type', this.object.data.type).attr('entity-id', this.object.id);
-            contentform.empty().attr('class', this.subsheet.options.classes.join(' ')).append(this.subdocument);
+            contentform.empty().attr('class', this.subsheet.options.classes.concat([`${game.system.id}`]).join(' ')).append(this.subdocument);
 
             //connect the tabs to the enhanced journal so that opening the regular document won't try and change tabs on the other window.
             this._tabs = this.subsheet.options.tabs.map(t => {

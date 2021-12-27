@@ -178,7 +178,7 @@ export class ShopSheet extends EnhancedJournalSheet {
     }
 
     _getSubmitData() {
-        let data = expandObject(super._getSubmitData());
+        let data = expandObject(super._getSubmitData(updateData));
 
         let items = null;
         if (data.items) {
