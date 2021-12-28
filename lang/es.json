@@ -112,6 +112,7 @@
   "MonksEnhancedJournal.SlideImage": "Imagen de diapositiva",
   "MonksEnhancedJournal.Sizing": "Dimensionado",
   "MonksEnhancedJournal.BackgroundColour": "Color de fondo",
+  "MonksEnhancedJournal.BackgroundOpacity": "Opacidad del fondo",
   "MonksEnhancedJournal.Text": "Texto",
   "MonksEnhancedJournal.TextColour": "Color del texto",
   "MonksEnhancedJournal.Justification": "Justificación",
@@ -213,6 +214,8 @@
   "MonksEnhancedJournal.Consequences": "Consecuencias",
   "MonksEnhancedJournal.Active": "Activar",
   "MonksEnhancedJournal.RefillItem": "Recargar objetos",
+  "MonksEnhancedJournal.Counter": "Contador",
+  "MonksEnhancedJournal.toggledialog": "Conmutar objetivos",
 
   "MonksEnhancedJournal.Contain": "Contener",
   "MonksEnhancedJournal.Cover": "Cubir",
