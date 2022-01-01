@@ -121,6 +121,14 @@ export class MonksEnhancedJournal {
             }
         });
 
+        if (JournalEntry.prototype.type == undefined) {
+            Object.defineProperty(JournalEntry.prototype, 'type', {
+                get: function () {
+                    return this.data.type || this.getFlag('monks-enhanced-journal', 'type') || 'base';
+                }
+            });
+        }
+
         let oldOnLayerClickRight = TokenLayer.prototype._onClickRight;
         TokenLayer.prototype._onClickRight = function (event) {
             oldOnLayerClickRight.call(this, event);
@@ -146,10 +154,7 @@ export class MonksEnhancedJournal {
             const documentId = element.parentElement.dataset.documentId;
             const entry = this.constructor.collection.get(documentId);
 
-            if (entry.data?.flags['monks-enhanced-journal']?.type)
-                entry.data.type = entry.data?.flags['monks-enhanced-journal']?.type;
-            if (entry.data.type == 'journalentry')
-                entry.data.type = 'base';
+            MonksEnhancedJournal.fixType(entry);
 
             if (game.MonksActiveTiles?.waitingInput || !MonksEnhancedJournal.openJournalEntry(entry))
                 wrapped(...args);
@@ -181,10 +186,7 @@ export class MonksEnhancedJournal {
 
             // Show the sheet with the appropriate mode
             if (!MonksEnhancedJournal.openJournalEntry(entry)) {
-                if (entry.data.flags['monks-enhanced-journal']?.type)
-                    entry.data.type = entry.data.flags['monks-enhanced-journal']?.type;
-                if (entry.data.type == 'journalentry')
-                    entry.data.type = 'base';
+                MonksEnhancedJournal.fixType(entry);
                 return entry.sheet.render(true, { sheetMode: mode });
             }
         }
@@ -577,12 +579,11 @@ export class MonksEnhancedJournal {
             if (document.data?.content?.includes('QuickEncountersTutorial'))
                 return false;
 
-            let entrytype = document.data.type;
-            document.data.type = (entrytype == 'journalentry' || entrytype == 'oldentry' ? 'base' : entrytype);
+            MonksEnhancedJournal.fixType(document);
+
             let sheet = (!document?._sheet ? document?._getSheetClass() : document?._sheet);
             if (sheet?.constructor?.name == 'QuestPreviewShim')
                 return false;
-            document.data.type = entrytype;
         }
 
         if (options.render == false || options.activate == false)
@@ -714,8 +715,7 @@ export class MonksEnhancedJournal {
 
         for (let entry of game.journal) {
             if (entry.data?.flags['monks-enhanced-journal']?.type) {
-                let type = entry.data?.flags['monks-enhanced-journal']?.type;
-                entry.data.type = (type == 'journalentry' || type == 'oldentry' ? 'base' : type);    //set the type of all entries since Foundry won't save the new type
+                MonksEnhancedJournal.fixType(entry);
             }
         }
 
@@ -1270,6 +1270,19 @@ export class MonksEnhancedJournal {
             MonksEnhancedJournal.journal.render(true);
         }
     }
+
+    static fixType(object, settype) {
+        let type = settype || object.data?.flags['monks-enhanced-journal']?.type;
+        type = (type == 'journalentry' || type == 'oldentry' ? 'base' : type);
+
+        if (game.modules.get('_document-sheet-registrar')?.active) {
+            object.setFlag('_document-sheet-registrar', 'type', type);
+            error(`Lib: Document Sheet Registrar is causing errors with Enhanced Journal.  It's recommended that you disable it`);
+        } else
+            object.data.type = type;    //set the type of all entries since Foundry won't save the new type
+
+        return type;
+    }
 }
 
 Hooks.on("renderJournalDirectory", async (app, html, options) => {
@@ -1296,7 +1309,8 @@ Hooks.once("ready", async function () {
 Hooks.on("preCreateJournalEntry", (entry, data, options, userId) => {
     let flags = { type: data.type };//(data.type == 'base' ? 'journalentry' : data.type) };
     if (data.type) {
-        entry.data.type = data.type;
+        MonksEnhancedJournal.fixType(entry);
+
         const cls = (entry._getSheetClass ? entry._getSheetClass() : null);
         if (cls && cls.defaultObject)
             flags = mergeObject(flags, cls.defaultObject);
@@ -1455,25 +1469,29 @@ Hooks.on('renderNoteConfig', (app, html, data) => {
 });
 
 Hooks.on("renderTokenConfig", (app, html, data) => {
-    let ctrl = $('<input>').attr('type', 'text').attr('name', 'flags.monks-enhanced-journal.chatbubble');
-    let group = $('<div>').addClass('form-group')
-        .append($('<label>').html('Token Dialog Journal Entry'))
-        .append(ctrl);
+    if (game.user.isGM) {
+        let ctrl = $('<input>').attr('type', 'text').attr('name', 'flags.monks-enhanced-journal.chatbubble');
+        let group = $('<div>').addClass('form-group')
+            .append($('<label>').html('Token Dialog Journal Entry'))
+            .append(ctrl);
 
-    let journalId = app.object.data.flags['monks-enhanced-journal']?.chatbubble;
-    let journal = game.journal.get(journalId);
+        let journalId = app.object.data.flags['monks-enhanced-journal']?.chatbubble;
+        let journal = game.journal.get(journalId);
 
-    let journalSelect = MonksEnhancedJournal.journalListing(ctrl, group, journal?.id, journal?.name, 'flags.monks-enhanced-journal.chatbubble');
-    ctrl.hide();
-    group.append(journalSelect);
+        let journalSelect = MonksEnhancedJournal.journalListing(ctrl, group, journal?.id, journal?.name, 'flags.monks-enhanced-journal.chatbubble');
+        ctrl.hide();
+        group.append(journalSelect);
 
-    let select = $('.journal-select', group);
-    let ul = $('.journal-list', group).appendTo(app.element);
-    window.setTimeout(function () {
-        ul.css({ left: select.position().left, top: (select.position().top + select.height() + 1), width: select.outerWidth() });
-    }, 100);
+        let select = $('.journal-select', group);
+        let ul = $('.journal-list', group).appendTo(app.element);
+        window.setTimeout(function () {
+            ul.css({ left: select.position().left, top: (select.position().top + select.height() + 1), width: select.outerWidth() });
+        }, 100);
 
-    $('div[data-tab="character"]', html).append(group);
+        $('div[data-tab="character"]', html).append(group);
+
+        app.setPosition({height: 'auto'});
+    }
 });
 
 Hooks.on("preDocumentSheetRegistrarInit", (settings) => {
@@ -1526,10 +1544,7 @@ Hooks.on("getActorDirectoryEntryContext", (html, entries) => {
 
 //Try and fix what data toolbox is breaking
 Hooks.on('getJournalSheetHeaderButtons', (app, actions) => {
-    if (app.object.data?.flags['monks-enhanced-journal']?.type)
-        app.object.data.type = app.object.data?.flags['monks-enhanced-journal']?.type;
-    if (app.object.data.type == 'journalentry')
-        app.object.data.type = 'base';
+    MonksEnhancedJournal.fixType(app.object);
 });
 
 Hooks.on("getSceneControlButtons", (controls) => {

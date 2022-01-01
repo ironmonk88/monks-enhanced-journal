@@ -115,7 +115,7 @@ export class EncounterSheet extends EnhancedJournalSheet {
         $('.item-refill', html).click(this.refillItems.bind(this));
     }
 
-    _getSubmitData() {
+    _getSubmitData(updateData = {}) {
         let data = expandObject(super._getSubmitData(updateData));
 
         let items = null;

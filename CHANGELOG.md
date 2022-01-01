@@ -1,3 +1,15 @@
+# Version 1.0.39
+
+Removed adding the system to the subdocument.  I know this is going to mess up the styling for PF2E, but the change was really messing up the stylings of all the other modules.
+
+I think I found a way to work around the issues with Lib: Document Sheet Registrar.
+
+Fixed an issue where players could see what Journal Entry was linked to a token for token dialog.
+
+Fixed an issue defaulting the price of shop items.
+
+Fixed an issue with Encounter sheet and Shop sheet not saving.
+
 # Version 1.0.38
 
 Added option to open a Journal Entry by clicking on an Objective link.

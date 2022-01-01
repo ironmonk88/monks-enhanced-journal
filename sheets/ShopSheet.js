@@ -64,8 +64,8 @@ export class ShopSheet extends EnhancedJournalSheet {
                     type: type,
                     img: entity.img,
                     qty: entity.data.data.quantity,
-                    price: entity.data.data.price,
-                    cost: entity.data.data.price,
+                    price: parseFloat(entity.data.data?.price?.value || entity.data.data.price) || 0,
+                    cost: parseFloat(entity.data.data?.price?.value || entity.data.data.price) || 0,
                     fromShop: true
                 }, sItem);
 
@@ -96,8 +96,8 @@ export class ShopSheet extends EnhancedJournalSheet {
                         type: aItem.type,
                         img: aItem.img,
                         name: aItem.name,
-                        price: aItem.data.data.price,
-                        cost: aItem.data.data.price,
+                        price: parseFloat(aItem.data.data?.price?.value || aItem.data.data.price) || 0,
+                        cost: parseFloat(aItem.data.data?.price?.value || aItem.data.data.price) || 0,
                         qty: aItem.data.data.quantity,
                         fromShop: false
                     }, aItem.data.flags['monks-enhanced-journal']);
@@ -110,6 +110,13 @@ export class ShopSheet extends EnhancedJournalSheet {
                     }
                 }
             }
+        }
+
+        for (let [k, v] of Object.entries(groups)) {
+            groups[k].items = groups[k].items.sort((a, b) => {
+                if (a.name < b.name) return -1;
+                return a.name > b.name ? 1 : 0;
+            })
         }
 
         data.groups = groups;
@@ -177,7 +184,7 @@ export class ShopSheet extends EnhancedJournalSheet {
         if (actorOptions) new ContextMenu($(html), ".actor-img", actorOptions);
     }
 
-    _getSubmitData() {
+    _getSubmitData(updateData = {}) {
         let data = expandObject(super._getSubmitData(updateData));
 
         let items = null;
