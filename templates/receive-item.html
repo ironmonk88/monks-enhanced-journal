@@ -1,0 +1,30 @@
+<div class="monks-enhanced-journal request-item item-card monks-journal-sheet sheet">
+    <div class="flexrow">
+        <div class="flexrow">
+            <img src="{{actor.img}}" class="actor-icon" />
+            <h4>{{actor.name}}</h4>
+        </div>
+    </div>
+    <ol class="items-list reward-items">
+        <li class="items-header flexrow">
+            <h3 class="item-name flexrow">{{localize 'MonksEnhancedJournal.Items'}}</h3>
+
+            <div class="item-controls item-quantity">{{localize 'MonksEnhancedJournal.Qty'}}</div>
+        </li>
+
+        <ol class="item-list">
+            {{#each items}}
+            <li class="item flexrow" data-id="{{this.id}}" draggable="false">
+                <div class="item-name flexrow">
+                    <div class="item-image" style="background-image: url('{{this.img}}')"></div>
+                    <h4>{{this.name}}</h4>
+                </div>
+
+                <div class="item-controls item-quantity">
+                    <span>{{this.quantity}}</span>
+                </div>
+            </li>
+            {{/each}}
+        </ol>
+    </ol>
+</div>

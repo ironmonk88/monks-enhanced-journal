@@ -34,6 +34,7 @@
 
 .monks-enhanced-journal .body {
     height: 100%;
+    width:100%;
 }
 
 .monks-enhanced-journal .content {
@@ -635,6 +636,7 @@
 .monks-journal-sheet .place-container,
 .monks-journal-sheet .organization-container,
 .monks-journal-sheet .shop-container,
+.monks-journal-sheet .loot-container,
 .monks-journal-sheet .poi-container {
     height: 100%;
 }
@@ -692,13 +694,22 @@
 .monks-journal-sheet.sheet .sheet-body {
     flex: 1;
     overflow: hidden;
+    height: calc(100% - 75px);
+}
+
+.monks-journal-sheet.sheet .sheet-body.half-size {
+    height: calc(100% - 200px);
+}
+
+.monks-journal-sheet.sheet .loot-container .sheet-body.half-size {
+    height: calc(100% - 165px);
 }
 
 .monks-journal-sheet.sheet .editor {
     overflow: visible;
     /*max-height: fit-content;
-    height: fit-content;*/
-    height:100%;
+height: fit-content;*/
+    height: 100%;
 }
 
 .monks-journal-sheet.sheet .editor .editor-content {
@@ -735,6 +746,7 @@
 .monks-journal-sheet.sheet .quest-container,
 .monks-journal-sheet.sheet .organization-container,
 .monks-journal-sheet.sheet .shop-container,
+.monks-journal-sheet.sheet .loot-container,
 .monks-journal-sheet.sheet .poi-container {
     height: 100%;
 }
@@ -754,7 +766,8 @@
 .monks-journal-sheet.sheet .quest-container .sheet-header img.profile,
 .monks-journal-sheet.sheet .organization-container .sheet-header img.profile,
 .monks-journal-sheet.sheet .poi-container .sheet-header img.profile,
-.monks-journal-sheet.sheet .shop-container .sheet-header img.profile {
+.monks-journal-sheet.sheet .shop-container .sheet-header img.profile,
+.monks-journal-sheet.sheet .loot-container .sheet-header img.profile{
     width: 100%;
     height: 100%;
     object-fit: contain;
@@ -799,7 +812,8 @@
 .monks-journal-sheet.sheet .quest-container .sheet-header .header-details .form-group label,
 .monks-journal-sheet.sheet .poi-container .sheet-header .header-details .form-group label,
 .monks-journal-sheet.sheet .organization-container .sheet-header .header-details .form-group label,
-.monks-journal-sheet.sheet .shop-container .sheet-header .header-details .form-group label {
+.monks-journal-sheet.sheet .shop-container .sheet-header .header-details .form-group label,
+.monks-journal-sheet.sheet .loot-container .sheet-header .header-details .form-group label{
     max-width: 175px;
 }
 
@@ -808,7 +822,8 @@
 .monks-journal-sheet.sheet .quest-container .sheet-header .header-details .form-group,
 .monks-journal-sheet.sheet .poi-container .sheet-header .header-details .form-group,
 .monks-journal-sheet.sheet .organization-container .sheet-header .header-details .form-group,
-.monks-journal-sheet.sheet .shop-container .sheet-header .header-details .form-group {
+.monks-journal-sheet.sheet .shop-container .sheet-header .header-details .form-group,
+.monks-journal-sheet.sheet .loot-container .sheet-header .header-details .form-group{
     margin-right: 8px;
 }
 
@@ -1516,6 +1531,17 @@
     color: #7a7971;
 }
 
+.monks-journal-sheet.sheet .loot-container .items-list {
+    overflow-x: auto;
+    overflow-y: unset;
+    flex-wrap: nowrap;
+}
+
+.monks-journal-sheet.sheet .loot-container .items-list.loot-characters .items-list  {
+    overflow-y: hidden;
+    height: 110px;
+}
+
 .monks-journal-sheet.sheet .items-list .item-list {
     list-style: none;
     margin: 0;
@@ -1542,7 +1568,8 @@
     overflow-x: hidden;
 }
 
-.monks-journal-sheet.sheet .shop-container .items-list .item-name h4 {
+.monks-journal-sheet.sheet .shop-container .items-list .item-name h4,
+.monks-journal-sheet.sheet .loot-container .items-list .item-name h4 {
     cursor: pointer;
 }
 
@@ -1569,7 +1596,8 @@
     text-align: center;
 }
 
-.monks-journal-sheet.sheet .items-list .item-controls a.active {
+.monks-journal-sheet.sheet .items-list .item-controls a.active,
+.monks-journal-sheet.sheet .items-list .item-controls input[type="checkbox"]:checked + .item-action{
     color: #ff6400;
 }
 
@@ -1609,16 +1637,19 @@
 }
 
 .monks-journal-sheet.sheet .shop-container .item-list > li input,
+.monks-journal-sheet.sheet .loot-container .item-list > li input,
 .monks-journal-sheet.sheet .person-container .items-list > li input {
     border-color: transparent;
 }
 
 .monks-journal-sheet.sheet .shop-container .item-list > li input:hover,
+.monks-journal-sheet.sheet .loot-container .item-list > li input:hover,
 .monks-journal-sheet.sheet .person-container .items-list > li input:hover {
     border-color: unset;
 }
 
-.monks-journal-sheet.sheet .shop-container .item-list .item .item-summary {
+.monks-journal-sheet.sheet .shop-container .item-list .item .item-summary,
+.monks-journal-sheet.sheet .loot-container .item-list .item .item-summary {
     flex: 0 0 100%;
     padding: .5rem;
     border-top: 1px solid var(--faint-color);
@@ -2110,7 +2141,8 @@ a.picture-link {
     word-break: break-all;
 }
 
-a.picture-link i {
+a.picture-link i,
+a.inline-request-roll i {
     color: #7a7971;
 }
 
@@ -2323,10 +2355,76 @@ a.picture-link.broken {
     margin-left:-60px;
 }
 
+.monks-enhanced-journal .actor-img #context-menu {
+    margin-left: -70px;
+}
+
 .monks-enhanced-journal .checklist #context-menu {
     max-width: 200px;
 }
 
 .monks-journal-sheet .window-resizable-handle {
     z-index: 100;
+}
+
+.monks-journal-sheet a[disabled] {
+    pointer-events: none;
+}
+
+.monks-journal-sheet .loot-player {
+    width: 14px;
+    line-height: 12px;
+    font-size: 10px;
+    text-align: center;
+    color: #000;
+    font-weight: 700;
+    background: #97dff4;
+    border: 1px solid #000;
+    border-radius: 8px;
+    display:inline-block;
+}
+
+.monks-journal-sheet .loot-character .loot-player {
+    position:absolute;
+    top:2px;
+    left:2px;
+}
+
+.loot-character {
+    height: 100px;
+    flex: 0 0 80px;
+    margin: 0 8px;
+    width:80px;
+    position: relative;
+}
+
+.loot-character > img {
+    width:80px;
+    height: 80px;
+    object-fit: contain;
+}
+
+.loot-character > .character-name {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.loot-characters .items-list .items-list {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    width: 100%;
+}
+
+.monks-journal-sheet .loot-character #context-menu {
+    top: 50%;
+}
+
+.monks-journal-sheet.sheet .items-list .item.empty .item-name .item-image {
+    filter: grayscale(100%);
+    opacity: 0.7;
+}
+
+.monks-enhanced-journal.request-item.item-card .items-list.reward-items{
+    overflow-y: unset;
 }

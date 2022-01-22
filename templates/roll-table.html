@@ -1,0 +1,16 @@
+<form>
+    <div class="form-group">
+        <label>Rollable Table</label>
+        <select name="rollable-table">
+            {{ selectGroups rollTables }}
+        </select>
+    </div>
+    <div class="form-group">
+        <label>Number of items</label>
+        <input name="count" type="number" min="1" value="1" style="text-align:right;" />
+    </div>
+    <div class="form-group">
+        <label>Clear Items</label>
+        <input name="clear" type="checkbox" />
+    </div>
+</form>

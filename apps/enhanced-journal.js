@@ -896,48 +896,6 @@ export class EnhancedJournal extends Application {
             return this.subsheet._onDragStart(event);
     }
 
-    /*
-    async itemDropped(id, actor) {
-        if (this.object.type == 'quest') {
-
-        } else {
-            let items = this.object.getFlag('monks-enhanced-journal', 'items');
-            if (items) {
-                let item = items.find(i => i.id == id);
-                if (item) {
-                    item.received = actor.name;
-                    item.assigned = true;
-                    this.object.setFlag('monks-enhanced-journal', 'items', items).then(() => {
-                        log('Item Dropped', item);
-                        this.render(true);
-                    });
-                }
-            }
-        }
-    }
-
-    async itemPurchased(id, actor) {
-        //this is exclusively for the Shop
-        let items = this.object.getFlag('monks-enhanced-journal', 'items');
-        if (items) {
-            let item = items.find(i => i.id == id);
-            if (item) {
-                if (game.user.isGM) {
-                    item.remaining = Math.max(item.remaining - 1, 0);
-                    this.object.setFlag('monks-enhanced-journal', 'items', items);
-                } else {
-                    MonksEnhancedJournal.emit("purchaseItem",
-                        {
-                            uuid: this.object.uuid,
-                            itemid: id,
-                            qty: 1
-                        }
-                    );
-                }
-            }
-        }
-    }*/
-
     _onDrop(event) {
         log('enhanced journal drop', event);
         let result = this.subsheet._onDrop(event);
@@ -1143,6 +1101,13 @@ export class EnhancedJournal extends Application {
                 icon: '<i class="fas fa-dolly-flatbed"></i>',
                 callback: li => {
                     this.convert('shop');
+                }
+            },
+            {
+                name: i18n("MonksEnhancedJournal.loot"),
+                icon: '<i class="fas fa-donate"></i>',
+                callback: li => {
+                    this.convert('loot');
                 }
             }
         ], { eventName: 'click' });

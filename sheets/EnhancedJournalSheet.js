@@ -240,11 +240,16 @@ export class EnhancedJournalSheet extends JournalSheet {
         const a = event.currentTarget;
 
         if (game.MonksTokenBar) {
+            let data = duplicate(a.dataset);
+            if (data.dc) data.dc = parseInt(data.dc);
+            if (data.fastForward) data.fastForward = true;
+            if (data.silent) data.silent = true;
+
             let requesttype = a.dataset.requesttype.toLowerCase();
             if (requesttype == 'request')
-                game.MonksTokenBar.requestRoll(canvas.tokens.controlled, a.dataset);
+                game.MonksTokenBar.requestRoll(canvas.tokens.controlled, data);
             else if (requesttype == 'contested')
-                game.MonksTokenBar.contextedRoll();
+                game.MonksTokenBar.requestContestedRoll({ request: a.dataset.request }, { request: a.dataset.request1 }, data);
         }
     }
 
@@ -286,8 +291,8 @@ export class EnhancedJournalSheet extends JournalSheet {
             editable: false
         })._render(true);
 
-        if (game.user.isGM)
-            this._onShowPlayers({ data: { object: document } });
+        //if (game.user.isGM)
+        //    this._onShowPlayers({ data: { object: document } });
     }
 
     _onEditImage(event) {
@@ -511,9 +516,71 @@ export class EnhancedJournalSheet extends JournalSheet {
         });
     }
 
+    getItemGroups(data) {
+        let type = data?.data?.flags['monks-enhanced-journal'].type;
+        let purchasing = data?.data?.flags['monks-enhanced-journal'].purchasing;
+
+        let groups = {};
+        for (let item of data.items || data?.data?.flags['monks-enhanced-journal'].items || []) {
+            let requests = (Object.entries(item.requests || {})).map(([k, v]) => {
+                if (!v)
+                    return null;
+                let user = game.users.get(k);
+                if (!user)
+                    return null;
+                return { id: user.id, border: user.data.border, color: user.data.color, letter: user.name[0], name: user.name };
+            }).filter(r => !!r);
+
+            let hasRequest = (requests.find(r => r.id == game.user.id) != undefined);
+            let quantity = (item.data?.quantity == undefined ? "" : (item.data?.quantity.hasOwnProperty("value") ? item.data?.quantity.value : item.data?.quantity));
+            let text = (type == 'shop' ?
+                (quantity === 0 ? "Sold Out" : (item.lock ? "Unavailable" : "Purchase")) :
+                (purchasing == "free" ? "Take" : (hasRequest ? "Cancel" : "Request")));
+            let icon = (type == 'shop' ?
+                (quantity === 0 ? "" : (item.lock ? "fa-lock" : "fa-dollar-sign")) :
+                (purchasing == "free" ? "fa-hand-paper" : (hasRequest ? "" : "fa-hand-holding-medical")));
+
+            let price = (item.data?.denomination != undefined ? item.data?.value.value + " " + item.data?.denomination.value : this.getCurrency(item.data?.price));
+            let itemData = {
+                id: item._id,
+                name: item.name,
+                type: item.type,
+                img: item.img,
+                hide: item.hide,
+                lock: item.lock,
+                quantity: quantity,
+                remaining: item.data?.remaining,
+                price: price,
+                cost: this.getCurrency(item.data?.cost) || price,
+                text: text,
+                icon: icon,
+                assigned: item.assigned,
+                received: item.received,
+                requests: requests
+            };
+
+            if (game.user.isGM || this.object.isOwner || (item.hide !== true && (quantity > 0 || setting('show-zero-quantity')))) {
+                if (groups[item.type] == undefined)
+                    groups[item.type] = { name: item.type, items: [] };
+                groups[item.type].items.push(itemData);
+            }
+        }
+
+        for (let [k, v] of Object.entries(groups)) {
+            groups[k].items = groups[k].items.sort((a, b) => {
+                if (a.name < b.name) return -1;
+                return a.name > b.name ? 1 : 0;
+            })
+        }
+
+        return groups;
+    }
+
     async getDocument(data) {
         let document;
-        if (data.pack) {
+        if (data.data) {
+            document = new CONFIG.Item.documentClass(data.data);
+        } else if (data.pack) {
             const pack = game.packs.get(data.pack);
             let id = data.id;
             if (data.lookup) {
@@ -523,31 +590,243 @@ export class EnhancedJournalSheet extends JournalSheet {
             }
             document = id ? await pack.getDocument(id) : null;
         } else {
-            document = game.collections.get(data.type).get(data.id);
-            if (document.documentName === "Scene" && document.journal)
-                document = document.journal;
-            if (!document.testUserPermission(game.user, "LIMITED")) {
-                return ui.notifications.warn(`You do not have permission to view this ${document.documentName} sheet.`);
+            if (data.type) {
+                document = game.collections.get(data.type).get(data.id);
+                if (document) {
+                    if (document.documentName === "Scene" && document.journal)
+                        document = document.journal;
+                    if (!document.testUserPermission(game.user, "LIMITED")) {
+                        return ui.notifications.warn(`You do not have permission to view this ${document.documentName} sheet.`);
+                    }
+                }
             }
         }
 
-        let result = { document: document, data: {} };
-        if (document) {
-            result.data = {
-                id: document.id,
-                uuid: document.uuid,
-                img: document.img || document.data?.img,
-                name: document.name,
-                qty: 1
+        return document;
+    }
+
+    static purchaseItem(entry, id, actor, user, purchased = false) {
+        let items = duplicate(entry.getFlag('monks-enhanced-journal', 'items') || []);
+        let rewards;
+        if (entry.getFlag('monks-enhanced-journal', 'rewards')) {
+            rewards = duplicate(entry.getFlag('monks-enhanced-journal', 'rewards'));
+            let reward = rewards.find(r => r.active);
+            if (reward)
+                items = reward.items;
+        }
+        if (items) {
+            let item = items.find(i => i._id == id);
+            if (item) {
+                if (item.data.remaining) {
+                    item.data.remaining = Math.max(item.data.remaining - 1, 0);
+                    item.received = actor.name;
+                    item.assigned = true;
+                } else {
+                    if (item.data.quantity && this.getCurrency(item.data.quantity, "") != "") {
+                        let newQty = Math.max(this.getCurrency(item.data.quantity) - 1, 0);
+                        item.data.quantity = (item.data.quantity.hasOwnProperty("value") ? { value: newQty } : newQty);
+                    }
+                }
+                if (rewards)
+                    entry.setFlag('monks-enhanced-journal', 'rewards', rewards);
+                else {
+                    if(entry.getFlag('monks-enhanced-journal', 'type') == 'loot')
+                        items = items.filter(i => this.getCurrency(i.data.quantity) > 0);
+                    entry.setFlag('monks-enhanced-journal', 'items', items);
+                }
+                if(purchased != 'nochat')
+                    this.sendChatPurchase(actor, item, purchased, user);
+            }
+        }
+    }
+
+    static async sendChatPurchase(actor, item, purchased = false, user = game.user.id) {
+        if (setting('chat-message')) {
+            let speaker = ChatMessage.getSpeaker({ actor });
+
+            let messageContent = {
+                actor: { id: actor.id, name: actor.name, img: actor.img },
+                items: [{ id: item.id, name: item.name, img: item.img, quantity: 1 }]
+            }
+
+            //create a chat message
+            let whisper = ChatMessage.getWhisperRecipients("GM").map(u => u.id);
+            //get players that own this character
+            if (actor.data.permission.default >= CONST.DOCUMENT_PERMISSION_LEVELS.OBSERVER)
+                whisper = null;
+            else {
+                for (let [user, perm] of Object.entries(actor.data.permission)) {
+                    if (perm >= CONST.DOCUMENT_PERMISSION_LEVELS.OBSERVER && !whisper.find(u => u == user))
+                        whisper.push(user);
+                }
+            }
+            let content = await renderTemplate("./modules/monks-enhanced-journal/templates/receive-item.html", messageContent);
+            let messageData = {
+                user: user,
+                speaker: speaker,
+                type: CONST.CHAT_MESSAGE_TYPES.OTHER,
+                content: content,
+                flavor: (actor.alias ? actor.alias : actor.name) + (purchased ? " purchased" : " received") + " an item",
+                whisper: whisper,
             };
 
-            if (data.type)
-                result.data.type = data.type;
-
-            if (data.pack)
-                result.data.pack = data.pack;
+            ChatMessage.create(messageData, {});
         }
+    }
+
+    async getItemData(data) {
+        let document = await this.getDocument(data);
+        if (!document)
+            return null;
+
+        let result = {
+            id: document.id,
+            uuid: document.uuid,
+            img: document.img || document.data?.img,
+            name: document.name,
+            quantity: 1,
+            type: document.data.flags['monks-enhanced-journal']?.type
+        };
+
+        if (data.type)
+            result.type = data.type;
+
+        if (data.pack)
+            result.pack = data.pack;
+
         return result;
+    }
+
+    clearAllItems() {
+        Dialog.confirm({
+            title: `Clear contents`,
+            content: `<h4>${game.i18n.localize("AreYouSure")}</h4><p>All items will be permanently deleted and cannot be recovered.</p>`,
+            yes: () => {
+                this.object.setFlag('monks-enhanced-journal', 'items', []);
+            },
+        });
+    }
+
+    async editItem(event) {
+        let id = $(event.currentTarget).closest('li').attr('data-id');
+        let items = (this.object.getFlag('monks-enhanced-journal', 'items') || []);
+
+        if (this.type == "quest") {
+            let rewards = this.getRewardData();
+            if (rewards.length) {
+                let reward = this.getReward(rewards);
+                items = reward.items;
+            }
+        }
+
+        
+
+        let itemData = items.find(i => i._id == id);
+        if (itemData) {
+            let item = new CONFIG.Item.documentClass(itemData);
+            let sheet = item.sheet;
+
+            let newSubmit = async (event, { updateData = null, preventClose = false, preventRender = false } = {}) => {
+                event.preventDefault();
+
+                sheet._submitting = true;
+                const states = this.constructor.RENDER_STATES;
+
+                // Process the form data
+                const formData = expandObject(sheet._getSubmitData(updateData));
+
+                let items = duplicate(this.object.getFlag('monks-enhanced-journal', 'items') || []);
+                let itm = items.find(i => i._id == itemData._id);
+                if (itm) {
+                    itm = mergeObject(itm, formData);
+                    await this.object.setFlag('monks-enhanced-journal', 'items', items);
+                }
+
+                mergeObject(sheet.object.data, formData);
+
+                // Handle the form state prior to submission
+                let closeForm = sheet.options.closeOnSubmit && !preventClose;
+                const priorState = sheet._state;
+                if (preventRender) sheet._state = states.RENDERING;
+                if (closeForm) sheet._state = states.CLOSING;
+
+                // Restore flags and optionally close the form
+                sheet._submitting = false;
+                if (preventRender) sheet._state = priorState;
+                if (closeForm) await sheet.close({ submit: false, force: true });
+            }
+
+            sheet._onSubmit = newSubmit.bind(sheet);
+            try {
+                sheet.render(true);
+            } catch {
+                ui.notifications.warn("Error trying to edit this object");
+            }
+        }
+    }
+
+    async rollTable() {
+        let rolltables = [];
+
+        for (let pack of game.packs) {
+            if (pack.documentName == 'RollTable') {
+                const index = await pack.getIndex();
+                let entries = [];
+                const tableString = `Compendium.${pack.collection}.`;
+                for (let table of index) {
+                    entries.push({
+                        name: table.name,
+                        uuid: tableString + table._id,
+                    });
+                }
+
+                let groups = entries.sort((a, b) => { return a.name.localeCompare(b.name) }).reduce((a, v) => ({ ...a, [v.uuid]: v.name }), {});
+                rolltables.push({ text: pack.metadata.label, groups: groups });
+            }
+        };
+
+        let groups = game.tables.map(t => { return { uuid: t.uuid, name: t.name } }).sort((a, b) => { return a.name.localeCompare(b.name) }).reduce((a, v) => ({ ...a, [v.uuid]: v.name }), {});
+        rolltables.push({ text: "Rollable Tables", groups: groups });
+
+        let that = this;
+
+        let html = await renderTemplate("modules/monks-enhanced-journal/templates/roll-table.html", { rollTables: rolltables });
+        Dialog.confirm({
+            title: `Populate from Rollable table`,
+            content: html,
+            yes: async (html) => {
+                let rolltable = $('[name="rollable-table"]').val();
+                let count = $('[name="count"]').val();
+                let clear = $('[name="clear"]').prop("checked");
+
+                let table = await fromUuid(rolltable);
+                if (table) {
+                    let items = (clear ? [] : that.object.getFlag('monks-enhanced-journal', 'items') || []);
+
+                    for (let i = 0; i < count; i++) {
+                        let result = await table.draw({ rollMode: "selfroll", displayChat: false });
+
+                        let item = null;
+
+                        if (result.results[0].data.collection === "Item") {
+                            item = game.items.get(result.results[0].data.resultId);
+                        } else {
+                            // Try to find it in the compendium
+                            const items = game.packs.get(result.results[0].data.collection);
+                            item = await items.getDocument(result.results[0].data.resultId);
+                        }
+
+                        if (item) {
+                            let itemData = item.toObject();
+                            itemData._id = makeid();
+                            items.push(itemData);
+                        }
+                    }
+
+                    that.object.setFlag('monks-enhanced-journal', 'items', items);
+                }
+            },
+        });
     }
 
     _deleteItem(event) {
@@ -557,7 +836,7 @@ export class EnhancedJournalSheet extends JournalSheet {
 
     deleteItem(id, container) {
         let data = duplicate(this.object.data.flags["monks-enhanced-journal"][container]);
-        data.findSplice(i => i.id == id);
+        data.findSplice(i => i.id == id || i._id == id);
         this.object.setFlag('monks-enhanced-journal', container, data);
     }
 
@@ -617,6 +896,9 @@ export class EnhancedJournalSheet extends JournalSheet {
         if (options?.showpic || object.data?.flags["monks-enhanced-journal"]?.type == 'picture')
             args.image = object.data.img;
 
+        if (!object.data.img && !object.data.content)
+            return ui.notifications.warn("Cannot show an entry that has no content or image");
+
         MonksEnhancedJournal.emit("showEntry", args);
 
         ui.notifications.info(game.i18n.format("MonksEnhancedJournal.MsgShowPlayers", {
@@ -656,5 +938,124 @@ export class EnhancedJournalSheet extends JournalSheet {
         }
 
         return data;
+    }
+
+    static getCurrency(currency, defvalue = 0) {
+        if (!currency)
+            return 0;
+        return (currency.hasOwnProperty("value") ? currency.value : currency) || defvalue;
+    }
+
+    getCurrency(currency) {
+        return this.constructor.getCurrency(currency);
+    }
+
+    static async assignItems(items, currency = {}, { clear = false, name = null } = {}) {
+        let lootSheet = setting('loot-sheet');
+        let lootentity = setting('loot-entity');
+        let collection = (['lootsheetnpc5e', 'merchantsheetnpc'].includes(lootSheet) ? game.actors : game.journal);
+
+        let getLootableName = () => {
+            let folder = setting('loot-folder');
+
+            //find the folder and find the next available 'Loot Entry (x)'
+            let previous = collection.filter(e => {
+                return e.data.folder == folder && e.name.startsWith("Loot Entry");
+            }).map((e, i) =>
+                parseInt(e.name.replace('Loot Entry ', '').replace('(', '').replace(')', '')) || (i + 1)
+            ).sort((a, b) => { return b - a; });
+            let num = (previous.length ? previous[0] + 1 : 1);
+
+            name = (num == 1 ? 'Loot Entry' : `Loot Entry (${num})`);
+            return name;
+        }
+
+        let entity;
+        if (lootentity != 'create') {
+            entity = await collection.get(lootentity);//find the correct entity;
+            name = entity?.name;
+
+            if (entity == undefined)
+                warn("Could not find Loot Entity, defaulting to creating one");
+        }
+
+        if (lootentity == 'create' || entity == undefined) {
+            //create the entity in the Correct Folder
+            let folder = setting('loot-folder');
+
+            if (name == undefined || name == '')
+                name = getLootableName();
+
+            const cls = collection.documentClass;
+            if (['lootsheetnpc5e', 'merchantsheetnpc'].includes(lootSheet)) {
+                entity = await cls.create({ folder: folder, name: name, img: 'icons/svg/chest.svg', type: 'npc', flags: { core: { 'sheetClass': (lootSheet == "lootsheetnpc5e" ? 'dnd5e.LootSheetNPC5e' : 'core.a') } }, permission: { 'default': CONST.ENTITY_PERMISSIONS.OBSERVER } });
+                ui.actors.render();
+            } else {
+                entity = await cls.create({ folder: folder, name: name, permission: { 'default': CONST.ENTITY_PERMISSIONS.OBSERVER } }, { render: false });
+                await entity.setFlag('monks-enhanced-journal', 'type', 'loot');
+                await entity.setFlag('monks-enhanced-journal', 'purchasing', 'confirm');
+                ui.journal.render();
+            }
+        }
+
+        if (!entity)
+            return ui.notifications.warn("Could not find Loot Entity");
+
+        if (clear && lootentity != 'create') {
+            if (['lootsheetnpc5e', 'merchantsheetnpc'].includes(lootSheet)) {
+                for (let item of entity.items) {
+                    await item.delete();
+                }
+            } else {
+                await entity.setFlag('monks-enhanced-journal', 'items', []);
+            }
+        }
+
+        let newitems = items.map(i => {
+            let item = duplicate(i);
+            item._id = makeid();
+            return (item.data.remaining > 0 ? item : null);
+        }).filter(i => i);
+
+        if (['lootsheetnpc5e', 'merchantsheetnpc'].includes(lootSheet)) {
+            entity.createEmbeddedDocuments("Item", newitems);
+
+            let newcurr = entity.data.data.currency || {};
+            for (let curr of Object.keys(CONFIG[game.system.id.toUpperCase()]?.currencies || {})) {
+                if (currency[curr]) {
+                    newVal = parseInt(this.getCurrency(newcurr[curr]) + (currency[curr] || 0));
+                    newcurr[curr] = (newcurr[curr].hasOwnProperty("value") ? { value: newVal } : newVal);
+                }
+            }
+
+            if (Object.keys(newcurr).length > 0)
+                entity.update({ data: { currency: newcurr } });
+        } else if (lootSheet == 'monks-enhanced-journal') {
+            let loot = duplicate(entity.getFlag('monks-enhanced-journal', 'items') || []);
+
+            loot = loot.concat(newitems);
+            await entity.setFlag('monks-enhanced-journal', 'items', loot);
+
+            let newcurr = entity.getFlag("monks-enhanced-journal", "currency") || {};
+            for (let curr of Object.keys(CONFIG[game.system.id.toUpperCase()]?.currencies || {})) {
+                if (currency[curr]) {
+                    newcurr[curr] = parseInt(EnhancedJournalSheet.getCurrency(newcurr[curr]) + (currency[curr] || 0));
+                }
+            }
+            await entity.setFlag('monks-enhanced-journal', 'currency', newcurr);
+        }
+
+        ui.notifications.info(`Items added to ${entity.name}`);
+
+        //set the currency to 0 and the remaining to 0 for all items
+        for (let item of items) {
+            if (item.data.remaining > 0) {
+                item.data.remaining = 0;
+                item.received = entity.name;
+                item.assigned = true;
+            }
+        }
+
+        return items;
     }
 }

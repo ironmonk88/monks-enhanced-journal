@@ -25,7 +25,7 @@ export class QuestSheet extends EnhancedJournalSheet {
         });
     }
 
-    getData() {
+    async getData() {
         let data = super.getData();
 
         data.showtoplayers = this.object.data.permission["default"] >= CONST.ENTITY_PERMISSIONS.OBSERVER;
@@ -47,14 +47,18 @@ export class QuestSheet extends EnhancedJournalSheet {
         data.useobjectives = setting('use-objectives');
 
         data.rewards = this.getRewardData();
-        if (data.rewards.length)
+        if (data.rewards.length) {
             data.reward = this.getReward(data.rewards);
+        }
+
+        data.valStr = (['pf2e'].includes(game.system.id) ? ".value" : "");
 
         return data;
     }
 
     getRewardData() {
         let rewards;
+
         if (this.object.data.flags["monks-enhanced-journal"].rewards == undefined &&
                 (this.object.data.flags["monks-enhanced-journal"].items != undefined ||
             this.object.data.flags["monks-enhanced-journal"].xp != undefined ||
@@ -105,6 +109,11 @@ export class QuestSheet extends EnhancedJournalSheet {
             reward = rewards[0];
             this.object.setFlag('monks-enhanced-journal', 'reward', reward.id);
         }
+        let currency = Object.keys(CONFIG[game.system.id.toUpperCase()]?.currencies || {}).reduce((a, v) => ({ ...a, [v]: 0 }), {});
+        reward.currency = mergeObject(currency, reward.currency);
+
+        reward.groups = this.getItemGroups(reward);
+
         return reward;
     }
 
@@ -131,6 +140,8 @@ export class QuestSheet extends EnhancedJournalSheet {
     activateListeners(html, enhancedjournal) {
         super.activateListeners(html, enhancedjournal);
 
+        let that = this;
+
         $('.objective-create', html).on('click', $.proxy(this.createObjective, this));
         $('.objective-edit', html).on('click', $.proxy(this.editObjective, this));
         $('.objective-delete', html).on('click', $.proxy(this._deleteItem, this));
@@ -146,9 +157,11 @@ export class QuestSheet extends EnhancedJournalSheet {
         $('.reward-list .journal-tab .tab-content', html).click(this.changeReward.bind(this));
         $('.reward-list .journal-tab .close', html).click(this.deleteReward.bind(this));
         $('.reward-list .tab-add', html).click(this.addReward.bind(this));
-        $('.assign-items', html).click(this.constructor.assignItems.bind(this));
+        $('.assign-items', html).click(this.constructor.assignItems.bind(this.object));
 
         $('.item-refill', html).click(this.refillItems.bind(this));
+        $('.item-edit', html).on('click', this.editItem.bind(this));
+        $('.item-delete', html).on('click', this._deleteItem.bind(this));
 
         const actorOptions = this._getPersonActorContextOptions();
         if (actorOptions) new ContextMenu($(html), ".actor-img", actorOptions);
@@ -232,75 +245,33 @@ export class QuestSheet extends EnhancedJournalSheet {
     _getSubmitData(updateData = {}) {
         let data = expandObject(super._getSubmitData(updateData));
 
-        let items = null;
-        if (data.reward?.items) {
-            for (let [k, v] of Object.entries(data.reward.items)) {
-                let values = (v instanceof Array ? v : [v]);
-                if (items == undefined) {
-                    items = values.map(item => { let obj = {}; obj[k] = (k == 'qty' || k == 'remaining' ? parseInt(item) : item); return obj; });
-                } else {
-                    for (let i = 0; i < values.length; i++) {
-                        items[i][k] = (k == 'qty' || k == 'remaining' ? parseInt(values[i]): values[i]);
-                    }
+        data.flags['monks-enhanced-journal'].rewards = duplicate(this.getRewardData() || []);
+        for (let reward of data.flags['monks-enhanced-journal'].rewards) {
+            let dataReward = data.reward[reward.id];
+            let olditems = duplicate(reward.items);
+            reward = mergeObject(reward, dataReward);
+            reward.items = olditems;
+            if (reward.items && dataReward) {
+                for (let item of reward.items) {
+                    let dataItem = dataReward.items[item._id];
+                    if (dataItem)
+                        item = mergeObject(item, dataItem);
+                    if (!item.assigned && item.received)
+                        delete item.received;
                 }
             }
-            delete data.reward.items;
-        }
-
-        //save the reward data
-        let rewards = duplicate(this.getRewardData());
-        let reward = this.getReward(rewards);//rewards.find(r => r.id == this.object.getFlag('monks-enhanced-journal', 'reward'));
-        if (reward) {
-            if (items) {
-                for (let item of items) {
-                    let olditem = reward.items.find(i => i.id == item.id);
-                    if (olditem) {
-                        olditem = Object.assign(olditem, item);
-                        if (!olditem.assigned && olditem.received)
-                            delete olditem.received;
-                    }
-                    else
-                        reward.items.push(item);
-                }
-            }
-
-            if (!reward.active && data.reward.active) {
-                //make sure there's only one active reward
-                for (let r of rewards)
-                    r.active = false;
-            }
-            reward = mergeObject(reward, data.reward);
-            //$('.reward-list .journal-tab[data-reward-id="' + reward.id + '"] .tab-content', this.element).html(reward.name);
-            data['flags.monks-enhanced-journal.rewards'] = rewards;
         }
         delete data.reward;
 
-        let objectives = null;
-        if (data.objectives) {
-            for (let [k, v] of Object.entries(data.objectives)) {
-                let values = (v instanceof Array ? v : [v]);
-                if (objectives == undefined) {
-                    objectives = values.map(objective => { let obj = {}; obj[k] = objective; return obj; });
-                } else {
-                    for (let i = 0; i < values.length; i++) {
-                        objectives[i][k] = values[i];
-                    }
-                }
+        data.flags['monks-enhanced-journal'].objectives = duplicate(this.object.getFlag("monks-enhanced-journal", "objectives") || []);
+        if (data.flags['monks-enhanced-journal'].objectives) {
+            for (let objective of data.flags['monks-enhanced-journal'].objectives) {
+                let dataObj= data.objectives[objective.id];
+                if (dataObj)
+                    objective = mergeObject(objective, dataObj);
             }
-            delete data.objectives;
         }
-
-        if (objectives) {
-            let oldobjectives = duplicate(this.object.getFlag('monks-enhanced-journal', 'objectives'));
-            for (let objective of objectives) {
-                let oldobj = oldobjectives.find(i => i.id == objective.id);
-                if (oldobj)
-                    oldobj = Object.assign(oldobj, objective);
-                else
-                    oldobjectives.push(objective);
-            }
-            data['flags.monks-enhanced-journal.objectives'] = oldobjectives;
-        }
+        delete data.objectives;
 
         return flattenObject(data);
     }
@@ -391,6 +362,16 @@ export class QuestSheet extends EnhancedJournalSheet {
         await this.loadRewards(0);
     }*/
 
+    deleteItem(id, container) {
+        if (container == 'items') {
+            let rewards = duplicate(this.object.data.flags["monks-enhanced-journal"].rewards);
+            let reward = rewards.find(r => r.id == this.object.data.flags["monks-enhanced-journal"].reward);
+            reward.items.findSplice(i => i.id == id || i._id == id);
+            this.object.setFlag('monks-enhanced-journal', "rewards", rewards);
+        } else
+            super.deleteItem(id, container);
+    }
+
     _canDragDrop(selector) {
         return game.user.isGM || this.object.isOwner;
     }
@@ -408,7 +389,7 @@ export class QuestSheet extends EnhancedJournalSheet {
                 return;
 
             let items = reward.items;
-            let item = items.find(i => i.uuid == uuid || i.id == id);
+            let item = items.find(i => i._id == id);
             if (!game.user.isGM && (this.object.data.flags["monks-enhanced-journal"].purchasing == 'locked' || item?.lock === true)) {
                 event.preventDefault();
                 return;
@@ -417,7 +398,8 @@ export class QuestSheet extends EnhancedJournalSheet {
             dragData.id = id;
             dragData.pack = li.dataset.pack;
             dragData.type = "Item";
-            dragData.uuid = this.object.uuid;
+            dragData.journalid = this.object.id;
+            dragData.data = item;
         } else if (li.dataset.document == 'Objective') {
             dragData.id = id;
             dragData.type = "Objective";
@@ -469,7 +451,7 @@ export class QuestSheet extends EnhancedJournalSheet {
     async addItem(data) {
         let item = await this.getDocument(data);
 
-        if (item.document) {
+        if (item) {
             let id = this.object.getFlag('monks-enhanced-journal', 'reward');
 
             let rewards = duplicate(this.getRewardData());
@@ -482,12 +464,8 @@ export class QuestSheet extends EnhancedJournalSheet {
 
             let items = reward.items;
 
-            let olditem = items.find(i => i.id == item.data.id);
-            if (olditem) {
-                olditem.qty++;
-            } else {
-                items.push(mergeObject(item.data, { remaining: 1 }));
-            }
+            let qty = (item.data.data.quantity.hasOwnProperty("value") ? { value: 1 } : 1);
+            items.push(mergeObject(item.toObject(), { _id: makeid(), data: { quantity: qty, remaining: 1 } }));
             this.object.setFlag('monks-enhanced-journal', 'rewards', rewards);
         }
     }
@@ -506,21 +484,24 @@ export class QuestSheet extends EnhancedJournalSheet {
         TextEditor._onClickContentLink(event);
     }
 
-    static itemDropped(id, actor) {
-        let rewards = duplicate(this.getFlag('monks-enhanced-journal', 'rewards'));
+    static itemDropped(id, actor, entry) {
+        let rewards = entry.getFlag('monks-enhanced-journal', 'rewards');
         for (let reward of rewards) {
             let items = reward.items;
             if (items) {
-                let item = items.find(i => i.id == id);
+                let item = items.find(i => i._id == id);
                 if (item) {
-                    item.received = actor.name;
-                    item.assigned = true;
-                    item.remaining = Math.max(item.remaining - 1, 0);
-                    this.setFlag('monks-enhanced-journal', 'rewards', rewards);
-                    return;
+                    if (item.remaining < 1) {
+                        ui.notifications.warn("Cannot transfer this item, not enough of this item remains.");
+                        return false;
+                    }
+
+                    this.purchaseItem.call(this, entry, id, actor);
+                    return true;
                 }
             }
         }
+        return false;
     }
 
     createObjective() {
@@ -538,10 +519,10 @@ export class QuestSheet extends EnhancedJournalSheet {
     }
 
     async addActor(data) {
-        let actor = await this.getDocument(data);
+        let actor = await this.getItemData(data);
 
-        if (actor.document) {
-            this.object.update({ 'flags.monks-enhanced-journal.actor': actor.data, 'flags.monks-enhanced-journal.source' : actor.data.name});
+        if (actor) {
+            this.object.update({ 'flags.monks-enhanced-journal.actor': actor, 'flags.monks-enhanced-journal.source' : actor.name});
         }
     }
 
@@ -582,65 +563,23 @@ export class QuestSheet extends EnhancedJournalSheet {
         let items = reward.items;
 
         let li = $(event.currentTarget).closest('li')[0];
-        let item = items.find(i => i.id == li.dataset.id);
+        let item = items.find(i => i._id == li.dataset.id);
         if (item) {
-            item.remaining = item.qty;
+            item.data.remaining = this.getCurrency(item.data.quantity);
             this.object.setFlag('monks-enhanced-journal', 'rewards', rewards);
         }
     }
 
     static async assignItems() {
-        let actor = game.actors.get(setting("assign-actor"));
-
-        if (!actor) {
-            ui.notifications.warn(`No Actor selected to assign items to, please Right Click and Actor to set it as the actor to assign items to`);
+        let rewards = duplicate(this.getFlag('monks-enhanced-journal', 'rewards'));
+        let reward = rewards.find(r => r.active) || rewards[0];
+        if (reward == undefined)
             return;
-        }
 
-        if (actor) {
-            let rewards = duplicate(this.getFlag('monks-enhanced-journal', 'rewards'));
-            let reward = rewards.find(r => r.active) || rewards[0];
-            if (reward == undefined)
-                return;
-            let items = reward.items;
+        reward.items = await super.assignItems(reward.items, reward.currency);
+        for(let key of Object.keys(reward.currency))
+            reward.currency[key] = 0;
 
-            let itemData = [];
-            let names = [];
-            for (let item of items) {
-                //add item to actor, including quantity
-                if (item.remaining > 0) {
-                    let document;
-                    if (item.pack) {
-                        const pack = game.packs.get(item.pack);
-                        if (pack) {
-                            document = await pack.getDocument(item.id);
-                        }
-                    } else {
-                        document = game.items.get(item.id);
-                    }
-
-                    if (!document)
-                        continue;
-
-                    let data = document.toObject();
-                    data.data.quantity = item.remaining;
-                    itemData.push(data);
-
-                    //update the encounter
-                    //item.qty = 0;
-                    item.remaining = 0;
-                    item.received = actor.name;
-                    item.assigned = true;
-                    names.push(item.name);
-                }
-            }
-
-            if (itemData.length > 0) {
-                actor.createEmbeddedDocuments("Item", itemData);
-                this.setFlag('monks-enhanced-journal', 'rewards', rewards);
-                ui.notifications.info(`Items [${names.join(', ')}] added to ${actor.name}`);
-            } else
-                ui.notifications.info(`No items added, either there were no items attached to this quest or none of them had any quantity.`);
-        }
+        this.setFlag('monks-enhanced-journal', 'rewards', rewards);
     }
 }

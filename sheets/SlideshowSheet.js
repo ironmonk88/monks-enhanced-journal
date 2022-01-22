@@ -269,9 +269,9 @@ export class SlideshowSheet extends EnhancedJournalSheet {
     }
 
     updateButtons() {
-        $('.nav-button.play').toggle(this.object.data.flags["monks-enhanced-journal"].state !== 'playing');
-        $('.nav-button.pause').toggle(this.object.data.flags["monks-enhanced-journal"].state === 'playing');
-        $('.nav-button.stop').toggle(this.object.data.flags["monks-enhanced-journal"].state !== 'stopped');
+        $('.nav-button.play', this.element).toggle(this.object.data.flags["monks-enhanced-journal"].state !== 'playing');
+        $('.nav-button.pause', this.element).toggle(this.object.data.flags["monks-enhanced-journal"].state === 'playing');
+        $('.nav-button.stop', this.element).toggle(this.object.data.flags["monks-enhanced-journal"].state !== 'stopped');
     }
 
     async playSlideshow(refresh = true) {
@@ -294,6 +294,7 @@ export class SlideshowSheet extends EnhancedJournalSheet {
             if (flags.audiofile != undefined && flags.audiofile != '')
                 AudioHelper.play({ src: flags.audiofile, loop: true }).then((sound) => {
                     this.object.sound = sound;
+                    return sound;
                 });
         } else {
             if (this.object.sound && this.object.sound.paused)

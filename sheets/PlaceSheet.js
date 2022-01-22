@@ -126,41 +126,41 @@ export class PlaceSheet extends EnhancedJournalSheet {
     }
 
     async addActor(data) {
-        let actor = await this.getDocument(mergeObject(data, { type: 'Actor' }));
+        let actor = await this.getItemData(mergeObject(data, { type: 'Actor' }));
 
-        if (actor.document) {
+        if (actor) {
             let actors = duplicate(this.object.data.flags["monks-enhanced-journal"].actors || []);
 
             //only add one item
-            if (actors.find(t => t.id == actor.data.id) != undefined)
+            if (actors.find(t => t.id == actor.id) != undefined)
                 return;
 
-            actors.push(actor.data);
+            actors.push(actor);
             this.object.setFlag('monks-enhanced-journal', 'actors', actors);
         }
     }
 
     async addShop(data) {
-        let shop = await this.getDocument(data);
+        let shop = await this.getItemData(data);
 
-        if (shop.document) {
-            if (shop.document.data.flags['monks-enhanced-journal']?.type == 'shop') {
+        if (shop) {
+            if (shop.type == 'shop') {
                 let shops = duplicate(this.object.data.flags["monks-enhanced-journal"].shops || []);
 
                 //only add one item
-                if (shops.find(t => t.id == shop.data.id) != undefined)
+                if (shops.find(t => t.id == shop.id) != undefined)
                     return;
 
-                shops.push(shop.data);
+                shops.push(shop);
                 this.object.setFlag("monks-enhanced-journal", "shops", shops);
-            } else if (shop.document.data.flags['monks-enhanced-journal']?.type == 'person') {
+            } else if (shop.type == 'person') {
                 let actors = duplicate(this.object.data.flags["monks-enhanced-journal"].actors || []);
 
                 //only add one item
-                if (actors.find(t => t.id == shop.data.id) != undefined)
+                if (actors.find(t => t.id == shop.id) != undefined)
                     return;
 
-                actors.push(mergeObject(shop.data, { type: 'JournalEntry' }));
+                actors.push(mergeObject(shop, { type: 'JournalEntry' }));
                 this.object.setFlag('monks-enhanced-journal', 'actors', actors);
             }
         }

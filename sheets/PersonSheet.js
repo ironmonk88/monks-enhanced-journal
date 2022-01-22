@@ -93,11 +93,11 @@ export class PersonSheet extends EnhancedJournalSheet {
         let that = this;
         $('.item-relationship input', html).on('change', function (event) {
             let id = $(event.currentTarget).closest('li').attr('data-id');
-            let items = that.object.data.flags['monks-enhanced-journal'].actors;
-            let item = items.find(i => i.id == id);
-            if (item) {
-                item.relationship = $(this).val();
-                that.object.setFlag('monks-enhanced-journal', 'actors', items);
+            let actors = that.object.data.flags['monks-enhanced-journal'].actors;
+            let actor = actors.find(i => i.id == id);
+            if (actor) {
+                actor.relationship = $(this).val();
+                that.object.setFlag('monks-enhanced-journal', 'actors', actors);
             }
         });
         $('.items-list .actor-icon', html).click(this.openRelationship.bind(this));
@@ -143,11 +143,10 @@ export class PersonSheet extends EnhancedJournalSheet {
     }
 
     async addRelationship(data) {
-        let relationship = await this.getDocument(data);
+        let relationship = await this.getItemData(data);
 
-        if (relationship.document) {
-            let type = relationship.document.data.flags['monks-enhanced-journal']?.type
-            relationship.data.type = type;
+        if (relationship) {
+            let type = relationship.type
             if (['organization','person','place'].includes(type)) {
                 let actors = duplicate(this.object.data.flags["monks-enhanced-journal"].actors || []);
 
@@ -168,10 +167,10 @@ export class PersonSheet extends EnhancedJournalSheet {
     }
 
     async addActor(data) {
-        let actor = await this.getDocument(data);
+        let actor = await this.getItemData(data);
 
-        if (actor.document) {
-            this.object.setFlag("monks-enhanced-journal", "actor", actor.data);
+        if (actor) {
+            this.object.setFlag("monks-enhanced-journal", "actor", actor);
         }
     }
 

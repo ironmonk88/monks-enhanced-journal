@@ -1,7 +1,7 @@
 <form id="document-create" autocomplete="off">
     {{#if hasFolders}}
     <div class="form-group">
-        <label>{{localize 'ENTITY.Folder'}}</label>
+        <label>{{localize 'DOCUMENT.Folder'}}</label>
         <div class="form-fields">
             <select name="folder">
                 <option value=""></option>
@@ -13,7 +13,7 @@
 
     <div class="form-group">
         <div class="form-fields">
-            <textarea name="text" placeholder="{{localize 'ENTITY.New' entity='Entry'}}" required style="height:120px;">{{data.text}}</textarea>
+            <textarea name="text" placeholder="{{localize 'DOCUMENT.New' type='Entry'}}" required style="height:120px;">{{data.text}}</textarea>
         </div>
     </div>
 </form>

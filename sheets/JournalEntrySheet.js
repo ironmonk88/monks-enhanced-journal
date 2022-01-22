@@ -119,3 +119,25 @@ export class JournalEntrySheet extends EnhancedJournalSheet {
         return flattenObject(data);
     }
 }
+
+export class JournalEntrySheetTextOnly extends JournalEntrySheet {
+    constructor(data, options) {
+        super(data, options);
+    }
+
+    _inferDefaultMode() {
+        if (super._inferDefaultMode() == undefined) return;
+        return 'text';
+    }
+
+    static get defaultOptions() {
+        return mergeObject(super.defaultOptions, {
+            title: i18n("MonksEnhancedJournal.journalentry"),
+            template: "modules/monks-enhanced-journal/templates/journalentry-textonly.html",
+            tabs: []
+        });
+    }
+
+    refresh() {
+    }
+}

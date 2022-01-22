@@ -13,10 +13,6 @@
         <li class="items-header flexrow">
             <h3 class="item-name flexrow">{{localize 'MonksEnhancedJournal.Items'}}</h3>
 
-            <!--<div class="item-controls item-price">{{localize 'MonksEnhancedJournal.Price'}}</div>-->
-
-            <div class="item-controls item-quantity">{{localize 'MonksEnhancedJournal.Qty'}}</div>
-
             <div class="item-controls item-total">{{localize 'MonksEnhancedJournal.Cost'}}</div>
         </li>
 
@@ -28,18 +24,9 @@
                     <h4 title="{{this.name}}">{{this.name}}</h4>
                 </div>
 
-                <!--<div class="item-controls item-price">
-                    <input type="text" name="price" value="{{this.price}}" style="text-align:center;" />
-                </div>-->
-
-                <div class="item-controls item-quantity">
-                    <!--<input type="text" name="quantity" value="{{this.quantity}}" style="text-align:center;" />-->
-                    <span>{{this.quantity}}</span>
-                </div>
-
                 <div class="item-controls item-total">
-                    <!--<input type="text" name="total" value="{{this.total}}" style="text-align:center;" />-->
-                    <span>{{this.total}}</span>
+                    <input class="gm-only" type="text" name="total" value="{{this.price}}" style="text-align:center;" />
+                    <span class="player-only">{{this.price}}</span>
                 </div>
             </li>
             {{/each}}

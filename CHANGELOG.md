@@ -1,3 +1,37 @@
+# Version 1.0.40
+
+Added the Loot sheet.  Using this sheet you can drag players to the entry, if they aren't already there.  And split the money associated witht he Loot evenly between the characters.  You can also drag items from Loot onto the character icons to add the items to the characters inventory.  Like the Shop sheet, you can set it so that only the GM can control item distribution, players are allowed to take their own items, or they can make a request for the item.
+
+Along with that you can now, in the settings, tell Enhanced Journals what you want to do with Quest or Encounter treasure.  You can have it create a new Loot Sheet or add the items to an old Loot sheet.  And there's integration with both Lootsheet and Merchant sheet to create actors and add the items to them.
+
+The Shop sheet has also been updated, it will now try and deduct the money from the characters currency.  You can save the item using what currency it should be associated with.  So if something is worth 5 silver peices you can save the item price as `5 sp`.
+
+Using the Shop, there is now a link for players to click on to buy the item, rather than relyign on them dragging and dropping to their character.
+
+You can also now fill a Shop and a Loot sheet using a Rollable Table.
+
+There's also now a Text only Journal Sheet.
+
+I've added the option to open Journal Entries in a new tab automatically.
+
+Fixed an issue where opening Journal Entries wasn't properly checking if the user had permissions to view it.
+
+Added Inline Rolls to the text description form Journal Entries. `@Request[perception dc:15 silent fastForward rollmode:selfroll]{flavor text}` and also added the option for Contested rolls `@Contested[strength strength silent fastForward rollmode:selfroll]{flavor text}`
+
+Fixed an issue with the way items were being added to the Journal Entries.  I was adding them by just their ID, but discovered that if the item came from a compendium and the compendium was deleted, or if the item itself was deleted then the item would disappear from the Journal Entry.  I've changed it so that Journal Entries will keep a copy of the item data.  Now if the Journal Entry is added to a compendium, it can be transfered to a new world without data loss.  Because of these changes, be aware that Shopkeeper items will no longer automatically show up.  You need to right click on the image to import the items from the Actor.
+
+Fixed an issue with saving user notes.
+
+Fixed some text issues when creating a new Checklist
+
+Added the option to Clear all content from a folder
+
+Fixed an issue with Slideshow buttons not workign when using Popout!
+
+Fixed an issue with Checkbox search box sizing.
+
+Added currency to Encounter Loot, and also expanded the tabs so that Monsters, Loot, and DCs are on separate tabs.
+
 # Version 1.0.39
 
 Removed adding the system to the subdocument.  I know this is going to mess up the styling for PF2E, but the change was really messing up the stylings of all the other modules.

@@ -252,13 +252,13 @@ export class CheckListSheet extends EnhancedJournalSheet {
         // Collect data
         const folders = this.folders;//.filter(f => f.displayed);
         const label = (data.id ? (options.type == 'folder' ? game.i18n.localize("FOLDER.Update") : 'Update Entry')
-            : (options.type == 'folder' ? game.i18n.localize("FOLDER.Create") : game.i18n.format("ENTITY.Create", { entity: (options.type == 'folder' ? game.i18n.localize("ENTITY.Folder") : 'Entry') })));
+            : (options.type == 'folder' ? game.i18n.localize("FOLDER.Create") : game.i18n.format("DOCUMENT.Create", { type: (options.type == 'folder' ? game.i18n.localize("DOCUMENT.Folder") : 'Entry') })));
         const title = label + (data.id && options.type == 'folder' ? ' : ' + data.name : '');
 
         // Render the entity creation form
         const html = await renderTemplate(`modules/monks-enhanced-journal/templates/checklist${options.type}.html`, {
             data: data,
-            name: data.name || game.i18n.format("ENTITY.New", { entity: options.type }),
+            name: data.name || game.i18n.format("DOCUMENT.New", { type: options.type }),
             folder: data.folder,
             folders: folders,
             hasFolders: folders.length > 0
