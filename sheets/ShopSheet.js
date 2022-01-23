@@ -498,13 +498,13 @@ export class ShopSheet extends EnhancedJournalSheet {
                     if (['feat', 'spell'].includes(type))
                         continue;
 
-                    items.push(mergeObject(item.toObject(), { cost: this.getCurrecy(aItem.data.data?.price, "") }));
+                    items.push(mergeObject(item.toObject(), { cost: this.getCurrency(item.data.data?.price, "") }));
                 }
 
                 if (items.length > 0) {
-                    let shopitems = duplicate(this.getFlag('monks-enhanced-journal', 'items'));
+                    let shopitems = duplicate(this.object.getFlag('monks-enhanced-journal', 'items'));
                     shopitems = shopitems.concat(items);
-                    this.setFlag('monks-enhanced-journal', 'items', shopitems);
+                    this.object.setFlag('monks-enhanced-journal', 'items', shopitems);
                 }
             }
         }

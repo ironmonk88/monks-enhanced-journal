@@ -1,3 +1,9 @@
+# Version 1.0.42
+
+Fixed an issue importing items from Shopkeeper
+
+Fixed an issue with getting the Item document.
+
 # Version 1.0.41
 
 Fixed some styling issues with the Fallout system
@@ -14,7 +20,7 @@ Fixed an issue where Person relationship could be seen by players even if they d
 
 Removed the Actor associated with a Person sheet for players.
 
-Allowed Person sheet to have relationships with Shop, Point of INterest, and Quest.
+Allowed Person sheet to have relationships with Shop, Point of Interest, and Quest.
 
 Fixed an issue when adding an Actor to a Place.
 

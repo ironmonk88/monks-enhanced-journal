@@ -613,7 +613,7 @@ export class EnhancedJournalSheet extends JournalSheet {
     }
 
     async getDocument(...args) {
-        this.constructor.getDocument(...args);
+        return this.constructor.getDocument(...args);
     }
 
     static purchaseItem(entry, id, actor, user, purchased = false) {
