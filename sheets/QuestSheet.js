@@ -163,6 +163,8 @@ export class QuestSheet extends EnhancedJournalSheet {
         $('.item-edit', html).on('click', this.editItem.bind(this));
         $('.item-delete', html).on('click', this._deleteItem.bind(this));
 
+        $('.roll-table', html).click(this.rollTable.bind(this));
+
         const actorOptions = this._getPersonActorContextOptions();
         if (actorOptions) new ContextMenu($(html), ".actor-img", actorOptions);
     }

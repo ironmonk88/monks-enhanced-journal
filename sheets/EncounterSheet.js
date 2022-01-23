@@ -121,6 +121,7 @@ export class EncounterSheet extends EnhancedJournalSheet {
         $('.encounter-traps .item-name', html).on('click', $.proxy(this.rollTrap, this));
 
         $('.item-refill', html).click(this.refillItems.bind(this));
+        $('.roll-table', html).click(this.rollTable.bind(this, "actors"));
     }
 
     _getSubmitData(updateData = {}) {
@@ -213,11 +214,13 @@ export class EncounterSheet extends EnhancedJournalSheet {
         let item = await this.getDocument(data);
 
         if (item) {
-            let items = duplicate(this.object.data.flags["monks-enhanced-journal"].items || []);
+            if (item.data.data.quantity) {
+                let items = duplicate(this.object.data.flags["monks-enhanced-journal"].items || []);
 
-            let qty = (item.data.data.quantity.hasOwnProperty("value") ? { value: 1 } : 1);
-            items.push(mergeObject(item.toObject(), { _id: makeid(), data: { quantity: qty, remaining: 1 } }));
-            this.object.setFlag('monks-enhanced-journal', 'items', items);
+                let qty = (item.data.data.quantity.hasOwnProperty("value") ? { value: 1 } : 1);
+                items.push(mergeObject(item.toObject(), { _id: makeid(), data: { quantity: qty, remaining: 1 } }));
+                this.object.setFlag('monks-enhanced-journal', 'items', items);
+            }
         }
     }
 
@@ -291,23 +294,25 @@ export class EncounterSheet extends EnhancedJournalSheet {
         const cls = getDocumentClass("Token");
         let tokenids = (this.data.flags['monks-enhanced-journal']?.tokens || []);
         for (let ea of (this.data.flags['monks-enhanced-journal']?.actors || [])) {
-            let actor = await Actor.implementation.fromDropData(ea);
-            if (!actor.isOwner) {
-                return ui.notifications.warn(`You do not have permission to create a new Token for the ${actor.name} Actor.`);
-            }
-            if (actor.compendium) {
-                const actorData = game.actors.fromCompendium(actor);
-                actor = await Actor.implementation.create(actorData);
-            }
+            let actor = await EnhancedJournalSheet.getDocument(ea);//Actor.implementation.fromDropData(ea);
+            if (actor) {
+                if (!actor.isOwner) {
+                    return ui.notifications.warn(`You do not have permission to create a new Token for the ${actor.name} Actor.`);
+                }
+                //if (actor.compendium) {
+                //    const actorData = game.actors.fromCompendium(actor);
+                //    actor = await Actor.implementation.create(actorData);
+                //}
 
-            // Prepare the Token data
-            for (let i = 0; i < (ea.quantity || 1); i++) {
-                let td = await actor.getTokenData({ x: x, y: y });
-                let newSpot = MonksEnhancedJournal.findVacantSpot({ x: x, y: y }, { width: td.width, height: td.height });
-                td.update(newSpot);
+                // Prepare the Token data
+                for (let i = 0; i < (ea.quantity || 1); i++) {
+                    let td = await actor.getTokenData({ x: x, y: y });
+                    let newSpot = MonksEnhancedJournal.findVacantSpot({ x: x, y: y }, { width: td.width, height: td.height });
+                    td.update(newSpot);
 
-                let token = await cls.create(td, { parent: canvas.scene });
-                tokenids.push(token.id);
+                    let token = await cls.create(td, { parent: canvas.scene });
+                    tokenids.push(token.id);
+                }
             }
         }
 

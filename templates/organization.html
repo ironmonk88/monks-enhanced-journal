@@ -25,13 +25,17 @@
             <a class="item" data-tab="notes">{{localize 'MonksEnhancedJournal.Notes'}}</a>
         </nav>
         <section class="sheet-body half-size">
-            <div class="tab description flexcol active" data-group="primary" data-tab="description">
-                {{editor target="content" content=data.content editable=true button=true owner=owner}}
+            <div class="tab description active" data-group="primary" data-tab="description">
+                <div class="tab-inner flexcol">
+                    {{editor target="content" content=data.content editable=true button=true owner=owner}}
+                </div>
             </div>
-            <div class="tab notes flexcol" data-group="primary" data-tab="notes">
-                <div style="flex: 0 0 20px;">{{localize 'MonksEnhancedJournal.OnlyViewable'}}</div>
-                <div>
-                    <textarea name="flags.monks-enhanced-journal.{{userid}}.notes" style="width: calc(100% - 4px);height: calc(100% - 4px)">{{userdata.notes}}</textarea>
+            <div class="tab notes" data-group="primary" data-tab="notes">
+                <div class="tab-inner flexcol">
+                    <div style="flex: 0 0 20px;">{{localize 'MonksEnhancedJournal.OnlyViewable'}}</div>
+                    <div>
+                        <textarea name="flags.monks-enhanced-journal.{{userid}}.notes" style="width: calc(100% - 4px);height: calc(100% - 4px)">{{userdata.notes}}</textarea>
+                    </div>
                 </div>
             </div>
         </section>

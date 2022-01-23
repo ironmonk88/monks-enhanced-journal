@@ -537,6 +537,7 @@
     border: 1px solid transparent !important;
     font-size: 32px !important;
     height: 36px !important;
+    color: var(--color-text-dark-primary);
 }
 
 .monks-journal-sheet .header-name .header-search{
@@ -671,6 +672,10 @@
     font-weight: bold;
 }
 
+.age-system .monks-journal-sheet.sheet .form-group label{
+    font-size: 16px;
+}
+
 .monks-journal-sheet.sheet .sheet-navigation {
     flex: 0 0 30px !important;
     margin-bottom: 5px;
@@ -699,6 +704,10 @@
 
 .monks-journal-sheet.sheet .sheet-body.half-size {
     height: calc(100% - 200px);
+}
+
+.age-system .monks-journal-sheet.sheet .sheet-body.half-size {
+    height: calc(100% - 210px);
 }
 
 .monks-journal-sheet.sheet .loot-container .sheet-body.half-size {
@@ -735,6 +744,10 @@ height: fit-content;*/
     height: 100% !important;
     overflow-y: auto !important;
     align-content: flex-start;
+}
+
+.monks-journal-sheet.sheet .tab .tab-inner{
+    height:100%;
 }
 
 .monks-journal-sheet.sheet header.sheet-header.journal-header {
@@ -836,7 +849,9 @@ height: fit-content;*/
     padding: 5px 20px;
 }
 
-.monks-journal-sheet.sheet .tab.rewards .currency-group .form-group {
+.monks-journal-sheet.sheet .tab.rewards .currency-group .form-group,
+.monks-journal-sheet.sheet .tab.details .details .form-group,
+.monks-journal-sheet.sheet .tab.items .currency-group {
     flex-grow: 0;
 }
 
@@ -2192,6 +2207,12 @@ a.picture-link.broken {
     line-height: 20px;
 }
 
+.fallout.monks-enhanced-journal .window-content {
+    background: url(../../../ui/parchment.jpg) repeat;
+    padding: 8px;
+    color: var(--color-text-dark-primary);
+}
+
 .wfrp4e.monks-enhanced-journal .directory .directory-header .header-search {
     padding-left: 8px;
 }
@@ -2427,4 +2448,12 @@ a.picture-link.broken {
 
 .monks-enhanced-journal.request-item.item-card .items-list.reward-items{
     overflow-y: unset;
+}
+
+.monks-journal-sheet.sheet .items-list .item-from {
+    flex: 0 0 150px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    align-items: start;
+    text-align: left;
 }

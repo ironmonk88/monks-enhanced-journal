@@ -1,3 +1,27 @@
+# Version 1.0.41
+
+Fixed some styling issues with the Fallout system
+
+Fixed tabs not working in the AGE system
+
+Fixed an issue where warning that Lib: Document Sheet Registrar was conflicted was preventing the module from loading.
+
+Added the option to add monsters to Encounter via a Roll Table.
+
+Added the from column for the Loot Entry, so you can see what token contributed what item
+
+Fixed an issue where Person relationship could be seen by players even if they didn't have permissions to know about it.
+
+Removed the Actor associated with a Person sheet for players.
+
+Allowed Person sheet to have relationships with Shop, Point of INterest, and Quest.
+
+Fixed an issue when adding an Actor to a Place.
+
+Fixed messages displayed when no items have been added so that it says one thing for the player and a different thing for the GM.
+
+Fixed an issue where the players associated with the Loot sheet would show to the players.
+
 # Version 1.0.40
 
 Added the Loot sheet.  Using this sheet you can drag players to the entry, if they aren't already there.  And split the money associated witht he Loot evenly between the characters.  You can also drag items from Loot onto the character icons to add the items to the characters inventory.  Like the Shop sheet, you can set it so that only the GM can control item distribution, players are allowed to take their own items, or they can make a request for the item.

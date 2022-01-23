@@ -16,6 +16,8 @@ import { LootSheet } from "./sheets/LootSheet.js"
 import { backgroundinit } from "./plugins/background.plugin.js"
 import { NoteHUD } from "./apps/notehud.js"
 
+export let debugEnabled = 0;
+
 export let debug = (...args) => {
     if (debugEnabled > 1) console.log("DEBUG: monks-enhanced-journal | ", ...args);
 };

@@ -55,9 +55,9 @@ export class PlaceSheet extends EnhancedJournalSheet {
 
         data.townsfolk = data.data.flags['monks-enhanced-journal'].actors?.map(t => {
             let actor;
-            if (t.type.toLowerCase() == 'actor')
+            if (t.type?.toLowerCase() == 'actor')
                 actor = game.actors.find(a => a.id == t.id)
-            else if (t.type.toLowerCase() == 'journal' || t.type.toLowerCase() == 'journalentry')
+            else if (t.type?.toLowerCase() == 'journal' || t.type?.toLowerCase() == 'journalentry')
                 actor = game.journal.find(a => a.id == t.id)
             if (!actor)
                 return null;
@@ -126,10 +126,10 @@ export class PlaceSheet extends EnhancedJournalSheet {
     }
 
     async addActor(data) {
-        let actor = await this.getItemData(mergeObject(data, { type: 'Actor' }));
+        let actor = mergeObject(await this.getItemData(data), { type: 'Actor' });
 
         if (actor) {
-            let actors = duplicate(this.object.data.flags["monks-enhanced-journal"].actors || []);
+            let actors = duplicate(this.object.data.flags["monks-enhanced-journal"].actors || []).filter(t => t.type);
 
             //only add one item
             if (actors.find(t => t.id == actor.id) != undefined)

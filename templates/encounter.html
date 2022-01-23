@@ -14,11 +14,13 @@
             <a class="item" data-tab="notes">{{localize 'MonksEnhancedJournal.Notes'}}</a>
         </nav>
         <section class="sheet-body">
-            <div class="tab description flexcol active" data-group="primary" data-tab="description">
+            <div class="tab description active" data-group="primary" data-tab="description">
+                <div class="tab-inner flexcol">
                 {{editor target="content" content=data.content editable=true button=true owner=owner}}
+                </div>
             </div>
             {{#if owner}}
-            <div class="tab monsters flexcol" data-group="primary" data-tab="monsters">
+            <div class="tab monsters" data-group="primary" data-tab="monsters">
                 <div class="encounter-content flexcol">
                     <div style="height:100%;">
                         <ol class="items-list encounter-monsters">
@@ -32,7 +34,9 @@
                                     {{localize 'MonksEnhancedJournal.Monsters'}}
                                 </h3>
                                 <div class="item-controls item-quantity">{{localize 'MonksEnhancedJournal.Qty'}}</div>
-                                <div class="item-controls flexrow"></div>
+                                <div class="item-controls flexrow">
+                                    <a class="item-control roll-table" title="Populate from Rolltable"><i class="fas fa-th-list"></i></a>
+                                </div>
                             </li>
 
                             <ol class="item-list">
@@ -52,15 +56,19 @@
                                     </div>
                                 </li>
                                 {{else}}
-                                <li class="instruction">Drag a Person here to add it to the encounter</li>
+                                {{#if owner}}
+                                <li class="instruction">Drag an actor here to add it to the encounter</li>
+                                {{else}}
+                                <li class="instruction">No monsters at the moment</li>
+                                {{/if}}
                                 {{/each}}
                             </ol>
                         </ol>
                     </div>
                 </div>
             </div>
-            <div class="tab items flexcol" data-group="primary" data-tab="items">
-                <div>
+            <div class="tab items" data-group="primary" data-tab="items">
+                <div class="tab-inner flexcol">
                     {{#if currency}}
                     <div class="form-group currency-group">
                         <label style="max-width: 150px;">{{localize 'MonksEnhancedJournal.Currency'}}</label>
@@ -122,14 +130,18 @@
                                 {{/each}}
                             </ul>
                             {{else}}
+                            {{#if owner}}
                             <li class="instruction">Drag an Item onto the encounter to add it to the rewards</li>
+                            {{else}}
+                            <li class="instruction">No rewards at the moment</li>
+                            {{/if}}
                             {{/each}}
                         </ol>
                     </ol>
                 </div>
             </div>
-            <div class="tab dcs flexcol" data-group="primary" data-tab="dcs">
-                <div>
+            <div class="tab dcs" data-group="primary" data-tab="dcs">
+                <div class="tab-inner flexcol">
                     <ol class="items-list encounter-dcs">
                         <li class="items-header flexrow">
                             <h3 class="item-name flexrow">{{localize 'MonksEnhancedJournal.DCs'}}</h3>
@@ -165,14 +177,18 @@
                                 </div>
                             </li>
                             {{else}}
+                            {{#if owner}}
                             <li class="instruction">No DCs added yet, press the Add button to create one</li>
+                            {{else}}
+                            <li class="instruction">No DCs at the moment</li>
+                            {{/if}}
                             {{/each}}
                         </ol>
                     </ol>
                 </div>
             </div>
-            <div class="tab trps flexcol" data-group="primary" data-tab="traps" style="display:none;">
-                <div>
+            <div class="tab traps" data-group="primary" data-tab="traps" style="display:none;">
+                <div class="tab-inner flexcol">
                     <ol class="items-list encounter-traps">
                         <li class="items-header flexrow">
                             <h3 class="item-name flexrow">{{localize 'MonksEnhancedJournal.Traps'}}</h3>
@@ -217,10 +233,12 @@
                 </div>
             </div>
             {{/if}}
-            <div class="tab notes flexcol" data-group="primary" data-tab="notes">
+            <div class="tab notes" data-group="primary" data-tab="notes">
+                <div class="tab-inner flexcol">
                 <div style="flex: 0 0 20px;">{{localize 'MonksEnhancedJournal.OnlyViewable'}}</div>
                 <div>
                     <textarea name="flags.monks-enhanced-journal.{{userid}}.notes" style="width: calc(100% - 4px);height: calc(100% - 4px)">{{userdata.notes}}</textarea>
+                </div>
                 </div>
             </div>
         </section>

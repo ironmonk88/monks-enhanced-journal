@@ -32,6 +32,7 @@
             </section>
         </header>
         <section class="sheet-body half-size flexcol">
+            {{#if isGM}}
             <ol class="items-list loot-characters" style="flex: 0 0 138px; overflow-y: hidden; ">
                 <li class="items-header flexrow">
                     <h3 class="item-name flexrow">{{localize 'MonksEnhancedJournal.Characters'}}</h3>
@@ -53,14 +54,18 @@
                         {{#if this.letter}}<div class="loot-player" title="{{this.username}}" style="background-color: {{this.color}};border-color: {{this.border}};">{{this.letter}}</div>{{/if}}
                     </li>
                     {{else}}
+                    {{#if owner}}
                     <li class="instruction">Drag Actors here.</li>
+                    {{/if}}
                     {{/each}}
                 </ol>
             </ol>
+            {{/if}}
 
             <ol class="items-list loot-items">
                 <li class="items-header flexrow">
                     <h3 class="item-name flexrow">{{localize 'MonksEnhancedJournal.Items'}}</h3>
+                    <div class="item-controls item-from">{{localize 'MonksEnhancedJournal.From'}}</div>
                     <div class="item-controls item-requests">{{localize 'MonksEnhancedJournal.Requests'}}</div>
                     <div class="item-controls item-quantity">{{localize 'MonksEnhancedJournal.Qty'}}</div>
                     {{#if showrequest}}<div class="item-controls flexrow"></div>{{/if}}
@@ -81,6 +86,10 @@
                             <div class="item-name flexrow">
                                 <div class="item-image item-icon" style="background-image: url('{{this.img}}')"></div>
                                 <h4>{{this.name}}</h4>
+                            </div>
+
+                            <div class="item-from flexrow">
+                                <h4 title="{{this.from}}">{{this.from}}</h4>
                             </div>
 
                             <div class="item-controls item-requests">
@@ -109,7 +118,11 @@
                         {{/each}}
                     </ul>
                     {{else}}
+                    {{#if owner}}
                     <li class="instruction">Drag Items here to add them to the loot</li>
+                    {{else}}
+                    <li class="instruction">No loot at the moment</li>
+                    {{/if}}
                     {{/each}}
                 </ol>
             </ol>

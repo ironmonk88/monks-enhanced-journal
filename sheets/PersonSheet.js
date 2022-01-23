@@ -29,10 +29,13 @@ export class PersonSheet extends EnhancedJournalSheet {
 
         data.relationships = {};
         for (let item of (data.data.flags['monks-enhanced-journal']?.actors || [])) {
-            if (!data.relationships[item.type])
-                data.relationships[item.type] = { type: item.type, name: i18n(`MonksEnhancedJournal.${item.type.toLowerCase()}`), actors: [] };
+            let entity = await this.getDocument(item, "JournalEntry", false);
+            if (entity && entity.testUserPermission(game.user, "LIMITED")) {
+                if (!data.relationships[item.type])
+                    data.relationships[item.type] = { type: item.type, name: i18n(`MonksEnhancedJournal.${item.type.toLowerCase()}`), actors: [] };
 
-            data.relationships[item.type].actors.push(item);
+                data.relationships[item.type].actors.push(item);
+            }
         }
 
         return data;
@@ -147,14 +150,14 @@ export class PersonSheet extends EnhancedJournalSheet {
 
         if (relationship) {
             let type = relationship.type
-            if (['organization','person','place'].includes(type)) {
+            if (['organization','person','place', 'shop', 'pointofinterest', 'quest'].includes(type)) {
                 let actors = duplicate(this.object.data.flags["monks-enhanced-journal"].actors || []);
 
                 //only add one item
-                if (actors.find(t => t.id == relationship.data.id) != undefined)
+                if (actors.find(t => t.id == relationship.id) != undefined)
                     return;
 
-                actors.push(relationship.data);
+                actors.push(relationship);
                 this.object.setFlag("monks-enhanced-journal", "actors", actors);
             }
         }

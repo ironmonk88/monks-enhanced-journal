@@ -548,6 +548,7 @@ export class EnhancedJournalSheet extends JournalSheet {
                 img: item.img,
                 hide: item.hide,
                 lock: item.lock,
+                from: item.from,
                 quantity: quantity,
                 remaining: item.data?.remaining,
                 price: price,
@@ -576,7 +577,7 @@ export class EnhancedJournalSheet extends JournalSheet {
         return groups;
     }
 
-    async getDocument(data) {
+    static async getDocument(data, type, notify = true) {
         let document;
         if (data.data) {
             document = new CONFIG.Item.documentClass(data.data);
@@ -590,19 +591,29 @@ export class EnhancedJournalSheet extends JournalSheet {
             }
             document = id ? await pack.getDocument(id) : null;
         } else {
-            if (data.type) {
-                document = game.collections.get(data.type).get(data.id);
-                if (document) {
-                    if (document.documentName === "Scene" && document.journal)
-                        document = document.journal;
-                    if (!document.testUserPermission(game.user, "LIMITED")) {
-                        return ui.notifications.warn(`You do not have permission to view this ${document.documentName} sheet.`);
+            if (data.type || type) {
+                let collection = game.collections.get(type || data.type);
+                if (collection) {
+                    document = collection.get(data.id);
+                    if (document) {
+                        if (document.documentName === "Scene" && document.journal)
+                            document = document.journal;
+                        if (notify && !document.testUserPermission(game.user, "LIMITED")) {
+                            return ui.notifications.warn(`You do not have permission to view this ${document.documentName} sheet.`);
+                        }
                     }
                 }
             }
         }
 
+        if (!document && data.uuid)
+            document = await fromUuid(data.uuid);
+
         return document;
+    }
+
+    async getDocument(...args) {
+        this.constructor.getDocument(...args);
     }
 
     static purchaseItem(entry, id, actor, user, purchased = false) {
@@ -688,9 +699,6 @@ export class EnhancedJournalSheet extends JournalSheet {
             type: document.data.flags['monks-enhanced-journal']?.type
         };
 
-        if (data.type)
-            result.type = data.type;
-
         if (data.pack)
             result.pack = data.pack;
 
@@ -765,7 +773,7 @@ export class EnhancedJournalSheet extends JournalSheet {
         }
     }
 
-    async rollTable() {
+    async rollTable(itemtype = "items") {
         let rolltables = [];
 
         for (let pack of game.packs) {
@@ -801,7 +809,7 @@ export class EnhancedJournalSheet extends JournalSheet {
 
                 let table = await fromUuid(rolltable);
                 if (table) {
-                    let items = (clear ? [] : that.object.getFlag('monks-enhanced-journal', 'items') || []);
+                    let items = (clear ? [] : that.object.getFlag('monks-enhanced-journal', itemtype) || []);
 
                     for (let i = 0; i < count; i++) {
                         let result = await table.draw({ rollMode: "selfroll", displayChat: false });
@@ -809,7 +817,9 @@ export class EnhancedJournalSheet extends JournalSheet {
                         let item = null;
 
                         if (result.results[0].data.collection === "Item") {
-                            item = game.items.get(result.results[0].data.resultId);
+                            let collection = game.collections.get(result.results[0].data.collection);
+                            if(collection)
+                                item = collection.get(result.results[0].data.resultId);
                         } else {
                             // Try to find it in the compendium
                             const items = game.packs.get(result.results[0].data.collection);
@@ -817,13 +827,27 @@ export class EnhancedJournalSheet extends JournalSheet {
                         }
 
                         if (item) {
-                            let itemData = item.toObject();
-                            itemData._id = makeid();
-                            items.push(itemData);
+                            if (itemtype == "items" && item instanceof Item) {
+                                let itemData = item.toObject();
+                                itemData._id = makeid();
+                                items.push(itemData);
+                            } else if(itemtype == "actors" && item instanceof Actor) {
+                                let itemData = {
+                                    id: item.id,
+                                    uuid: item.uuid,
+                                    img: item.img,
+                                    name: item.name,
+                                    quantity: 1,
+                                    type: "Actor"
+                                }
+                                if (item.pack)
+                                    itemData.pack = item.pack;
+                                items.push(itemData);
+                            }
                         }
                     }
 
-                    that.object.setFlag('monks-enhanced-journal', 'items', items);
+                    that.object.setFlag('monks-enhanced-journal', itemtype, items);
                 }
             },
         });
