@@ -1,3 +1,17 @@
+# Version 1.0.43
+
+Fixed an issue where opening tabs automatically wasn't checking to see if the tab was already open.
+
+Fixed an issue where scroll bars were no longer showing with the tab sheets
+
+Added increased width to the currency fields
+
+Added price to the description of the Loot and Shop item.
+
+Set the default currency to system specific currency rather than just using gp.
+
+And added Item summaries for Quest and Encounter sheets
+
 # Version 1.0.42
 
 Fixed an issue importing items from Shopkeeper

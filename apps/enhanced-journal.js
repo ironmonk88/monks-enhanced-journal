@@ -746,7 +746,7 @@ export class EnhancedJournal extends Application {
         let id = event.currentTarget.dataset.bookmarkId;
         let bookmark = this.bookmarks.find(b => b.id == id);
         let entity = await this.findEntity(bookmark.entityId, bookmark.text);
-        this.open(entity);
+        this.open(entity, setting("open-new-tab"));
     }
 
     removeBookmark(bookmark) {
@@ -772,7 +772,7 @@ export class EnhancedJournal extends Application {
             if (newtab === true) {
                 //the journal is getting created
                 //lets see if we can find  tab with this entity?
-                let tab = this.tabs.find(t => t.entityId == entity.id);
+                let tab = this.tabs.find(t => t.entityId.endsWith(entity.id));
                 if (tab != undefined)
                     this.activateTab(tab);
                 else
@@ -912,11 +912,11 @@ export class EnhancedJournal extends Application {
             if (data.type == 'Actor') {
                 if (data.pack == undefined) {
                     let actor = game.actors.get(data.id);
-                    this.open(actor);
+                    this.open(actor, setting("open-new-tab"));
                 }
             } else if (data.type == 'JournalEntry') {
                 let entity = game.journal.get(data.id);
-                this.open(entity);
+                this.open(entity, setting("open-new-tab"));
             }     
             log('drop data', event, data);
         }

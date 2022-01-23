@@ -26,7 +26,7 @@ export const registerSettings = function () {
 		hint: i18n("MonksEnhancedJournal.open-new-tab.hint"),
 		scope: "world",
 		config: true,
-		default: true,
+		default: false,
 		type: Boolean,
 	});
 

@@ -746,8 +746,10 @@ height: fit-content;*/
     align-content: flex-start;
 }
 
-.monks-journal-sheet.sheet .tab .tab-inner{
-    height:100%;
+.monks-journal-sheet.sheet .tab .tab-inner {
+    height: 100%;
+    overflow-y: auto !important;
+    align-content: flex-start;
 }
 
 .monks-journal-sheet.sheet header.sheet-header.journal-header {
@@ -853,6 +855,10 @@ height: fit-content;*/
 .monks-journal-sheet.sheet .tab.details .details .form-group,
 .monks-journal-sheet.sheet .tab.items .currency-group {
     flex-grow: 0;
+}
+
+.monks-journal-sheet.sheet .currency-group .form-fields input {
+    flex: 2;
 }
 
 .monks-journal-sheet.sheet .tab.details .details label,
@@ -1663,6 +1669,8 @@ height: fit-content;*/
     border-color: unset;
 }
 
+.monks-journal-sheet.sheet .encounter-body .item-list .item .item-summary,
+.monks-journal-sheet.sheet .quest-container .item-list .item .item-summary,
 .monks-journal-sheet.sheet .shop-container .item-list .item .item-summary,
 .monks-journal-sheet.sheet .loot-container .item-list .item .item-summary {
     flex: 0 0 100%;

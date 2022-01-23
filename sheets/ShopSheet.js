@@ -376,6 +376,15 @@ export class ShopSheet extends EnhancedJournalSheet {
         }*/
     }
 
+    static defaultCurrency() {
+        if (CONFIG[game.system.id.toUpperCase()]?.currencies["gp"])
+            return "gp";
+        else {
+            let currencies = Object.keys(CONFIG[game.system.id.toUpperCase()]?.currencies);
+            return (currencies.length > 0 ? currencies[0] : "");
+        }
+    }
+
     static canAfford(item, actor) {
         //find the currency
         let cost = "" + item.data.cost;
@@ -385,8 +394,9 @@ export class ShopSheet extends EnhancedJournalSheet {
 
         let currency = cost.replace(',', '').replace(price, '').trim();
 
-        if (currency == "")
-            currency = "gp";
+        if (currency == "") {
+            currency = this.defaultCurrency();
+        }
 
         let currencies = CONFIG[game.system.id.toUpperCase()]?.currencies;
         if (!currencies)
@@ -409,7 +419,7 @@ export class ShopSheet extends EnhancedJournalSheet {
         let currency = cost.replace(',', '').replace(price, '').trim();
 
         if (currency == "")
-            currency = "gp";
+            currency = this.defaultCurrency();
 
         let currencies = CONFIG[game.system.id.toUpperCase()]?.currencies;
         if (!currencies)
@@ -422,7 +432,7 @@ export class ShopSheet extends EnhancedJournalSheet {
             updates[`data.quantity.value`] = newVal;
             coinage.update(updates);
         } else {
-            let newVal = parseInt(this.getCurrency(actor.data.data.currency[currency])) - price;
+            let newVal = parseInt(EnhancedJournalSheet.getCurrency(actor.data.data.currency[currency])) - price;
             updates[`data.currency.${currency}`] = (actor.data.data.currency[currency].hasOwnProperty("value") ? { value: newVal } : newVal);
             actor.update(updates);
         }
@@ -539,33 +549,5 @@ export class ShopSheet extends EnhancedJournalSheet {
                 }
             }
         ];
-    }
-
-    async _onItemSummary(event) {
-        event.preventDefault();
-
-        let li = $(event.currentTarget).closest('li.item');
-
-        const id = li.data("id");
-        let itemData = (this.object.getFlag('monks-enhanced-journal', 'items') || []).find(i => i._id == id);
-        if (!itemData)
-            return;
-
-        let item = new CONFIG.Item.documentClass(itemData);
-        const chatData = item.getChatData({ secrets: false });
-
-        // Toggle summary
-        if (li.hasClass("expanded")) {
-            let summary = li.children(".item-summary");
-            summary.slideUp(200, () => summary.remove());
-        } else {
-            let div = $(`<div class="item-summary">${chatData.description.value}</div>`);
-            let props = $('<div class="item-properties"></div>');
-            chatData.properties.forEach(p => props.append(`<span class="tag">${p}</span>`));
-            div.append(props);
-            li.append(div.hide());
-            div.slideDown(200);
-        }
-        li.toggleClass("expanded");
     }
 }

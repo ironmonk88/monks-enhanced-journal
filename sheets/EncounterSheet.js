@@ -122,6 +122,7 @@ export class EncounterSheet extends EnhancedJournalSheet {
 
         $('.item-refill', html).click(this.refillItems.bind(this));
         $('.roll-table', html).click(this.rollTable.bind(this, "actors"));
+        $('.item-name h4', html).click(this._onItemSummary.bind(this));
     }
 
     _getSubmitData(updateData = {}) {

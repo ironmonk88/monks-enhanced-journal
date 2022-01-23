@@ -164,6 +164,7 @@ export class QuestSheet extends EnhancedJournalSheet {
         $('.item-delete', html).on('click', this._deleteItem.bind(this));
 
         $('.roll-table', html).click(this.rollTable.bind(this));
+        $('.item-name h4', html).click(this._onItemSummary.bind(this));
 
         const actorOptions = this._getPersonActorContextOptions();
         if (actorOptions) new ContextMenu($(html), ".actor-img", actorOptions);
@@ -583,5 +584,34 @@ export class QuestSheet extends EnhancedJournalSheet {
             reward.currency[key] = 0;
 
         this.setFlag('monks-enhanced-journal', 'rewards', rewards);
+    }
+
+    async _onItemSummary(event) {
+        event.preventDefault();
+
+        let li = $(event.currentTarget).closest('li.item');
+
+        const id = li.data("id");
+        let reward = this.getActiveReward();
+        let itemData = (reward?.items || []).find(i => i._id == id);
+        if (!itemData)
+            return;
+
+        let item = new CONFIG.Item.documentClass(itemData);
+        const chatData = item.getChatData({ secrets: false });
+
+        // Toggle summary
+        if (li.hasClass("expanded")) {
+            let summary = li.children(".item-summary");
+            summary.slideUp(200, () => summary.remove());
+        } else {
+            let div = $(`<div class="item-summary">${chatData.description.value}</div>`);
+            let props = $('<div class="item-properties"></div>');
+            chatData.properties.forEach(p => props.append(`<span class="tag">${p}</span>`));
+            div.append(props);
+            li.append(div.hide());
+            div.slideDown(200);
+        }
+        li.toggleClass("expanded");
     }
 }

@@ -299,7 +299,7 @@ export class MonksEnhancedJournal {
 
             // Action 3 - Render the Entity sheet
             if (doc.documentName == 'Actor' || doc.documentName == 'JournalEntry') {
-                if (event.altKey || setting('open-outside') || !MonksEnhancedJournal.openJournalEntry(doc, { newtab: event.ctrlKey })) {
+                if (event.altKey || setting('open-outside') || !MonksEnhancedJournal.openJournalEntry(doc, { newtab: event.ctrlKey && !setting("open-new-tab") })) {
                     return doc.sheet.render(true);
                 }
             }

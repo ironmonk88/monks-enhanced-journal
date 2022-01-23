@@ -372,6 +372,8 @@ export class LootSheet extends EnhancedJournalSheet {
                 let div = $(`<div class="item-summary">${chatData.description.value}</div>`);
                 let props = $('<div class="item-properties"></div>');
                 chatData.properties.forEach(p => props.append(`<span class="tag">${p}</span>`));
+                if (chatData.price != undefined)
+                    props.append(`<span class="tag">Price: ${chatData.price}</span>`)
                 div.append(props);
                 li.append(div.hide());
                 div.slideDown(200);
