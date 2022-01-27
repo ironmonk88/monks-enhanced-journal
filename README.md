@@ -119,6 +119,42 @@ When the Notes tool is selected, players can view the objectives of any In Progr
 You can also set the rewards that are gained by completing this quest.  To add an item, drag the item icon on the journal page.
 You can also drag an item off this list, onto an actor and it will register which actor that item has been handed off to.
 
+### Checklist
+
+![monks-enhanced-journal](/screenshots/checklist.png)
+
+The Checklist represents a list of items that chan be checked off.  Items can be dragged between folders and re-ordered.
+
+### Shop
+
+![monks-enhanced-journal](/screenshots/shop.png)
+
+This represents a Shop that contains Items which the players can purchase.
+
+Player purchasing can be set so that the shop is closed and not visible, open but unavailable for purchase, or set up so the GM distributes items, the items can be requested for puchase, or just open for the players to purchase whatever they want.
+
+If the currency beign used is specified the shop will attempt to determine if the actor has enough funds to purchase the item.  Setting the Quantity to blank means the item has infinite quantity, otherwise the quantity is decreased each time the player receives an item.
+
+Price is the store price, and Cost is what the players will see, so you can auto scale the pricing based on the shop keepers attitude towards the party.
+
+Items can be locked so that a player doesn't have access to purchasing the item, and can be hidden from the player, if for instance the shop  has the item, but the players need to enquire about it.
+
+You can also fill a Shop using a RollTable.
+
+### Loot
+
+![monks-enhanced-journal](/screenshots/loot.png)
+
+Loot represents loot gathered from an encounter.  You can drag and drop characters into the list of characters.  Double-clicking on the portrait will quickly open up the associted character.
+
+As with a Shop, you can set the availability so that the GM has to distribute items, the player needs to request the item, or they can take what they want.
+
+You can fill the loot from a Roll Table.
+
+You can split the currency between the associated characters.
+
+The Loot entry will also integrate with Monk's Tokenbar, so when an encounter/combat is finished, the items left by the NPC's can be added to a Loot Entry.
+
 ### Old Entry
 
 ![monks-enhanced-journal](/screenshots/oldentry.png)
