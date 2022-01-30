@@ -24,7 +24,7 @@
                     <div class="form-fields" style="flex-wrap:nowrap;">
                         {{#each currency}}
                         <label>{{localize @key}}</label>
-                        <input type="text" name="flags.monks-enhanced-journal.currency.{{@key}}" placeholder="0" value="{{this}}" style="text-align:right;" />
+                        <input type="text" name="flags.monks-enhanced-journal.currency.{{@key}}" placeholder="0" value="{{this}}" data-dtype="Number" style="text-align:right;" />
                         {{/each}}
                     </div>
                 </div>
@@ -36,15 +36,17 @@
             <ol class="items-list loot-characters" style="flex: 0 0 138px; overflow-y: hidden; ">
                 <li class="items-header flexrow">
                     <h3 class="item-name flexrow">{{localize 'MonksEnhancedJournal.Characters'}}</h3>
-                    {{#if currency}}
-                    <div class="item-controls flexrow owner-only">
-                        {{#if canSplit}}
+
+                    <div class="item-controls flexrow owner-only" style="flex: 0 0 120px;">
+                        <a class="item-control add-players" title="Replace with player characters">
+                            <i class="fas fa-user"></i> Players
+                        </a>
+                        {{#if (and currency canSplit)}}
                         <a class="item-control split-money" title="Split Currency between selected players">
                             <i class="fas fa-dollar-sign"></i> Split
                         </a>
                         {{/if}}
                     </div>
-                    {{/if}}
                 </li>
                 <ol class="items-list flexrow">
                     {{#each characters}}
@@ -67,6 +69,7 @@
                     <h3 class="item-name flexrow">{{localize 'MonksEnhancedJournal.Items'}}</h3>
                     <div class="item-controls item-from">{{localize 'MonksEnhancedJournal.From'}}</div>
                     <div class="item-controls item-requests">{{localize 'MonksEnhancedJournal.Requests'}}</div>
+                    {{#if canGrant}}<div class="item-controls item-grant">{{localize 'MonksEnhancedJournal.Grant'}}</div>{{/if}}
                     <div class="item-controls item-quantity">{{localize 'MonksEnhancedJournal.Qty'}}</div>
                     {{#if showrequest}}<div class="item-controls flexrow"></div>{{/if}}
                     <div class="item-controls flexrow owner-only">
@@ -99,6 +102,14 @@
                                     {{/each}}
                                 </ul>
                             </div>
+
+                            {{#if @root.canGrant}}
+                            <div class="item-controls item-grant">
+                                {{#if (and @root.owner (eq this.requests.length 1))}}
+                                <a class="item-control grant-item"><i class="fas fa-user-check"></i> {{localize 'MonksEnhancedJournal.Grant'}}</a>
+                                {{/if}}
+                            </div>
+                            {{/if}}
 
                             <div class="item-controls item-quantity">
                                 <input type="number" min="0" name="items.{{this.id}}.data.quantity{{@root.valStr}}" value="{{this.quantity}}" style="text-align:center;" />

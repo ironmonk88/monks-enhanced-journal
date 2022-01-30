@@ -4,8 +4,6 @@ import { EnhancedJournalSheet } from "../sheets/EnhancedJournalSheet.js";
 export class LootSheet extends EnhancedJournalSheet {
     constructor(data, options) {
         super(data, options);
-
-
     }
 
     static get defaultOptions() {
@@ -34,6 +32,13 @@ export class LootSheet extends EnhancedJournalSheet {
                     actors.push(user.character.id); //, name: user.character.name, img: user.character.img });
                 }
             }
+            if (actors.length == 0) {
+                for (let user of game.users) {
+                    if (user.character) {
+                        actors.push(user.character.id); //, name: user.character.name, img: user.character.img });
+                    }
+                }
+            }
             await this.object.setFlag('monks-enhanced-journal', 'actors', actors);
         }
 
@@ -45,9 +50,11 @@ export class LootSheet extends EnhancedJournalSheet {
         };
 
         let currency = (data.data.flags['monks-enhanced-journal'].currency || []);
-        data.currency = Object.keys(CONFIG[game.system.id.toUpperCase()]?.currencies || {}).reduce((a, v) => ({ ...a, [v]: currency[v] || 0 }), {});
+        data.currency = Object.keys(MonksEnhancedJournal.currencies).reduce((a, v) => ({ ...a, [v]: currency[v] || 0 }), {});
 
         data.groups = this.getItemGroups(data);
+
+        data.canGrant = ((data.data.flags['monks-enhanced-journal'].items || []).find(i => (Object.values(i.requests || {}).find(r => r) != undefined)) != undefined);
 
         data.characters = (data.data.flags['monks-enhanced-journal'].actors || []).map(a => {
             let actor = game.actors.get(a);
@@ -91,9 +98,11 @@ export class LootSheet extends EnhancedJournalSheet {
 
         $('.clear-items', html).click(this.clearAllItems.bind(this));
         $('.split-money', html).click(this.splitMoney.bind(this));
+        $('.add-players', html).click(this.addPlayers.bind(this));
         $('.roll-table', html).click(this.rollTable.bind(this));
 
         $('.request-item', html).click(this.requestItem.bind(this));
+        $('.grant-item', html).click(this.grantItem.bind(this));
 
         $('.loot-character', html).dblclick(this.openActor.bind(this));
 
@@ -130,16 +139,24 @@ export class LootSheet extends EnhancedJournalSheet {
         await this.object.setFlag('monks-enhanced-journal', 'currency', remainder);
     }
 
+    async addPlayers() {
+        let actors = [];
+        for (let user of game.users) {
+            if (user.character) {
+                actors.push(user.character.id);
+            }
+        }
+        await this.object.setFlag('monks-enhanced-journal', 'actors', actors);
+    }
+
     _getSubmitData(updateData = {}) {
         let data = expandObject(super._getSubmitData(updateData));
 
         data.flags['monks-enhanced-journal'].items = duplicate(this.object.getFlag("monks-enhanced-journal", "items") || []);
-        if (items) {
-            for (let item of data.flags['monks-enhanced-journal'].items) {
-                let dataItem = data.items[item._id];
-                if (dataItem)
-                    item = mergeObject(item, dataItem);
-            }
+        for (let item of data.flags['monks-enhanced-journal'].items) {
+            let dataItem = data.items[item._id];
+            if (dataItem)
+                item = mergeObject(item, dataItem);
         }
         delete data.items;
 
@@ -170,6 +187,9 @@ export class LootSheet extends EnhancedJournalSheet {
         let item = this.object.data.flags["monks-enhanced-journal"].items.find(i => i._id == id);
         if (item == undefined || (!game.user.isGM && (item?.lock === true || this.getCurrency(item.quantity) <= 0)))
             return;
+
+        item = duplicate(item);
+        item.data.quantity = (item.data.quantity.hasOwnProperty("value") ? { value: 1 } : 1);
 
         dragData.id = id;
         dragData.journalid = this.object.id;
@@ -202,6 +222,7 @@ export class LootSheet extends EnhancedJournalSheet {
                 if (actor) {
                     let itemData = duplicate(data.data);
                     delete itemData._id;
+                    itemData.data.quantity = (itemData.data.quantity.hasOwnProperty("value") ? { value: 1 } : 1);
                     actor.createEmbeddedDocuments("Item", [itemData]);
                     this.constructor.purchaseItem.call(this.constructor, this.object, data.data._id, actor);
                 }
@@ -259,6 +280,7 @@ export class LootSheet extends EnhancedJournalSheet {
             // Create the owned item
             let itemData = duplicate(item);
             delete itemData._id;
+            itemData.data.quantity = (itemData.data.quantity.hasOwnProperty("value") ? { value: 1 } : 1);
             actor.createEmbeddedDocuments("Item", [itemData]);
             MonksEnhancedJournal.emit("purchaseItem",
                 {
@@ -267,6 +289,36 @@ export class LootSheet extends EnhancedJournalSheet {
                     actorid: actor.id
                 })
         }
+    }
+
+    async grantItem(event) {
+        let li = $(event.currentTarget).closest("li")[0];
+
+        let item;
+        let id = li.dataset.id;
+        let items = duplicate(this.object.data.flags['monks-enhanced-journal'].items || []);
+        item = items.find(o => o._id == id);
+
+        if (!item || item.requests.length == 0)
+            return;
+
+        let userid = Object.entries(item.requests || {}).find(([k,v]) => v)[0];
+        let user = game.users.get(userid);
+        if (!user) return;
+
+        const actor = user.character;
+        if (!actor) return;
+
+        // Create the owned item
+        let itemData = duplicate(item);
+        delete itemData._id;
+        itemData.data.quantity = (itemData.data.quantity.hasOwnProperty("value") ? { value: 1 } : 1);
+        actor.createEmbeddedDocuments("Item", [itemData]);
+
+        item.requests[userid] = false;
+        await this.object.setFlag('monks-enhanced-journal', 'items', items);
+
+        await this.constructor.purchaseItem.call(this.constructor, this.object, id, actor, user);
     }
 
     async addItem(data) {

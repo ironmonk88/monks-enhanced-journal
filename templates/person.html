@@ -116,7 +116,7 @@
                             <label>{{localize 'MonksEnhancedJournal.LongTermGoal'}}</label>
                             <textarea name="flags.monks-enhanced-journal.longterm">{{data.flags.monks-enhanced-journal.longterm}}</textarea>
                         </div>
-                        <div class="form-group" {{#unless fields.shirtterm.value}} style="display:none;" {{/unless}}>
+                        <div class="form-group" {{#unless fields.shortterm.value}} style="display:none;" {{/unless}}>
                             <label>{{localize 'MonksEnhancedJournal.ShortTermGoal'}}</label>
                             <textarea name="flags.monks-enhanced-journal.shortterm">{{data.flags.monks-enhanced-journal.shortterm}}</textarea>
                         </div>
@@ -152,7 +152,7 @@
                                     <input type="text" class="item-field" name="relationship" value="{{this.relationship}}" />
                                 </div>
 
-                                {{#if owner}}
+                                {{#if @root.owner}}
                                 <div class="item-controls flexrow owner">
                                     <a class="item-control item-delete" title="{{localize 'MonksEnhancedJournal.RemoveActor'}}"><i class="fas fa-trash"></i></a>
                                 </div>

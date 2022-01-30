@@ -48,7 +48,7 @@ export class EncounterSheet extends EnhancedJournalSheet {
             return config[container][value];
         }
 
-        let config = (game.system.id == "tormenta20" ? CONFIG.T20 : CONFIG[game.system.id.toUpperCase()]);
+        let config = MonksEnhancedJournal.config;
 
         if (data.data.flags && data.data.flags["monks-enhanced-journal"].dcs) {
             data.dcs = data.data.flags["monks-enhanced-journal"].dcs.map(dc => {
@@ -68,7 +68,7 @@ export class EncounterSheet extends EnhancedJournalSheet {
         data.groups = this.getItemGroups(data);
 
         let currency = this.object.data.flags["monks-enhanced-journal"].currency || {};
-        data.currency = Object.keys(CONFIG[game.system.id.toUpperCase()]?.currencies || {}).reduce((a, v) => ({ ...a, [v]: currency[v] || 0 }), {});
+        data.currency = Object.keys(MonksEnhancedJournal.currencies).reduce((a, v) => ({ ...a, [v]: currency[v] || 0 }), {});
 
         data.valStr = (['pf2e'].includes(game.system.id) ? ".value" : "");
 
@@ -129,16 +129,22 @@ export class EncounterSheet extends EnhancedJournalSheet {
         let data = expandObject(super._getSubmitData(updateData));
 
         data.flags['monks-enhanced-journal'].items = duplicate(this.object.getFlag("monks-enhanced-journal", "items") || []);
-        if (items) {
-            for (let item of data.flags['monks-enhanced-journal'].items) {
-                let dataItem = data.items[item._id];
-                if (dataItem)
-                    item = mergeObject(item, dataItem);
-                if (!item.assigned && item.received)
-                    delete item.received;
-            }
+        for (let item of data.flags['monks-enhanced-journal'].items) {
+            let dataItem = data.items[item._id];
+            if (dataItem)
+                item = mergeObject(item, dataItem);
+            if (!item.assigned && item.received)
+                delete item.received;
         }
         delete data.items;
+
+        data.flags['monks-enhanced-journal'].actors = duplicate(this.object.getFlag("monks-enhanced-journal", "actors") || []);
+        for (let actor of data.flags['monks-enhanced-journal'].actors) {
+            let dataActor = data.actors[actor.id];
+            if (dataActor)
+                actor = mergeObject(actor, dataActor);
+        }
+        delete data.actors;
 
         return flattenObject(data);
     }
@@ -308,10 +314,15 @@ export class EncounterSheet extends EnhancedJournalSheet {
                 // Prepare the Token data
                 for (let i = 0; i < (ea.quantity || 1); i++) {
                     let td = await actor.getTokenData({ x: x, y: y });
+                    if (ea.hidden)
+                        td.hidden = true;
                     let newSpot = MonksEnhancedJournal.findVacantSpot({ x: x, y: y }, { width: td.width, height: td.height });
                     td.update(newSpot);
 
                     let token = await cls.create(td, { parent: canvas.scene });
+                    if (ea.hidden)
+                        token.update({ hidden: true });
+
                     tokenids.push(token.id);
                 }
             }

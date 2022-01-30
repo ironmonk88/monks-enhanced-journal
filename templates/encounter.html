@@ -33,7 +33,8 @@
                                 <h3 class="item-name monster-name flexrow">
                                     {{localize 'MonksEnhancedJournal.Monsters'}}
                                 </h3>
-                                <div class="item-controls item-quantity">{{localize 'MonksEnhancedJournal.Qty'}}</div>
+                                <div class="item-controls item-hidden">{{localize 'MonksEnhancedJournal.Hidden'}}</div>
+                                <div class="item-controls item-quantity">{{localize 'MonksEnhancedJournal.Quantity'}}</div>
                                 <div class="item-controls flexrow">
                                     <a class="item-control roll-table" title="Populate from Rolltable"><i class="fas fa-th-list"></i></a>
                                 </div>
@@ -47,8 +48,12 @@
                                         <h4>{{this.name}}</h4>
                                     </div>
 
+                                    <div class="item-controls item-hidden" style="text-align:center;">
+                                        <input type="checkbox" name="actors.{{this.id}}.hidden" {{checked this.hidden}} data-dtype="Boolean" style="text-align:center;" />
+                                    </div>
+
                                     <div class="item-controls item-quantity">
-                                        <input type="text" name="quantity" value="{{this.quantity}}" style="text-align:center;" />
+                                        <input type="text" name="actors.{{this.id}}.quantity" value="{{this.quantity}}" data-dtype="Number" style="text-align:center;" />
                                     </div>
 
                                     <div class="item-controls flexrow">

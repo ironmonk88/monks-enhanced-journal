@@ -1,3 +1,35 @@
+# Version 1.0.44
+
+Fixed an issue where the submit button of the old journal sheet was causing the entire page to submit.
+
+Added an error message to the dialog that sends journal entries to players if there are no players selected and Show All isn't pressed.
+
+Fixed an issue where newly created journal entries weren't getting the type set properly.
+
+Fixed an issue where players gold wasn't being subtracted when they could purchase the item themselves.
+
+Fixed issue with the way some systems handle currencies.
+
+Fixed issue when the default sheet class was changed, the journal sheet wasn't updating.
+
+Fixed issue with updating monster quantities in Encounters
+
+Added the option to create an encounter with some tokens hidden.
+
+Fixed issue with showing to players when the sheet is not within the enhanced browser
+
+Updated the Loot sheet to select the current party if no characters are added.
+
+Added a button to grant items to players that request them in the loot sheet.
+
+Added a button to add the current party to loot sheet.
+
+Fixed issues with quantity if it's an object rather than a number
+
+Fixed issue with Person sheet not able to remove relationships
+
+Fixed issue with short term goals not being shown on the Person sheet
+
 # Version 1.0.43
 
 Fixed an issue where opening tabs automatically wasn't checking to see if the tab was already open.

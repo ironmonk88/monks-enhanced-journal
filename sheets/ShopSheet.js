@@ -115,12 +115,10 @@ export class ShopSheet extends EnhancedJournalSheet {
         let data = expandObject(super._getSubmitData(updateData));
 
         data.flags['monks-enhanced-journal'].items = duplicate(this.object.getFlag("monks-enhanced-journal", "items") || []);
-        if (items) {
-            for (let item of data.flags['monks-enhanced-journal'].items) {
-                let dataItem = data.items[item._id];
-                if (dataItem)
-                    item = mergeObject(item, dataItem);
-            }
+        for (let item of data.flags['monks-enhanced-journal'].items) {
+            let dataItem = data.items[item._id];
+            if (dataItem)
+                item = mergeObject(item, dataItem);
         }
         delete data.items;
 
@@ -152,6 +150,9 @@ export class ShopSheet extends EnhancedJournalSheet {
             ui.notifications.warn("Not enough of that item remains to be transferred to an Actor");
             return;
         }
+
+        item = duplicate(item);
+        item.data.quantity = (item.data.quantity.hasOwnProperty("value") ? { value: 1 } : 1);
 
         dragData.id = id;
         dragData.journalid = this.object.id;
@@ -289,6 +290,7 @@ export class ShopSheet extends EnhancedJournalSheet {
             // Create the owned item
             let itemData = duplicate(item);
             delete itemData._id;
+            itemData.data.quantity = (itemData.data.quantity.hasOwnProperty("value") ? { value: 1 } : 1);
             await actor.createEmbeddedDocuments("Item", [itemData]);
 
             MonksEnhancedJournal.emit("purchaseItem",
@@ -377,10 +379,10 @@ export class ShopSheet extends EnhancedJournalSheet {
     }
 
     static defaultCurrency() {
-        if (CONFIG[game.system.id.toUpperCase()]?.currencies["gp"])
+        if (MonksEnhancedJournal.currencies["gp"])
             return "gp";
         else {
-            let currencies = Object.keys(CONFIG[game.system.id.toUpperCase()]?.currencies);
+            let currencies = Object.keys(MonksEnhancedJournal.currencies);
             return (currencies.length > 0 ? currencies[0] : "");
         }
     }
@@ -398,8 +400,8 @@ export class ShopSheet extends EnhancedJournalSheet {
             currency = this.defaultCurrency();
         }
 
-        let currencies = CONFIG[game.system.id.toUpperCase()]?.currencies;
-        if (!currencies)
+        let currencies = MonksEnhancedJournal.currencies;
+        if (Object.keys(currencies).length == 0)
             return true;
 
         if (game.system.id == 'pf2e') {
@@ -421,8 +423,8 @@ export class ShopSheet extends EnhancedJournalSheet {
         if (currency == "")
             currency = this.defaultCurrency();
 
-        let currencies = CONFIG[game.system.id.toUpperCase()]?.currencies;
-        if (!currencies)
+        let currencies = MonksEnhancedJournal.currencies;
+        if (Object.keys(currencies).length == 0)
             return;
 
         let updates = {};

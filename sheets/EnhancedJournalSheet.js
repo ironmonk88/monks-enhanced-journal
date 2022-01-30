@@ -1,5 +1,6 @@
 import { setting, i18n, log, makeid, MonksEnhancedJournal } from "../monks-enhanced-journal.js";
 import { EditFields } from "../apps/editfields.js";
+import { SelectPlayer } from "../apps/selectplayer.js";
 
 export class EnhancedJournalSheet extends JournalSheet {
     constructor(object, options = {}) {
@@ -150,7 +151,8 @@ export class EnhancedJournalSheet extends JournalSheet {
         if (data.type == 'JournalEntry' && this.enhancedjournal) {
             let document = game.journal.find(j => j.id == data.id);
             this.enhancedjournal.open(document);
-        }
+        } else
+            return false;
     }
 
     activateListeners(html, enhancedjournal) {
@@ -898,47 +900,52 @@ export class EnhancedJournalSheet extends JournalSheet {
     }
 
     async _onShowPlayers(event) {
-        let users = event.data.users;
-        let options = event.data.options;
+        if (!event.data?.hasOwnProperty("users")) {
+            let type = this.type;
+            new SelectPlayer(this, { showpic: $('.fullscreen-image', this.element).is(':visible') || ((type == 'journalentry' || type == 'oldentry') && $('.tab.picture', this.element).hasClass('active')) }).render(true);
+        } else {
+            let users = event.data.users;
+            let options = event.data.options;
 
-        let object = event.data?.object || this.object;
+            let object = event.data?.object || this.object;
 
-        if (users != undefined)
-            users = users.filter(u => u.selected);
-        //if we havn't picked anyone to show this to, then exit
-        if (users instanceof Array && users.length == 0)
-            return;
+            if (users != undefined)
+                users = users.filter(u => u.selected);
+            //if we havn't picked anyone to show this to, then exit
+            if (users instanceof Array && users.length == 0)
+                return;
 
-        if (!object.isOwner) throw new Error("You may only request to show Journal Entries which you own.");
+            if (!object.isOwner) throw new Error("You may only request to show Journal Entries which you own.");
 
-        let args = {
-            title: object.name,
-            uuid: object.uuid,
-            users: (users != undefined ? users.map(u => u.id) : users),
-            showid: makeid()
-        }
-        if (options?.showpic || object.data?.flags["monks-enhanced-journal"]?.type == 'picture')
-            args.image = object.data.img;
-
-        if (!object.data.img && !object.data.content)
-            return ui.notifications.warn("Cannot show an entry that has no content or image");
-
-        MonksEnhancedJournal.emit("showEntry", args);
-
-        ui.notifications.info(game.i18n.format("MonksEnhancedJournal.MsgShowPlayers", {
-            title: object.name,
-            which: (users == undefined ? 'all players' : users.map(u => u.name).join(', '))
-        }) + (options?.showpic || object.data?.flags["monks-enhanced-journal"]?.type == 'picture' ? ', click <a onclick="game.MonksEnhancedJournal.journal.cancelSend(\'' + args.showid + '\', ' + options?.showpic + ');event.preventDefault();">here</a> to cancel' : ''));
-
-        if (options?.updatepermission) {
-            let permissions = {};
-            Object.assign(permissions, object.data.permission);
-            if (users == undefined)
-                permissions["default"] = CONST.ENTITY_PERMISSIONS.OBSERVER;
-            else {
-                users.forEach(user => { permissions[user.id] = CONST.ENTITY_PERMISSIONS.OBSERVER; });
+            let args = {
+                title: object.name,
+                uuid: object.uuid,
+                users: (users != undefined ? users.map(u => u.id) : users),
+                showid: makeid()
             }
-            object.update({ permission: permissions });
+            if (options?.showpic || object.data?.flags["monks-enhanced-journal"]?.type == 'picture')
+                args.image = object.data.img;
+
+            if (!object.data.img && !object.data.content)
+                return ui.notifications.warn("Cannot show an entry that has no content or image");
+
+            MonksEnhancedJournal.emit("showEntry", args);
+
+            ui.notifications.info(game.i18n.format("MonksEnhancedJournal.MsgShowPlayers", {
+                title: object.name,
+                which: (users == undefined ? 'all players' : users.map(u => u.name).join(', '))
+            }) + (options?.showpic || object.data?.flags["monks-enhanced-journal"]?.type == 'picture' ? ', click <a onclick="game.MonksEnhancedJournal.journal.cancelSend(\'' + args.showid + '\', ' + options?.showpic + ');event.preventDefault();">here</a> to cancel' : ''));
+
+            if (options?.updatepermission) {
+                let permissions = {};
+                Object.assign(permissions, object.data.permission);
+                if (users == undefined)
+                    permissions["default"] = CONST.ENTITY_PERMISSIONS.OBSERVER;
+                else {
+                    users.forEach(user => { permissions[user.id] = CONST.ENTITY_PERMISSIONS.OBSERVER; });
+                }
+                object.update({ permission: permissions });
+            }
         }
     }
 
@@ -1045,7 +1052,7 @@ export class EnhancedJournalSheet extends JournalSheet {
             entity.createEmbeddedDocuments("Item", newitems);
 
             let newcurr = entity.data.data.currency || {};
-            for (let curr of Object.keys(CONFIG[game.system.id.toUpperCase()]?.currencies || {})) {
+            for (let curr of Object.keys(MonksEnhancedJournal.currencies)) {
                 if (currency[curr]) {
                     newVal = parseInt(this.getCurrency(newcurr[curr]) + (currency[curr] || 0));
                     newcurr[curr] = (newcurr[curr].hasOwnProperty("value") ? { value: newVal } : newVal);
@@ -1061,7 +1068,7 @@ export class EnhancedJournalSheet extends JournalSheet {
             await entity.setFlag('monks-enhanced-journal', 'items', loot);
 
             let newcurr = entity.getFlag("monks-enhanced-journal", "currency") || {};
-            for (let curr of Object.keys(CONFIG[game.system.id.toUpperCase()]?.currencies || {})) {
+            for (let curr of Object.keys(MonksEnhancedJournal.currencies)) {
                 if (currency[curr]) {
                     newcurr[curr] = parseInt(EnhancedJournalSheet.getCurrency(newcurr[curr]) + (currency[curr] || 0));
                 }

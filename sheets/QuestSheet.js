@@ -81,7 +81,7 @@ export class QuestSheet extends EnhancedJournalSheet {
     }
 
     convertRewards() {
-        let currency = Object.keys(CONFIG[game.system.id.toUpperCase()]?.currencies || {}).reduce((a, v) => ({ ...a, [v]: this.object.data.flags["monks-enhanced-journal"][v] }), {});
+        let currency = Object.keys(MonksEnhancedJournal.currencies).reduce((a, v) => ({ ...a, [v]: this.object.data.flags["monks-enhanced-journal"][v] }), {});
         return [{
             id: makeid(),
             name: "Rewards",
@@ -109,7 +109,7 @@ export class QuestSheet extends EnhancedJournalSheet {
             reward = rewards[0];
             this.object.setFlag('monks-enhanced-journal', 'reward', reward.id);
         }
-        let currency = Object.keys(CONFIG[game.system.id.toUpperCase()]?.currencies || {}).reduce((a, v) => ({ ...a, [v]: 0 }), {});
+        let currency = Object.keys(MonksEnhancedJournal.currencies).reduce((a, v) => ({ ...a, [v]: 0 }), {});
         reward.currency = mergeObject(currency, reward.currency);
 
         reward.groups = this.getItemGroups(reward);
@@ -291,7 +291,7 @@ export class QuestSheet extends EnhancedJournalSheet {
 
     async addReward() {
         let rewards = duplicate(this.getRewardData());
-        let currency = Object.keys(CONFIG[game.system.id.toUpperCase()]?.currencies || {}).reduce((a, v) => ({ ...a, [v]: 0 }), {});
+        let currency = Object.keys(MonksEnhancedJournal.currencies).reduce((a, v) => ({ ...a, [v]: 0 }), {});
         let reward = {
             id: makeid(),
             name: "Rewards",

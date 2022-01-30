@@ -85,10 +85,12 @@ export class SelectPlayer extends FormApplication {
     }
 
     showPlayers(mode, event) {
-        if (mode == 'players' && this.users.length == 0) {
+        let users = this.users.filter(u => u.selected);
+        if (mode == 'players' && users.length == 0) {
+            ui.notifications.info('No players selected to send this entry to');
             return;
         }
-        event.data = {users: (mode == 'all' ? null : this.users), options: { showpic: this.showpic, updatepermission: this.updatepermission }};
+        event.data = { users: (mode == 'all' ? null : users), options: { showpic: this.showpic, updatepermission: this.updatepermission }};
         this.journalsheet._onShowPlayers.call(this.journalsheet, event);
     }
 

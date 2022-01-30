@@ -347,6 +347,8 @@ export class MonksEnhancedJournal {
             if (game.user.id !== userid)
                 return;
 
+            MonksEnhancedJournal.fixType(this);
+
             if (MonksEnhancedJournal.compendium !== true && !MonksEnhancedJournal.openJournalEntry(this, options))
                 return wrapped(...args);
         }
@@ -1245,8 +1247,12 @@ export class MonksEnhancedJournal {
             if (entry && actor) {
                 const cls = (entry._getSheetClass ? entry._getSheetClass() : null);
                 if (cls && cls.purchaseItem) {
-                    if (!cls.purchaseItem.call(cls, entry, data.itemid, actor, data.user))
-                        return false;
+                    cls.purchaseItem.call(cls, entry, data.itemid, actor, data.user);
+                    if (data.purchase === true) {
+                        let item = (entry.getFlag('monks-enhanced-journal', 'items') || []).find(i => i._id == data.itemid);
+                        if (item)
+                            cls.actorPurchase(item, actor);
+                    }
                 }
             }
         }
@@ -1486,9 +1492,11 @@ export class MonksEnhancedJournal {
 
             if (game.modules.get('_document-sheet-registrar')?.active) {
                 object.setFlag('_document-sheet-registrar', 'type', type);
+                object.data.flags["_document-sheet-registrar"] = { type: type };
                 warn(`Lib: Document Sheet Registrar is causing errors with Enhanced Journal.  It's recommended that you disable it`);
-            } else
+            } else {
                 object.data.type = type;    //set the type of all entries since Foundry won't save the new type
+            }
 
             return type;
         } else if (object.data?.flags['monks-enhanced-journal']?.type == 'blank') {
@@ -1504,6 +1512,30 @@ export class MonksEnhancedJournal {
             lootsheetoptions['merchantsheetnpc'] = "Merchant Sheet NPC";
 
         return lootsheetoptions;
+    }
+
+    static get config() {
+        let system = game.system.id.toUpperCase();
+        if (game.system.id == 'dnd4e' && !CONFIG[system])
+            system = "DND4EBETA";
+        if (game.system.id == 'tormenta20')
+            system = "T20";
+
+        return CONFIG[system] || {};
+    }
+
+    static get currencies() {
+        let system = game.system.id.toUpperCase();
+        if (game.system.id == 'dnd4e' && !CONFIG[system])
+            system = "DND4EBETA";
+        if (game.system.id == 'tormenta20')
+            system = "T20";
+
+        if (game.system.id == "sw5e")
+            return { gc: "", cr: "" };
+        if (game.system.id == "swade")
+            return { gp: "Gold" };
+        return MonksEnhancedJournal.config.currencies || {};
     }
 }
 
@@ -1583,7 +1615,14 @@ Hooks.once("ready", async function () {
 Hooks.on("preCreateJournalEntry", (entry, data, options, userId) => {
     let flags = { type: data.type };//(data.type == 'base' ? 'journalentry' : data.type) };
     if (data.type) {
-        MonksEnhancedJournal.fixType(entry);
+        if (entry.id)
+            MonksEnhancedJournal.fixType(entry);
+        else {
+            if (game.modules.get("_document-sheet-registrar")?.active)
+                entry.data.flags["_document-sheet-registrar"] = { type: data.type };
+            else
+                entry.data.type = data.type;
+        }
 
         const cls = (entry._getSheetClass ? entry._getSheetClass() : null);
         if (cls && cls.defaultObject)
@@ -1850,4 +1889,13 @@ Hooks.on("getSceneControlButtons", (controls) => {
 Hooks.on("renderItemSheet", (app, html, options) => {
     //Change the price so we can specify the currency type
     $('input[name="data.price"]', html).attr('data-dtype', 'String');
-})
+});
+
+Hooks.on("updateSetting", (setting, data, options, userid) => {
+    if (setting.key == "core.sheetClasses" && MonksEnhancedJournal.journal) {
+        let value = JSON.parse(data.value);
+        if (value.hasOwnProperty("JournalEntry")) {
+            MonksEnhancedJournal.journal.render();
+        }
+    }
+});

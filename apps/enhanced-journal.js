@@ -236,6 +236,8 @@ export class EnhancedJournal extends Application {
 
             this.subsheet.activateListeners($(this.subdocument), this);
 
+            $('button[type="submit"]', $(this.subdocument)).attr('type', 'button').on("click", this.subsheet._onSubmit.bind(this.subsheet))
+
             if (this.subsheet.updateStyle && this.object.data.type != 'blank')
                 this.subsheet.updateStyle(null, this.subdocument);
 
@@ -470,7 +472,7 @@ export class EnhancedJournal extends Application {
         else {
             this.saveTabs();
             if (options.refresh)
-                this.render(true);
+                this.render(true, { focus: true });
         }
 
         this.updateRecent(tab.entity);
@@ -572,7 +574,7 @@ export class EnhancedJournal extends Application {
         if (!this.rendered)
             return;
 
-        this.render(true);
+        this.render(true, { focus: true });
     }
 
     removeTab(tab, event) {
