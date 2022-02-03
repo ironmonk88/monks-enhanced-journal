@@ -162,6 +162,7 @@
   "MonksEnhancedJournal.ShopType": "Shop Type",
   "MonksEnhancedJournal.LootName": "Loot Name",
   "MonksEnhancedJournal.PlayerPurchasing": "Player Purchasing",
+  "MonksEnhancedJournal.PlayerReceiving": "Player Receiving",
   "MonksEnhancedJournal.Townsfolk": "Townsfolk",
   "MonksEnhancedJournal.Shops": "Shops",
   "MonksEnhancedJournal.Inhabitants": "Inhabitants",
@@ -192,6 +193,7 @@
   "MonksEnhancedJournal.ReceivedBy": "Received by",
   "MonksEnhancedJournal.Accept": "Accept",
   "MonksEnhancedJournal.Reject": "Reject",
+  "MonksEnhancedJournal.Cancel": "Cancel",
   "MonksEnhancedJournal.ChangePermissions": "Change permissions to Observer",
   "MonksEnhancedJournal.State": "State",
   "MonksEnhancedJournal.Closed": "Closed",
@@ -261,8 +263,9 @@
   "MonksEnhancedJournal.checklist": "Checklist",
 
   "MonksEnhancedJournal.purchasing.locked": "GM Only",
-  "MonksEnhancedJournal.purchasing.confirm": "Request Purchase",
+  "MonksEnhancedJournal.purchasing.confirm": "Confirm Receipt",
   "MonksEnhancedJournal.purchasing.free": "Anyone",
+  "MonksEnhancedJournal.purchasing.request": "Request Purchase",
 
   "MonksEnhancedJournal.inactive": "Inactive",
   "MonksEnhancedJournal.unavailable": "Unavailable",

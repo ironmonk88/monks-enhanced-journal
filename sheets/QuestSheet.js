@@ -21,7 +21,7 @@ export class QuestSheet extends EnhancedJournalSheet {
                 { dragSelector: ".reward-items .item-list .item .item-name", dropSelector: "null" },
                 { dragSelector: ".objective-items .item-list .item", dropSelector: ".quest-container" }
             ],
-            scrollY: [".objective-items", ".reward-items", ".description"]
+            scrollY: [".objective-items", ".reward-items", ".tab.description .tab-inner"]
         });
     }
 
@@ -163,7 +163,7 @@ export class QuestSheet extends EnhancedJournalSheet {
         $('.item-edit', html).on('click', this.editItem.bind(this));
         $('.item-delete', html).on('click', this._deleteItem.bind(this));
 
-        $('.roll-table', html).click(this.rollTable.bind(this));
+        $('.roll-table', html).click(this.rollTable.bind(this, "items"));
         $('.item-name h4', html).click(this._onItemSummary.bind(this));
 
         const actorOptions = this._getPersonActorContextOptions();

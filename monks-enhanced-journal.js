@@ -520,7 +520,38 @@ export class MonksEnhancedJournal {
             }
         }
 
-        SceneNavigation._getContextMenuOptions
+        let notesOnDropData = async function(...args) {
+            let [ event, data ] = args;
+            // Acquire Journal entry
+            let entry = await JournalEntry.fromDropData(data);
+            if (entry.compendium) {
+                const journalData = game.journal.fromCompendium(entry);
+                entry = await JournalEntry.implementation.create(journalData);
+            }
+
+            // Get the world-transformed drop position
+            const coords = this._canvasCoordinatesFromDrop(event);
+            if (!coords) return false;
+            const noteData = { entryId: entry.id, x: coords[0], y: coords[1] };
+            if (entry.type == 'shop')
+                noteData.icon = "icons/svg/hanging-sign.svg";
+            else if (entry.type == 'loot')
+                noteData.icon = "icons/svg/chest.svg";
+            else if (entry.type == 'encounter')
+                noteData.icon = "icons/svg/sword.svg";
+            else if (entry.type == 'place')
+                noteData.icon = "icons/svg/village.svg";
+
+            return this._createPreview(noteData, { top: event.clientY - 20, left: event.clientX + 40 });
+        }
+
+        if (game.modules.get("lib-wrapper")?.active) {
+            libWrapper.register("monks-enhanced-journal", "NotesLayer.prototype._onDropData", notesOnDropData, "OVERRIDE");
+        } else {
+            NotesLayer.prototype._onDropData = function (event) {
+                return notesOnDropData.call(this, ...arguments);
+            }
+        }
 
         Handlebars.registerHelper({ selectGroups: MonksEnhancedJournal.selectGroups });
     }
@@ -919,7 +950,7 @@ export class MonksEnhancedJournal {
 
         tinyMCE.PluginManager.add('background', backgroundinit);
 
-        if (game.modules.get("polyglot")?.active) {
+        if (game.modules.get("polyglot")?.active && !isNewerVersion(game.modules.get("polyglot").data.version, "1.7.30")) {
             let root = $('<div>').attr('id', 'enhanced-journal-fonts').appendTo('body');
             for (let [k, v] of Object.entries(polyglot.polyglot.LanguageProvider.alphabets)) {
                 $('<span>').attr('lang', k).css({ font: v }).appendTo(root);
@@ -1361,14 +1392,14 @@ export class MonksEnhancedJournal {
         return checkspot;
     }
 
-    static async acceptItem(accept) {
+    static async acceptItem(status) {
         let message = this;
 
         let content = $(message.data.content);
         $('.request-buttons', content).remove();
-        $('.request-msg', content).html((accept ? '<i class="fas fa-check"></i> Item has been added to inventory' : '<i class="fas fa-times"></i> Request has been rejected'));
+        $('.card-footer', content).html(`<span class="request-msg">${(status == 'accept' ? '<i class="fas fa-check"></i> Item has been added to inventory' : '<i class="fas fa-times"></i> Request has been ' + (status == 'reject' ? 'rejected' : 'canceled'))}</span>`);
 
-        if (accept) {
+        if (status == 'accept') {
             //find the shop        
             let msgshop = message.getFlag('monks-enhanced-journal', 'shop');
             let entry = game.journal.get(msgshop.id);
@@ -1396,7 +1427,7 @@ export class MonksEnhancedJournal {
             if (item.data.cost && item.data.cost != '') {
                 //check if the player can afford it
                 if (!cls.canAfford(item, actor)) {
-                    ui.notifications.warn("Cannot transfer this item, Actor cannot afford it.");
+                    ui.notifications.warn(`Cannot transfer this item, ${actor.name} cannot afford it.`);
                     return false;
                 }
             }
@@ -1410,7 +1441,7 @@ export class MonksEnhancedJournal {
             cls.purchaseItem.call(cls, entry, item._id, actor, null, 'nochat');
         }
 
-        message.update({ content: content[0].outerHTML, flags: { 'monks-enhanced-journal': { accepted: accept } } });
+        message.update({ content: content[0].outerHTML, flags: { 'monks-enhanced-journal': { accepted: (status == 'accept') } } });
     }
 
     static async openRequestItem(type, event) {
@@ -1813,8 +1844,8 @@ Hooks.on("renderChatMessage", (message, html, data) => {
         if (game.user.isGM)
             html.find(".player-only").remove();
 
-        $('.request-accept', html).click(MonksEnhancedJournal.acceptItem.bind(message, true));
-        $('.request-reject', html).click(MonksEnhancedJournal.acceptItem.bind(message, false));
+        $('.request-accept', html).click(MonksEnhancedJournal.acceptItem.bind(message, 'accept'));
+        $('.request-reject', html).click(MonksEnhancedJournal.acceptItem.bind(message, game.user.isGM ? 'reject' : 'cancel'));
 
         $('.actor-icon', html).click(MonksEnhancedJournal.openRequestItem.bind(message, 'actor')).attr('onerror', "$(this).attr('src', 'icons/svg/mystery-man.svg');");
         $('.shop-icon', html).click(MonksEnhancedJournal.openRequestItem.bind(message, 'shop')).attr('onerror', "$(this).attr('src', 'modules/monks-enhanced-journal/assets/shop.png');");
@@ -1897,5 +1928,12 @@ Hooks.on("updateSetting", (setting, data, options, userid) => {
         if (value.hasOwnProperty("JournalEntry")) {
             MonksEnhancedJournal.journal.render();
         }
+    }
+});
+
+Hooks.on("polyglot.ready", () => {
+    let root = $('<div>').attr('id', 'enhanced-journal-fonts').appendTo('body');
+    for (let [k, v] of Object.entries(game.polyglot.LanguageProvider.alphabets)) {
+        $('<span>').attr('lang', k).css({ font: v }).appendTo(root);
     }
 });

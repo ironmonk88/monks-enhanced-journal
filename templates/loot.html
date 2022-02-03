@@ -11,7 +11,7 @@
                     <input name="name" type="text" value="{{data.name}}" placeholder="{{localize 'MonksEnhancedJournal.LootName'}}">
                 </h1>
                 <div class="form-group owner-only">
-                    <label style="background: none; border: none;">{{localize 'MonksEnhancedJournal.PlayerPurchasing'}}</label>
+                    <label style="background: none; border: none;">{{localize 'MonksEnhancedJournal.PlayerReceiving'}}</label>
                     <select class="shop-state" name="flags.monks-enhanced-journal.purchasing" style="font-size: inherit; font-family: inherit; height: 26px; margin: 0px; ">
                         {{ selectOptions purchaseOptions selected=data.flags.monks-enhanced-journal.purchasing localize=true }}
                     </select>

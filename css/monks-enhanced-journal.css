@@ -540,8 +540,16 @@
     color: var(--color-text-dark-primary);
 }
 
-.monks-journal-sheet .header-name .header-search{
-    font-size:14px;
+.wfrp4e.monks-enhanced-journal .monks-journal-sheet .header-name input {
+    color: #111;
+}
+
+.wfrp4e.monks-enhanced-journal .monks-journal-sheet .header-name input::placeholder {
+    color: #888
+}
+
+.monks-journal-sheet .header-name .header-search {
+    font-size: 14px;
 }
 
 .monks-journal-sheet .header-name .create-folder,
@@ -2087,6 +2095,10 @@ a.inline-request-roll {
 .monks-enhanced-journal.request-item .card-footer {
     padding: 3px 0 0;
     border-top: 2px groove #FFF;
+}
+
+.monks-enhanced-journal.request-item .card-footer:empty {
+    display:none;
 }
 
 .monks-enhanced-journal.request-item .card-footer span {

@@ -20,7 +20,7 @@ export class ShopSheet extends EnhancedJournalSheet {
                 { dragSelector: ".document.actor", dropSelector: ".shop-container" },
                 { dragSelector: ".document.item", dropSelector: ".shop-container" },
                 { dragSelector: ".shop-items .item-list .item .item-name", dropSelector: "null" }],
-            scrollY: [".shop-items", ".description"]
+            scrollY: [".shop-items", ".tab.description .tab-inner"]
         });
     }
 
@@ -44,7 +44,7 @@ export class ShopSheet extends EnhancedJournalSheet {
                 groups: {
                     locked: "MonksEnhancedJournal.purchasing.locked",
                     free: "MonksEnhancedJournal.purchasing.free",
-                    confirm: "MonksEnhancedJournal.purchasing.confirm"
+                    confirm: "MonksEnhancedJournal.purchasing.request"
                 }
             }
         ];
@@ -103,7 +103,7 @@ export class ShopSheet extends EnhancedJournalSheet {
 
         $('.clear-items', html).click(this.clearAllItems.bind(this));
         $('.adjust-price', html).click(this.adjustPrice.bind(this));
-        $('.roll-table', html).click(this.rollTable.bind(this));
+        $('.roll-table', html).click(this.rollTable.bind(this, "items"));
 
         $('.request-item', html).prop('disabled', function () { return $(this).attr('locked') == 'true' }).click(this.requestItem.bind(this));
 
@@ -273,7 +273,7 @@ export class ShopSheet extends EnhancedJournalSheet {
         if (item.data.cost && item.data.cost != '') {
             //check if the player can afford it
             if (!this.constructor.canAfford(item, actor)) {
-                ui.notifications.warn("Cannot transfer this item, Actor cannot afford it.");
+                ui.notifications.warn(`Cannot transfer this item, ${actor.name} cannot afford it.`);
                 return false;
             }
         }
@@ -286,6 +286,7 @@ export class ShopSheet extends EnhancedJournalSheet {
 
         if (this.object.data.flags['monks-enhanced-journal'].purchasing == 'confirm') {
             this.constructor.createRequestMessage.call(this.object, item, actor);
+            ui.notifications.info(`${actor.name} requested a ${item.name}`);
         } else if (this.object.data.flags['monks-enhanced-journal'].purchasing == 'free') {
             // Create the owned item
             let itemData = duplicate(item);
@@ -397,7 +398,7 @@ export class ShopSheet extends EnhancedJournalSheet {
         let currency = cost.replace(',', '').replace(price, '').trim();
 
         if (currency == "") {
-            currency = this.defaultCurrency();
+            currency = ShopSheet.defaultCurrency();
         }
 
         let currencies = MonksEnhancedJournal.currencies;
@@ -407,6 +408,9 @@ export class ShopSheet extends EnhancedJournalSheet {
         if (game.system.id == 'pf2e') {
             let coinage = actor.data.items.find(i => { return i.isCoinage && i.data.data.denomination.value == currency });
             return (coinage && coinage.data.data.quantity.value >= price);
+        } else if (game.system.id == 'swade') {
+            let coinage = parseInt(actor.data.data.details.currency);
+            return (coinage >= price);
         }else
             return (parseInt(this.getCurrency(actor.data.data.currency[currency])) >= price);
     }
@@ -421,7 +425,7 @@ export class ShopSheet extends EnhancedJournalSheet {
         let currency = cost.replace(',', '').replace(price, '').trim();
 
         if (currency == "")
-            currency = this.defaultCurrency();
+            currency = ShopSheet.defaultCurrency();
 
         let currencies = MonksEnhancedJournal.currencies;
         if (Object.keys(currencies).length == 0)
@@ -433,6 +437,11 @@ export class ShopSheet extends EnhancedJournalSheet {
             let newVal = coinage.data.data.quantity.value - price;
             updates[`data.quantity.value`] = newVal;
             coinage.update(updates);
+        } else if (game.system.id == 'swade') {
+            let coinage = parseInt(actor.data.data.details.currency);
+            let newVal = coinage - price;
+            updates[`data.details.currency`] = newVal;
+            actor.update(updates);
         } else {
             let newVal = parseInt(EnhancedJournalSheet.getCurrency(actor.data.data.currency[currency])) - price;
             updates[`data.currency.${currency}`] = (actor.data.data.currency[currency].hasOwnProperty("value") ? { value: newVal } : newVal);
@@ -452,7 +461,7 @@ export class ShopSheet extends EnhancedJournalSheet {
             if (item.data.cost && item.data.cost != '') {
                 //check if the player can afford it
                 if (!this.canAfford(item, actor)) {
-                    ui.notifications.warn("Cannot transfer this item, Actor cannot afford it.");
+                    ui.notifications.warn(`Cannot transfer this item, ${actor.name} cannot afford it.`);
                     return false;
                 }
             }

@@ -223,9 +223,10 @@ export class EnhancedJournal extends Application {
 
             if (this.subsheet.options.scrollY) {
                 this._scrollPositions = this._scrollPositions || {};
+                /*
                 for (let [k, v] of Object.entries(this.subsheet._scrollPositions || {})) {
-                    this._scrollPositions[k] = v;
-                }
+                    this._scrollPositions[k] = v || this._scrollPositions[k];
+                }*/
                 let oldScrollY = this.options.scrollY;
                 this.options.scrollY = this.options.scrollY.concat(this.subsheet.options.scrollY);
                 this._restoreScrollPositions(contentform);
@@ -289,8 +290,10 @@ export class EnhancedJournal extends Application {
             const selectors = this.subsheet.options.scrollY || [];
 
             this._scrollPositions = selectors.reduce((pos, sel) => {
-                const el = $(sel, this.subdocument);
-                if (el.length === 1) pos[sel] = el[0].scrollTop;
+                //const el = $(sel, this.subdocument);
+                //if (el.length === 1) pos[sel] = Array.from(el).map(el => el[0].scrollTop);
+                const el = $(this.subdocument).find(sel);
+                pos[sel] = Array.from(el).map(el => el.scrollTop);
                 return pos;
             }, (this._scrollPositions || {}));
         }

@@ -436,11 +436,12 @@ export class EnhancedJournalSheet extends JournalSheet {
             if (!lang) return;
 
             let text = $(this).html();
-            let scramble = polyglot.polyglot.scrambleString(this.textContent, game.settings.get('polyglot', 'useUniqueSalt') ? that.object.id : lang, lang);
-            let font = polyglot.polyglot._getFontStyle(lang);
+            let polyglot = (isNewerVersion(game.modules.get("polyglot").data.version, "1.7.30") ? game.polyglot : polyglot.polyglot);
+            let scramble = polyglot.scrambleString(this.textContent, game.settings.get('polyglot', 'useUniqueSalt') ? that.object.id : lang, lang);
+            let font = polyglot._getFontStyle(lang);
 
             $(this).addClass('converted')
-                .attr('title', (game.user.isGM || that.object.permission == CONST.ENTITY_PERMISSIONS.OWNER || polyglot.polyglot.known_languages.has(lang) ? polyglot.polyglot.LanguageProvider.languages[lang] : 'Unknown'))
+                .attr('title', (game.user.isGM || that.object.permission == CONST.ENTITY_PERMISSIONS.OWNER || polyglot.known_languages.has(lang) ? polyglot.LanguageProvider.languages[lang] : 'Unknown'))
                 .attr('data-language', lang)
                 .css({ font: font })
                 .data({ text: text, scramble: scramble, lang: lang, font: font, changed: true })
@@ -449,72 +450,11 @@ export class EnhancedJournalSheet extends JournalSheet {
                     function () {
                         let data = $(this).data();
                         const lang = data.lang;
-                        if (game.user.isGM || that.object.permission == CONST.ENTITY_PERMISSIONS.OWNER || polyglot.polyglot.known_languages.has(lang)) {
+                        if (game.user.isGM || that.object.permission == CONST.ENTITY_PERMISSIONS.OWNER || polyglot.known_languages.has(lang)) {
                             $(this).data('changed', !data.changed).html(data.changed ? data.scramble : data.text).css({ font: (data.changed ? data.font : '') });
                         }
                     }
                 );
-
-            /*
-            $('<div>')
-                .addClass('polyglot-container')
-                .attr('data-lang-text', (game.user.isGM || that.object.permission == CONST.ENTITY_PERMISSIONS.OWNER || polyglot.polyglot.known_languages.has(lang) ? polyglot.polyglot.LanguageProvider.languages[lang] : 'Unknown'))
-                .attr('data-language', lang)
-                .insertBefore($(this).addClass('converted').attr('title', ''))
-                .append(this)
-                .append(scrambleSpan)
-                .hover(
-                    function () {
-                        //hover in
-                        const lang = this.dataset.language;
-                        if (game.user.isGM || that.object.permission == CONST.ENTITY_PERMISSIONS.OWNER || polyglot.polyglot.known_languages.has(lang)) {
-                            $(this).addClass('translate');
-                        }
-                    },
-                    function () {
-                        //hover out
-                        $(this).removeClass('translate');
-                    }
-                );*/
-
-            /*
-            if (!$(this).data('converted')) {
-                $(this).data({
-                    'text': this.textContent,
-                    'scramble': MonksEnhancedJournal.polyglot.scrambleString(this.textContent, game.settings.get('polyglot', 'useUniqueSalt') ? that.object.id : lang),
-                    'font': this.style.font,
-                    'converted': true
-                });
-            }
-
-            this.textContent = $(this).data('scramble');
-            this.style.font = MonksEnhancedJournal.polyglot._getFontStyle(lang);
-
-            $(this).hover(
-                function () {
-                    //hover in
-                    const lang = this.dataset.language;
-                    if (game.user.isGM || that.object.permission == CONST.ENTITY_PERMISSIONS.OWNER || that.known_languages.has(lang)) {
-                        this.textContent = $(this).data('text');
-                        this.style.font = $(this).data('font');
-                    }
-                },
-                function () {
-                    //hover out
-                    const lang = this.dataset.language;
-                    this.textContent = $(this).data('scramble');
-                    this.style.font = MonksEnhancedJournal.polyglot._getFontStyle(lang);
-                }
-            );*/
-
-
-
-            /*
-            else if (!userunes && $(this).data('converted')) {
-                this.textContent = $(this).data('text');
-                this.style.font = $(this).data('font');
-                $(this).data('converted', false)
-            }*/
         });
     }
 
@@ -831,8 +771,19 @@ export class EnhancedJournalSheet extends JournalSheet {
                         if (item) {
                             if (itemtype == "items" && item instanceof Item) {
                                 let itemData = item.toObject();
-                                itemData._id = makeid();
-                                items.push(itemData);
+                                let oldId = itemData._id;
+                                let oldItem = items.find(i => i.flags['monks-enhanced-journal']?.parentId == oldId);
+                                if (oldItem) {
+                                    let qty = oldItem.data.quantity.value || oldItem.data.quantity;
+                                    if (qty == undefined) qty = 1;
+                                    qty = parseInt(qty) + 1;
+                                    oldItem.data.quantity = (oldItem.data.quantity.hasOwnProperty('value') ? { value: qty } : qty);
+                                } else {
+                                    itemData._id = makeid();
+                                    itemData.flags['monks-enhanced-journal'] = { parentId: oldId };
+                                    itemData.from = table.name;
+                                    items.push(itemData);
+                                }
                             } else if(itemtype == "actors" && item instanceof Actor) {
                                 let itemData = {
                                     id: item.id,

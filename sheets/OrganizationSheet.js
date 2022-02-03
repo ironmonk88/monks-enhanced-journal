@@ -12,7 +12,7 @@ export class OrganizationSheet extends EnhancedJournalSheet {
             template: "modules/monks-enhanced-journal/templates/organization.html",
             tabs: [{ navSelector: ".tabs", contentSelector: ".sheet-body", initial: "description" }],
             dragDrop: [{ dragSelector: ".document.actor", dropSelector: ".organization-container" }],
-            scrollY: [".description"]
+            scrollY: [".tab.description .tab-inner"]
         });
     }
 

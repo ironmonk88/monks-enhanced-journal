@@ -99,7 +99,7 @@ export class LootSheet extends EnhancedJournalSheet {
         $('.clear-items', html).click(this.clearAllItems.bind(this));
         $('.split-money', html).click(this.splitMoney.bind(this));
         $('.add-players', html).click(this.addPlayers.bind(this));
-        $('.roll-table', html).click(this.rollTable.bind(this));
+        $('.roll-table', html).click(this.rollTable.bind(this, "items"));
 
         $('.request-item', html).click(this.requestItem.bind(this));
         $('.grant-item', html).click(this.grantItem.bind(this));

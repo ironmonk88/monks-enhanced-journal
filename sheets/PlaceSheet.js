@@ -14,7 +14,7 @@ export class PlaceSheet extends EnhancedJournalSheet {
             dragDrop: [
                 { dragSelector: ".document.actor", dropSelector: ".place-container" },
                 { dragSelector: ".document.item", dropSelector: ".place-container" }],
-            scrollY: [".tab.details", ".tab.townsfolk", ".tab.shops", ".description"]
+            scrollY: [".tab.details .tab-inner", ".tab.townsfolk .tab-inner", ".tab.shops .tab-inner", ".tab.description .tab-inner"]
         });
     }
 
@@ -59,7 +59,7 @@ export class PlaceSheet extends EnhancedJournalSheet {
                 actor = game.actors.find(a => a.id == t.id)
             else if (t.type?.toLowerCase() == 'journal' || t.type?.toLowerCase() == 'journalentry')
                 actor = game.journal.find(a => a.id == t.id)
-            if (!actor)
+            if (!actor || !actor.testUserPermission(game.user, "LIMITED"))
                 return null;
             return mergeObject(t, {
                 img: actor?.data.img,
@@ -70,7 +70,7 @@ export class PlaceSheet extends EnhancedJournalSheet {
 
         data.shops = data.data.flags['monks-enhanced-journal'].shops?.map(s => {
             let shop = game.journal.find(a => a.id == s.id)
-            if (!shop)
+            if (!shop || !shop.testUserPermission(game.user, "LIMITED"))
                 return null;
             return mergeObject(s, {
                 img: shop?.data.img,

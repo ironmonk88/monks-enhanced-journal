@@ -1,3 +1,25 @@
+# Version 1.0.45
+
+Fixed issue where the items list in a Shop would scroll back to the top when items are edited.
+
+Fixed issue with text colouring in Warhammer
+
+Changed the Note HUD so for Shop and Loot notes, making it visible for players will give them Observer permissions rather than just Limited.
+
+Added the option for players to cancel a shop transaction.
+
+Changed the default icon applied to Shop, Loot, Encounter, and Place notes dragged to the canvas.
+
+Fixed issues with the latest version of Polyglot
+
+Added the option to set the quantity of monsters in an Encounter to allow for formulas, so you can have the Encounter roll for monsters.
+
+Fixed issues with filling Loot and Shop from Rolltable.
+
+Fixed issue with Place sheet showing relationships that player doesn't have permissions to see.
+
+Added support for SWADE currency
+
 # Version 1.0.44
 
 Fixed an issue where the submit button of the old journal sheet was causing the entire page to submit.

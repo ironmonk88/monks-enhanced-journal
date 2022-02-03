@@ -21,7 +21,7 @@ export class EncounterSheet extends EnhancedJournalSheet {
                 { dragSelector: ".create-encounter", dropSelector: "null" },
                 { dragSelector: ".create-combat", dropSelector: "null" }
             ],
-            scrollY: [".encounter-content", ".description"]
+            scrollY: [".tab.description .tab-inner", ".encounter-content", ".encounter-items", ".encounter-dcs"]
         });
     }
 
@@ -312,7 +312,16 @@ export class EncounterSheet extends EnhancedJournalSheet {
                 //}
 
                 // Prepare the Token data
-                for (let i = 0; i < (ea.quantity || 1); i++) {
+                let quantity = (ea.quantity || 1);
+                if (quantity.indexOf("d") != -1) {
+                    let r = new Roll(quantity);
+                    await r.evaluate({ async: true });
+                    quantity = r.total;
+                } else {
+                    quantity = parseInt(quantity);
+                    if (isNaN(quantity)) quantity = 1;
+                }
+                for (let i = 0; i < (quantity || 1); i++) {
                     let td = await actor.getTokenData({ x: x, y: y });
                     if (ea.hidden)
                         td.hidden = true;
