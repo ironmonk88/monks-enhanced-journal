@@ -9,6 +9,12 @@
         <label>Number of items</label>
         <input name="count" type="number" min="1" value="1" style="text-align:right;" />
     </div>
+    {{#if useFrom}}
+    <div class="form-group">
+        <label>Use Rolltable name in from data</label>
+        <input name="from" type="checkbox" />
+    </div>
+    {{/if}}
     <div class="form-group">
         <label>Clear Items</label>
         <input name="clear" type="checkbox" />

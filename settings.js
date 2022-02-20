@@ -121,6 +121,15 @@ export const registerSettings = function () {
 		type: Boolean,
 	});
 
+	game.settings.register(modulename, "hide-inline", {
+		name: i18n("MonksEnhancedJournal.hide-inline.name"),
+		hint: i18n("MonksEnhancedJournal.hide-inline.hint"),
+		scope: "world",
+		config: true,
+		default: true,
+		type: Boolean,
+	});
+
 	game.settings.register(modulename, "loot-sheet", {
 		name: game.i18n.localize("MonksEnhancedJournal.loot-sheet.name"),
 		hint: game.i18n.localize("MonksEnhancedJournal.loot-sheet.hint"),
@@ -151,6 +160,13 @@ export const registerSettings = function () {
 
 	game.settings.register(modulename, "show-dialog", {
 		scope: "client",
+		default: true,
+		type: Boolean,
+		config: false
+	});
+
+	game.settings.register(modulename, "fix-relationships", {
+		scope: "world",
 		default: true,
 		type: Boolean,
 		config: false

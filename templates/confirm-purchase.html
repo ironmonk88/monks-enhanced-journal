@@ -1,0 +1,16 @@
+<div style="padding:4px;">
+    {{msg}}
+    <hr />
+    <div class="flexrow" style="align-items:center;">
+        <img style="flex:0 0 30px;width:30px;height:30px;margin-right:8px;" src="{{img}}" /><i>{{name}}</i>
+    </div>
+    <div class="flexrow" style="align-items: center;">
+        <div>
+            <b>Quantity:</b> <input type="number" min="1" {{#if maxquantity}}max="{{maxquantity}}"{{/if}} step="1" name="quantity" style="width:50px;text-align:right;" value="{{quantity}}" /> {{#if maxquantity}}<i>(Max: {{maxquantity}})</i>{{/if}}
+        </div>
+        <div style="text-align:right;">
+            <b>Total:</b> <span class="request-total">{{total}}</span>
+        </div>
+    </div>
+</div>
+<hr />

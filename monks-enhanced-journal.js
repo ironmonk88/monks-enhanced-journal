@@ -15,6 +15,7 @@ import { ShopSheet } from "./sheets/ShopSheet.js"
 import { LootSheet } from "./sheets/LootSheet.js"
 import { backgroundinit } from "./plugins/background.plugin.js"
 import { NoteHUD } from "./apps/notehud.js"
+import { EnhancedJournalSheet } from "./sheets/EnhancedJournalSheet.js";
 
 export let debugEnabled = 0;
 
@@ -50,6 +51,10 @@ export let oldSheetClass = () => {
 export class MonksEnhancedJournal {
     static _oldSheetClass;
     static journal;
+
+    static pricename = "price";
+    static quantityname = "quantity";
+    static currencyname = "currency";
 
     constructor() {
     }
@@ -96,6 +101,12 @@ export class MonksEnhancedJournal {
     static init() {
         log('Initializing Monks Enhanced Journal');
         registerSettings();
+
+        if (game.system.id == "tormenta20") {
+            MonksEnhancedJournal.pricename = "preco";
+            MonksEnhancedJournal.quantityname = "qtd";
+            MonksEnhancedJournal.currencyname = "dinheiro";
+        }
 
         game.MonksEnhancedJournal = this;
 
@@ -553,6 +564,22 @@ export class MonksEnhancedJournal {
             }
         }
 
+        //Make sure that players can't see inline links that they don't know about.
+        if (setting("hide-inline")) {
+            let oldCreateContentLink = TextEditor._createContentLink;
+            TextEditor._createContentLink = function (match, type, target, name) {
+                if (CONST.DOCUMENT_TYPES.includes(type)) {
+                    const collection = game.collections.get(type);
+                    const doc = /^[a-zA-Z0-9]{16}$/.test(target) ? collection.get(target) : collection.getName(target);
+
+                    if (!doc.testUserPermission(game.user, "OBSERVER"))
+                        return document.createElement('span');
+                }
+
+                return oldCreateContentLink.call(this, match, type, target, name);
+            }
+        }
+
         Handlebars.registerHelper({ selectGroups: MonksEnhancedJournal.selectGroups });
     }
 
@@ -576,8 +603,8 @@ export class MonksEnhancedJournal {
                 if (doc) {
                     isFix = true;
                     let item = doc.toObject();
-                    item.data.quantity = (item.data.price.hasOwnProperty("value") ? { value: i.qty } : i.qty);
-                    item.data.price = (item.data.price.hasOwnProperty("value") ? { value: i.price } : i.price);
+                    item.data[MonksEnhancedJournal.quantityname] = (item.data[MonksEnhancedJournal.quantityname]?.hasOwnProperty("value") ? { value: i.qty } : i.qty);
+                    item.data[MonksEnhancedJournal.pricename] = (item.data[MonksEnhancedJournal.pricename].hasOwnProperty("value") ? { value: i.price } : i.price);
 
                     if (i.cost != undefined)
                         item.data.cost = i.cost;
@@ -661,6 +688,35 @@ export class MonksEnhancedJournal {
                 }
             } else if (type == "person") {
                 //+++fix the actor
+            }
+        }
+    }
+
+    static async fixRelationships() {
+        if (setting('fix-relationships')) {
+            for (let journal of game.journal) {
+                if (["person", "place"].includes(journal.type) && journal.getFlag('monks-enhanced-journal', 'relationships') == undefined) {
+                    let actors = journal.getFlag('monks-enhanced-journal', 'actors') || [];
+                    let shops = journal.getFlag('monks-enhanced-journal', 'shops') || [];
+                    await journal.setFlag('monks-enhanced-journal', 'relationships', actors.concat(shops));
+                    //journal.unsetFlag('monks-enhanced-journal', 'actors');
+                }
+
+                //cheak to make sure the relationships go both ways
+                if (["person", "place", "organization", "shop", "quest"].includes(journal.type)) {
+                    let relationships = journal.getFlag('monks-enhanced-journal', 'relationships') || [];
+                    for (let relationship of relationships) {
+                        let other = game.journal.get(relationship.id);
+                        if (other) {
+                            let refs = duplicate(other.getFlag("monks-enhanced-journal", "relationships") || []);
+                            if (!refs.find(r => r.id == journal.id)) {
+                                log(`Fixing ${other.name}, adding relationship with ${journal.name}`);
+                                refs.push({ id: journal.id, hidden: relationship.hidden });
+                                other.setFlag("monks-enhanced-journal", "relationships", refs);
+                            }
+                        }
+                    }
+                }
             }
         }
     }
@@ -749,6 +805,8 @@ export class MonksEnhancedJournal {
             let sheet = (!document?._sheet ? document?._getSheetClass() : document?._sheet);
             if (sheet?.constructor?.name == 'QuestPreviewShim')
                 return false;
+            if (document.data.flags["forien-quest-log"] && game.modules.get('forien-quest-log')?.active)
+                return false;
         }
 
         if (options.render == false || options.activate == false)
@@ -758,7 +816,7 @@ export class MonksEnhancedJournal {
         if (allowed === false)
             return false;
 
-        if (!game.user.isGM && document.getUserLevel(game.user) === CONST.ENTITY_PERMISSIONS.LIMITED) {
+        if (!game.user.isGM && document?.getUserLevel(game.user) === CONST.ENTITY_PERMISSIONS.LIMITED) {
             if (document.data.img) {
                 let img = new ImagePopout(document.data.img, {
                     title: document.name,
@@ -873,6 +931,9 @@ export class MonksEnhancedJournal {
         const doc = /^[a-zA-Z0-9]{16}$/.test(target) ? game.journal.get(target) : game.journal.getName(target);
         if (!doc) broken = true;
 
+        if (!doc.testUserPermission(game.user, "OBSERVER"))
+            return document.createElement('span');
+
         // Update link data
         data.name = data.name || (broken ? target : doc.name);
         data.dataset = { entity: 'JournalEntry', id: broken ? null : doc.id };
@@ -905,7 +966,10 @@ export class MonksEnhancedJournal {
             }
         }
 
-        MonksEnhancedJournal.fixItems();
+        if (game.user.isGM) {
+            MonksEnhancedJournal.fixItems();
+            MonksEnhancedJournal.fixRelationships();
+        }
 
         $('<div>').attr('id', 'slideshow-canvas').addClass('monks-journal-sheet flexrow').append($('<div>').addClass('slideshow-container flexcol playing').append($('<div>').addClass('slide-showing'))).append($('<div>').addClass('slide-padding')).appendTo($('body'));
         //new SlideshowWindow().render(true);
@@ -1317,87 +1381,88 @@ export class MonksEnhancedJournal {
         }
     }
 
+    static async sellItem(data) {
+        if (game.user.isGM) {
+            let entry = game.journal.get(data.shopid);
+            const cls = (entry._getSheetClass ? entry._getSheetClass() : null);
+            const sheet = new cls(entry, { render: false });
+
+            sheet.addItem({ data: data.itemdata });
+        }
+    }
+
     static findVacantSpot(pos, size) {
+        let ring = 0;
         let width = size.width * canvas.scene.data.size;
         let height = size.height * canvas.scene.data.size;
 
         let tokenCollide = function (pt) {
-            let ptWidth = width / 2;
-            let checkpt = duplicate(pt);
-            checkpt.x += (width / 2);
-            checkpt.y += (height / 2);
-
+            let rect1 = { x1: pt.x + 10, y1: pt.y + 10, x2: pt.x + width - 10, y2: pt.y + height - 10 };
             let found = canvas.scene.tokens.find(tkn => {
-                let tokenX = tkn.data.x + (width / 2);
-                let tokenY = tkn.data.y + (height / 2);
+                let rect2 = { x1: tkn.data.x + 10, y1: tkn.data.y + 10, x2: tkn.data.x + (tkn.data.width * canvas.scene.data.size) - 10, y2: tkn.data.y + (tkn.data.height * canvas.scene.data.size) - 10 };
 
-                let distSq = parseInt(Math.sqrt(Math.pow(checkpt.x - tokenX, 2) + Math.pow(checkpt.y - tokenY, 2)));
-                let radSumSq = ((tkn.data.width * canvas.scene.data.size) / 2) + ptWidth;
-
-                let result = (distSq < radSumSq - 5);
-
-                return result;
+                return !(rect1.x2 < rect2.x1 || rect1.x1 > rect2.x2 || rect1.y1 > rect2.y2 || rect1.y2 < rect2.y1);
             })
 
             return found != undefined;
         }
 
-        let wallCollide = function (ray) {
-            return canvas.walls.checkCollision(ray);
+        pos = {
+            x: (Math.floor(pos.x / canvas.scene.data.size) * canvas.scene.data.size) + (width / 2),
+            y: (Math.floor(pos.y / canvas.scene.data.size) * canvas.scene.data.size) + (height / 2)
+        };
+        let spot = null;
+
+        while (spot == undefined && ring < 10) {
+            for (let x = -ring; x <= ring; x++) {
+                for (let y = -ring; y <= ring; y++) {
+                    if (Math.abs(x) == ring || Math.abs(y) == ring) {
+                        let checkspot = { x: pos.x + (x * canvas.scene.data.size), y: pos.y + (y * canvas.scene.data.size) };
+
+                        //is this on the other side of a wall?
+                        let ray = new Ray({ x: pos.x, y: pos.y }, { x: checkspot.x, y: checkspot.y });
+                        if (canvas.walls.checkCollision(ray))
+                            continue;
+
+                        //are there any tokens at this position?
+                        checkspot.x -= (width / 2);
+                        checkspot.y -= (height / 2);
+                        if (tokenCollide(checkspot))
+                            continue;
+
+                        spot = checkspot;
+                        break;
+                    }
+                }
+
+                if (spot != undefined)
+                    break;
+            }
+            ring++;
         }
 
-        let count = 0;
-        const tw = width;
-        let dist = 0;
-        let angle = null;
-        let rotate = 1; //should be set first thing, but if it isn't just make sure it's not 0
-        let spot = duplicate(pos);
-        let checkspot = duplicate(spot);
-        checkspot.x -= (width / 2);
-        checkspot.y -= (height / 2);
-        checkspot.x = checkspot.x.toNearest(canvas.scene.data.size);
-        checkspot.y = checkspot.y.toNearest(canvas.scene.data.size);
-        let ray = new Ray({ x: pos.x, y: pos.y }, { x: checkspot.x, y: checkspot.y });
-        while (tokenCollide(checkspot) || wallCollide(ray)) {
-            count++;
-            //move the point along
-            if (angle == undefined || angle > 2 * Math.PI) {
-                dist += canvas.scene.data.size;
-                angle = 0;
-                rotate = Math.atan2(tw, dist); //What's the angle to move, so at this distance, the arc travles the token width
-            } else {
-                //rotate
-                angle += rotate;
-            }
-            spot.x = pos.x + (Math.cos(angle) * dist);
-            spot.y = pos.y + (-Math.sin(angle) * dist);
-            checkspot = duplicate(spot);
-
-            //need to check that the resulting snap to grid isn't going to put this out of bounds
-            checkspot.x -= (width / 2);
-            checkspot.y -= (height / 2);
-            checkspot.x = checkspot.x.toNearest(canvas.scene.data.size);
-            checkspot.y = checkspot.y.toNearest(canvas.scene.data.size);
-
-            ray.B.x = checkspot.x + (width / 2);
-            ray.B.y = checkspot.y + (height / 2);
-
-            if (count > 50) {
-                //if we've exceeded the maximum spots to check then set it to the original spot
-                checkspot = pos;
-                break;
-            }
+        if (spot == undefined) {
+            spot.x = pos.x - (width / 2);
+            spot.y = pos.y - (height / 2);
         }
 
-        return checkspot;
+        return spot;
+    }
+
+    static notify(data) {
+        if (game.user.isGM) {
+            ui.notifications.info(`${data.actor} requested a ${data.item}`);
+        }
     }
 
     static async acceptItem(status) {
         let message = this;
 
         let content = $(message.data.content);
-        $('.request-buttons', content).remove();
-        $('.card-footer', content).html(`<span class="request-msg">${(status == 'accept' ? '<i class="fas fa-check"></i> Item has been added to inventory' : '<i class="fas fa-times"></i> Request has been ' + (status == 'reject' ? 'rejected' : 'canceled'))}</span>`);
+  
+        let offered = message.getFlag('monks-enhanced-journal', 'offered');
+        let approved = message.getFlag('monks-enhanced-journal', 'approved');
+        let accepted = message.getFlag('monks-enhanced-journal', 'accepted');
 
         if (status == 'accept') {
             //find the shop        
@@ -1410,38 +1475,150 @@ export class MonksEnhancedJournal {
             let actor = game.actors.get(msgactor.id);
             if (!actor)
                 return;
-            //find the item
-            let msgitems = message.getFlag('monks-enhanced-journal', 'items');
-            let item = (entry.getFlag('monks-enhanced-journal', 'items') || []).find(i => i._id == msgitems[0].id);
-            if (!item)
-                return;
 
-            if (parseInt(item.data.quantity) < 1) {
-                //check to see if there's enough quantity
-                ui.notifications.warn("Cannot transfer this item, not enough of this item remains.");
-                return false;
-            }
+            let action = message.getFlag('monks-enhanced-journal', 'action');
+            if (action == "buy") {
+                accepted = true;
+                //find the item
+                let msgitems = message.getFlag('monks-enhanced-journal', 'items');
+                for (let msgitem of msgitems) {
+                    if (msgitem.quantity == 0)
+                        continue;
+                    let item = (entry.getFlag('monks-enhanced-journal', 'items') || []).find(i => i._id == msgitem._id);
+                    if (!item)
+                        continue;
 
-            const cls = (entry._getSheetClass ? entry._getSheetClass() : null);
+                    if (parseInt(item.data[MonksEnhancedJournal.quantityname]) < msgitem.quantity) {
+                        //check to see if there's enough quantity
+                        ui.notifications.warn("Cannot transfer this item, not enough of this item remains.");
+                        continue;
+                    }
 
-            if (item.data.cost && item.data.cost != '') {
-                //check if the player can afford it
-                if (!cls.canAfford(item, actor)) {
-                    ui.notifications.warn(`Cannot transfer this item, ${actor.name} cannot afford it.`);
-                    return false;
+                    const cls = (entry._getSheetClass ? entry._getSheetClass() : null);
+
+                    if (msgitem.sell > 0) {
+                        //check if the player can afford it
+                        if (!cls.canAfford((msgitem.sell * msgitem.quantity) + " " + msgitem.currency, actor)) {
+                            ui.notifications.warn(`Cannot transfer this item, ${actor.name} cannot afford it.`);
+                            continue;
+                        }
+                    }
+
+                    //Add it to the actor
+                    let itemData = duplicate(item);
+                    if ((itemData.type === "spell") && game.system.id == 'dnd5e') {
+                        itemData = await cls.createScrollFromSpell(itemData);
+                    }
+                    itemData.data[MonksEnhancedJournal.quantityname] = msgitem.quantity;
+                    itemData.data[MonksEnhancedJournal.pricename] = msgitem.sell + " " + msgitem.currency;
+                    delete itemData._id;
+                    actor.createEmbeddedDocuments("Item", [itemData]);
+                    //deduct the gold
+                    cls.actorPurchase((msgitem.sell * msgitem.quantity) + " " + msgitem.currency, actor);
+                    cls.purchaseItem.call(cls, entry, item._id, actor, null, 'nochat');
+                }
+
+                $('.request-buttons', content).remove();
+                $('input', content).remove();
+                $('.item-quantity span, .item-price span', content).removeClass('player-only').show();
+                $('.card-footer', content).html(`<span class="request-msg"><i class="fas fa-check"></i> Item has been added to inventory</span>`);
+
+            } else if (action == "sell") {
+                if (game.user.isGM) {
+                    offered = !offered;
+                    approved = false;   //technically this shouldn't happen, but any time the GM changes, the player response should be cancelled
+                }
+                else
+                    approved = !approved;
+
+                $('.card-footer', content).html(`<span class="request-msg">${offered ? 'Shop made an offer, Do you accept?' : 'Shop is considering an offer'}</span>`);
+
+                if (offered && approved) {
+                    accepted = true;
+                    const cls = (entry._getSheetClass ? entry._getSheetClass() : null);
+
+                    let msgitems = message.getFlag('monks-enhanced-journal', 'items');
+                    for (let msgitem of msgitems) {
+                        if (msgitem.quantity == 0)
+                            continue;
+
+                        let actoritem = actor.items.get(msgitem._id);
+                        if (!actoritem)
+                            continue;
+
+                        //give the player the money
+                        await cls.actorPurchase(-(msgitem.sell * msgitem.quantity) + " " + msgitem.currency, actor);
+
+                        //remove the item from the actor
+                        if (msgitem.quantity == msgitem.maxquantity) {
+                            await actoritem.delete();
+                        } else {
+                            let qty = msgitem.maxquantity - msgitem.quantity;
+                            let newQty = (actoritem.data.data[MonksEnhancedJournal.quantityname]?.hasOwnProperty("value") ? { value: qty } : qty);
+                            let data = {};
+                            data[MonksEnhancedJournal.quantityname] = newQty;
+                            await actoritem.update({ data: data });
+                        }
+
+                        //add the item to the shop
+                        msgitem.data.quantity = msgitem.quantity;
+                        msgitem.data[MonksEnhancedJournal.pricename] = (msgitem.sell * 2) + " " + msgitem.currency;
+                        msgitem.lock = true;
+                        msgitem.from = actor.name;
+                        delete msgitem.quantity;
+                        delete msgitem.sell;
+                        delete msgitem.currency;
+                        delete msgitem.maxquantity;
+
+                        if (!game.user.isGM)
+                            MonksEnhancedJournal.emit("sellItem", { shopid: msgshop.id, itemdata: msgitem });
+                        else {
+                            const sheet = new cls(entry, { render: false });
+                            await sheet.addItem(msgitem);
+                        }
+
+                        $('input', content).remove();
+                        $('.item-quantity span, .item-price span', content).removeClass('player-only').show();
+                        $('.request-buttons', content).remove();
+                        $('.card-footer', content).html(`<span class="request-msg"><i class="fas fa-check"></i> Sold to the shop</span>`);
+                    }
                 }
             }
-
-            //Add it to the actor
-            let itemData = duplicate(item);
-            delete itemData._id;
-            actor.createEmbeddedDocuments("Item", [itemData]);
-            //deduct the gold
-            cls.actorPurchase(item, actor);
-            cls.purchaseItem.call(cls, entry, item._id, actor, null, 'nochat');
+        } else {
+            accepted = false;
+            $('.request-buttons', content).remove();
+            $('.card-footer', content).html(`<span class="request-msg"><i class="fas fa-times"></i> Sale has been ${(status == 'reject' ? 'rejected' : 'canceled')}</span>`);
         }
 
-        message.update({ content: content[0].outerHTML, flags: { 'monks-enhanced-journal': { accepted: (status == 'accept') } } });
+        message.update({ content: content[0].outerHTML, flags: { 'monks-enhanced-journal': { accepted: !!accepted, offered: !!offered, approved: !!approved } } });
+    }
+
+    static updateSale(event) {
+        let message = this;
+
+        let content = $(message.data.content);
+        let id = $(event.currentTarget).closest('li').attr('data-id');
+
+        let items = duplicate(message.getFlag('monks-enhanced-journal', 'items') || []);
+        let item = items.find(i => i._id == id);
+        if (item == undefined)
+            return;
+
+        let html = $(event.currentTarget).closest('ol.item-list');
+
+        item.quantity = parseInt($(`li[data-id="${id}"] input[name="quantity"]`, html).val());
+        let sell = $(`li[data-id="${id}"] input[name="sell"]`, html).val();
+        let price = ShopSheet.getPrice(sell);
+
+        item.sell = price.value;
+        item.currency = price.currency;
+        item.total = item.quantity * item.sell;
+
+        $(`li[data-id="${id}"] .item-quantity span`, content).html(item.quantity);
+        $(`li[data-id="${id}"] .item-price span`, content).html(item.sell + ' ' + price.currency);
+        $(`li[data-id="${id}"] .item-total span`, content).html(item.total + ' ' + price.currency);
+
+        message.update({ content: content[0].outerHTML, flags: { 'monks-enhanced-journal': { items: items } } });
     }
 
     static async openRequestItem(type, event) {
@@ -1541,6 +1718,8 @@ export class MonksEnhancedJournal {
             lootsheetoptions['lootsheetnpc5e'] = "Loot Sheet NPC 5e";
         if (game.modules.get("merchantsheetnpc")?.active)
             lootsheetoptions['merchantsheetnpc'] = "Merchant Sheet NPC";
+        if (game.modules.get("item-piles")?.active)
+            lootsheetoptions['item-piles'] = "Item Piles";
 
         return lootsheetoptions;
     }
@@ -1559,14 +1738,18 @@ export class MonksEnhancedJournal {
         let system = game.system.id.toUpperCase();
         if (game.system.id == 'dnd4e' && !CONFIG[system])
             system = "DND4EBETA";
-        if (game.system.id == 'tormenta20')
-            system = "T20";
 
         if (game.system.id == "sw5e")
             return { gc: "", cr: "" };
-        if (game.system.id == "swade")
+        else if (game.system.id == "swade")
             return { gp: "Gold" };
+        else if (game.system.id == "tormenta20")
+            return { to: "TO", tp: "T$", tc: "TC"};
         return MonksEnhancedJournal.config.currencies || {};
+    }
+
+    static isLootActor(lootsheet) {
+        return ['lootsheetnpc5e', 'merchantsheetnpc', 'item-piles'].includes(lootsheet);
     }
 }
 
@@ -1590,7 +1773,7 @@ Hooks.on("renderSettingsConfig", (app, html, data) => {
 
         if (($('[name="monks-enhanced-journal.loot-entity"]', html).val() || setting('loot-entity')) == 'create') {
             list.push({ id: '', name: '' });
-            if (['lootsheetnpc5e', 'merchantsheetnpc'].includes(sheet)) {
+            if (MonksEnhancedJournal.isLootActor(sheet)) {
                 //find Actors Folders
                 for (let entry of game.folders) {
                     if (entry.data.type == 'Actor')
@@ -1614,7 +1797,7 @@ Hooks.on("renderSettingsConfig", (app, html, data) => {
         let list = [];
 
         list.push({ id: 'create', name: '-- Create new --' });
-        if (['lootsheetnpc5e', 'merchantsheetnpc'].includes(sheet)) {
+        if (MonksEnhancedJournal.isLootActor(sheet)) {
             //find Actors
             for (let entry of game.actors) {
                 if (entry.getFlag('core', 'sheetClass') == (sheet == 'lootsheetnpc5e' ? 'dnd5e.LootSheetNPC5e' : (sheet == 'merchantsheetnpc' ? 'core.a' : '')))
@@ -1698,11 +1881,12 @@ Hooks.on("updateJournalEntry", (document, data, options, userId) => {
         }
 
         if (MonksEnhancedJournal.journal.tabs.active().entityId?.endsWith(data._id) &&
-            (data.content != undefined || 
+            (data.content != undefined ||
+            data.permission != undefined ||
                 (data?.flags && (data?.flags['monks-enhanced-journal']?.actor != undefined ||
                     data?.flags['monks-enhanced-journal']?.actors != undefined ||
+                    data?.flags['monks-enhanced-journal']?.relationships != undefined ||
                     data?.flags['monks-enhanced-journal']?.currency != undefined ||
-                    data?.flags['monks-enhanced-journal']?.shops != undefined ||
                     data?.flags['monks-enhanced-journal']?.items != undefined ||
                     data?.flags['monks-enhanced-journal']?.type != undefined ||
                     data?.flags['monks-enhanced-journal']?.fields != undefined ||
@@ -1842,10 +2026,25 @@ Hooks.on("renderChatMessage", (message, html, data) => {
         if (!game.user.isGM)
             html.find(".gm-only").remove();
         if (game.user.isGM)
-            html.find(".player-only").remove();
+            html.find(".player-only").hide();
 
         $('.request-accept', html).click(MonksEnhancedJournal.acceptItem.bind(message, 'accept'));
         $('.request-reject', html).click(MonksEnhancedJournal.acceptItem.bind(message, game.user.isGM ? 'reject' : 'cancel'));
+        if (message.getFlag('monks-enhanced-journal', 'action') == "sell") {
+            let offered = message.getFlag('monks-enhanced-journal', 'offered');
+            let approved = message.getFlag('monks-enhanced-journal', 'approved');
+
+            $('.request-accept', html).toggleClass('active', (game.user.isGM ? !!offered : !!approved)).prop('disabled', !game.user.isGM && !offered);
+        }
+
+        $('input[name="quantity"]', html).change(MonksEnhancedJournal.updateSale.bind(message));
+        $('input[name="sell"]', html).change(MonksEnhancedJournal.updateSale.bind(message));
+
+        let items = message.getFlag('monks-enhanced-journal', 'items') || [];
+        for (let item of items) {
+            $(`li[data-id="${item._id}"] input[name="quantity"]`, html).val(item.quantity);
+            $(`li[data-id="${item._id}"] input[name="sell"]`, html).val(item.sell + " " + item.currency);
+        }
 
         $('.actor-icon', html).click(MonksEnhancedJournal.openRequestItem.bind(message, 'actor')).attr('onerror', "$(this).attr('src', 'icons/svg/mystery-man.svg');");
         $('.shop-icon', html).click(MonksEnhancedJournal.openRequestItem.bind(message, 'shop')).attr('onerror', "$(this).attr('src', 'modules/monks-enhanced-journal/assets/shop.png');");
@@ -1870,10 +2069,18 @@ Hooks.on("getActorDirectoryEntryContext", (html, entries) => {
         name: "Assign Items to this Actor",
         icon: '<i class="fas fa-suitcase"></i>',
         condition: li => {
-            return game.user.isGM;
+            return game.user.isGM && (game.modules.get("merchantsheetnpc")?.active || game.modules.get("lootsheetnpc5e")?.active);
         },
         callback: async (li) => {
             await game.settings.set("monks-enhanced-journal", "loot-entity", li.data("documentId"));
+            if (!MonksEnhancedJournal.isLootActor(setting("loot-sheet"))){
+                if (game.modules.get("lootsheetnpc5e")?.active)
+                    await game.settings.set("monks-enhanced-journal", "loot-sheet", "lootsheetnpc5e");
+                else if (game.modules.get("merchantsheetnpc")?.active)
+                    await game.settings.set("monks-enhanced-journal", "loot-sheet", "merchantsheetnpc");
+                else if (game.modules.get("item-piles")?.active)
+                    await game.settings.set("monks-enhanced-journal", "loot-sheet", "item-piles");
+            }
             ui.actors.render(true);
         }
     });
@@ -1890,6 +2097,8 @@ Hooks.on("getJournalDirectoryEntryContext", (html, entries) => {
         },
         callback: async (li) => {
             await game.settings.set("monks-enhanced-journal", "loot-entity", li.data("documentId"));
+            if (setting("loot-sheet") != "monks-enhanced-journal")
+                await game.settings.set("monks-enhanced-journal", "loot-sheet", "monks-enhanced-journal");
             ui.actors.render(true);
         }
     });

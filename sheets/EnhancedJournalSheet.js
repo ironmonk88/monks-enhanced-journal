@@ -44,6 +44,10 @@ export class EnhancedJournalSheet extends JournalSheet {
         return 'blank';
     }
 
+    get allowedRelationships() {
+        return [];
+    }
+
     _inferDefaultMode() {
         const hasImage = !!this.object.data.img;
         if (this.object.limited) return hasImage ? "image" : null;
@@ -235,6 +239,24 @@ export class EnhancedJournalSheet extends JournalSheet {
         super._disableFields(form);
         $(`textarea[name="flags.monks-enhanced-journal.${game.user.id}.notes"]`, form).removeAttr('disabled').on('change', this._onChangeInput.bind(this));
         $('.editor-edit', form).css({ width: '0px !important', height: '0px !important' });
+    }
+
+    static getQuantity(quantity, defvalue) {
+        if (!quantity)
+            return 0;
+        return (quantity?.hasOwnProperty("value") ? quantity.value : quantity) ?? defvalue;
+    }
+
+    getQuantity(quantity, defvalue) {
+        return this.constructor.getQuantity(quantity, defvalue);
+    }
+
+    static setQuantity(quantity, value = 1) {
+        return (quantity?.hasOwnProperty("value") ? { value: value } : value);
+    }
+
+    setQuantity(quantity, value) {
+        return this.constructor.setQuantity(quantity, value);
     }
 
     _onClickInlineRequestRoll(event) {
@@ -474,7 +496,7 @@ export class EnhancedJournalSheet extends JournalSheet {
             }).filter(r => !!r);
 
             let hasRequest = (requests.find(r => r.id == game.user.id) != undefined);
-            let quantity = (item.data?.quantity == undefined ? "" : (item.data?.quantity.hasOwnProperty("value") ? item.data?.quantity.value : item.data?.quantity));
+            let quantity = (item.data[MonksEnhancedJournal.quantityname] == undefined ? "" : (this.getQuantity(item.data[MonksEnhancedJournal.quantityname])));
             let text = (type == 'shop' ?
                 (quantity === 0 ? "Sold Out" : (item.lock ? "Unavailable" : "Purchase")) :
                 (purchasing == "free" ? "Take" : (hasRequest ? "Cancel" : "Request")));
@@ -482,7 +504,7 @@ export class EnhancedJournalSheet extends JournalSheet {
                 (quantity === 0 ? "" : (item.lock ? "fa-lock" : "fa-dollar-sign")) :
                 (purchasing == "free" ? "fa-hand-paper" : (hasRequest ? "" : "fa-hand-holding-medical")));
 
-            let price = (item.data?.denomination != undefined ? item.data?.value.value + " " + item.data?.denomination.value : this.getCurrency(item.data?.price));
+            let price = (item.data?.denomination != undefined ? item.data?.value.value + " " + item.data?.denomination.value : this.getCurrency(item.data[MonksEnhancedJournal.pricename]));
             let itemData = {
                 id: item._id,
                 name: item.name,
@@ -575,16 +597,16 @@ export class EnhancedJournalSheet extends JournalSheet {
                     item.received = actor.name;
                     item.assigned = true;
                 } else {
-                    if (item.data.quantity && this.getCurrency(item.data.quantity, "") != "") {
-                        let newQty = Math.max(this.getCurrency(item.data.quantity) - 1, 0);
-                        item.data.quantity = (item.data.quantity.hasOwnProperty("value") ? { value: newQty } : newQty);
+                    if (item.data[MonksEnhancedJournal.quantityname] && this.getCurrency(item.data[MonksEnhancedJournal.quantityname], "") != "") {
+                        let newQty = Math.max(this.getCurrency(item.data[MonksEnhancedJournal.quantityname]) - 1, 0);
+                        item.data[MonksEnhancedJournal.quantityname] = this.setQuantity(item.data[MonksEnhancedJournal.quantityname], newQty);
                     }
                 }
                 if (rewards)
                     entry.setFlag('monks-enhanced-journal', 'rewards', rewards);
                 else {
                     if(entry.getFlag('monks-enhanced-journal', 'type') == 'loot')
-                        items = items.filter(i => this.getCurrency(i.data.quantity) > 0);
+                        items = items.filter(i => this.getCurrency(i.data[MonksEnhancedJournal.quantityname]) > 0);
                     entry.setFlag('monks-enhanced-journal', 'items', items);
                 }
                 if(purchased != 'nochat')
@@ -715,7 +737,7 @@ export class EnhancedJournalSheet extends JournalSheet {
         }
     }
 
-    async rollTable(itemtype = "items") {
+    async rollTable(itemtype = "items", useFrom = false) {
         let rolltables = [];
 
         for (let pack of game.packs) {
@@ -740,7 +762,7 @@ export class EnhancedJournalSheet extends JournalSheet {
 
         let that = this;
 
-        let html = await renderTemplate("modules/monks-enhanced-journal/templates/roll-table.html", { rollTables: rolltables });
+        let html = await renderTemplate("modules/monks-enhanced-journal/templates/roll-table.html", { rollTables: rolltables, useFrom: useFrom});
         Dialog.confirm({
             title: `Populate from Rollable table`,
             content: html,
@@ -774,10 +796,10 @@ export class EnhancedJournalSheet extends JournalSheet {
                                 let oldId = itemData._id;
                                 let oldItem = items.find(i => i.flags['monks-enhanced-journal']?.parentId == oldId);
                                 if (oldItem) {
-                                    let qty = oldItem.data.quantity.value || oldItem.data.quantity;
+                                    let qty = this.getQuantity(oldItem.data[MonksEnhancedJournal.quantityname]);
                                     if (qty == undefined) qty = 1;
                                     qty = parseInt(qty) + 1;
-                                    oldItem.data.quantity = (oldItem.data.quantity.hasOwnProperty('value') ? { value: qty } : qty);
+                                    oldItem.data[MonksEnhancedJournal.quantityname] = this.setQuantity(oldItem.data[MonksEnhancedJournal.quantityname], qty);
                                 } else {
                                     itemData._id = makeid();
                                     itemData.flags['monks-enhanced-journal'] = { parentId: oldId };
@@ -811,10 +833,34 @@ export class EnhancedJournalSheet extends JournalSheet {
         this.deleteItem(item.dataset.id, item.dataset.container);
     }
 
-    deleteItem(id, container) {
+    deleteItem(id, container, cascade = true) {
         let data = duplicate(this.object.data.flags["monks-enhanced-journal"][container]);
         data.findSplice(i => i.id == id || i._id == id);
         this.object.setFlag('monks-enhanced-journal', container, data);
+
+        if (container == "relationships" && cascade) {
+            let journal = game.journal.get(id);
+            if (journal) {
+                let data = duplicate(journal.data.flags["monks-enhanced-journal"].relationships);
+                data.findSplice(i => i.id == this.object.id || i._id == this.object.id);
+                journal.setFlag('monks-enhanced-journal', "relationships", data);
+            }
+        }
+    }
+
+    async alterItem(event) {
+        $(event.currentTarget).prev().click();
+        if ($(event.currentTarget).hasClass('item-hide')) {
+            let li = $(event.currentTarget).closest('li.item');
+            const id = li.data("id");
+            let journal = game.journal.get(id);
+            if (journal) {
+                let relationships = duplicate(journal.data.flags["monks-enhanced-journal"].relationships);
+                let relationship = relationships.find(r => r.id == this.object.id);
+                relationship.hidden = $(event.currentTarget).prev().prop('checked');
+                journal.setFlag('monks-enhanced-journal', "relationships", relationships);
+            }
+        }
     }
 
     checkForChanges() {
@@ -922,6 +968,10 @@ export class EnhancedJournalSheet extends JournalSheet {
         return data;
     }
 
+    static isLootActor(lootsheet) {
+        return ['lootsheetnpc5e', 'merchantsheetnpc', 'item-piles'].includes(lootsheet);
+    }
+
     static getCurrency(currency, defvalue = 0) {
         if (!currency)
             return 0;
@@ -935,7 +985,7 @@ export class EnhancedJournalSheet extends JournalSheet {
     static async assignItems(items, currency = {}, { clear = false, name = null } = {}) {
         let lootSheet = setting('loot-sheet');
         let lootentity = setting('loot-entity');
-        let collection = (['lootsheetnpc5e', 'merchantsheetnpc'].includes(lootSheet) ? game.actors : game.journal);
+        let collection = (EnhancedJournalSheet.isLootActor(lootSheet) ? game.actors : game.journal);
 
         let getLootableName = () => {
             let folder = setting('loot-folder');
@@ -969,7 +1019,7 @@ export class EnhancedJournalSheet extends JournalSheet {
                 name = getLootableName();
 
             const cls = collection.documentClass;
-            if (['lootsheetnpc5e', 'merchantsheetnpc'].includes(lootSheet)) {
+            if (EnhancedJournalSheet.isLootActor(lootSheet)) {
                 entity = await cls.create({ folder: folder, name: name, img: 'icons/svg/chest.svg', type: 'npc', flags: { core: { 'sheetClass': (lootSheet == "lootsheetnpc5e" ? 'dnd5e.LootSheetNPC5e' : 'core.a') } }, permission: { 'default': CONST.ENTITY_PERMISSIONS.OBSERVER } });
                 ui.actors.render();
             } else {
@@ -984,7 +1034,7 @@ export class EnhancedJournalSheet extends JournalSheet {
             return ui.notifications.warn("Could not find Loot Entity");
 
         if (clear && lootentity != 'create') {
-            if (['lootsheetnpc5e', 'merchantsheetnpc'].includes(lootSheet)) {
+            if (EnhancedJournalSheet.isLootActor(lootSheet)) {
                 for (let item of entity.items) {
                     await item.delete();
                 }
@@ -999,7 +1049,7 @@ export class EnhancedJournalSheet extends JournalSheet {
             return (item.data.remaining > 0 ? item : null);
         }).filter(i => i);
 
-        if (['lootsheetnpc5e', 'merchantsheetnpc'].includes(lootSheet)) {
+        if (EnhancedJournalSheet.isLootActor(lootSheet)) {
             entity.createEmbeddedDocuments("Item", newitems);
 
             let newcurr = entity.data.data.currency || {};
@@ -1010,8 +1060,11 @@ export class EnhancedJournalSheet extends JournalSheet {
                 }
             }
 
-            if (Object.keys(newcurr).length > 0)
-                entity.update({ data: { currency: newcurr } });
+            if (Object.keys(newcurr).length > 0) {
+                let data = {};
+                data[MonksEnhancedJournal.currencyname] = newcurr;
+                entity.update({ data: data });
+            }
         } else if (lootSheet == 'monks-enhanced-journal') {
             let loot = duplicate(entity.getFlag('monks-enhanced-journal', 'items') || []);
 
@@ -1067,5 +1120,68 @@ export class EnhancedJournalSheet extends JournalSheet {
             div.slideDown(200);
         }
         li.toggleClass("expanded");
+    }
+
+    async addRelationship(relationship, cascade = true) {
+        let entity = game.journal.get(relationship.id);
+        relationship.type = entity.type;
+        if (this.allowedRelationships.includes(relationship.type)) {
+            let relationships = duplicate(this.object.data.flags["monks-enhanced-journal"].relationships || []);
+
+            //only add one item
+            if (relationships.find(t => t.id == relationship.id) != undefined)
+                return;
+
+            relationships.push(relationship);
+            this.object.setFlag("monks-enhanced-journal", "relationships", relationships);
+
+            //add the reverse relationship
+            if (cascade) {
+                let original = game.journal.get(relationship.id);
+                let sheet = original.sheet;
+                sheet.addRelationship({ id: this.object.id, type: original.type, hidden: false }, false);
+            }
+        }
+    }
+
+    openRelationship(event) {
+        let item = event.currentTarget.closest('.item');
+        let journal = game.journal.find(s => s.id == item.dataset.id);
+        this.open(journal);
+    }
+
+    static async createScrollFromSpell(itemData) {
+
+        // Get spell data
+        const {
+            actionType, description, source, activation, duration, target, range, damage, formula, save, level
+        } = itemData.data;
+
+        // Get scroll data
+        const scrollUuid = `Compendium.${CONFIG.DND5E.sourcePacks.ITEMS}.${CONFIG.DND5E.spellScrollIds[level]}`;
+        const scrollItem = await fromUuid(scrollUuid);
+        const scrollData = scrollItem.toObject();
+        delete scrollData._id;
+
+        // Split the scroll description into an intro paragraph and the remaining details
+        const scrollDescription = scrollData.data.description.value;
+        const pdel = "</p>";
+        const scrollIntroEnd = scrollDescription.indexOf(pdel);
+        const scrollIntro = scrollDescription.slice(0, scrollIntroEnd + pdel.length);
+        const scrollDetails = scrollDescription.slice(scrollIntroEnd + pdel.length);
+
+        // Create a composite description from the scroll description and the spell details
+        const desc = `${scrollIntro}<hr/><h3>${itemData.name} (Level ${level})</h3><hr/>${description.value}<hr/><h3>Scroll Details</h3><hr/>${scrollDetails}`;
+
+        // Create the spell scroll data
+        const spellScrollData = foundry.utils.mergeObject(scrollData, {
+            name: `${game.i18n.localize("DND5E.SpellScroll")}: ${itemData.name}`,
+            img: itemData.img,
+            data: {
+                "description.value": desc.trim(), source, actionType, activation, duration, target, range, damage, formula,
+                save, level
+            }
+        });
+        return spellScrollData;
     }
 }

@@ -16,26 +16,37 @@ export class PersonSheet extends EnhancedJournalSheet {
         });
     }
 
+    get allowedRelationships() {
+        return ['organization', 'person', 'place', 'shop', 'quest'];
+    }
+
     get type() {
         return 'person';
     }
 
     static get defaultObject() {
-        return { actors: [] };
+        return { relationships: [] };
     }
 
     async getData() {
         let data = super.getData();
 
         data.relationships = {};
-        for (let item of (data.data.flags['monks-enhanced-journal']?.actors || [])) {
+        for (let item of (data.data.flags['monks-enhanced-journal']?.relationships || [])) {
             let entity = await this.getDocument(item, "JournalEntry", false);
-            if (entity && entity.testUserPermission(game.user, "LIMITED")) {
-                if (!data.relationships[item.type])
-                    data.relationships[item.type] = { type: item.type, name: i18n(`MonksEnhancedJournal.${item.type.toLowerCase()}`), actors: [] };
+            if (entity && entity.testUserPermission(game.user, "LIMITED") && (game.user.isGM || !item.hidden)) {
+                if (!data.relationships[entity.type])
+                    data.relationships[entity.type] = { type: entity.type, name: i18n(`MonksEnhancedJournal.${entity.type.toLowerCase()}`), documents: [] };
 
-                data.relationships[item.type].actors.push(item);
+                item.name = entity.name;
+                item.img = entity.data.img;
+
+                data.relationships[entity.type].documents.push(item);
             }
+        }
+
+        for (let [k, v] of Object.entries(data.relationships)) {
+            v.documents = v.documents.sort((a, b) => a.name.localeCompare(b.name));
         }
 
         return data;
@@ -89,21 +100,28 @@ export class PersonSheet extends EnhancedJournalSheet {
         $('.document-details textarea', html).keyup(this.textAreaAdjust.bind(this));
 
         $('.item-delete', html).on('click', $.proxy(this._deleteItem, this));
+        $('.item-action', html).on('click', this.alterItem.bind(this));
+
+        $('.item-hide', html).on('click', this.alterItem.bind(this));
 
         const actorOptions = this._getPersonActorContextOptions();
         if (actorOptions) new ContextMenu($(html), ".actor-img", actorOptions);
 
-        let that = this;
-        $('.item-relationship input', html).on('change', function (event) {
-            let id = $(event.currentTarget).closest('li').attr('data-id');
-            let actors = that.object.data.flags['monks-enhanced-journal'].actors;
-            let actor = actors.find(i => i.id == id);
-            if (actor) {
-                actor.relationship = $(this).val();
-                that.object.setFlag('monks-enhanced-journal', 'actors', actors);
-            }
-        });
         $('.items-list .actor-icon', html).click(this.openRelationship.bind(this));
+    }
+
+    _getSubmitData(updateData = {}) {
+        let data = expandObject(super._getSubmitData(updateData));
+
+        data.flags['monks-enhanced-journal'].relationships = duplicate(this.object.getFlag("monks-enhanced-journal", "relationships") || []);
+        for (let relationship of data.flags['monks-enhanced-journal'].relationships) {
+            let dataRel = data.relationships[relationship.id];
+            if (dataRel)
+                relationship = mergeObject(relationship, dataRel);
+        }
+        delete data.relationships;
+
+        return flattenObject(data);
     }
 
     _canDragDrop(selector) {
@@ -143,30 +161,6 @@ export class PersonSheet extends EnhancedJournalSheet {
         let element = event.currentTarget;
         element.style.height = "1px";
         element.style.height = (25 + element.scrollHeight) + "px";
-    }
-
-    async addRelationship(data) {
-        let relationship = await this.getItemData(data);
-
-        if (relationship) {
-            let type = relationship.type
-            if (['organization','person','place', 'shop', 'pointofinterest', 'quest'].includes(type)) {
-                let actors = duplicate(this.object.data.flags["monks-enhanced-journal"].actors || []);
-
-                //only add one item
-                if (actors.find(t => t.id == relationship.id) != undefined)
-                    return;
-
-                actors.push(relationship);
-                this.object.setFlag("monks-enhanced-journal", "actors", actors);
-            }
-        }
-    }
-
-    openRelationship(event) {
-        let item = event.currentTarget.closest('.item');
-        let relationship = game.journal.find(s => s.id == item.dataset.id);
-        this.open(relationship);
     }
 
     async addActor(data) {

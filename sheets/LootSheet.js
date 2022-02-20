@@ -1,5 +1,6 @@
 import { setting, i18n, log, makeid, MonksEnhancedJournal } from "../monks-enhanced-journal.js";
 import { EnhancedJournalSheet } from "../sheets/EnhancedJournalSheet.js";
+import { DistributeCurrency } from "../apps/distribute-currency.js";
 
 export class LootSheet extends EnhancedJournalSheet {
     constructor(data, options) {
@@ -25,13 +26,16 @@ export class LootSheet extends EnhancedJournalSheet {
     }
 
     async getData() {
-        if (this.object.getFlag('monks-enhanced-journal', 'actors') == undefined) {
-            let actors = [];
-            for (let user of game.users) {
-                if (this.object.testUserPermission(user, "OBSERVER") && user.character) {
+        let actors = [];
+        let players = [];
+        for (let user of game.users) {
+            if (!user.isGM && this.object.testUserPermission(user, "OBSERVER")) {
+                players.push(user.name);
+                if(user.character)
                     actors.push(user.character.id); //, name: user.character.name, img: user.character.img });
-                }
             }
+        }
+        if (this.object.getFlag('monks-enhanced-journal', 'actors') == undefined && game.user.isGM) {
             if (actors.length == 0) {
                 for (let user of game.users) {
                     if (user.character) {
@@ -54,7 +58,7 @@ export class LootSheet extends EnhancedJournalSheet {
 
         data.groups = this.getItemGroups(data);
 
-        data.canGrant = ((data.data.flags['monks-enhanced-journal'].items || []).find(i => (Object.values(i.requests || {}).find(r => r) != undefined)) != undefined);
+        data.canGrant = game.user.isGM && ((data.data.flags['monks-enhanced-journal'].items || []).find(i => (Object.values(i.requests || {}).find(r => r) != undefined)) != undefined);
 
         data.characters = (data.data.flags['monks-enhanced-journal'].actors || []).map(a => {
             let actor = game.actors.get(a);
@@ -67,7 +71,10 @@ export class LootSheet extends EnhancedJournalSheet {
         data.purchasing = data.data.flags['monks-enhanced-journal'].purchasing || 'locked';
         data.showrequest = !game.user.isGM;
 
+        data.players = players.join(", ");
+
         data.valStr = (['pf2e'].includes(game.system.id) ? ".value" : "");
+        data.quantityname = MonksEnhancedJournal.quantityname;
 
         data.canSplit = !['pf2e'].includes(game.system.id);
 
@@ -99,18 +106,40 @@ export class LootSheet extends EnhancedJournalSheet {
         $('.clear-items', html).click(this.clearAllItems.bind(this));
         $('.split-money', html).click(this.splitMoney.bind(this));
         $('.add-players', html).click(this.addPlayers.bind(this));
-        $('.roll-table', html).click(this.rollTable.bind(this, "items"));
+        $('.roll-table', html).click(this.rollTable.bind(this, "items", true));
 
         $('.request-item', html).click(this.requestItem.bind(this));
         $('.grant-item', html).click(this.grantItem.bind(this));
 
         $('.loot-character', html).dblclick(this.openActor.bind(this));
 
+        $('.configure-permissions', html).click(this.configure.bind(this));
+
         const actorOptions = this._getActorContextOptions();
         if (actorOptions) new ContextMenu($(html), ".loot-character", actorOptions);
     }
 
+    configure() {
+        new PermissionControl(this.object).render(true);
+    }
+
     async splitMoney() {
+        let actors = (this.object.getFlag('monks-enhanced-journal', 'actors') || []).map(a => {
+            return game.actors.get(a);
+        }).filter(a => !!a);
+        if (actors.length == 0) {
+            ui.notifications.warn("There are no characters to distribute to");
+            return;
+        }
+
+        let currency = duplicate(this.object.getFlag('monks-enhanced-journal', 'currency') || {});
+        if (Object.values(currency).find(v => v > 0) == undefined) {
+            ui.notifications.warn("There's no money to split");
+            return;
+        }
+
+        new DistributeCurrency(actors, currency, this).render(true);
+        /*
         let actors = (this.object.getFlag('monks-enhanced-journal', 'actors') || []).map(a => {
             return game.actors.get(a);
         }).filter(a => !!a);
@@ -127,14 +156,35 @@ export class LootSheet extends EnhancedJournalSheet {
         }
 
         for (let actor of actors) {
-            let curr = actor.data.data.currency || {};
+            let curr = actor.data.data[MonksEnhancedJournal.currencyname] || {};
             for (let [k, v] of Object.entries(split)) {
                 if (v != 0) {
                     let newVal = this.getCurrency(curr[k]) + v;
                     curr[k] = (curr[k].hasOwnProperty("value") ? { value: newVal } : newVal);
                 }
             }
-            await actor.update({ data: { currency: curr } });
+            let data = {};
+            data[MonksEnhancedJournal.currencyname] = curr;
+            await actor.update({ data: data });
+        }
+        await this.object.setFlag('monks-enhanced-journal', 'currency', remainder);
+        */
+    }
+
+    async doSplitMoney(characters, remainder){
+        for (let character of characters) {
+            let actor = game.actors.get(character.id);
+
+            let curr = actor.data.data[MonksEnhancedJournal.currencyname] || {};
+            for (let [k, v] of Object.entries(character.currency)) {
+                if (v != 0) {
+                    let newVal = this.getCurrency(curr[k]) + v;
+                    curr[k] = (curr[k].hasOwnProperty("value") ? { value: newVal } : newVal);
+                }
+            }
+            let data = {};
+            data[MonksEnhancedJournal.currencyname] = curr;
+            await actor.update({ data: data });
         }
         await this.object.setFlag('monks-enhanced-journal', 'currency', remainder);
     }
@@ -160,7 +210,7 @@ export class LootSheet extends EnhancedJournalSheet {
         }
         delete data.items;
 
-        data.flags['monks-enhanced-journal'].items = data.flags['monks-enhanced-journal'].items.filter(i => this.getCurrency(i.data.quantity) > 0);
+        data.flags['monks-enhanced-journal'].items = data.flags['monks-enhanced-journal'].items.filter(i => this.getCurrency(i.data[MonksEnhancedJournal.quantityname]) > 0);
 
         return flattenObject(data);
     }
@@ -189,7 +239,7 @@ export class LootSheet extends EnhancedJournalSheet {
             return;
 
         item = duplicate(item);
-        item.data.quantity = (item.data.quantity.hasOwnProperty("value") ? { value: 1 } : 1);
+        item.data[MonksEnhancedJournal.quantityname] = this.setQuantity(item.data[MonksEnhancedJournal.quantityname], 1);
 
         dragData.id = id;
         dragData.journalid = this.object.id;
@@ -203,7 +253,7 @@ export class LootSheet extends EnhancedJournalSheet {
         MonksEnhancedJournal._dragItem = li.dataset.id;
     }
 
-    _onDrop(event) {
+    async _onDrop(event) {
         let data;
         try {
             data = JSON.parse(event.dataTransfer.getData('text/plain'));
@@ -221,8 +271,11 @@ export class LootSheet extends EnhancedJournalSheet {
                 let actor = game.actors.get(event.currentTarget.id);
                 if (actor) {
                     let itemData = duplicate(data.data);
+                    if ((itemData.type === "spell") && game.system.id == 'dnd5e') {
+                        itemData = await LootSheet.createScrollFromSpell(itemData);
+                    }
                     delete itemData._id;
-                    itemData.data.quantity = (itemData.data.quantity.hasOwnProperty("value") ? { value: 1 } : 1);
+                    itemData.data[MonksEnhancedJournal.quantityname] = this.setQuantity(itemData.data[MonksEnhancedJournal.quantityname], 1);
                     actor.createEmbeddedDocuments("Item", [itemData]);
                     this.constructor.purchaseItem.call(this.constructor, this.object, data.data._id, actor);
                 }
@@ -280,7 +333,7 @@ export class LootSheet extends EnhancedJournalSheet {
             // Create the owned item
             let itemData = duplicate(item);
             delete itemData._id;
-            itemData.data.quantity = (itemData.data.quantity.hasOwnProperty("value") ? { value: 1 } : 1);
+            itemData.data[MonksEnhancedJournal.quantityname] = this.setQuantity(itemData.data[MonksEnhancedJournal.quantityname], 1);
             actor.createEmbeddedDocuments("Item", [itemData]);
             MonksEnhancedJournal.emit("purchaseItem",
                 {
@@ -312,7 +365,7 @@ export class LootSheet extends EnhancedJournalSheet {
         // Create the owned item
         let itemData = duplicate(item);
         delete itemData._id;
-        itemData.data.quantity = (itemData.data.quantity.hasOwnProperty("value") ? { value: 1 } : 1);
+        itemData.data[MonksEnhancedJournal.quantityname] = this.setQuantity(itemData.data[MonksEnhancedJournal.quantityname], 1);
         actor.createEmbeddedDocuments("Item", [itemData]);
 
         item.requests[userid] = false;
@@ -327,8 +380,10 @@ export class LootSheet extends EnhancedJournalSheet {
         if (item) {
             let items = duplicate(this.object.data.flags["monks-enhanced-journal"].items || []);
 
-            let qty = (item.data.data.quantity.hasOwnProperty("value") ? { value: 1 } : 1);
-            items.push(mergeObject(item.toObject(), { _id: makeid(), data: { quantity: qty } }));
+            let qty = this.setQuantity(item.data.data[MonksEnhancedJournal.quantityname], 1);
+            let data = {};
+            data[MonksEnhancedJournal.quantityname] = qty;
+            items.push(mergeObject(item.toObject(), { _id: makeid(), data: data }));
             this.object.setFlag('monks-enhanced-journal', 'items', items);
             return true;
         }
@@ -369,7 +424,7 @@ export class LootSheet extends EnhancedJournalSheet {
     static itemDropped(id, actor, entry) {
         let item = (entry.getFlag('monks-enhanced-journal', 'items') || []).find(i => i._id == id);
         if (item) {
-            if (parseInt(this.getCurrency(item.data.quantity, "")) < 1) {
+            if (parseInt(this.getQuantity(item.data[MonksEnhancedJournal.quantityname]), "") < 1) {
                 ui.notifications.warn("Cannot transfer this item, not enough of this item remains.");
                 return false;
             }

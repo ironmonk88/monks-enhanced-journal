@@ -1626,7 +1626,8 @@ height: fit-content;*/
 }
 
 .monks-journal-sheet.sheet .items-list .item-controls a.active,
-.monks-journal-sheet.sheet .items-list .item-controls input[type="checkbox"]:checked + .item-action{
+.monks-journal-sheet.sheet .items-list .item-controls input[type="checkbox"]:checked + .item-action,
+.monks-journal-sheet.sheet .items-list .item-controls input[type="checkbox"]:checked + .item-hide{
     color: #ff6400;
 }
 
@@ -1653,7 +1654,10 @@ height: fit-content;*/
 }
 
 .monks-journal-sheet.sheet .place-container .items-list .item .item-name .item-image,
-.monks-journal-sheet.sheet .person-container .items-list .item .item-name .item-image {
+.monks-journal-sheet.sheet .person-container .items-list .item .item-name .item-image,
+.monks-journal-sheet.sheet .shop-container .relationships .items-list .item .item-name .item-image,
+.monks-journal-sheet.sheet .organization-container .items-list .item .item-name .item-image,
+.monks-journal-sheet.sheet .quest-container .items-list .item .item-name .item-image {
     flex: 0 0 70px;
     height: 70px;
     width: 70px;
@@ -1667,13 +1671,21 @@ height: fit-content;*/
 
 .monks-journal-sheet.sheet .shop-container .item-list > li input,
 .monks-journal-sheet.sheet .loot-container .item-list > li input,
-.monks-journal-sheet.sheet .person-container .items-list > li input {
+.monks-journal-sheet.sheet .person-container .items-list > li input,
+.monks-journal-sheet.sheet .place-container .items-list > li input,
+.monks-journal-sheet.sheet .organization-container .items-list > li input,
+.monks-journal-sheet.sheet .quest-container .items-list > li input,
+.monks-journal-sheet.sheet .distribute-container .item-list > li input {
     border-color: transparent;
 }
 
 .monks-journal-sheet.sheet .shop-container .item-list > li input:hover,
 .monks-journal-sheet.sheet .loot-container .item-list > li input:hover,
-.monks-journal-sheet.sheet .person-container .items-list > li input:hover {
+.monks-journal-sheet.sheet .person-container .items-list > li input:hover,
+.monks-journal-sheet.sheet .place-container .items-list > li input:hover,
+.monks-journal-sheet.sheet .organization-container .items-list > li input:hover,
+.monks-journal-sheet.sheet .quest-container .items-list > li input:hover,
+.monks-journal-sheet.sheet .distribute-container .item-list > li input:hover{
     border-color: unset;
 }
 
@@ -2470,6 +2482,14 @@ a.picture-link.broken {
     overflow-y: unset;
 }
 
+.monks-enhanced-journal.request-item button.active {
+    color: #ff6400;
+}
+
+.monks-enhanced-journal.request-item button:disabled {
+    color: #C0C0C0;
+}
+
 .monks-journal-sheet.sheet .items-list .item-from {
     flex: 0 0 150px;
     overflow: hidden;
@@ -2497,4 +2517,49 @@ a.picture-link.broken {
     border: 1px solid #999;
     border-radius: 3px;
     background: rgba(0, 0, 0, 0.05);
+}
+
+.tox.tox-tinymce-aux{
+    width: 0px;
+}
+
+.monks-journal-sheet.sheet .distribute-container input,
+.monks-journal-sheet.sheet .distribute-container a.split,
+.monks-journal-sheet.sheet .distribute-container a.assign,
+.monks-journal-sheet.sheet .distribute-container .item-control {
+    flex: 0 0 80px;
+    text-align: center;
+    margin-right: 0px;
+}
+
+.monks-journal-sheet.sheet .distribute-container a.split {
+    font-size: 12px;
+    text-align: center;
+    color: #7a7971;
+}
+
+.monks-journal-sheet.sheet .distribute-container a.assign {
+    font-size: 12px;
+}
+
+#distribute-currency {
+    height: unset;
+}
+
+.wfrp4e .tox .tox-menubar {
+    background-color: transparent;
+}
+
+.wfrp4e .tox-tinymce .tox-menubar button {
+    background: none !important;
+    border-image: none !important;
+    color: black !important;
+    width: auto !important;
+    opacity: 1;
+    font-size: var(--font-size-12) !important;
+    height: 26px !important;
+    margin: 2px 2px 2px 2px !important;
+    font-style: normal;
+    font-family: "Signika", sans-serif !important;
+    box-shadow: inset 0px 0px 12px #6b3a0f87 !important;
 }

@@ -61,7 +61,7 @@ export class EnhancedJournal extends Application {
     }
 
     get isEditable() {
-        let editable = this.options["editable"] && this.object.isOwner;
+        let editable = !!this.options["editable"] && this.object.isOwner;
         if (this.object.pack) {
             const pack = game.packs.get(this.object.pack);
             if (pack.locked) editable = false;
@@ -193,6 +193,10 @@ export class EnhancedJournal extends Application {
 
             $('.content', this.element).attr('entity-type', this.object.data.type).attr('entity-id', this.object.id);
             contentform.empty().attr('class', this.subsheet.options.classes.join(' ')).append(this.subdocument); //.concat([`${game.system.id}`]).join(' ')
+
+            if (!this.isEditable) {
+                this.subsheet._disableFields(contentform[0]);
+            }
 
             //connect the tabs to the enhanced journal so that opening the regular document won't try and change tabs on the other window.
             this._tabs = this.subsheet.options.tabs.map(t => {

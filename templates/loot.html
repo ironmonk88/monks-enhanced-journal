@@ -29,21 +29,25 @@
                     </div>
                 </div>
                 {{/if}}
+                <div class="form-group owner-only">
+                    <label>{{localize 'MonksEnhancedJournal.Players'}}</label>
+                    <div class="configure-permissions" title="Configure Permissions" style="flex: 0 0 25px;cursor: pointer;"><i class="fas fa-lock"></i></div><span>{{players}}</span>
+                </div>
             </section>
         </header>
         <section class="sheet-body half-size flexcol">
-            {{#if isGM}}
+            {{#if isGM }}
             <ol class="items-list loot-characters" style="flex: 0 0 138px; overflow-y: hidden; ">
                 <li class="items-header flexrow">
                     <h3 class="item-name flexrow">{{localize 'MonksEnhancedJournal.Characters'}}</h3>
 
-                    <div class="item-controls flexrow owner-only" style="flex: 0 0 120px;">
+                    <div class="item-controls flexrow owner-only" style="flex: 0 0 160px;">
                         <a class="item-control add-players" title="Replace with player characters">
                             <i class="fas fa-user"></i> Players
                         </a>
                         {{#if (and currency canSplit)}}
                         <a class="item-control split-money" title="Split Currency between selected players">
-                            <i class="fas fa-dollar-sign"></i> Split
+                            <i class="fas fa-dollar-sign"></i> Distribute
                         </a>
                         {{/if}}
                     </div>
@@ -92,7 +96,7 @@
                             </div>
 
                             <div class="item-from flexrow">
-                                <h4 title="{{this.from}}">{{this.from}}</h4>
+                                <input type="text" name="items.{{this.id}}.from" value="{{this.from}}" />
                             </div>
 
                             <div class="item-controls item-requests">
@@ -112,7 +116,7 @@
                             {{/if}}
 
                             <div class="item-controls item-quantity">
-                                <input type="number" min="0" name="items.{{this.id}}.data.quantity{{@root.valStr}}" value="{{this.quantity}}" style="text-align:center;" />
+                                <input type="number" min="0" name="items.{{this.id}}.data.{{@root.quantityname}}{{@root.valStr}}" value="{{this.quantity}}" style="text-align:center;" />
                             </div>
 
                             {{#if @root.showrequest}}

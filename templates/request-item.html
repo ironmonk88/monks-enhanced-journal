@@ -1,45 +1,50 @@
 <div class="monks-enhanced-journal request-item item-card monks-journal-sheet sheet">
-    <div class="flexrow">
-        <div class="flexcol" style="align-items:center;">
-            <img src="{{actor.img}}" class="actor-icon" />
-            <h4>{{actor.name}}</h4>
-        </div>
-        <div class="flexcol" style="align-items:center;">
-            <img src="{{shop.img}}" class="shop-icon" />
-            <h4>{{shop.name}}</h4>
-        </div>
+    <div class="flexrow" style="align-items: center;">
+        <img src="{{actor.img}}" class="actor-icon" />
+        <h4 style="margin-bottom:0px;">{{actor.name}}</h4>
+    </div>
+    <div class="flexrow" style="align-items: center;">
+        <img src="{{shop.img}}" class="shop-icon" />
+        <h4 style="margin-bottom:0px;">{{shop.name}}</h4>
     </div>
     <ol class="items-list reward-items">
         <li class="items-header flexrow">
             <h3 class="item-name flexrow">{{localize 'MonksEnhancedJournal.Items'}}</h3>
-
-            <!--<div class="item-controls item-price">{{localize 'MonksEnhancedJournal.Price'}}</div>-->
-
-            <div class="item-controls item-quantity">{{localize 'MonksEnhancedJournal.Qty'}}</div>
-
-            <div class="item-controls item-total">{{localize 'MonksEnhancedJournal.Cost'}}</div>
         </li>
 
         <ol class="item-list">
             {{#each items}}
-            <li class="item flexrow" data-id="{{this.id}}" data-uuid="{{this.uuid}}" draggable="false">
+            <li class="item flexrow" data-id="{{this._id}}">
+                <img src="{{this.img}}" class="item-icon" />
+                <h4>{{this.name}}</h4>
+            </li>
+            <li class="item flexrow" data-id="{{this._id}}">
                 <div class="item-name flexrow">
-                    <div class="item-image" style="background-image: url('{{this.img}}')"></div>
-                    <h4 title="{{this.name}}">{{this.name}}</h4>
+                    <h4>Quantity</h4>
                 </div>
 
-                <!--<div class="item-controls item-price">
-                    <input type="text" name="price" value="{{this.price}}" style="text-align:center;" />
-                </div>-->
-
-                <div class="item-controls item-quantity">
-                    <!--<input type="text" name="quantity" value="{{this.quantity}}" style="text-align:center;" />-->
-                    <span>{{this.quantity}}</span>
+                <div class="item-quantity flexrow" style="flex: 0 0 70px;">
+                    <input class="gm-only" type="number" min="0" {{#if this.maxquantity}}max="{{this.maxquantity}}"{{/if}} step="1" data-dtype="Number" name="quantity" value="{{this.quantity}}" style="text-align:right;" />
+                    <span class="player-only" style="text-align:right;">{{this.quantity}}</span>
+                </div>
+            </li>
+            <li class="item flexrow" data-id="{{this._id}}">
+                <div class="item-name flexrow">
+                    <h4>Price</h4>
                 </div>
 
-                <div class="item-controls item-total">
-                    <!--<input type="text" name="total" value="{{this.total}}" style="text-align:center;" />-->
-                    <span>{{this.total}}</span>
+                <div class="item-price flexrow" style="flex: 0 0 70px;">
+                    <input class="gm-only" type="text" name="sell" value="{{this.sell}} {{this.currency}}" style="text-align:right;" />
+                    <span class="player-only" style="text-align:right;">{{this.sell}} {{this.currency}}</span>
+                </div>
+            </li>
+            <li class="item flexrow" data-id="{{this._id}}" style="border-top: 1px solid #FFFFFF;">
+                <div class="item-name flexrow">
+                    <h4 style="font-weight:bold;">Total</h4>
+                </div>
+
+                <div class="item-total flexrow">
+                    <span style="text-align:right;">{{this.total}} {{this.currency}}</span>
                 </div>
             </li>
             {{/each}}

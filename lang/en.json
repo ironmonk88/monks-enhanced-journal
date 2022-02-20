@@ -34,6 +34,8 @@
   "MonksEnhancedJournal.loot-folder.hint": "If the loot entity is being created, which folder should it be created in",
   "MonksEnhancedJournal.open-new-tab.name": "Open in New Tab",
   "MonksEnhancedJournal.open-new-tab.hint": "Open Sidebar directory links in a new tab rather than overwriting current tab",
+  "MonksEnhancedJournal.hide-inline.name": "Hide Inline Links",
+  "MonksEnhancedJournal.hide-inline.hint": "Hide Inline Links for documents that players don't havee access to.'",
 
   "MonsEnhancedJournal.SlideConfiguration": "Slide Configuration",
   "MonsEnhancedJournal.DCConfiguration": "DC Configuration",
@@ -46,6 +48,8 @@
   "MonksEnhancedJournal.MsgShowPlayers": "Showed {title} to {which}.",
   "MonksEnhancedJournal.MsgOnlyOneBookmark": "Can't bookmark the same entity twice",
 
+  "MonksEnhancedJournal.DistributeCurrency": "Distribute Currency",
+  "MonksEnhancedJournal.Distribute": "Distribute",
   "MonksEnhancedJournal.NewTab": "New Tab",
   "MonksEnhancedJournal.OpenEntry": "Open an Entry",
   "MonksEnhancedJournal.CannotFindEntity": "Cannot find the entity",
@@ -165,6 +169,7 @@
   "MonksEnhancedJournal.PlayerReceiving": "Player Receiving",
   "MonksEnhancedJournal.Townsfolk": "Townsfolk",
   "MonksEnhancedJournal.Shops": "Shops",
+  "MonksEnhancedJournal.Organizations": "Organizations",
   "MonksEnhancedJournal.Inhabitants": "Inhabitants",
   "MonksEnhancedJournal.Districts": "Districts",
   "MonksEnhancedJournal.Agricultural": "Agricultural",
@@ -233,6 +238,9 @@
   "MonksEnhancedJournal.From": "From",
   "MonksEnhancedJournal.Grant": "Grant",
   "MonksEnhancedJournal.Hidden": "Hidden",
+  "MonksEnhancedJournal.Players": "Players",
+  "MonksEnhancedJournal.Offer": "Offer",
+  "MonksEnhancedJournal.RemoveRelationship": "Remove Relationship",
 
   "MonksEnhancedJournal.Contain": "Contain",
   "MonksEnhancedJournal.Cover": "Cover",

@@ -121,7 +121,7 @@ export class EncounterSheet extends EnhancedJournalSheet {
         $('.encounter-traps .item-name', html).on('click', $.proxy(this.rollTrap, this));
 
         $('.item-refill', html).click(this.refillItems.bind(this));
-        $('.roll-table', html).click(this.rollTable.bind(this, "actors"));
+        $('.roll-table', html).click(this.rollTable.bind(this, "actors", false));
         $('.item-name h4', html).click(this._onItemSummary.bind(this));
     }
 
@@ -221,11 +221,13 @@ export class EncounterSheet extends EnhancedJournalSheet {
         let item = await this.getDocument(data);
 
         if (item) {
-            if (item.data.data.quantity) {
+            if (item.data.data[MonksEnhancedJournal.quantityname]) {
                 let items = duplicate(this.object.data.flags["monks-enhanced-journal"].items || []);
 
-                let qty = (item.data.data.quantity.hasOwnProperty("value") ? { value: 1 } : 1);
-                items.push(mergeObject(item.toObject(), { _id: makeid(), data: { quantity: qty, remaining: 1 } }));
+                let qty = (item.data.data[MonksEnhancedJournal.quantityname]?.hasOwnProperty("value") ? { value: 1 } : 1);
+                let data = { remaining: 1 };
+                data[MonksEnhancedJournal.quantityname] = qty;
+                items.push(mergeObject(item.toObject(), { _id: makeid(), data: data }));
                 this.object.setFlag('monks-enhanced-journal', 'items', items);
             }
         }
@@ -312,7 +314,7 @@ export class EncounterSheet extends EnhancedJournalSheet {
                 //}
 
                 // Prepare the Token data
-                let quantity = (ea.quantity || 1);
+                let quantity = (ea.quantity || "1");
                 if (quantity.indexOf("d") != -1) {
                     let r = new Roll(quantity);
                     await r.evaluate({ async: true });
@@ -321,6 +323,7 @@ export class EncounterSheet extends EnhancedJournalSheet {
                     quantity = parseInt(quantity);
                     if (isNaN(quantity)) quantity = 1;
                 }
+
                 for (let i = 0; i < (quantity || 1); i++) {
                     let td = await actor.getTokenData({ x: x, y: y });
                     if (ea.hidden)
@@ -381,7 +384,7 @@ export class EncounterSheet extends EnhancedJournalSheet {
         let li = $(event.currentTarget).closest('li')[0];
         let item = items.find(i => i._id == li.dataset.id);
         if (item) {
-            item.data.remaining = this.getCurrency(item.data.quantity);
+            item.data.remaining = this.getCurrency(item.data[MonksEnhancedJournal.quantityname]);
             this.object.setFlag('monks-enhanced-journal', 'items', items);
         }
     }

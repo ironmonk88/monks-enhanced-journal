@@ -53,6 +53,24 @@ export class QuestSheet extends EnhancedJournalSheet {
 
         data.valStr = (['pf2e'].includes(game.system.id) ? ".value" : "");
 
+        data.relationships = {};
+        for (let item of (data.data.flags['monks-enhanced-journal']?.relationships || [])) {
+            let entity = await this.getDocument(item, "JournalEntry", false);
+            if (entity && entity.testUserPermission(game.user, "LIMITED") && (game.user.isGM || !item.hidden)) {
+                if (!data.relationships[entity.type])
+                    data.relationships[entity.type] = { type: entity.type, name: i18n(`MonksEnhancedJournal.${entity.type.toLowerCase()}`), documents: [] };
+
+                item.name = entity.name;
+                item.img = entity.data.img;
+
+                data.relationships[entity.type].documents.push(item);
+            }
+        }
+
+        for (let [k, v] of Object.entries(data.relationships)) {
+            v.documents = v.documents.sort((a, b) => a.name.localeCompare(b.name));
+        }
+
         return data;
     }
 
@@ -78,6 +96,10 @@ export class QuestSheet extends EnhancedJournalSheet {
         }
 
         return rewards;
+    }
+
+    get allowedRelationships() {
+        return ['person'];
     }
 
     convertRewards() {
@@ -162,9 +184,14 @@ export class QuestSheet extends EnhancedJournalSheet {
         $('.item-refill', html).click(this.refillItems.bind(this));
         $('.item-edit', html).on('click', this.editItem.bind(this));
         $('.item-delete', html).on('click', this._deleteItem.bind(this));
+        $('.item-action', html).on('click', this.alterItem.bind(this));
 
-        $('.roll-table', html).click(this.rollTable.bind(this, "items"));
+        $('.item-hide', html).on('click', this.alterItem.bind(this));
+
+        $('.roll-table', html).click(this.rollTable.bind(this, "items", false));
         $('.item-name h4', html).click(this._onItemSummary.bind(this));
+
+        $('.items-list .actor-icon', html).click(this.openRelationship.bind(this));
 
         const actorOptions = this._getPersonActorContextOptions();
         if (actorOptions) new ContextMenu($(html), ".actor-img", actorOptions);
@@ -275,6 +302,14 @@ export class QuestSheet extends EnhancedJournalSheet {
             }
         }
         delete data.objectives;
+
+        data.flags['monks-enhanced-journal'].relationships = duplicate(this.object.getFlag("monks-enhanced-journal", "relationships") || []);
+        for (let relationship of data.flags['monks-enhanced-journal'].relationships) {
+            let dataRel = data.relationships[relationship.id];
+            if (dataRel)
+                relationship = mergeObject(relationship, dataRel);
+        }
+        delete data.relationships;
 
         return flattenObject(data);
     }
@@ -446,6 +481,8 @@ export class QuestSheet extends EnhancedJournalSheet {
 
             this.object.data.flags['monks-enhanced-journal'].objectives = objectives;
             this.object.setFlag('monks-enhanced-journal', 'objectives', objectives);
+        } else if (data.type == 'JournalEntry') {
+            this.addRelationship(data);
         }
 
         log('drop data', event, data);
@@ -467,8 +504,10 @@ export class QuestSheet extends EnhancedJournalSheet {
 
             let items = reward.items;
 
-            let qty = (item.data.data.quantity.hasOwnProperty("value") ? { value: 1 } : 1);
-            items.push(mergeObject(item.toObject(), { _id: makeid(), data: { quantity: qty, remaining: 1 } }));
+            let qty = this.setQuantity(item.data.data[MonksEnhancedJournal.quantityname], 1);
+            let data = { remaining: 1 };
+            data[MonksEnhancedJournal.quantityname] = qty;
+            items.push(mergeObject(item.toObject(), { _id: makeid(), data: data }));
             this.object.setFlag('monks-enhanced-journal', 'rewards', rewards);
         }
     }
@@ -568,7 +607,7 @@ export class QuestSheet extends EnhancedJournalSheet {
         let li = $(event.currentTarget).closest('li')[0];
         let item = items.find(i => i._id == li.dataset.id);
         if (item) {
-            item.data.remaining = this.getCurrency(item.data.quantity);
+            item.data.remaining = this.getCurrency(item.data[MonksEnhancedJournal.quantityname]);
             this.object.setFlag('monks-enhanced-journal', 'rewards', rewards);
         }
     }

@@ -1,0 +1,63 @@
+<div class="distribute-container">
+    <form autocomplete="off" onsubmit="event.preventDefault();" style="flex-grow: 0;">
+        <p class="notes">Clear the value for the player to remove the character from receiving a split of the money</p>
+        <ol class="items-list">
+            <li class="items-header flexrow">
+                <h3 class="item-name flexrow"></h3>
+                <a class="item-control split" title="Split Currency evenly between players">
+                    <i class="fas fa-dollar-sign"></i> Split
+                </a>
+                <a class="item-control reset" title="Reset all the values">
+                    <i class="fas fa-trash"></i> Clear
+                </a>
+            </li>
+        </ol>
+
+        <div class="form-group">
+            <label>
+                {{localize 'MonksEnhancedJournal.Currency'}}
+            </label>
+            <div class="form-fields" style="flex-wrap:nowrap;">
+                {{#each currency}}
+                <input type="text" class="currency-amount" data-currency="{{@key}}" name="currency.{{@key}}" placeholder="0" value="{{this}}" data-dtype="Number" />
+                {{/each}}
+            </div>
+            <div class="item-control"></div>
+        </div>
+
+        <ol class="items-list">
+            <li class="items-header flexrow">
+                <h3 class="item-name flexrow">Character</h3>
+                {{#each currency}}
+                <div class="item-controls">{{localize @key}}</div>
+                {{/each}}
+                <div class="item-control"></div>
+            </li>
+            <ul class="item-list">
+                {{#each characters}}
+                <li class="item flexrow" data-id="{{this.id}}" draggable="false">
+                    <div class="item-name flexrow">
+                        <div class="item-image item-icon" style="background-image: url('{{this.img}}')" title="{{this.name}}"></div>
+                    </div>
+
+                    {{#each this.currency}}
+                    <input type="number" class="player-amount" data-currency="{{@key}}" data-character="{{../id}}" charactername="character.{{../id}}.currency.{{@key}}" placeholder="-" value="{{this}}" data-dtype="Number" />
+                    {{/each}}
+
+                    <a class="item-control assign" data-character="{{this.id}}" title="Assign the remainder of the currency to this character">
+                        <i class="fas fa-dollar-sign"></i> Assign
+                    </a>
+                </li>
+                {{/each}}
+            </ul>
+            <li class="items-header flexrow">
+                <h3 class="item-name flexrow">Totals</h3>
+                {{#each totals}}
+                <div class="item-controls total-amount{{#if (gt this 0)}} more{{/if}}{{#if (lt this 0)}} less{{/if}}" data-currency="{{@key}}" name="totalcurrency.{{@key}}">{{this}}</div>
+                {{/each}}
+                <div class="item-control"></div>
+            </li>
+        </ol>
+        <button type="submit" name="submit" value="1"><i class="far fa-save"></i> {{localize "MonksEnhancedJournal.Distribute"}}</button>
+    </form>
+</div>

@@ -44,40 +44,48 @@ export class PlaceSheet extends EnhancedJournalSheet {
         return { shops: [], townsfolk: [] };
     }
 
-    getData() {
+    get allowedRelationships() {
+        return ['organization', 'person', 'shop'];
+    }
+
+    async getData() {
         let data = super.getData();
 
         if (data?.data?.flags['monks-enhanced-journal']?.townsfolk) {
-            data.data.flags['monks-enhanced-journal'].actors = data?.data?.flags['monks-enhanced-journal']?.townsfolk;
-            this.object.setFlag('monks-enhanced-journal', 'actors', data.data.flags['monks-enhanced-journal'].actors);
+            data.data.flags['monks-enhanced-journal'].relationships = data?.data?.flags['monks-enhanced-journal']?.townsfolk;
+            this.object.setFlag('monks-enhanced-journal', 'relationships', data.data.flags['monks-enhanced-journal'].relationships);
             this.object.unsetFlag('monks-enhanced-journal', 'townsfolk');
         }
 
-        data.townsfolk = data.data.flags['monks-enhanced-journal'].actors?.map(t => {
-            let actor;
-            if (t.type?.toLowerCase() == 'actor')
-                actor = game.actors.find(a => a.id == t.id)
-            else if (t.type?.toLowerCase() == 'journal' || t.type?.toLowerCase() == 'journalentry')
-                actor = game.journal.find(a => a.id == t.id)
-            if (!actor || !actor.testUserPermission(game.user, "LIMITED"))
-                return null;
-            return mergeObject(t, {
-                img: actor?.data.img,
-                name: actor?.name,
-                role: foundry.utils.getProperty(actor, "data.flags.monks-enhanced-journal.role")
-            });
-        }).filter(t => t);
+        if (data?.data?.flags['monks-enhanced-journal']?.shops) {
+            let relationships = data.data.flags['monks-enhanced-journal'].relationships || [];
+            relationships = relationships.concat(data?.data?.flags['monks-enhanced-journal']?.shops);
+            this.object.setFlag('monks-enhanced-journal', 'relationships', relationships);
+            this.object.unsetFlag('monks-enhanced-journal', 'shops');
+        }
 
-        data.shops = data.data.flags['monks-enhanced-journal'].shops?.map(s => {
-            let shop = game.journal.find(a => a.id == s.id)
-            if (!shop || !shop.testUserPermission(game.user, "LIMITED"))
-                return null;
-            return mergeObject(s, {
-                img: shop?.data.img,
-                name: shop?.name,
-                shoptype: foundry.utils.getProperty(shop, "data.flags.monks-enhanced-journal.shoptype")
-            });
-        }).filter(s => s);
+        data.shops = [];
+        data.organizations = [];
+        data.townsfolk = [];
+        for (let item of data.data.flags['monks-enhanced-journal'].relationships) {
+            let entity = await this.getDocument(item, "JournalEntry", false);
+            if (entity && entity.testUserPermission(game.user, "LIMITED") && (game.user.isGM || !item.hidden)) {
+                item.name = entity.name;
+                item.img = entity.data.img;
+
+                if (entity.getFlag('monks-enhanced-journal', 'type') == "shop") {
+                    data.shops.push(item);
+                } else if (entity.getFlag('monks-enhanced-journal', 'type') == "organization") {
+                    data.organizations.push(item);
+                } else {
+                    data.townsfolk.push(item);
+                }
+            }
+        }
+
+        data.shops = data.shops.sort((a, b) => a.name.localeCompare(b.name));
+        data.organizations = data.organizations.sort((a, b) => a.name.localeCompare(b.name));
+        data.townsfolk = data.townsfolk.sort((a, b) => a.name.localeCompare(b.name));
 
         return data;
     }
@@ -97,10 +105,27 @@ export class PlaceSheet extends EnhancedJournalSheet {
     activateListeners(html, enhancedjournal) {
         super.activateListeners(html, enhancedjournal);
 
-        $('.townsfolk .actor-icon', html).click(this.openActor.bind(this));
-        $('.shop-icon', html).click(this.openShop.bind(this));
+        $('.townsfolk .actor-icon', html).click(this.openRelationship.bind(this));
+        $('.shop-icon', html).click(this.openRelationship.bind(this));
+        $('.organization-icon', html).click(this.openRelationship.bind(this));
 
+        $('.item-action', html).on('click', this.alterItem.bind(this));
         $('.item-delete', html).on('click', $.proxy(this._deleteItem, this));
+        $('.item-hide', html).on('click', this.alterItem.bind(this));
+    }
+
+    _getSubmitData(updateData = {}) {
+        let data = expandObject(super._getSubmitData(updateData));
+
+        data.flags['monks-enhanced-journal'].relationships = duplicate(this.object.getFlag("monks-enhanced-journal", "relationships") || []);
+        for (let relationship of data.flags['monks-enhanced-journal'].relationships) {
+            let dataRel = data.relationships[relationship.id];
+            if (dataRel)
+                relationship = mergeObject(relationship, dataRel);
+        }
+        delete data.relationships;
+
+        return flattenObject(data);
     }
 
     _canDragDrop(selector) {
@@ -116,71 +141,10 @@ export class PlaceSheet extends EnhancedJournalSheet {
             return false;
         }
 
-        if (data.type == 'Actor') {
-            this.addActor(data);
-        } else if (data.type == 'JournalEntry') {
-            this.addShop(data);
+        if (data.type == 'JournalEntry') {
+            this.addRelationship(data);
         }
 
         log('drop data', event, data);
-    }
-
-    async addActor(data) {
-        let actor = mergeObject(await this.getItemData(data), { type: 'Actor' });
-
-        if (actor) {
-            let actors = duplicate(this.object.data.flags["monks-enhanced-journal"].actors || []).filter(t => t.type);
-
-            //only add one item
-            if (actors.find(t => t.id == actor.id) != undefined)
-                return;
-
-            actors.push(actor);
-            this.object.setFlag('monks-enhanced-journal', 'actors', actors);
-        }
-    }
-
-    async addShop(data) {
-        let shop = await this.getItemData(data);
-
-        if (shop) {
-            if (shop.type == 'shop') {
-                let shops = duplicate(this.object.data.flags["monks-enhanced-journal"].shops || []);
-
-                //only add one item
-                if (shops.find(t => t.id == shop.id) != undefined)
-                    return;
-
-                shops.push(shop);
-                this.object.setFlag("monks-enhanced-journal", "shops", shops);
-            } else if (shop.type == 'person') {
-                let actors = duplicate(this.object.data.flags["monks-enhanced-journal"].actors || []);
-
-                //only add one item
-                if (actors.find(t => t.id == shop.id) != undefined)
-                    return;
-
-                actors.push(mergeObject(shop, { type: 'JournalEntry' }));
-                this.object.setFlag('monks-enhanced-journal', 'actors', actors);
-            }
-        }
-    }
-
-    openActor(event) {
-        let item = event.currentTarget.closest('.item');
-        let townsfolk = this.object.getFlag('monks-enhanced-journal', 'actors').find(a => a.id == item.dataset.id);
-        if (townsfolk.type.toLowerCase() == 'actor') {
-            let actor = game.actors.find(a => a.id == townsfolk.id);
-            this.open(actor);
-        } else if (townsfolk.type.toLowerCase() == 'journal' || townsfolk.type.toLowerCase() == 'journalentry') {
-            let person = game.journal.find(s => s.id == townsfolk.id);
-            this.open(person);
-        }
-    }
-
-    openShop(event) {
-        let item = event.currentTarget.closest('.item');
-        let shop = game.journal.find(s => s.id == item.dataset.id);
-        this.open(shop);
     }
 }

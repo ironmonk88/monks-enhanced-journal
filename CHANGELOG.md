@@ -1,3 +1,34 @@
+# Version 1.0.46
+
+Added an interface to distribute coins a bit better.  You can set some characters to not receive a share by emptying out the string before splitting.  And you can now assign the leftovers to a single character in case your players want to keep a party fund.
+
+Fixed issues with players being able to edit a Journal Entry they shouldn't have access to.
+
+Fixed issues with Warhammer and the styling of the menu buttons when editing a Journal Entry
+
+Fixed issues with Tormenta 20 and being able to add and buy items from shops
+
+Added the option to hide inline links for Journal Entries that players aren't supposed to know about
+
+Fixed issues with Forien's Quest Log not being recognised as a window not to open in Enhanced Journals.
+
+Added the option to seel items back to shops.
+
+Added the option to purchase items in quantity.
+
+Fixed issues with creating an encounter not finding a vacant spot properly.
+
+Fixed issue where the GM wasn't being notified when a player purchased an item.
+
+Fixed issue when creating an encounter from a Roll Table
+
+Added two way relationships between Journal Entries, and added the option to hide that relationship from players.
+
+When spells are purchased from a shop or loot sheet they will be converted to a spell scroll, if you're using DnD5e.
+
+Allow a wider range when adjusting the price.  And remembering the price adjustment so that items sold back to the shop will use that conversion.
+
+Showing who has permission to see the loot sheet a littler easier and added a conveniant button to change the permissions.
 # Version 1.0.45
 
 Fixed issue where the items list in a Shop would scroll back to the top when items are edited.
