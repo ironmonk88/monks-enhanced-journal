@@ -37,6 +37,8 @@
   "MonksEnhancedJournal.loot-folder.hint": "Om ett plundringsbyte skapas, i vilken mapp ska det hamna",
   "MonksEnhancedJournal.open-new-tab.name": "Öppna i ny flik",
   "MonksEnhancedJournal.open-new-tab.hint": "Öppna sidomenyn i en ny flik istälet för att skriva över den befintliga",
+  "MonksEnhancedJournal.hide-inline.name": "Dölj länkar",
+  "MonksEnhancedJournal.hide-inline.hint": "Dölj länkar till dokument som spelarna inte har tillgång till.'",
 
   "MonsEnhancedJournal.SlideConfiguration": "Inställning för bildspel",
   "MonsEnhancedJournal.DCConfiguration": "Inställning för svårighetsnivå",
@@ -49,6 +51,8 @@
   "MonksEnhancedJournal.MsgShowPlayers": "Visa {title} för {which}.",
   "MonksEnhancedJournal.MsgOnlyOneBookmark": "Kan inte bokmärka samma sak två gånger",
 
+  "MonksEnhancedJournal.DistributeCurrency": "Fördela pengar",
+  "MonksEnhancedJournal.Distribute": "Fördela",  
   "MonksEnhancedJournal.NewTab": "Ny flik",
   "MonksEnhancedJournal.OpenEntry": "Öppna en anteckning",
   "MonksEnhancedJournal.CannotFindEntity": "Kan inte hitta anteckningen",
@@ -145,7 +149,7 @@
   "MonksEnhancedJournal.Assigned": "Tilldelad",
   "MonksEnhancedJournal.Additional": "Ytterligare",
   "MonksEnhancedJournal.Currency": "Valuta",
-  "MonksEnhancedJournal.Loop": "Loop",
+  "MonksEnhancedJournal.Loop": "Loopa",
   "MonksEnhancedJournal.Extract": "Extrahera till ny anteckning",
   "MonksEnhancedJournal.LongTermGoal": "Långsiktiga mål",
   "MonksEnhancedJournal.ShortTermGoal": "Kortsiktiga mål",
@@ -168,6 +172,7 @@
   "MonksEnhancedJournal.PlayerReceiving": "Mottagande spelare",
   "MonksEnhancedJournal.Townsfolk": "Invånare",
   "MonksEnhancedJournal.Shops": "Butiker",
+  "MonksEnhancedJournal.Organizations": "Organisationer",
   "MonksEnhancedJournal.Inhabitants": "Invånare",
   "MonksEnhancedJournal.Districts": "Distrikt",
   "MonksEnhancedJournal.Agricultural": "Lantbruk",
@@ -236,6 +241,10 @@
   "MonksEnhancedJournal.From": "Från",
   "MonksEnhancedJournal.Grant": "Bevilja",
   "MonksEnhancedJournal.Hidden": "Dold",
+  "MonksEnhancedJournal.Players": "Spelare",
+  "MonksEnhancedJournal.Offer": "Erbjud",
+  "MonksEnhancedJournal.RemoveRelationship": "Ta bort relation",
+
 
   "MonksEnhancedJournal.Contain": "Innehåller",
   "MonksEnhancedJournal.Cover": "Täcker",
