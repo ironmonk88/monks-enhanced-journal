@@ -12,7 +12,7 @@ Added the option to hide inline links for Journal Entries that players aren't su
 
 Fixed issues with Forien's Quest Log not being recognised as a window not to open in Enhanced Journals.
 
-Added the option to seel items back to shops.
+Added the option to sell items back to shops.
 
 Added the option to purchase items in quantity.
 
@@ -28,7 +28,8 @@ When spells are purchased from a shop or loot sheet they will be converted to a 
 
 Allow a wider range when adjusting the price.  And remembering the price adjustment so that items sold back to the shop will use that conversion.
 
-Showing who has permission to see the loot sheet a littler easier and added a conveniant button to change the permissions.
+Showing who has permission to see the loot sheet a little easier and added a convenient button to change the permissions.
+
 # Version 1.0.45
 
 Fixed issue where the items list in a Shop would scroll back to the top when items are edited.

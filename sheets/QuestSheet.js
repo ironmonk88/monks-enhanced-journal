@@ -494,6 +494,11 @@ export class QuestSheet extends EnhancedJournalSheet {
         if (item) {
             let id = this.object.getFlag('monks-enhanced-journal', 'reward');
 
+            let itemData = item.toObject();
+            if ((itemData.type === "spell") && game.system.id == 'dnd5e') {
+                itemData = await QuestSheet.createScrollFromSpell(itemData);
+            }
+
             let rewards = duplicate(this.getRewardData());
             let reward = rewards.find(r => r.id == id);
             if (reward == undefined) {
@@ -507,7 +512,7 @@ export class QuestSheet extends EnhancedJournalSheet {
             let qty = this.setQuantity(item.data.data[MonksEnhancedJournal.quantityname], 1);
             let data = { remaining: 1 };
             data[MonksEnhancedJournal.quantityname] = qty;
-            items.push(mergeObject(item.toObject(), { _id: makeid(), data: data }));
+            items.push(mergeObject(itemData, { _id: makeid(), data: data }));
             this.object.setFlag('monks-enhanced-journal', 'rewards', rewards);
         }
     }
@@ -526,7 +531,7 @@ export class QuestSheet extends EnhancedJournalSheet {
         TextEditor._onClickContentLink(event);
     }
 
-    static itemDropped(id, actor, entry) {
+    static async itemDropped(id, actor, entry) {
         let rewards = entry.getFlag('monks-enhanced-journal', 'rewards');
         for (let reward of rewards) {
             let items = reward.items;

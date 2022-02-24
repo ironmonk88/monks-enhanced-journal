@@ -221,14 +221,21 @@ export class EncounterSheet extends EnhancedJournalSheet {
         let item = await this.getDocument(data);
 
         if (item) {
-            if (item.data.data[MonksEnhancedJournal.quantityname]) {
+            if (item.data.data[MonksEnhancedJournal.quantityname] || (item.data.type == "spell" && game.system.id == 'dnd5e')) {
                 let items = duplicate(this.object.data.flags["monks-enhanced-journal"].items || []);
+
+                let itemData = item.toObject();
+                if ((itemData.type === "spell") && game.system.id == 'dnd5e') {
+                    itemData = await EncounterSheet.createScrollFromSpell(itemData);
+                }
 
                 let qty = (item.data.data[MonksEnhancedJournal.quantityname]?.hasOwnProperty("value") ? { value: 1 } : 1);
                 let data = { remaining: 1 };
                 data[MonksEnhancedJournal.quantityname] = qty;
-                items.push(mergeObject(item.toObject(), { _id: makeid(), data: data }));
+                items.push(mergeObject(itemData, { _id: makeid(), data: data }));
                 this.object.setFlag('monks-enhanced-journal', 'items', items);
+            } else {
+                ui.notifications.warn("Cannot add item of this type");
             }
         }
     }
@@ -364,7 +371,7 @@ export class EncounterSheet extends EnhancedJournalSheet {
         await this.setFlag('monks-enhanced-journal', 'currency', currency);
     }
 
-    static itemDropped(id, actor, entry) {
+    static async itemDropped(id, actor, entry) {
         let item = (entry.getFlag('monks-enhanced-journal', 'items') || []).find(i => i._id == id);
         if (item) {
             if (item.remaining < 1) {

@@ -7,48 +7,49 @@
         <img src="{{shop.img}}" class="shop-icon" />
         <h4 style="margin-bottom:0px;">{{shop.name}}</h4>
     </div>
-    <ol class="items-list reward-items">
+
+    <ol class="items-list purchase-items">
         <li class="items-header flexrow">
             <h3 class="item-name flexrow">{{localize 'MonksEnhancedJournal.Items'}}</h3>
         </li>
 
-        <ol class="item-list">
-            {{#each items}}
-            <li class="item flexrow" data-id="{{this._id}}">
-                <img src="{{this.img}}" class="item-icon" />
-                <h4>{{this.name}}</h4>
-            </li>
-            <li class="item flexrow" data-id="{{this._id}}">
-                <div class="item-name flexrow">
-                    <h4>Quantity</h4>
-                </div>
+        {{#each items}}
+        <li class="item flexrow" data-id="{{this._id}}">
+            <img src="{{this.img}}" class="item-icon" />
+            <h4>{{this.name}}</h4>
+        </li>
+        <li class="item flexrow" data-id="{{this._id}}">
+            <div class="item-name flexrow">
+                <h4>Quantity</h4>
+            </div>
 
-                <div class="item-quantity flexrow" style="flex: 0 0 70px;">
-                    <input class="gm-only" type="number" min="0" {{#if this.maxquantity}}max="{{this.maxquantity}}"{{/if}} step="1" data-dtype="Number" name="quantity" value="{{this.quantity}}" style="text-align:right;" />
-                    <span class="player-only" style="text-align:right;">{{this.quantity}}</span>
-                </div>
-            </li>
-            <li class="item flexrow" data-id="{{this._id}}">
-                <div class="item-name flexrow">
-                    <h4>Price</h4>
-                </div>
+            <div class="item-quantity flexrow" style="flex: 0 0 70px;">
+                <input class="gm-only" type="number" min="0" {{#if this.maxquantity}} max="{{this.maxquantity}}" {{/if}} step="1" data-dtype="Number" name="quantity" value="{{this.quantity}}" style="text-align:right;" />
+                <span class="player-only" style="text-align: right; padding-right: 4px;">{{this.quantity}}</span>
+            </div>
+        </li>
+        {{#if this.total}}
+        <li class="item flexrow" data-id="{{this._id}}">
+            <div class="item-name flexrow">
+                <h4>Price</h4>
+            </div>
 
-                <div class="item-price flexrow" style="flex: 0 0 70px;">
-                    <input class="gm-only" type="text" name="sell" value="{{this.sell}} {{this.currency}}" style="text-align:right;" />
-                    <span class="player-only" style="text-align:right;">{{this.sell}} {{this.currency}}</span>
-                </div>
-            </li>
-            <li class="item flexrow" data-id="{{this._id}}" style="border-top: 1px solid #FFFFFF;">
-                <div class="item-name flexrow">
-                    <h4 style="font-weight:bold;">Total</h4>
-                </div>
+            <div class="item-price flexrow" style="flex: 0 0 70px;">
+                <input class="gm-only" type="text" name="sell" value="{{this.sell}} {{this.currency}}" style="text-align:right;" />
+                <span class="player-only" style="text-align: right; padding-right: 4px;">{{this.sell}} {{this.currency}}</span>
+            </div>
+        </li>
+        <li class="item flexrow" data-id="{{this._id}}" style="border-top: 1px solid #FFFFFF;">
+            <div class="item-name flexrow">
+                <h4 style="font-weight:bold;">Total</h4>
+            </div>
 
-                <div class="item-total flexrow">
-                    <span style="text-align:right;">{{this.total}} {{this.currency}}</span>
-                </div>
-            </li>
-            {{/each}}
-        </ol>
+            <div class="item-total flexrow">
+                <span style="text-align: right; padding-right: 4px;">{{this.total}} {{this.currency}}</span>
+            </div>
+        </li>
+        {{/if}}
+        {{/each}}
     </ol>
     <div class="gm-only flexrow request-buttons">
         <button type="button" class="request-accept"><i class="fas fa-check"></i> {{localize 'MonksEnhancedJournal.Accept'}}</button>

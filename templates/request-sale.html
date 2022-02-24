@@ -10,7 +10,7 @@
 
     <ol class="items-list sell-items">
         <li class="items-header flexrow">
-            <h3 class="item-name flexrow">Items</h3>
+            <h3 class="item-name flexrow">{{localize 'MonksEnhancedJournal.Items'}}</h3>
         </li>
         {{#each items}}
         <li class="item flexrow" data-id="{{this._id}}">
@@ -24,7 +24,7 @@
 
             <div class="item-quantity flexrow" style="flex: 0 0 70px;">
                 <input class="gm-only" type="number" min="0" max="{{this.maxquantity}}" step="1" data-dtype="Number" name="quantity" value="{{this.quantity}}" style="text-align:right;" />
-                <span class="player-only" style="text-align:right;">{{this.quantity}}</span>
+                <span class="player-only" style="text-align: right; padding-right: 4px;">{{this.quantity}}</span>
             </div>
         </li>
         <li class="item flexrow" data-id="{{this._id}}">
@@ -34,7 +34,7 @@
 
             <div class="item-price flexrow" style="flex: 0 0 70px;">
                 <input class="gm-only" type="text" name="sell" value="{{this.sell}} {{this.currency}}" style="text-align:right;" />
-                <span class="player-only" style="text-align:right;">{{this.sell}} {{this.currency}}</span>
+                <span class="player-only" style="text-align: right; padding-right: 4px;">{{this.sell}} {{this.currency}}</span>
             </div>
         </li>
         <li class="item flexrow" data-id="{{this._id}}" style="border-top: 1px solid #FFFFFF;">
@@ -43,7 +43,7 @@
             </div>
 
             <div class="item-total flexrow">
-                <span style="text-align:right;">{{this.total}} {{this.currency}}</span>
+                <span style="text-align: right; padding-right: 4px;">{{this.total}} {{this.currency}}</span>
             </div>
         </li>
         {{/each}}

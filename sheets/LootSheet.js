@@ -59,6 +59,7 @@ export class LootSheet extends EnhancedJournalSheet {
         data.groups = this.getItemGroups(data);
 
         data.canGrant = game.user.isGM && ((data.data.flags['monks-enhanced-journal'].items || []).find(i => (Object.values(i.requests || {}).find(r => r) != undefined)) != undefined);
+        data.canRequest = (data.data.flags['monks-enhanced-journal'].purchasing == "locked");
 
         data.characters = (data.data.flags['monks-enhanced-journal'].actors || []).map(a => {
             let actor = game.actors.get(a);
@@ -235,7 +236,7 @@ export class LootSheet extends EnhancedJournalSheet {
 
         let id = li.dataset.id;
         let item = this.object.data.flags["monks-enhanced-journal"].items.find(i => i._id == id);
-        if (item == undefined || (!game.user.isGM && (item?.lock === true || this.getCurrency(item.quantity) <= 0)))
+        if (item == undefined || (!game.user.isGM && (item?.lock === true || this.getCurrency(item.data.quantity) <= 0)))
             return;
 
         item = duplicate(item);
@@ -280,9 +281,9 @@ export class LootSheet extends EnhancedJournalSheet {
                     this.constructor.purchaseItem.call(this.constructor, this.object, data.data._id, actor);
                 }
             } else {
-                if (game.user.isGM)
+                if (game.user.isGM) {
                     this.addItem(data);
-                else
+                } else
                     MonksEnhancedJournal.emit("addItem",
                         {
                             lootid: this.object.id,
@@ -318,7 +319,19 @@ export class LootSheet extends EnhancedJournalSheet {
         if (!item)
             return;
 
-        if (this.object.data.flags['monks-enhanced-journal'].purchasing == 'confirm') {
+        const actor = game.user.character;
+        if (!actor) {
+            ui.notifications.warn("You don't have a character associated with your user");
+            return;
+        }
+
+        let qty = parseInt(this.getQuantity(item.data[MonksEnhancedJournal.quantityname]));
+        if (qty < 1) {
+            ui.notifications.warn("Cannot transfer this item, not enough of this item remains.");
+            return false;
+        }
+
+        if (this.object.data.flags['monks-enhanced-journal'].purchasing == 'locked') {
             MonksEnhancedJournal.emit("requestLoot",
                 {
                     shopid: this.object.id,
@@ -326,21 +339,35 @@ export class LootSheet extends EnhancedJournalSheet {
                     itemid: id
                 }
             );
-        } else if (this.object.data.flags['monks-enhanced-journal'].purchasing == 'free') {
-            const actor = game.user.character;
-            if (!actor) return;
+        } else if (this.object.data.flags['monks-enhanced-journal'].purchasing == 'confirm') {
+            await LootSheet.confirmQuantity(item, qty, (html) => {
+                //create the chat message informaing the GM that player is trying to sell an item.
+                item.quantity = parseInt($('input[name="quantity"]', html).val());
+                item.maxquantity = qty;
 
-            // Create the owned item
-            let itemData = duplicate(item);
-            delete itemData._id;
-            itemData.data[MonksEnhancedJournal.quantityname] = this.setQuantity(itemData.data[MonksEnhancedJournal.quantityname], 1);
-            actor.createEmbeddedDocuments("Item", [itemData]);
-            MonksEnhancedJournal.emit("purchaseItem",
-                {
-                    shopid: this.object.id,
-                    itemid: item._id,
-                    actorid: actor.id
-                })
+                LootSheet.createRequestMessage.call(this.object, item, actor);
+                MonksEnhancedJournal.emit("notify", { actor: actor.name, item: item.name });
+            });
+        } else if (this.object.data.flags['monks-enhanced-journal'].purchasing == 'free') {
+            LootSheet.confirmQuantity(item, qty, async (html) => {
+                let quantity = parseInt($('input[name="quantity"]', html).val());
+
+                if (quantity > 0) {
+                    // Create the owned item
+                    let itemData = duplicate(item);
+                    delete itemData._id;
+                    itemData.data[MonksEnhancedJournal.quantityname] = this.setQuantity(itemData.data[MonksEnhancedJournal.quantityname], quantity);
+                    actor.createEmbeddedDocuments("Item", [itemData]);
+                    MonksEnhancedJournal.emit("purchaseItem",
+                        {
+                            shopid: this.object.id,
+                            itemid: item._id,
+                            actorid: actor.id,
+                            user: game.user.id,
+                            quantity: quantity
+                        })
+                }
+            });
         }
     }
 
@@ -371,7 +398,7 @@ export class LootSheet extends EnhancedJournalSheet {
         item.requests[userid] = false;
         await this.object.setFlag('monks-enhanced-journal', 'items', items);
 
-        await this.constructor.purchaseItem.call(this.constructor, this.object, id, actor, user);
+        await this.constructor.purchaseItem.call(this.constructor, this.object, id, actor, 1, user);
     }
 
     async addItem(data) {
@@ -380,10 +407,12 @@ export class LootSheet extends EnhancedJournalSheet {
         if (item) {
             let items = duplicate(this.object.data.flags["monks-enhanced-journal"].items || []);
 
-            let qty = this.setQuantity(item.data.data[MonksEnhancedJournal.quantityname], 1);
-            let data = {};
-            data[MonksEnhancedJournal.quantityname] = qty;
-            items.push(mergeObject(item.toObject(), { _id: makeid(), data: data }));
+            let itemData = item.toObject();
+            if ((itemData.type === "spell") && game.system.id == 'dnd5e') {
+                itemData = await LootSheet.createScrollFromSpell(itemData);
+            }
+
+            items.push(mergeObject(itemData, { _id: makeid() }));
             this.object.setFlag('monks-enhanced-journal', 'items', items);
             return true;
         }
@@ -421,10 +450,11 @@ export class LootSheet extends EnhancedJournalSheet {
         }
     }
 
-    static itemDropped(id, actor, entry) {
+    static async itemDropped(id, actor, entry) {
         let item = (entry.getFlag('monks-enhanced-journal', 'items') || []).find(i => i._id == id);
         if (item) {
-            if (parseInt(this.getQuantity(item.data[MonksEnhancedJournal.quantityname]), "") < 1) {
+            let qty = (item.data[MonksEnhancedJournal.quantityname] == undefined || item.data[MonksEnhancedJournal.quantityname] == "" ? "" : this.getQuantity(item.data[MonksEnhancedJournal.quantityname])) || "";
+            if (qty != "" && parseInt(qty) < 1) {
                 ui.notifications.warn("Cannot transfer this item, not enough of this item remains.");
                 return false;
             }
@@ -434,23 +464,33 @@ export class LootSheet extends EnhancedJournalSheet {
                 return true;
             } else {
                 if (entry.data.flags["monks-enhanced-journal"].purchasing == 'confirm') {
-                    MonksEnhancedJournal.emit("requestLoot",
-                        {
-                            shopid: entry.id,
-                            actorid: actor.id,
-                            itemid: id
-                        }
-                    );
+                    await LootSheet.confirmQuantity(item, qty, (html) => {
+                        //create the chat message informaing the GM that player is trying to sell an item.
+                        item.quantity = parseInt($('input[name="quantity"]', html).val());
+                        item.maxquantity = (qty != "" ? parseInt(qty) : null);
+
+                        LootSheet.createRequestMessage.call(entry, item, actor);
+                        MonksEnhancedJournal.emit("notify", { actor: actor.name, item: item.name });
+                    });
                     return false;
                 } else {
-                    MonksEnhancedJournal.emit("purchaseItem",
-                        {
-                            shopid: entry.id,
-                            actorid: actor.id,
-                            itemid: id,
-                            quantity: 1
+                    let result = await LootSheet.confirmQuantity(item, qty, async (html) => {
+                        let quantity = parseInt($('input[name="quantity"]', html).val());
+
+                        if (quantity > 0) {
+                            MonksEnhancedJournal.emit("purchaseItem",
+                                {
+                                    shopid: entry.id,
+                                    actorid: actor.id,
+                                    itemid: id,
+                                    quantity: quantity,
+                                    user: game.user.id
+                                });
+                            return quantity;
                         }
-                    );
+                        return false;
+                    });
+                    return result;
                 }
             }
         }

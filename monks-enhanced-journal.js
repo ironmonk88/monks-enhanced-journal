@@ -1342,11 +1342,14 @@ export class MonksEnhancedJournal {
             if (entry && actor) {
                 const cls = (entry._getSheetClass ? entry._getSheetClass() : null);
                 if (cls && cls.purchaseItem) {
-                    cls.purchaseItem.call(cls, entry, data.itemid, actor, data.user);
+                    cls.purchaseItem.call(cls, entry, data.itemid, actor, data.quantity, data.user);
                     if (data.purchase === true) {
                         let item = (entry.getFlag('monks-enhanced-journal', 'items') || []).find(i => i._id == data.itemid);
-                        if (item)
-                            cls.actorPurchase(item, actor);
+                        if (item) {
+                            let price = cls.getPrice(item.data.cost);
+                            price.value = price.value * (data.quantity ?? 1);
+                            cls.actorPurchase(price, actor);
+                        }
                     }
                 }
             }
@@ -1479,6 +1482,7 @@ export class MonksEnhancedJournal {
             let action = message.getFlag('monks-enhanced-journal', 'action');
             if (action == "buy") {
                 accepted = true;
+                let msg = `<span class="request-msg"><i class="fas fa-check"></i> Item has been added to inventory</span>`;
                 //find the item
                 let msgitems = message.getFlag('monks-enhanced-journal', 'items');
                 for (let msgitem of msgitems) {
@@ -1491,6 +1495,7 @@ export class MonksEnhancedJournal {
                     if (parseInt(item.data[MonksEnhancedJournal.quantityname]) < msgitem.quantity) {
                         //check to see if there's enough quantity
                         ui.notifications.warn("Cannot transfer this item, not enough of this item remains.");
+                        msg = `<span class="request-msg"><i class="fas fa-times"></i> Cannot transfer this item, not enough of this item remains.</span>`
                         continue;
                     }
 
@@ -1500,6 +1505,7 @@ export class MonksEnhancedJournal {
                         //check if the player can afford it
                         if (!cls.canAfford((msgitem.sell * msgitem.quantity) + " " + msgitem.currency, actor)) {
                             ui.notifications.warn(`Cannot transfer this item, ${actor.name} cannot afford it.`);
+                            msg = `<span class="request-msg"><i class="fas fa-times"></i> Cannot transfer this item, ${actor.name} cannot afford it.</span>`;
                             continue;
                         }
                     }
@@ -1510,19 +1516,20 @@ export class MonksEnhancedJournal {
                         itemData = await cls.createScrollFromSpell(itemData);
                     }
                     itemData.data[MonksEnhancedJournal.quantityname] = msgitem.quantity;
-                    itemData.data[MonksEnhancedJournal.pricename] = msgitem.sell + " " + msgitem.currency;
+                    if (msgitem.sell > 0)
+                        itemData.data[MonksEnhancedJournal.pricename] = msgitem.sell + " " + msgitem.currency;
                     delete itemData._id;
                     actor.createEmbeddedDocuments("Item", [itemData]);
                     //deduct the gold
-                    cls.actorPurchase((msgitem.sell * msgitem.quantity) + " " + msgitem.currency, actor);
-                    cls.purchaseItem.call(cls, entry, item._id, actor, null, 'nochat');
+                    if (msgitem.sell > 0)
+                        cls.actorPurchase({ value: (msgitem.sell * msgitem.quantity), currency: msgitem.currency }, actor);
+                    cls.purchaseItem.call(cls, entry, item._id, actor, msgitem.quantity, null, 'nochat');
                 }
 
                 $('.request-buttons', content).remove();
                 $('input', content).remove();
                 $('.item-quantity span, .item-price span', content).removeClass('player-only').show();
-                $('.card-footer', content).html(`<span class="request-msg"><i class="fas fa-check"></i> Item has been added to inventory</span>`);
-
+                $('.card-footer', content).html(msg);
             } else if (action == "sell") {
                 if (game.user.isGM) {
                     offered = !offered;
@@ -1547,7 +1554,7 @@ export class MonksEnhancedJournal {
                             continue;
 
                         //give the player the money
-                        await cls.actorPurchase(-(msgitem.sell * msgitem.quantity) + " " + msgitem.currency, actor);
+                        await cls.actorPurchase({ value: -(msgitem.sell * msgitem.quantity), currency: msgitem.currency }, actor);
 
                         //remove the item from the actor
                         if (msgitem.quantity == msgitem.maxquantity) {
@@ -1604,7 +1611,7 @@ export class MonksEnhancedJournal {
         if (item == undefined)
             return;
 
-        let html = $(event.currentTarget).closest('ol.item-list');
+        let html = $(event.currentTarget).closest('ol.items-list');
 
         item.quantity = parseInt($(`li[data-id="${id}"] input[name="quantity"]`, html).val());
         let sell = $(`li[data-id="${id}"] input[name="sell"]`, html).val();
@@ -1614,6 +1621,7 @@ export class MonksEnhancedJournal {
         item.currency = price.currency;
         item.total = item.quantity * item.sell;
 
+        $(`li[data-id="${id}"] input[name="sell"]`, html).val(item.sell + ' ' + price.currency);
         $(`li[data-id="${id}"] .item-quantity span`, content).html(item.quantity);
         $(`li[data-id="${id}"] .item-price span`, content).html(item.sell + ' ' + price.currency);
         $(`li[data-id="${id}"] .item-total span`, content).html(item.total + ' ' + price.currency);
@@ -1927,8 +1935,14 @@ Hooks.on('dropActorSheetData', (actor, sheet, data) => {
         let entry = game.journal.get(data.journalid);
         const cls = (entry._getSheetClass ? entry._getSheetClass() : null);
         if (cls && cls.itemDropped) {
-            if (!cls.itemDropped.call(cls, data.id, actor, entry))
-                return false;
+            cls.itemDropped.call(cls, data.id, actor, entry).then((result) => {
+                if (!!result) {
+                    data.data.data.quantity = cls.setQuantity(data.data.data.quantity, result);
+                    sheet._onDropItem(null, data);
+                }
+            });
+
+            return false;
         }
     }
 });
@@ -2146,3 +2160,13 @@ Hooks.on("polyglot.ready", () => {
         $('<span>').attr('lang', k).css({ font: v }).appendTo(root);
     }
 });
+
+Hooks.on("renderItemSheet", (sheet, html, data) => {
+    if (data.options.addcost == true) {
+        let priceGroup = $('input[name="data.price"]', html).closest('.form-group');
+        $('<div>').addClass('form-group')
+            .append($('<label>').html("Cost"))
+            .append($('<input>').attr('type', 'text').attr('name', 'data.cost').attr('data-dtype', 'String').val(data.data.cost))
+            .insertAfter(priceGroup);
+    }
+})

@@ -1657,7 +1657,7 @@ height: fit-content;*/
 .monks-journal-sheet.sheet .person-container .items-list .item .item-name .item-image,
 .monks-journal-sheet.sheet .shop-container .relationships .items-list .item .item-name .item-image,
 .monks-journal-sheet.sheet .organization-container .items-list .item .item-name .item-image,
-.monks-journal-sheet.sheet .quest-container .items-list .item .item-name .item-image {
+.monks-journal-sheet.sheet .quest-container .relationships .items-list .item .item-name .item-image {
     flex: 0 0 70px;
     height: 70px;
     width: 70px;
@@ -2562,4 +2562,10 @@ a.picture-link.broken {
     font-style: normal;
     font-family: "Signika", sans-serif !important;
     box-shadow: inset 0px 0px 12px #6b3a0f87 !important;
+}
+
+.monks-enhanced-journal.request-item .items-list .item-name h4,
+.monks-enhanced-journal.request-sale .items-list .item-name h4 {
+    height: 27px;
+    line-height: 27px;
 }

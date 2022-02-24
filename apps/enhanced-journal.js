@@ -883,8 +883,20 @@ export class EnhancedJournal extends Application {
         }
     }
 
+    _canDragStart(selector) {
+        if (selector == ".journal-tab") return true;
+
+        if (this.subsheet)
+            return this.subsheet._canDragStart(selector);
+        else
+            return super._canDragStart(selector);
+    }
+
     _canDragDrop(selector) {
-        return this.subsheet._canDragDrop(selector);
+        if (this.subsheet)
+            return this.subsheet._canDragDrop(selector);
+        else
+            return super._canDragDrop(selector);
     }
 
     _onDragStart(event) {

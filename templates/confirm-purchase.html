@@ -8,9 +8,11 @@
         <div>
             <b>Quantity:</b> <input type="number" min="1" {{#if maxquantity}}max="{{maxquantity}}"{{/if}} step="1" name="quantity" style="width:50px;text-align:right;" value="{{quantity}}" /> {{#if maxquantity}}<i>(Max: {{maxquantity}})</i>{{/if}}
         </div>
+        {{#if total }}
         <div style="text-align:right;">
             <b>Total:</b> <span class="request-total">{{total}}</span>
         </div>
+        {{/if}}
     </div>
 </div>
 <hr />

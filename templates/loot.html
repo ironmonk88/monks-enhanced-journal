@@ -72,8 +72,10 @@
                 <li class="items-header flexrow">
                     <h3 class="item-name flexrow">{{localize 'MonksEnhancedJournal.Items'}}</h3>
                     <div class="item-controls item-from">{{localize 'MonksEnhancedJournal.From'}}</div>
+                    {{#if canRequest}}
                     <div class="item-controls item-requests">{{localize 'MonksEnhancedJournal.Requests'}}</div>
                     {{#if canGrant}}<div class="item-controls item-grant">{{localize 'MonksEnhancedJournal.Grant'}}</div>{{/if}}
+                    {{/if}}
                     <div class="item-controls item-quantity">{{localize 'MonksEnhancedJournal.Qty'}}</div>
                     {{#if showrequest}}<div class="item-controls flexrow"></div>{{/if}}
                     <div class="item-controls flexrow owner-only">
@@ -99,6 +101,7 @@
                                 <input type="text" name="items.{{this.id}}.from" value="{{this.from}}" />
                             </div>
 
+                            {{#if @root.canRequest}}
                             <div class="item-controls item-requests">
                                 <ul class="request-players">
                                     {{#each this.requests as |user i|}}
@@ -113,6 +116,7 @@
                                 <a class="item-control grant-item"><i class="fas fa-user-check"></i> {{localize 'MonksEnhancedJournal.Grant'}}</a>
                                 {{/if}}
                             </div>
+                            {{/if}}
                             {{/if}}
 
                             <div class="item-controls item-quantity">
