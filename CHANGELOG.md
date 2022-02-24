@@ -1,3 +1,9 @@
+# Version 1.0.47
+
+Fixed an issue with hiding inline links if the link is broken
+
+Added support for Swedish language, thank you Rangertheman
+
 # Version 1.0.46
 
 Added an interface to distribute coins a bit better.  You can set some characters to not receive a share by emptying out the string before splitting.  And you can now assign the leftovers to a single character in case your players want to keep a party fund.

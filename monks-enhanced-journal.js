@@ -572,7 +572,7 @@ export class MonksEnhancedJournal {
                     const collection = game.collections.get(type);
                     const doc = /^[a-zA-Z0-9]{16}$/.test(target) ? collection.get(target) : collection.getName(target);
 
-                    if (!doc.testUserPermission(game.user, "OBSERVER"))
+                    if (doc && !doc.testUserPermission(game.user, "OBSERVER"))
                         return document.createElement('span');
                 }
 
