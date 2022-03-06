@@ -45,7 +45,7 @@ export class PlaceSheet extends EnhancedJournalSheet {
     }
 
     get allowedRelationships() {
-        return ['organization', 'person', 'shop'];
+        return ['organization', 'person', 'shop', 'poi'];
     }
 
     async getData() {
@@ -73,11 +73,13 @@ export class PlaceSheet extends EnhancedJournalSheet {
                 item.name = entity.name;
                 item.img = entity.data.img;
 
-                if (entity.getFlag('monks-enhanced-journal', 'type') == "shop") {
+                if (entity.getFlag('monks-enhanced-journal', 'type') == "shop" || entity.getFlag('monks-enhanced-journal', 'type') == "poi") {
+                    item.shoptype = entity.getFlag("monks-enhanced-journal", "shoptype");
                     data.shops.push(item);
                 } else if (entity.getFlag('monks-enhanced-journal', 'type') == "organization") {
                     data.organizations.push(item);
                 } else {
+                    item.role = entity.getFlag("monks-enhanced-journal", "role");
                     data.townsfolk.push(item);
                 }
             }
@@ -112,6 +114,8 @@ export class PlaceSheet extends EnhancedJournalSheet {
         $('.item-action', html).on('click', this.alterItem.bind(this));
         $('.item-delete', html).on('click', $.proxy(this._deleteItem, this));
         $('.item-hide', html).on('click', this.alterItem.bind(this));
+
+        $('.item-relationship .item-field', html).on('change', this.alterRelationship.bind(this));
     }
 
     _getSubmitData(updateData = {}) {

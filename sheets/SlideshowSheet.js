@@ -11,6 +11,7 @@ export class SlideshowSheet extends EnhancedJournalSheet {
         return mergeObject(super.defaultOptions, {
             title: i18n("MonksEnhancedJournal.slideshow"),
             template: "modules/monks-enhanced-journal/templates/slideshow.html",
+            tabs: [{ navSelector: ".tabs", contentSelector: ".sheet-body", initial: "details" }],
             dragDrop: [
                 { dragSelector: ".slide", dropSelector: ".slide" },
                 { dragSelector: ".slide", dropSelector: ".slideshow-body" }
@@ -37,6 +38,8 @@ export class SlideshowSheet extends EnhancedJournalSheet {
         if (flags.state == undefined)
             flags.state = 'stopped';
         data.playing = (flags.state != 'stopped') || !this.object.isOwner;
+
+        data.effectOptions = MonksEnhancedJournal.effectTypes;
 
         let idx = 0;
         if (flags.slides) {
@@ -292,7 +295,7 @@ export class SlideshowSheet extends EnhancedJournalSheet {
             this.object.sound = undefined;
 
             if (flags.audiofile != undefined && flags.audiofile != '')
-                AudioHelper.play({ src: flags.audiofile, loop: true }).then((sound) => {
+                AudioHelper.play({ src: flags.audiofile, loop: flags.loopaudio }).then((sound) => {
                     this.object.sound = sound;
                     return sound;
                 });
@@ -316,6 +319,9 @@ export class SlideshowSheet extends EnhancedJournalSheet {
 
         if (refresh && flags.state == 'stopped')
             $('.slide-showing .slide', this.element).remove();
+        //add a loading slide
+        $('<div>').addClass('loading-slide slide').appendTo($('.slide-showing', this.element));
+
         this.playSlide(flags.slideAt, animate);
         //this.object.update({ 'flags.monks-enhanced-journal': this.object.data.flags["monks-enhanced-journal"] });
     }
@@ -337,10 +343,12 @@ export class SlideshowSheet extends EnhancedJournalSheet {
             this.object.data.flags['monks-enhanced-journal'].state = "paused";
         this.updateButtons.call(this);
 
-        //if (this.object.sound)
-        //    this.object.sound.pause();
-
-        //this.object.update({ 'flags.monks-enhanced-journal': this.object.data.flags["monks-enhanced-journal"] });
+        if (this.object.slidesound?.src != undefined) {
+            if (game.user.isGM)
+                MonksEnhancedJournal.emit("stopSlideAudio");
+            this.object.slidesound.stop();
+            delete this.object.slidesound;
+        }
     }
 
     async stopSlideshow() {
@@ -366,9 +374,15 @@ export class SlideshowSheet extends EnhancedJournalSheet {
 
         if (this.object.sound?.src != undefined) {
             if (game.user.isGM)
-                game.socket.emit("stopAudio", { src: flags.audiofile });
+                MonksEnhancedJournal.emit("stopSlideshowAudio");
             this.object.sound.stop();
             this.object.sound = undefined;
+        }
+        if (this.object.slidesound?.src != undefined) {
+            if (game.user.isGM)
+                MonksEnhancedJournal.emit("stopSlideAudio");
+            this.object.slidesound.stop();
+            this.object.slidesound = undefined;
         }
 
         //inform players
@@ -403,57 +417,124 @@ export class SlideshowSheet extends EnhancedJournalSheet {
         //remove any that are still on the way out
         $('.slide-showing .slide.out', this.element).remove();
 
-        if (animate) {
-            //remove any old slides
-            let oldSlide = $('.slide-showing .slide', this.element);
-            oldSlide.addClass('out').animate({ opacity: 0 }, 1000, 'linear', function () { $(this).remove() });
+        let effect = (slide.transition?.effect == 'fade' ? null : slide.transition?.effect) || this.object.data.flags['monks-enhanced-journal'].transition?.effect || 'none';
 
-            //bring in the new slide
-            let newSlide = MonksEnhancedJournal.createSlide(slide);
-            $('.slide-textarea', newSlide).css({ 'font-size': '25px' });
-            $('.slide-showing', this.element).append(newSlide);
-            newSlide.css({ opacity: 0 }).animate({ opacity: 1 }, 1000, 'linear');
+        //remove any old slides
+        $('.slide-showing .slide', this.element).addClass('out');
+
+        //bring in the new slide
+        let newSlide = MonksEnhancedJournal.createSlide(slide);
+        $('.slide-textarea', newSlide).css({ 'font-size': '25px' });
+        $('.slide-showing', this.element).append(newSlide);
+
+        var img = $('.slide-image', newSlide);
+
+        function loaded() {
+            newSlide.removeClass('loading');
+            $('.slide-showing .loading-slide', this.element).remove();
+            if (animate && effect != 'none' && $('.slide-showing .slide.out', that.element).length) {
+                let realeffect = effect;
+                if (effect == 'slide-bump-left') {
+                    realeffect = 'slide-slide-left';
+                    $('.slide-showing .slide.out', that.element).addClass('slide-slide-out-right');
+                } else if (effect == 'slide-bump-right') {
+                    realeffect = 'slide-slide-right';
+                    $('.slide-showing .slide.out', that.element).addClass('slide-slide-out-left');
+                } else if (effect == 'slide-flip') {
+                    realeffect = 'slide-flip-in';
+                    $('.slide-showing .slide.out', that.element).addClass('slide-flip-out');
+                } else if (effect == 'slide-page-turn') {
+                    realeffect = '';
+                    $('.slide-showing .slide.out', that.element).addClass('slide-page-out');
+                    newSlide.css({ opacity: 1 });
+                }
+                newSlide.addClass(realeffect).on('animationend webkitAnimationEnd oAnimationEnd MSAnimationEnd', function (evt) {
+                    if ($(evt.target).hasClass('slide')) {
+                        $('.slide-showing .slide.out', that.element).remove();
+                        newSlide.removeClass(realeffect);
+                        if (that.object.slidesound?.src != undefined) {
+                            if (game.user.isGM)
+                                MonksEnhancedJournal.emit("stopSlideAudio");
+                            that.object.slidesound.stop();
+                            that.object.slidesound = undefined;
+                        }
+                        if (slide.audiofile != undefined && slide.audiofile != '') {
+                            AudioHelper.play({ src: slide.audiofile, loop: false }).then((sound) => {
+                                that.object.slidesound = sound;
+                                return sound;
+                            });
+                        }
+                    }
+                });
+            } else {
+                newSlide.css({ opacity: 1 });
+                $('.slide-showing .slide.out', this.element).remove();
+                if (that.object.slidesound?.src != undefined) {
+                    if (game.user.isGM)
+                        MonksEnhancedJournal.emit("stopSlideAudio");
+                    that.object.slidesound.stop();
+                    that.object.slidesound = undefined;
+                }
+                if (slide.audiofile != undefined && slide.audiofile != '') {
+                    AudioHelper.play({ src: slide.audiofile, loop: false }).then((sound) => {
+                        that.object.slidesound = sound;
+                        return sound;
+                    });
+                }
+            }
+
+            $(`.slideshow-body .slide:eq(${idx})`, this.element).addClass('active').siblings().removeClass('active');
+            $('.slideshow-body', this.element).scrollLeft((idx * 116));
+            $('.slide-showing .duration', this.element).empty();
+
+            if (this.object?._currentSlide?.transition?.timer)
+                window.clearTimeout(this.object?._currentSlide?.transition?.timer);
+
+            let duration = slide.transition?.duration || this.object.data.flags['monks-enhanced-journal'].transition?.duration || 0;
+            if (duration > 0) {
+                //set up the transition
+                let time = duration * 1000;
+                slide.transition.startTime = (new Date()).getTime();
+                slide.transition.timer = window.setTimeout(function () {
+                    if (that.object.getFlag("monks-enhanced-journal", "state") == 'playing')
+                        that.advanceSlide.call(that, 1);
+                }, time);
+                $('.slide-showing .duration', this.element).append($('<div>').addClass('duration-bar').css({ width: '0' }).show().animate({ width: '100%' }, time, 'linear'));
+            } else {
+                $('.slide-showing .duration', this.element).append($('<div>').addClass('duration-label').html(i18n("MonksEnhancedJournal.ClickForNext")));
+            }
+
+            for (let text of slide.texts) {
+                if ($.isNumeric(text.fadein)) {
+                    let fadein = text.fadein + (effect != 'none' ? 1 : 0);
+                    $('.slide-showing .slide-text[data-id="' + text.id + '"]', MonksEnhancedJournal.slideshow?.element)
+                        .css({ 'animation-delay': fadein + 's' })
+                        .addClass('text-fade-in')
+                        .on('animationend webkitAnimationEnd oAnimationEnd MSAnimationEnd', function () {
+                            if ($.isNumeric(text.fadeout)) {
+                                $(this).css({ 'animation-delay': text.fadeout + 's' }).removeClass('text-fade-in').addClass('text-fade-out');
+                            }
+                        });
+                } else if ($.isNumeric(text.fadeout)) {
+                    let fadeout = ($.isNumeric(text.fadein) ? text.fadein : 0) + (effect != 'none' ? 1 : 0) + text.fadeout;
+                    $('.slide-showing .slide-text[data-id="' + text.id + '"]', MonksEnhancedJournal.slideshow?.element).css({ 'animation-delay': fadeout + 's' }).addClass('text-fade-out');
+                }
+            }
+
+            this.object._currentSlide = slide;
+
+            if (game.user.isGM)
+                MonksEnhancedJournal.emit('playSlide', { id: this.object.id, idx: idx });
         }
 
-        $(`.slideshow-body .slide:eq(${idx})`, this.element).addClass('active').siblings().removeClass('active');
-        $('.slideshow-body', this.element).scrollLeft((idx * 116));
-        $('.slide-showing .duration', this.element).empty();
-
-        if (this.object?._currentSlide?.transition?.timer)
-            window.clearTimeout(this.object?._currentSlide?.transition?.timer);
-
-        if (slide.transition?.duration > 0) {
-            //set up the transition
-            let time = slide.transition.duration * 1000;
-            slide.transition.startTime = (new Date()).getTime();
-            slide.transition.timer = window.setTimeout(function () {
-                if (that.object.getFlag("monks-enhanced-journal", "state") == 'playing')
-                    that.advanceSlide.call(that, 1);
-            }, time);
-            $('.slide-showing .duration', this.element).append($('<div>').addClass('duration-bar').css({ width: '0' }).show().animate({ width: '100%' }, time, 'linear'));
+        if (img[0].complete) {
+            loaded.call(this);
         } else {
-            $('.slide-showing .duration', this.element).append($('<div>').addClass('duration-label').html(i18n("MonksEnhancedJournal.ClickForNext")));
+            img.on('load', loaded.bind(this))
+            img.on('error', function () {
+                loaded.call(this);
+            })
         }
-
-        for (let text of slide.texts) {
-            if ($.isNumeric(text.fadein)) {
-                window.setTimeout(() => {
-                    if (that.object.getFlag("monks-enhanced-journal", "state") == 'playing')
-                        $('.slide-showing .slide-text[data-id="' + text.id + '"]', this.element).animate({ opacity: 1 }, 500, 'linear');
-                }, text.fadein * 1000);
-            }
-            if ($.isNumeric(text.fadeout)) {
-                window.setTimeout(() => {
-                    if (that.object.getFlag("monks-enhanced-journal", "state") == 'playing')
-                        $('.slide-showing .slide-text[data-id="' + text.id + '"]', this.element).animate({ opacity: 0 }, 500, 'linear');
-                }, text.fadeout * 1000);
-            }
-        }
-
-        this.object._currentSlide = slide;
-
-        if(game.user.isGM)
-            MonksEnhancedJournal.emit('playSlide', { id: this.object.id, idx: idx });
     }
 
     advanceSlide(dir, event) {

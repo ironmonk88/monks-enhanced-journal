@@ -193,6 +193,8 @@ export class QuestSheet extends EnhancedJournalSheet {
 
         $('.items-list .actor-icon', html).click(this.openRelationship.bind(this));
 
+        $('.item-relationship .item-field', html).on('change', this.alterRelationship.bind(this));
+
         const actorOptions = this._getPersonActorContextOptions();
         if (actorOptions) new ContextMenu($(html), ".actor-img", actorOptions);
     }

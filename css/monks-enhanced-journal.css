@@ -1003,6 +1003,7 @@ height: fit-content;*/
     padding-right: 8px;
 }
 
+/*
 .monks-journal-sheet .slideshow-container .slideshow-settings {
     overflow: hidden;
     flex: 0 0 72px;
@@ -1012,11 +1013,24 @@ height: fit-content;*/
 
 .monks-journal-sheet .slideshow-container.playing .slideshow-settings {
     flex: 0 0 0px;
+}*/
+
+.monks-journal-sheet .slideshow-container.playing .sheet-navigation,
+.monks-journal-sheet .slideshow-container.playing .tab.details{
+    display:none;
+}
+
+.monks-journal-sheet .slideshow-container.playing .tab.slides{
+    display:block;
+}
+
+.monks-journal-sheet .slideshow-container .slide-details > * {
+    flex-grow: 0;
 }
 
 .monks-journal-sheet .slideshow-container:not(.playing) .slide-showing {
     flex: 1;
-    opacity:0;
+    opacity: 0;
     transition: opacity 0.3s ease-out;
 }
 
@@ -1027,6 +1041,9 @@ height: fit-content;*/
     height: calc(100% - 35px);
     width: 100%;
     position: relative;
+    overflow: hidden;
+    perspective: 2000px;
+    -webkit-perspective: 2000px;
 }
 
 .monks-journal-sheet .slideshow-container .slideshow-body-outer {
@@ -1034,7 +1051,7 @@ height: fit-content;*/
     overflow: hidden;
     max-height: 100%;
     position: absolute;
-    top: 110px;
+    top: 70px;
     bottom: 0px;
     width: 100%;
     transition: top 0.3s ease-out;
@@ -1119,6 +1136,17 @@ height: fit-content;*/
     top: 0px;
     left: 0px;
     margin: 0px;
+    z-index: 5;
+}
+
+.monks-journal-sheet .slideshow-container .slide-showing .slide.loading,
+#slideshow-canvas .slideshow-container .slide-showing .slide.loading {
+    display:none;
+}
+
+.monks-journal-sheet .slideshow-container .slide-showing .slide:last-child,
+#slideshow-canvas .slideshow-container .slide-showing .slide:last-child {
+    z-index: 10;
 }
 
 .monks-journal-sheet .slideshow-container.playing .add-slide{
@@ -1365,15 +1393,18 @@ height: fit-content;*/
 
 .monks-journal-sheet.sheet .editor .tox-toolbar-overlord {
     background-color: rgba(255, 255, 255, 0.4);
-} 
+}
 
-.slide-sheet .form-header {
+.slide-sheet .form-header,
+.slideshow-container .form-header {
     border-top: 1px solid #b5b3a4;
     border-bottom: 1px solid #f0f0e0;
     margin-bottom: 5px;
-} 
+    padding: 0;
+}
 
-.slide-sheet .form-header h3 {
+.slide-sheet .form-header h3,
+.slideshow-container .form-header h3 {
     line-height: 28px;
     margin: 0;
     border-top: 1px solid #f0f0e0;
@@ -1657,6 +1688,7 @@ height: fit-content;*/
 .monks-journal-sheet.sheet .person-container .items-list .item .item-name .item-image,
 .monks-journal-sheet.sheet .shop-container .relationships .items-list .item .item-name .item-image,
 .monks-journal-sheet.sheet .organization-container .items-list .item .item-name .item-image,
+.monks-journal-sheet.sheet .poi-container .items-list .item .item-name .item-image,
 .monks-journal-sheet.sheet .quest-container .relationships .items-list .item .item-name .item-image {
     flex: 0 0 70px;
     height: 70px;
@@ -1674,6 +1706,7 @@ height: fit-content;*/
 .monks-journal-sheet.sheet .person-container .items-list > li input,
 .monks-journal-sheet.sheet .place-container .items-list > li input,
 .monks-journal-sheet.sheet .organization-container .items-list > li input,
+.monks-journal-sheet.sheet .poi-container .items-list > li input,
 .monks-journal-sheet.sheet .quest-container .items-list > li input,
 .monks-journal-sheet.sheet .distribute-container .item-list > li input {
     border-color: transparent;
@@ -1684,6 +1717,7 @@ height: fit-content;*/
 .monks-journal-sheet.sheet .person-container .items-list > li input:hover,
 .monks-journal-sheet.sheet .place-container .items-list > li input:hover,
 .monks-journal-sheet.sheet .organization-container .items-list > li input:hover,
+.monks-journal-sheet.sheet .poi-container .items-list > li input:hover,
 .monks-journal-sheet.sheet .quest-container .items-list > li input:hover,
 .monks-journal-sheet.sheet .distribute-container .item-list > li input:hover{
     border-color: unset;
@@ -1951,6 +1985,10 @@ height: fit-content;*/
     list-style: none;
     margin: 0;
     padding: 0;
+}
+
+.scene-sheet .journal-list {
+    max-height: 250px;
 }
 
 .journal-select.open .journal-list,

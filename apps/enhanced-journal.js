@@ -264,7 +264,7 @@ export class EnhancedJournal extends Application {
             }
 
             if (this.object.data.type != 'blank')
-                Hooks.callAll('renderJournalSheet', this.subsheet, contentform, this.object);
+                Hooks.callAll('renderJournalSheet', this.subsheet, contentform, templateData); //this.object);
 
             this.activateControls($('#journal-buttons', this.element).empty());
 

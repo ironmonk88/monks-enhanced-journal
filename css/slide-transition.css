@@ -1,0 +1,244 @@
+:root {
+    --animate-duration: 1s;
+    --animate-delay: 1s;
+    --animate-repeat: 1;
+}
+
+.animate-slide {
+    animation-duration: 1s;
+    animation-duration: var(--animate-duration);
+    animation-fill-mode: both;
+    animation-iteration-count: 1;
+}
+
+@keyframes textFadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes textFadeOut {
+    from { opacity: 1; }
+    to { opacity: 0; }
+}
+
+.text-fade-in,
+.text-fade-out {
+    animation-duration: 0.5s;
+    animation-iteration-count: 1;
+    animation-fill-mode: both;
+}
+.text-fade-in {
+    animation-name: textFadeIn;
+}
+.text-fade-out {
+    animation-name: textFadeOut;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+.slide-fade {
+    animation-name: fadeIn;
+}
+
+@keyframes fadeInLeft {
+    from {
+        opacity: 0;
+        transform: translate3d(-100%, 0, 0);
+    }
+
+    to {
+        opacity: 1;
+        transform: translate3d(0, 0, 0);
+    }
+}
+
+.slide-fade-left {
+    animation-name: fadeInLeft;
+}
+
+@keyframes fadeInRight {
+    from {
+        opacity: 0;
+        transform: translate3d(100%, 0, 0);
+    }
+
+    to {
+        opacity: 1;
+        transform: translate3d(0, 0, 0);
+    }
+}
+
+.slide-fade-right {
+    animation-name: fadeInRight;
+}
+
+@keyframes zoomIn {
+    from {
+        opacity: 0;
+        transform: scale3d(0.3, 0.3, 0.3);
+    }
+
+    80% {
+        opacity: 1;
+    }
+}
+
+.slide-zoom-in {
+    animation-name: zoomIn;
+}
+
+@keyframes slideInLeft {
+    from {
+        transform: translate3d(-100%, 0, 0);
+    }
+
+    to {
+        transform: translate3d(0, 0, 0);
+    }
+}
+
+.slide-slide-left {
+    animation-name: slideInLeft;
+}
+
+@keyframes slideInRight {
+    from {
+        transform: translate3d(100%, 0, 0);
+    }
+
+    to {
+        transform: translate3d(0, 0, 0);
+    }
+}
+
+.slide-slide-right {
+    animation-name: slideInRight;
+}
+
+@keyframes slideOutLeft {
+    from {
+        transform: translate3d(0, 0, 0);
+    }
+
+    to {
+        transform: translate3d(-100%, 0, 0);
+    }
+}
+
+.slide-slide-out-left {
+    animation-name: slideOutLeft;
+}
+
+@keyframes slideOutRight {
+    from {
+        transform: translate3d(0, 0, 0);
+    }
+
+    to {
+        transform: translate3d(100%, 0, 0);
+    }
+}
+
+.slide-slide-out-right {
+    animation-name: slideOutRight;
+}
+
+@keyframes rotateIn {
+    from {
+        transform: rotate3d(0, 0, 1, -200deg);
+        opacity: 0;
+    }
+
+    to {
+        transform: translate3d(0, 0, 0);
+        opacity: 1;
+    }
+}
+
+.slide-rotate {
+    animation-name: rotateIn;
+    transform-origin: center;
+}
+
+@keyframes hingeIn {
+    from {
+        transform: rotate3d(0, 0, 1, -45deg);
+        opacity: 0;
+    }
+
+    to {
+        transform: translate3d(0, 0, 0);
+        opacity: 1;
+    }
+}
+
+.slide-hinge {
+    animation-name: hingeIn;
+    transform-origin: bottom left;
+}
+
+@keyframes flipIn {
+    from {
+        transform: rotateY(180deg);
+    }
+
+    to {
+        transform: rotateY(360deg);
+    }
+}
+
+.slide-flip-in {
+    animation-name: flipIn;
+    transform-style: preserve-3d;
+    backface-visibility: hidden;
+}
+
+@keyframes flipOut {
+    from {
+        transform: rotateY(0deg);
+        z-index: 20;
+        
+    }
+
+    50% {
+        z-index: 10;
+    }
+
+    to {
+        transform: rotateY(180deg);
+    }
+}
+
+.slide-flip-out {
+    animation-name: flipOut;
+    backface-visibility: hidden;
+    transform-style: preserve-3d;
+}
+
+@keyframes pageOut {
+    from {
+        transform: rotateY(360deg);
+        z-index: 25;
+    }
+
+    to {
+        transform: rotateY(270deg);
+        z-index: 25;
+    }
+}
+
+.slide-page-out {
+    animation-name: pageOut;
+    transform-origin: 0% 50%;
+    z-index: 25;
+    transform-style: preserve-3d;
+    backface-visibility: hidden;
+}

@@ -129,7 +129,7 @@
   "MonksEnhancedJournal.Justification": "Justification",
   "MonksEnhancedJournal.VAlign": "V-Align",
   "MonksEnhancedJournal.Transition": "Transition",
-  "MonksEnhancedJournal.Duration": "Duration",
+  "MonksEnhancedJournal.Duration": "Slide Duration",
   "MonksEnhancedJournal.SlideshowName": "Slideshow Name",
   "MonksEnhancedJournal.ShowAs": "Show As",
   "MonksEnhancedJournal.AudioFile": "Audio File",
@@ -241,6 +241,8 @@
   "MonksEnhancedJournal.Players": "Players",
   "MonksEnhancedJournal.Offer": "Offer",
   "MonksEnhancedJournal.RemoveRelationship": "Remove Relationship",
+  "MonksEnhancedJournal.Audio": "Audio",
+  "MonksEnhancedJournal.Slides": "Slides",
 
   "MonksEnhancedJournal.Contain": "Contain",
   "MonksEnhancedJournal.Cover": "Cover",

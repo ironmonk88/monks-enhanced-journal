@@ -3,51 +3,94 @@
         <i class="fas fa-photo-video sheet-icon"></i>
         <input name="name" type="text" value="{{data.name}}" placeholder="{{localize 'MonksEnhancedJournal.SlideshowName'}}">
         <div class="slideshow-buttons flexrow">
-            <div class="nav-button play" title="Play" {{#if (eq data.flags.monks-enhanced-journal.state "playing")}}style="display:none;"{{/if}}><i class="fas fa-play"></i></div>
-            <div class="nav-button pause" title="Pause" {{#if (ne data.flags.monks-enhanced-journal.state "playing")}}style="display:none;"{{/if}}><i class="fas fa-pause"></i></div>
-            <div class="nav-button stop" title="Stop" {{#if (eq data.flags.monks-enhanced-journal.state "stopped")}}style="display:none;"{{/if}}><i class="fas fa-stop"></i></div>
+            <div class="nav-button play" title="Play" {{#if (eq data.flags.monks-enhanced-journal.state "playing")}} style="display:none;" {{/if}}><i class="fas fa-play"></i></div>
+            <div class="nav-button pause" title="Pause" {{#if (ne data.flags.monks-enhanced-journal.state "playing")}} style="display:none;" {{/if}}><i class="fas fa-pause"></i></div>
+            <div class="nav-button stop" title="Stop" {{#if (eq data.flags.monks-enhanced-journal.state "stopped")}} style="display:none;" {{/if}}><i class="fas fa-stop"></i></div>
         </div>
     </div>
-    <div class="flexcol slideshow-settings">
-        <div class="form-group" style="flex: 0 0 30px;">
-            <label for="flags.monks-enhanced-journal.showas">{{localize 'MonksEnhancedJournal.ShowAs'}}</label>
-            <div class="form-fields">
-                <select name="flags.monks-enhanced-journal.showas">
-                    {{ selectOptions showasOptions selected=data.flags.monks-enhanced-journal.showas }}
-                </select>
-            </div>
-            <label style="padding-left:20px;">{{localize 'MonksEnhancedJournal.Loop'}}</label>
-            <input type="checkbox" name="flags.monks-enhanced-journal.loop" {{checked data.flags.monks-enhanced-journal.loop}}>
-        </div>
-        <div class="form-group" style="flex: 0 0 30px;">
-            <label for="audiofile">{{localize 'MonksEnhancedJournal.AudioFile'}}</label>
-            <div class="form-fields">
-                {{ filePicker type="audio" target="flags.monks-enhanced-journal.audiofile" }}
-                <input class="image" style="border-color:#7a7971;" type="text" name="flags.monks-enhanced-journal.audiofile" placeholder="path/audio.mp3" value="{{data.flags.monks-enhanced-journal.audiofile}}">
-            </div>
-        </div>
-    </div>
-    <div class="slide-showing">
-        <div class="duration"></div>
-    </div>
-    <div class="slideshow-body-outer">
-        <div class="slideshow-body">
-            {{#each slides}}
-            <div class="slide{{#if this.active}} active{{/if}}" data-slide-id="{{this.id}}">
-                <div class="slide-inner">
-                    <div class="slide-background"><div style="{{this.background}}"></div></div>
-                    <img class="slide-image" src="{{this.img}}" style="object-fit:{{this.sizing}}" />
-                    <div class="slide-textarea flexcol">
-                        {{#each this.texts}}
-                        <div class="slide-text" data-id="{{this.id}}" style="{{this.style}}">{{this.text}}</div>
-                        {{/each}}
+    <nav class="sheet-navigation tabs" data-group="primary">
+        <a class="item" data-tab="details">{{localize 'MonksEnhancedJournal.Details'}}</a>
+        <a class="item" data-tab="slides">{{localize 'MonksEnhancedJournal.Slides'}}</a>
+    </nav>
+    <section class="sheet-body half-size">
+        <div class="tab details active" data-group="primary" data-tab="details">
+            <div class="tab-inner slide-details flexcol">
+                <div class="form-group">
+                    <label for="flags.monks-enhanced-journal.showas">{{localize 'MonksEnhancedJournal.ShowAs'}}</label>
+                    <div class="form-fields">
+                        <select name="flags.monks-enhanced-journal.showas">
+                            {{ selectOptions showasOptions selected=data.flags.monks-enhanced-journal.showas }}
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>{{localize 'MonksEnhancedJournal.Loop'}}</label>
+                    <div class="form-fields" style="justify-content:flex-end;">
+                        <input type="checkbox" name="flags.monks-enhanced-journal.loop" {{checked data.flags.monks-enhanced-journal.loop}}>
+                    </div>
+                </div>
+                <header class="form-header" style="font-size:16px;">
+                    <h3><i class="fas fa-music"></i> {{localize 'MonksEnhancedJournal.Audio'}}</h3>
+                </header>
+                <div class="form-group">
+                    <label for="audiofile">{{localize 'MonksEnhancedJournal.AudioFile'}}</label>
+                    <div class="form-fields">
+                        {{ filePicker type="audio" target="flags.monks-enhanced-journal.audiofile" }}
+                        <input class="image" style="border-color:#7a7971;" type="text" name="flags.monks-enhanced-journal.audiofile" placeholder="path/audio.mp3" value="{{data.flags.monks-enhanced-journal.audiofile}}">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>{{localize 'MonksEnhancedJournal.Loop'}}</label>
+                    <div class="form-fields" style="justify-content:flex-end;">
+                        <input type="checkbox" name="flags.monks-enhanced-journal.loopaudio" {{checked data.flags.monks-enhanced-journal.loopaudio}}>
+                    </div>
+                </div>
+                <header class="form-header" style="font-size:16px;">
+                    <h3><i class="fas fa-running"></i> {{localize 'MonksEnhancedJournal.Transition'}}</h3>
+                </header>
+                <div class="form-group">
+                    <label for="transition.effect">{{localize 'MonksEnhancedJournal.Effect'}}</label>
+                    <div class="form-fields">
+                        <select name="flags.monks-enhanced-journal.transition.effect">
+                            {{ selectOptions effectOptions selected=data.flags.monks-enhanced-journal.transition.effect }}
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="transition.duration">{{localize 'MonksEnhancedJournal.Duration'}}</label>
+                    <div class="form-fields" style="justify-content:flex-end;">
+                        <input type="number" name="flags.monks-enhanced-journal.transition.duration" value="{{data.flags.monks-enhanced-journal.transition.duration}}" style="height: 28px; flex: 0 0 60px; text-align: right;">
+                        <label style="flex: 0 0 60px;">seconds</label>
                     </div>
                 </div>
             </div>
-            {{/each}}
-            <div class="add-slide">
-                <i class="fas fa-plus"></i>
+        </div>
+        <div class="tab slides" data-group="primary" data-tab="slides">
+            <div class="tab-inner flexcol">
+                <div class="slide-showing">
+                    <div class="duration"></div>
+                </div>
+                <div class="slideshow-body-outer">
+                    <div class="slideshow-body">
+                        {{#each slides}}
+                        <div class="slide{{#if this.active}} active{{/if}}" data-slide-id="{{this.id}}">
+                            <div class="slide-inner">
+                                <div class="slide-background"><div style="{{this.background}}"></div></div>
+                                <img class="slide-image" src="{{this.img}}" style="object-fit:{{this.sizing}}" />
+                                <div class="slide-textarea flexcol">
+                                    {{#each this.texts}}
+                                    <div class="slide-text" data-id="{{this.id}}" style="{{this.style}}">{{this.text}}</div>
+                                    {{/each}}
+                                </div>
+                            </div>
+                        </div>
+                        {{/each}}
+                        <div class="add-slide">
+                            <i class="fas fa-plus"></i>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
+    </section>
 </form>

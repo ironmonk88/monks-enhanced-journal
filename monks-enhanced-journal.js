@@ -92,6 +92,24 @@ export class MonksEnhancedJournal {
         };
     }
 
+    static get effectTypes() {
+        return {
+            'none': "None",
+            'slide-fade': "Fade in",
+            'slide-fade-left': "Fade in Left",
+            'slide-fade-right': "Fade in Right",
+            'slide-zoom-in': "Zoom in",
+            'slide-slide-left': "Slide In Left",
+            'slide-slide-right': "Slide In Right",
+            'slide-bump-left': "Bump Left",
+            'slide-bump-right': "Bump Right",
+            'slide-rotate': "Rotate In",
+            'slide-hinge': "Hinge In",
+            'slide-flip': "Flip In",
+            'slide-page-turn': "Page Turn"
+        };
+    }
+
     static emit(action, args = {}) {
         args.action = action;
         args.senderId = game.user.id;
@@ -370,6 +388,28 @@ export class MonksEnhancedJournal {
             const oldOnCreate = JournalEntry.prototype._onCreate;
             JournalEntry.prototype._onCreate = function (event) {
                 return createJournalEntry.call(this, oldOnCreate.bind(this), ...arguments);
+            }
+        }
+
+        let sceneActivate = function (wrapped, ...args) {
+            if (this.journal && this.journal.type == 'slideshow') {
+                if (game.user.isGM) {
+                    //start slideshow for everyone
+                    const cls = (this.journal._getSheetClass ? this.journal._getSheetClass() : null);
+                    const sheet = new cls(this.journal, { render: false });
+                    if (sheet.playSlideshow)
+                        sheet.playSlideshow();
+                }
+            }
+            return wrapped(...args);
+        }
+
+        if (game.modules.get("lib-wrapper")?.active) {
+            libWrapper.register("monks-enhanced-journal", "Scene.prototype.activate", sceneActivate, "WRAPPER");
+        } else {
+            const oldSceneActivate = Scene.prototype.activate;
+            Scene.prototype.activate = function (event) {
+                return sceneActivate.call(this, oldSceneActivate.bind(this), ...arguments);
             }
         }
 
@@ -1043,6 +1083,7 @@ export class MonksEnhancedJournal {
     }
 
     static onMessage(data) {
+        log('message', data);
         MonksEnhancedJournal[data.action].call(MonksEnhancedJournal, data);
     }
 
@@ -1089,6 +1130,20 @@ export class MonksEnhancedJournal {
         }
     }
 
+    static async stopSlideshowAudio(data) {
+        if (MonksEnhancedJournal.slideshow?.sound?.src != undefined) {
+            MonksEnhancedJournal.slideshow.sound.stop();
+            MonksEnhancedJournal.slideshow.sound = undefined;
+        }
+    }
+
+    static async stopSlideAudio(data) {
+        if (MonksEnhancedJournal.slideshow?.slidesound?.src != undefined) {
+            MonksEnhancedJournal.slideshow.slidesound.stop();
+            MonksEnhancedJournal.slideshow.slidesound = undefined;
+        }
+    }
+
     static async playSlideshow(data) {
         if (!game.user.isGM) {
             //clear any old ones
@@ -1125,11 +1180,14 @@ export class MonksEnhancedJournal {
                 MonksEnhancedJournal.slideshow.element.addClass('active');
 
                 if (MonksEnhancedJournal.slideshow.content.audiofile != undefined && MonksEnhancedJournal.slideshow.content.audiofile != '' && MonksEnhancedJournal.slideshow.sound == undefined)
-                    AudioHelper.play({ src: MonksEnhancedJournal.slideshow.content.audiofile, loop: true }).then((sound) => {
+                    AudioHelper.play({ src: MonksEnhancedJournal.slideshow.content.audiofile, loop: MonksEnhancedJournal.slideshow.content.loopaudio }).then((sound) => {
                         if (MonksEnhancedJournal.slideshow)
                             MonksEnhancedJournal.slideshow.sound = sound;
                         return sound;
                     });
+
+                MonksEnhancedJournal.slideshow.playing = true;
+                MonksEnhancedJournal.slideshow.slideAt = -1;
 
                 if (data.idx != undefined)
                     MonksEnhancedJournal.playSlide(data);
@@ -1147,34 +1205,103 @@ export class MonksEnhancedJournal {
             if (MonksEnhancedJournal.slideshow.element == undefined) {
                 MonksEnhancedJournal.slideshow.callback = data;
             } else {
-                let slide = MonksEnhancedJournal.slideshow.content.slides[data.idx];
+                if (MonksEnhancedJournal.slideshow.slideAt == data.idx)
+                    return;
+
+                MonksEnhancedJournal.slideshow.slideAt = data.idx;
+                let slide = MonksEnhancedJournal.slideshow.slide = MonksEnhancedJournal.slideshow.content.slides[data.idx];
 
                 //remove any that are still on the way out
                 $('.slide-showing .slide.out', MonksEnhancedJournal.slideshow.element).remove();
 
                 //remove any old slides
-                let oldSlide = $('.slide-showing .slide', MonksEnhancedJournal.slideshow.element);
-                oldSlide.addClass('out').animate({ opacity: 0 }, 1000, 'linear', function () { $(this).remove() });
+                $('.slide-showing .slide', MonksEnhancedJournal.slideshow.element).addClass('out');
 
                 //bring in the new slide
+                let effect = (slide.transition?.effect == 'fade' ? null : slide.transition?.effect) || MonksEnhancedJournal.slideshow?.content?.transition?.effect || 'none';
+
                 let newSlide = MonksEnhancedJournal.createSlide(slide);
                 $('.slide-textarea', newSlide).css({ 'font-size': '48px' });
                 $('.slide-showing', MonksEnhancedJournal.slideshow.element).append(newSlide);
-                if (newSlide)
-                    newSlide.css({ opacity: 0 }).animate({ opacity: 1 }, 1000, 'linear');
+                if (newSlide) {
+                    var img = $('.slide-image', newSlide);
 
-                for (let text of slide.texts) {
-                    if ($.isNumeric(text.fadein)) {
-                        window.setTimeout(function () {
-                            if (MonksEnhancedJournal.slideshow)
-                                $('.slide-showing .slide-text[data-id="' + text.id + '"]', MonksEnhancedJournal.slideshow?.element).animate({ opacity: 1 }, 500, 'linear');
-                        }, text.fadein * 1000);
+                    function loaded() {
+                        newSlide.removeClass('loading');
+                        if (effect != 'none' && $('.slide-showing .slide.out', MonksEnhancedJournal.slideshow.element).length) {
+                            let realeffect = effect;
+                            if (effect == 'slide-bump-left') {
+                                realeffect = 'slide-slide-left';
+                                $('.slide-showing .slide.out', MonksEnhancedJournal.slideshow.element).addClass('slide-slide-out-right');
+                            } else if (effect == 'slide-bump-right') {
+                                realeffect = 'slide-slide-right';
+                                $('.slide-showing .slide.out', MonksEnhancedJournal.slideshow.element).addClass('slide-slide-out-left');
+                            } else if (effect == 'slide-flip') {
+                                realeffect = 'slide-flip-in';
+                                $('.slide-showing .slide.out', MonksEnhancedJournal.slideshow.element).addClass('slide-flip-out');
+                            } else if (effect == 'slide-page-turn') {
+                                realeffect = '';
+                                $('.slide-showing .slide.out', MonksEnhancedJournal.slideshow.element).addClass('slide-page-out');
+                                newSlide.css({ opacity: 1 });
+                            }
+                            newSlide.addClass(realeffect).on('animationend webkitAnimationEnd oAnimationEnd MSAnimationEnd', function (evt) {
+                                if ($(evt.target).hasClass('slide')) {
+                                    $('.slide-showing .slide.out', MonksEnhancedJournal.slideshow.element).remove();
+                                    newSlide.removeClass(realeffect);
+
+                                    if (MonksEnhancedJournal.slideshow.slidesound?.src != undefined) {
+                                        MonksEnhancedJournal.slideshow.slidesound.stop();
+                                        MonksEnhancedJournal.slideshow.slidesound = undefined;
+                                    }
+                                    if (MonksEnhancedJournal.slideshow.slide.audiofile != undefined && MonksEnhancedJournal.slideshow.slide.audiofile != '') {
+                                        AudioHelper.play({ src: MonksEnhancedJournal.slideshow.slide.audiofile, loop: false }).then((sound) => {
+                                            MonksEnhancedJournal.slideshow.slidesound = sound;
+                                            return sound;
+                                        });
+                                    }
+                                }
+                            });
+                        } else {
+                            newSlide.css({ opacity: 1 });
+                            $('.slide-showing .slide.out', this.element).remove();
+                            if (MonksEnhancedJournal.slideshow.slidesound?.src != undefined) {
+                                MonksEnhancedJournal.slideshow.slidesound.stop();
+                                MonksEnhancedJournal.slideshow.slidesound = undefined;
+                            }
+                            if (MonksEnhancedJournal.slideshow.slide.audiofile != undefined && MonksEnhancedJournal.slideshow.slide.audiofile != '') {
+                                AudioHelper.play({ src: MonksEnhancedJournal.slideshow.slide.audiofile, loop: false }).then((sound) => {
+                                    MonksEnhancedJournal.slideshow.slidesound = sound;
+                                    return sound;
+                                });
+                            }
+                        }
+
+                        for (let text of slide.texts) {
+                            if ($.isNumeric(text.fadein)) {
+                                let fadein = text.fadein + (effect != 'none' ? 1 : 0);
+                                $('.slide-showing .slide-text[data-id="' + text.id + '"]', MonksEnhancedJournal.slideshow?.element)
+                                    .css({ 'animation-delay': fadein + 's' })
+                                    .addClass('text-fade-in')
+                                    .on('animationend webkitAnimationEnd oAnimationEnd MSAnimationEnd', function () {
+                                        if ($.isNumeric(text.fadeout)) {
+                                            $(this).css({ 'animation-delay': text.fadeout + 's' }).removeClass('text-fade-in').addClass('text-fade-out');
+                                        }
+                                    });
+                            }
+                            else if ($.isNumeric(text.fadeout)) {
+                                let fadeout = ($.isNumeric(text.fadein) ? text.fadein : 0) + (effect != 'none' ? 1 : 0) + text.fadeout;
+                                $('.slide-showing .slide-text[data-id="' + text.id + '"]', MonksEnhancedJournal.slideshow?.element).css({ 'animation-delay': fadeout + 's' }).addClass('text-fade-out');
+                            }
+                        }
                     }
-                    if ($.isNumeric(text.fadeout)) {
-                        window.setTimeout(function () {
-                            if (MonksEnhancedJournal.slideshow)
-                                $('.slide-showing .slide-text[data-id="' + text.id + '"]', MonksEnhancedJournal.slideshow?.element).animate({ opacity: 0 }, 500, 'linear');
-                        }, text.fadeout * 1000);
+
+                    if (img[0].complete) {
+                        loaded.call(this);
+                    } else {
+                        img.on('load', loaded.bind(this))
+                        img.on('error', function () {
+                            loaded.call(this);
+                        })
                     }
                 }
             }
@@ -1190,6 +1317,9 @@ export class MonksEnhancedJournal {
 
                 if (MonksEnhancedJournal.slideshow?.sound?.src != undefined) {
                     MonksEnhancedJournal.slideshow?.sound.stop();
+                }
+                if (MonksEnhancedJournal.slideshow?.slidesound?.src != undefined) {
+                    MonksEnhancedJournal.slideshow?.slidesound.stop();
                 }
                 delete MonksEnhancedJournal.slideshow;
             }
@@ -1224,7 +1354,7 @@ export class MonksEnhancedJournal {
             textarea.append($('<div>').addClass('slide-text').attr({'data-id': t.id}).html(t.text).css(style));
         }
 
-        return $('<div>').addClass("slide").attr('data-slide-id', slide.id)
+        return $('<div>').addClass("slide animate-slide loading").attr('data-slide-id', slide.id)
             .append($('<div>').addClass('slide-background').append($('<div>').attr('style', background)))
             .append($('<img>').addClass('slide-image').attr('src', slide.img).css({ 'object-fit': slide.sizing}))
             .append(textarea);
@@ -1553,6 +1683,12 @@ export class MonksEnhancedJournal {
                         if (!actoritem)
                             continue;
 
+                        msgitem.maxquantity = cls.getQuantity(actoritem.data.data[MonksEnhancedJournal.quantityname]);
+                        if (msgitem.maxquantity < msgitem.quantity) {
+                            msgitem.quantity = Math.min(msgitem.maxquantity, msgitem.quantity);
+                            ui.notifications.warn(`Not enough of the item remains, only selling ${msgitem.quantity}`);
+                        }
+
                         //give the player the money
                         await cls.actorPurchase({ value: -(msgitem.sell * msgitem.quantity), currency: msgitem.currency }, actor);
 
@@ -1676,6 +1812,8 @@ export class MonksEnhancedJournal {
                 .sort((a, b) => { return a.data.sort < b.data.sort ? -1 : a.data.sort > b.data.sort ? 1 : 0; })
                 .map(j => { return $('<li>').addClass('journal-item').attr('id', j.id).html($('<div>').addClass('journal-title').html(j.name)).click(selectItem.bind(j)); }));
 
+        $(html).click(function () { list.removeClass('open') });
+
         return $('<div>')
             .addClass('journal-select')
             .attr('tabindex', '0')
@@ -1683,7 +1821,7 @@ export class MonksEnhancedJournal {
             .append(list)
             //.focus(function () { list.addClass('open') })
             //.blur(function () { list.removeClass('open') })
-            .click(function () { list.toggleClass('open') });
+            .click(function (evt) { list.toggleClass('open'); evt.preventDefault; evt.stopPropagation(); });
     }
 
     static convertReward() {
@@ -1751,6 +1889,8 @@ export class MonksEnhancedJournal {
             return { gc: "", cr: "" };
         else if (game.system.id == "swade")
             return { gp: "Gold" };
+        else if (game.system.id == "age-system")
+            return { gp: "Gold", sp: "Silver", cp: "Copper" };
         else if (game.system.id == "tormenta20")
             return { to: "TO", tp: "T$", tc: "TC"};
         return MonksEnhancedJournal.config.currencies || {};
@@ -2031,6 +2171,16 @@ Hooks.on("renderTokenConfig", (app, html, data) => {
     }
 });
 
+Hooks.on("renderSceneConfig", (app, html, data) => {
+    if (game.user.isGM) {
+        let ctrl = $('select[name="journal"]', html);
+        let journal = app.object.journal;
+
+        MonksEnhancedJournal.journalListing(ctrl, html, journal?.id, journal?.name, 'journal').insertAfter(ctrl);
+        ctrl.hide();
+    }
+});
+
 Hooks.on("preDocumentSheetRegistrarInit", (settings) => {
     settings["JournalEntry"] = true;
 });
@@ -2140,11 +2290,6 @@ Hooks.on("getSceneControlButtons", (controls) => {
     }
 });
 
-Hooks.on("renderItemSheet", (app, html, options) => {
-    //Change the price so we can specify the currency type
-    $('input[name="data.price"]', html).attr('data-dtype', 'String');
-});
-
 Hooks.on("updateSetting", (setting, data, options, userid) => {
     if (setting.key == "core.sheetClasses" && MonksEnhancedJournal.journal) {
         let value = JSON.parse(data.value);
@@ -2162,6 +2307,9 @@ Hooks.on("polyglot.ready", () => {
 });
 
 Hooks.on("renderItemSheet", (sheet, html, data) => {
+    //Change the price so we can specify the currency type
+    $('input[name="data.price"]', html).attr('data-dtype', 'String');
+
     if (data.options.addcost == true) {
         let priceGroup = $('input[name="data.price"]', html).closest('.form-group');
         $('<div>').addClass('form-group')

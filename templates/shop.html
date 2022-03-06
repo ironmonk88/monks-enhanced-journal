@@ -31,7 +31,7 @@
                 </div>
                 {{/unless}}
             </section>
-            {{#if actor}}
+            {{#if (and actor owner)}}
             <div class="actor-img">
                 <div class="shop-owner">{{localize 'MonksEnhancedJournal.ShopOwner'}}</div>
                 <img src="{{actor.img}}" data-id="{{actor.id}}" data-document="Actor" onerror="$(this).hide();">

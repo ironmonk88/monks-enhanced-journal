@@ -100,6 +100,7 @@
                             <li class="items-header flexrow">
                                 <h3 class="item-name flexrow">{{localize 'MonksEnhancedJournal.Name'}}</h3>
                                 <h3 class="item-name flexrow">{{localize 'MonksEnhancedJournal.Role'}}</h3>
+                                <h3 class="item-name flexrow">{{localize 'MonksEnhancedJournal.Relationship'}}</h3>
                                 {{#if @root.owner}}<div class="item-controls flexrow"></div>{{/if}}
                             </li>
                             {{#each townsfolk}}
@@ -111,6 +112,10 @@
 
                                 <div class="item-name flexrow">
                                     {{this.role}}
+                                </div>
+
+                                <div class="item-name item-relationship flexrow">
+                                    <input type="text" class="item-field" name="relationships.{{this.id}}.relationship" value="{{this.relationship}}" />
                                 </div>
 
                                 {{#if @root.owner}}
@@ -139,6 +144,7 @@
                             <li class="items-header flexrow">
                                 <h3 class="item-name flexrow">{{localize 'MonksEnhancedJournal.Name'}}</h3>
                                 <h3 class="item-name item-title">{{localize 'MonksEnhancedJournal.ShopType'}}</h3>
+                                <h3 class="item-name flexrow">{{localize 'MonksEnhancedJournal.Relationship'}}</h3>
                                 {{#if @root.owner}}<div class="item-controls flexrow"></div>{{/if}}
                             </li>
                             {{#each shops}}
@@ -150,6 +156,10 @@
 
                                 <div class="item-name flexrow">
                                     {{this.shoptype}}
+                                </div>
+
+                                <div class="item-name item-relationship flexrow">
+                                    <input type="text" class="item-field" name="relationships.{{this.id}}.relationship" value="{{this.relationship}}" />
                                 </div>
 
                                 {{#if @root.owner}}
@@ -177,6 +187,7 @@
                         <ul class="items-list">
                             <li class="items-header flexrow">
                                 <h3 class="item-name flexrow">{{localize 'MonksEnhancedJournal.Name'}}</h3>
+                                <h3 class="item-name flexrow">{{localize 'MonksEnhancedJournal.Relationship'}}</h3>
                                 {{#if @root.owner}}<div class="item-controls flexrow"></div>{{/if}}
                             </li>
                             {{#each organizations}}
@@ -184,6 +195,10 @@
                                 <div class="item-name flexrow">
                                     <img class="item-image organization-icon" src="{{this.img}}" onerror="this.src='modules/monks-enhanced-journal/assets/organization.png'" />
                                     <h4>{{this.name}}</h4>
+                                </div>
+
+                                <div class="item-name item-relationship flexrow">
+                                    <input type="text" class="item-field" name="relationships.{{this.id}}.relationship" value="{{this.relationship}}" />
                                 </div>
 
                                 {{#if @root.owner}}

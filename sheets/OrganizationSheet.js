@@ -11,7 +11,7 @@ export class OrganizationSheet extends EnhancedJournalSheet {
             title: i18n("MonksEnhancedJournal.organization"),
             template: "modules/monks-enhanced-journal/templates/organization.html",
             tabs: [{ navSelector: ".tabs", contentSelector: ".sheet-body", initial: "description" }],
-            dragDrop: [{ dragSelector: ".document.actor", dropSelector: ".organization-container" }],
+            dragDrop: [{ dropSelector: ".organization-container" }],
             scrollY: [".tab.description .tab-inner"]
         });
     }
@@ -54,6 +54,7 @@ export class OrganizationSheet extends EnhancedJournalSheet {
         $('.item-hide', html).on('click', this.alterItem.bind(this));
         $('.item-delete', html).on('click', $.proxy(this._deleteItem, this));
         $('.items-list .actor-icon', html).click(this.openRelationship.bind(this));
+        $('.item-relationship .item-field', html).on('change', this.alterRelationship.bind(this));
     }
 
     _documentControls() {

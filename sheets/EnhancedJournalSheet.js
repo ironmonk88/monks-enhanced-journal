@@ -586,7 +586,7 @@ export class EnhancedJournalSheet extends JournalSheet {
         return this.constructor.getDocument(...args);
     }
 
-    static async createRequestMessage(item, actor) {
+    static async createRequestMessage(entry, item, actor) {
         let price = (this.getPrice ? this.getPrice(item.data?.cost) : null);
         item.sell = price?.value;
         item.currency = price?.currency;
@@ -599,7 +599,7 @@ export class EnhancedJournalSheet extends JournalSheet {
             action: 'buy',
             actor: { id: actor.id, name: actor.name, img: actor.img },
             items: [item],
-            shop: { id: this.id, name: this.data.name, img: this.data.img }
+            shop: { id: entry.id, name: entry.data.name, img: entry.data.img }
         }
 
         //create a chat message
@@ -941,6 +941,18 @@ export class EnhancedJournalSheet extends JournalSheet {
                 relationship.hidden = $(event.currentTarget).prev().prop('checked');
                 journal.setFlag('monks-enhanced-journal', "relationships", relationships);
             }
+        }
+    }
+
+    async alterRelationship(event) {
+        let li = $(event.currentTarget).closest('li.item');
+        const id = li.data("id");
+        let journal = game.journal.get(id);
+        if (journal) {
+            let relationships = duplicate(journal.data.flags["monks-enhanced-journal"].relationships);
+            let relationship = relationships.find(r => r.id == this.object.id);
+            relationship.relationship = $(event.currentTarget).val();
+            journal.setFlag('monks-enhanced-journal', "relationships", relationships);
         }
     }
 

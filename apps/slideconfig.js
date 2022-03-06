@@ -21,7 +21,12 @@ export class SlideConfig extends FormApplication {
     getData(options) {
         let data = mergeObject(super.getData(options),
             {
-                sizingOptions: { contain: "MonksEnhancedJournal.Contain", cover: "MonksEnhancedJournal.Cover", fill: "MonksEnhancedJournal.Stretch" }
+                sizingOptions: {
+                    contain: "MonksEnhancedJournal.Contain",
+                    cover: "MonksEnhancedJournal.Cover",
+                    fill: "MonksEnhancedJournal.Stretch"
+                },
+                effectOptions: Object.assign({'': "--Inherit from Slideshow--"}, MonksEnhancedJournal.effectTypes)
             }, { recursive: false }
         );
 

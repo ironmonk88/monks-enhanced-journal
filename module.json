@@ -2,7 +2,7 @@
   "name": "monks-enhanced-journal",
   "title": "Monk's Enhanced Journal",
   "description": "Treat the journal like it's going to be popped out and used as a digital guide book.  Add extra information to summarize an encounter.  Show summaries of people and places.  Allow for bookmarking of commonly used pages",
-	"version": "1.0.47",
+	"version": "1.0.48",
 	"minimumCoreVersion": "9",
 	"compatibleCoreVersion": "9",
 	"author": "IronMonk",
@@ -51,10 +51,13 @@
   "scripts": [
     "js/jquery.mark.min.js"
   ],
-  "styles": [ "css/monks-enhanced-journal.css", "css/editor.css" ],
+	"styles": [
+		"css/monks-enhanced-journal.css",
+		"css/editor.css", 
+		"css/slide-transition.css" ],
   "packs": [],
   "url": "https://github.com/ironmonk88/monks-enhanced-journal",
-  "download": "https://github.com/ironmonk88/monks-enhanced-journal/archive/1.0.47.zip",
+  "download": "https://github.com/ironmonk88/monks-enhanced-journal/archive/1.0.48.zip",
   "manifest": "https://github.com/ironmonk88/monks-enhanced-journal/releases/latest/download/module.json",
   "bugs": "https://github.com/ironmonk88/monks-enhanced-journal/issues",
   "allowBugReporter": true

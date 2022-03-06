@@ -11,13 +11,16 @@ export class PersonSheet extends EnhancedJournalSheet {
             title: i18n("MonksEnhancedJournal.person"),
             template: "modules/monks-enhanced-journal/templates/person.html",
             tabs: [{ navSelector: ".tabs", contentSelector: ".sheet-body", initial: "description" }],
-            dragDrop: [{ dragSelector: ".document.actor", dropSelector: ".person-container" }],
+            dragDrop: [
+                { dragSelector: ".document.actor", dropSelector: ".person-container" },
+                { dragSelector: ".actor-img img", dropSelector: "null" }
+            ],
             scrollY: [".tab.details .tab-inner", ".tab.description .tab-inner", ".relationships .items-list"]
         });
     }
 
     get allowedRelationships() {
-        return ['organization', 'person', 'place', 'shop', 'quest'];
+        return ['organization', 'person', 'place', 'shop', 'quest', 'poi'];
     }
 
     get type() {
@@ -47,6 +50,13 @@ export class PersonSheet extends EnhancedJournalSheet {
 
         for (let [k, v] of Object.entries(data.relationships)) {
             v.documents = v.documents.sort((a, b) => a.name.localeCompare(b.name));
+        }
+
+        let actorLink = this.object.getFlag('monks-enhanced-journal', 'actor');
+        let actor = game.actors.find(a => a.id == actorLink.id);
+
+        if (actor) {
+            data.actor = { id: actor.id, name: actor.name, img: actor.img };
         }
 
         return data;
@@ -86,7 +96,9 @@ export class PersonSheet extends EnhancedJournalSheet {
             { id: 'edit', text: i18n("MonksEnhancedJournal.EditDescription"), icon: 'fa-pencil-alt', conditional: this.isEditable, callback: () => { this.onEditDescription(); } },
             { id: 'convert', text: i18n("MonksEnhancedJournal.Convert"), icon: 'fa-clipboard-list', conditional: (game.user.isGM && this.isEditable), callback: () => { } }
         ];
-        //this.addPolyglotButton(ctrls);
+        //if (game.modules.get("VoiceActor")?.active) {
+
+        //}
         return ctrls.concat(super._documentControls());
     }
 
@@ -108,6 +120,8 @@ export class PersonSheet extends EnhancedJournalSheet {
         if (actorOptions) new ContextMenu($(html), ".actor-img", actorOptions);
 
         $('.items-list .actor-icon', html).click(this.openRelationship.bind(this));
+
+        $('.item-relationship .item-field', html).on('change', this.alterRelationship.bind(this));
     }
 
     _getSubmitData(updateData = {}) {
@@ -122,6 +136,16 @@ export class PersonSheet extends EnhancedJournalSheet {
         delete data.relationships;
 
         return flattenObject(data);
+    }
+
+    _onDragStart(event) {
+        const target = event.currentTarget;
+
+        if (target.dataset.document == "Actor") {
+            const dragData = { id: target.dataset.id, type: target.dataset.document };
+
+            event.dataTransfer.setData("text/plain", JSON.stringify(dragData));
+        }
     }
 
     _canDragDrop(selector) {

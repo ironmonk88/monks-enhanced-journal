@@ -20,7 +20,7 @@ export class NoteHUD extends BasePlaceableHUD {
         const visible = this.entry.data.permission.default >= CONST.ENTITY_PERMISSIONS.LIMITED;
 
         return mergeObject(data, {
-            visibilityClass: visible ? "active" : "",
+            visibilityClass: visible ? "" : "active",
             type: type,
         });
     }

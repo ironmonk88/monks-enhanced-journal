@@ -19,7 +19,9 @@ export class ShopSheet extends EnhancedJournalSheet {
             dragDrop: [
                 { dragSelector: ".document.actor", dropSelector: ".shop-container" },
                 { dragSelector: ".document.item", dropSelector: ".shop-container" },
-                { dragSelector: ".shop-items .item-list .item .item-name", dropSelector: "null" }],
+                { dragSelector: ".shop-items .item-list .item .item-name", dropSelector: "null" },
+                { dragSelector: ".actor-img img", dropSelector: "null" }
+            ],
             scrollY: [".shop-items", ".tab.description .tab-inner"]
         });
     }
@@ -54,10 +56,15 @@ export class ShopSheet extends EnhancedJournalSheet {
 
         data.hideitems = (['hidden', 'visible'].includes(data.data.flags['monks-enhanced-journal'].purchasing) && !this.object.isOwner);
         let purchasing = data.data.flags['monks-enhanced-journal'].purchasing;
-        data.showrequest = (['confirm', 'free'].includes(purchasing) && !this.object.isOwner && game.user.character);
+        let hasGM = (game.users.find(u => u.isGM && u.active) != undefined);
+        data.showrequest = (['confirm', 'free'].includes(purchasing) && !this.object.isOwner && game.user.character && hasGM);
 
         let actorData = data.data.flags['monks-enhanced-journal'].actor;
-        data.actor = game.actors.get(actorData);
+        let actor = game.actors.get(actorData);
+
+        if (actor) {
+            data.actor = { id: actor.id, name: actor.name, img: actor.img };
+        }
 
         data.valStr = (['pf2e'].includes(game.system.id) ? ".value" : "");
         data.quantityname = MonksEnhancedJournal.quantityname;
@@ -134,6 +141,8 @@ export class ShopSheet extends EnhancedJournalSheet {
 
         $('.request-item', html).prop('disabled', function () { return $(this).attr('locked') == 'true' }).click(this.requestItem.bind(this));
 
+        $('.item-relationship .item-field', html).on('change', this.alterRelationship.bind(this));
+
         const actorOptions = this._getPersonActorContextOptions();
         if (actorOptions) new ContextMenu($(html), ".actor-img", actorOptions);
     }
@@ -163,54 +172,74 @@ export class ShopSheet extends EnhancedJournalSheet {
     _canDragStart(selector) {
         if (selector == ".document.actor") return game.user.isGM;
         if (selector == ".document.item") return true;
-        return game.user.isGM || (['free', 'confirm'].includes(this.object.data.flags["monks-enhanced-journal"].purchasing));
+        let hasGM = (game.users.find(u => u.isGM && u.active) != undefined);
+        return game.user.isGM || (['free', 'confirm'].includes(this.object.data.flags["monks-enhanced-journal"].purchasing) && hasGM);
     }
 
     _canDragDrop(selector) {
         return (game.user.isGM || this.object.isOwner);
     }
 
+    _onDragStart(event) {
+        const target = event.currentTarget;
+
+        if (target.dataset.document == "Actor") {
+            const dragData = { id: target.dataset.id, type: target.dataset.document };
+
+            event.dataTransfer.setData("text/plain", JSON.stringify(dragData));
+        }
+    }
+
     async _onDragStart(event) {
-        const li = $(event.currentTarget).closest("li")[0];
+        const target = event.currentTarget;
 
-        const dragData = { from: 'monks-enhanced-journal' };
+        if (target.dataset.document == "Actor") {
+            const dragData = { id: target.dataset.id, type: target.dataset.document };
 
-        if (!game.user.isGM && !['free', 'confirm'].includes(this.object.data.flags["monks-enhanced-journal"].purchasing)) {
-            event.preventDefault();
-            return;
+            event.dataTransfer.setData("text/plain", JSON.stringify(dragData));
+        } else {
+            const li = $(target).closest("li")[0];
+
+            const dragData = { from: 'monks-enhanced-journal' };
+
+            if (!game.user.isGM && !['free', 'confirm'].includes(this.object.data.flags["monks-enhanced-journal"].purchasing)) {
+                event.preventDefault();
+                return;
+            }
+
+            let id = li.dataset.id;
+
+            let item = this.object.data.flags["monks-enhanced-journal"].items.find(i => i._id == id);
+            if (item == undefined) {
+                ui.notifications.warn("Cannot find that item.");
+                return;
+            }
+
+            if (!game.user.isGM && item?.lock === true) {
+                ui.notifications.warn("That item is locked from purchasing");
+                return;
+            }
+
+            let qty = this.getQuantity(item.data[MonksEnhancedJournal.quantityname], null);
+            if (!game.user.isGM && (qty != null && qty <= 0)) {
+                ui.notifications.warn("Not enough of that item remains to be transferred to an Actor");
+                return;
+            }
+
+            item = duplicate(item);
+            item.data[MonksEnhancedJournal.quantityname] = this.setQuantity(item.data[MonksEnhancedJournal.quantityname], 1);
+
+            dragData.id = id;
+            dragData.journalid = this.object.id;
+            dragData.type = "Item";
+            dragData.data = item;
+
+            log('Drag Start', dragData);
+
+            event.dataTransfer.setData("text/plain", JSON.stringify(dragData));
+
+            MonksEnhancedJournal._dragItem = li.dataset.id;
         }
-
-        let id = li.dataset.id;
-
-        let item = this.object.data.flags["monks-enhanced-journal"].items.find(i => i._id == id);
-        if (item == undefined) {
-            ui.notifications.warn("Cannot find that item.");
-            return;
-        }
-
-        if (!game.user.isGM && item?.lock === true) {
-            ui.notifications.warn("That item is locked from purchasing");
-            return;
-        }
-
-        if (!game.user.isGM && (this.getQuantity(item.data[MonksEnhancedJournal.quantityname], 0) <= 0)) {
-            ui.notifications.warn("Not enough of that item remains to be transferred to an Actor");
-            return;
-        }
-
-        item = duplicate(item);
-        item.data[MonksEnhancedJournal.quantityname] = this.setQuantity(item.data[MonksEnhancedJournal.quantityname], 1);
-
-        dragData.id = id;
-        dragData.journalid = this.object.id;
-        dragData.type = "Item";
-        dragData.data = item;
-
-        log('Drag Start', dragData);
-
-        event.dataTransfer.setData("text/plain", JSON.stringify(dragData));
-
-        MonksEnhancedJournal._dragItem = li.dataset.id;
     }
 
     async _onDrop(event) {
@@ -236,6 +265,11 @@ export class ShopSheet extends EnhancedJournalSheet {
                         item.delete();
                     }
                 } else {
+                    let hasGM = (game.users.find(u => u.isGM && u.active) != undefined);
+                    if (!hasGM) {
+                        ui.notifications.warn("Cannot sell to shop without the GM present.");
+                        return false;
+                    }
                     //request to sell
                     let quantity = this.getQuantity(data.data.data[MonksEnhancedJournal.quantityname]);
                     let price = ShopSheet.getPrice(data.data.data?.price);
@@ -357,9 +391,15 @@ export class ShopSheet extends EnhancedJournalSheet {
             }
         }
 
-        let qty = (item.data[MonksEnhancedJournal.quantityname] == undefined || item.data[MonksEnhancedJournal.quantityname] == "" ? "" : this.getQuantity(item.data[MonksEnhancedJournal.quantityname])) || "";
-        if (qty != "" && parseInt(qty) < 1) {
+        let qty = this.getQuantity(item.data[MonksEnhancedJournal.quantityname], null);
+        if (!game.user.isGM && (qty != null && qty <= 0)) {
             ui.notifications.warn("Cannot transfer this item, not enough of this item remains.");
+            return false;
+        }
+
+        let hasGM = (game.users.find(u => u.isGM && u.active) != undefined);
+        if (!hasGM) {
+            ui.notifications.warn("Cannot make purchases without the GM present.");
             return false;
         }
 
@@ -374,7 +414,7 @@ export class ShopSheet extends EnhancedJournalSheet {
                 if (!ShopSheet.canAfford((item.quantity * price.value) + " " + price.currency, actor))
                     ui.notifications.error(`${actor.name} cannot afford ${item.quantity} ${item.name}`);
                 else {
-                    this.constructor.createRequestMessage.call(this.object, item, actor);
+                    this.constructor.createRequestMessage.call(this, this.object, item, actor);
                     MonksEnhancedJournal.emit("notify", { actor: actor.name, item: item.name });
                 }
             });
@@ -492,17 +532,46 @@ export class ShopSheet extends EnhancedJournalSheet {
     }
 
     static getPrice(cost) {
+        var countDecimals = function (value) {
+            if (Math.floor(value) !== value)
+                return value.toString().split(".")[1].length || 0;
+            return 0;
+        }
+
         cost = "" + cost;
-        let price = parseInt(cost.replace(',', ''));
-        if (price == 0 || isNaN(price))
+        let price = parseFloat(cost.replace(',', ''));
+        if (price == 0 || isNaN(price)) {
             return { value: 0, currency: ShopSheet.defaultCurrency() };
+        }
 
         let currency = cost.replace(',', '').replace(price, '').trim();
 
         if (currency == "")
             currency = ShopSheet.defaultCurrency();
 
+        if (parseInt(price) != price) {
+            if (game.system.id == "dnd5e") {
+                if (currency == "ep") {
+                    price = price / 2;
+                    currency = "gp";
+                }
+
+                let decimals = countDecimals(price);
+                let curArr = ["pp", "gp", "sp", "cp"];
+                let idx = curArr.indexOf(currency);
+                let idx2 = Math.min(idx + decimals, 3);
+
+                price = Math.floor(price * (10 ** (idx2 - idx)));
+                currency = curArr[idx2];
+            } else
+                price = Math.floor(price);
+        }
+
         return { value: price, currency };
+    }
+
+    getPrice(cost) {
+        return this.constructor.getPrice(cost);
     }
 
     static canAfford(item, actor) {
@@ -519,6 +588,9 @@ export class ShopSheet extends EnhancedJournalSheet {
         if (game.system.id == 'pf2e') {
             let coinage = actor.data.items.find(i => { return i.isCoinage && i.data.data.denomination.value == price.currency });
             return (coinage && coinage.data.data.quantity.value >= price.value);
+        } else if (game.system.id == 'age-system') {
+            let coinage = parseInt(actor.data.data[price.currency]);
+            return (coinage >= price.value);
         } else if (game.system.id == 'swade') {
             let coinage = parseInt(actor.data.data.details.currency);
             return (coinage >= price.value);
@@ -541,6 +613,11 @@ export class ShopSheet extends EnhancedJournalSheet {
             let newVal = coinage.data.data.quantity.value - price.value;
             updates[`data.quantity.value`] = newVal;
             coinage.update(updates);
+        } else if (game.system.id == 'age-system') {
+            let coinage = parseInt(actor.data.data[price.currency]);
+            let newVal = coinage - price.value;
+            updates[`data.${price.currency}`] = newVal;
+            actor.update(updates);
         } else if (game.system.id == 'swade') {
             let coinage = parseInt(actor.data.data.details.currency);
             let newVal = coinage - price.value;
@@ -556,8 +633,8 @@ export class ShopSheet extends EnhancedJournalSheet {
     static async itemDropped(id, actor, entry) {
         let item = (entry.getFlag('monks-enhanced-journal', 'items') || []).find(i => i._id == id);
         if (item) {
-            let qty = (item.data[MonksEnhancedJournal.quantityname] == undefined || item.data[MonksEnhancedJournal.quantityname] == "" ? "" : this.getQuantity(item.data[MonksEnhancedJournal.quantityname])) || "";
-            if (qty != "" && parseInt(qty) < 1) {
+            let qty = this.getQuantity(item.data[MonksEnhancedJournal.quantityname], null);
+            if (!game.user.isGM && (qty != null && qty <= 0)) {
                 ui.notifications.warn("Cannot transfer this item, not enough of this item remains.");
                 return false;
             }
@@ -568,6 +645,12 @@ export class ShopSheet extends EnhancedJournalSheet {
                     ui.notifications.warn(`Cannot transfer this item, ${actor.name} cannot afford it.`);
                     return false;
                 }
+            }
+
+            let hasGM = (game.users.find(u => u.isGM && u.active) != undefined);
+            if (!hasGM) {
+                ui.notifications.warn("Cannot make purchases without the GM present.");
+                return false;
             }
 
             let price = ShopSheet.getPrice(item.data.cost);
@@ -586,7 +669,7 @@ export class ShopSheet extends EnhancedJournalSheet {
                         if (!ShopSheet.canAfford((item.quantity * price.value) + " " + price.currency, actor))
                             ui.notifications.error(`${actor.name} cannot afford ${item.quantity} ${item.name}`);
                         else {
-                            ShopSheet.createRequestMessage.call(entry, item, actor);
+                            ShopSheet.createRequestMessage.call(this, entry, item, actor);
                             MonksEnhancedJournal.emit("notify", { actor: actor.name, item: item.name });
                         }
                     });

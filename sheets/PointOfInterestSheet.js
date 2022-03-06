@@ -11,12 +11,49 @@ export class PointOfInterestSheet extends EnhancedJournalSheet {
             title: i18n("MonksEnhancedJournal.PointOfInterest"),
             template: "modules/monks-enhanced-journal/templates/poi.html",
             tabs: [{ navSelector: ".tabs", contentSelector: ".sheet-body", initial: "description" }],
+            dragDrop: [{ dropSelector: ".poi-container" }],
             scrollY: [".tab.description .tab-inner"]
         });
     }
 
+    async getData() {
+        let data = super.getData();
+
+        data.relationships = {};
+        for (let item of (data.data.flags['monks-enhanced-journal']?.relationships || [])) {
+            let entity = await this.getDocument(item, "JournalEntry", false);
+            if (entity && entity.testUserPermission(game.user, "LIMITED") && (game.user.isGM || !item.hidden)) {
+                if (!data.relationships[entity.type])
+                    data.relationships[entity.type] = { type: entity.type, name: i18n(`MonksEnhancedJournal.${entity.type.toLowerCase()}`), documents: [] };
+
+                item.name = entity.name;
+                item.img = entity.data.img;
+
+                data.relationships[entity.type].documents.push(item);
+            }
+        }
+
+        for (let [k, v] of Object.entries(data.relationships)) {
+            v.documents = v.documents.sort((a, b) => a.name.localeCompare(b.name));
+        }
+
+        return data;
+    }
+
     get type() {
         return 'poi';
+    }
+
+    get allowedRelationships() {
+        return ['person', 'place'];
+    }
+
+    activateListeners(html, enhancedjournal) {
+        super.activateListeners(html, enhancedjournal);
+        $('.item-hide', html).on('click', this.alterItem.bind(this));
+        $('.item-delete', html).on('click', $.proxy(this._deleteItem, this));
+        $('.items-list .actor-icon', html).click(this.openRelationship.bind(this));
+        $('.item-relationship .item-field', html).on('change', this.alterRelationship.bind(this));
     }
 
     _documentControls() {
@@ -29,5 +66,39 @@ export class PointOfInterestSheet extends EnhancedJournalSheet {
         ];
         //this.addPolyglotButton(ctrls);
         return ctrls.concat(super._documentControls());
+    }
+
+    _getSubmitData(updateData = {}) {
+        let data = expandObject(super._getSubmitData(updateData));
+
+        data.flags['monks-enhanced-journal'].relationships = duplicate(this.object.getFlag("monks-enhanced-journal", "relationships") || []);
+        for (let relationship of data.flags['monks-enhanced-journal'].relationships) {
+            let dataRel = data.relationships[relationship.id];
+            if (dataRel)
+                relationship = mergeObject(relationship, dataRel);
+        }
+        delete data.relationships;
+
+        return flattenObject(data);
+    }
+
+    _canDragDrop(selector) {
+        return game.user.isGM || this.object.isOwner;
+    }
+
+    _onDrop(event) {
+        let data;
+        try {
+            data = JSON.parse(event.dataTransfer.getData('text/plain'));
+        }
+        catch (err) {
+            return false;
+        }
+
+        if (data.type == 'JournalEntry') {
+            this.addRelationship(data);
+        }
+
+        log('drop data', event, data);
     }
 }

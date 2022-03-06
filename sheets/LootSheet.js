@@ -217,7 +217,8 @@ export class LootSheet extends EnhancedJournalSheet {
     }
 
     _canDragStart(selector) {
-        return game.user.isGM || (['free', 'confirm'].includes(this.object.data.flags["monks-enhanced-journal"].purchasing));
+        let hasGM = (game.users.find(u => u.isGM && u.active) != undefined);
+        return game.user.isGM || (['free', 'confirm'].includes(this.object.data.flags["monks-enhanced-journal"].purchasing) && hasGM);
     }
 
     _canDragDrop(selector) {
@@ -325,9 +326,15 @@ export class LootSheet extends EnhancedJournalSheet {
             return;
         }
 
-        let qty = parseInt(this.getQuantity(item.data[MonksEnhancedJournal.quantityname]));
-        if (qty < 1) {
+        let qty = this.getQuantity(item.data[MonksEnhancedJournal.quantityname], null);
+        if (!game.user.isGM && (qty != null && qty <= 0)) {
             ui.notifications.warn("Cannot transfer this item, not enough of this item remains.");
+            return false;
+        }
+
+        let hasGM = (game.users.find(u => u.isGM && u.active) != undefined);
+        if (!hasGM) {
+            ui.notifications.warn("Cannot take loot without the GM present.");
             return false;
         }
 
@@ -345,7 +352,7 @@ export class LootSheet extends EnhancedJournalSheet {
                 item.quantity = parseInt($('input[name="quantity"]', html).val());
                 item.maxquantity = qty;
 
-                LootSheet.createRequestMessage.call(this.object, item, actor);
+                LootSheet.createRequestMessage.call(this, this.object, item, actor);
                 MonksEnhancedJournal.emit("notify", { actor: actor.name, item: item.name });
             });
         } else if (this.object.data.flags['monks-enhanced-journal'].purchasing == 'free') {
@@ -453,9 +460,15 @@ export class LootSheet extends EnhancedJournalSheet {
     static async itemDropped(id, actor, entry) {
         let item = (entry.getFlag('monks-enhanced-journal', 'items') || []).find(i => i._id == id);
         if (item) {
-            let qty = (item.data[MonksEnhancedJournal.quantityname] == undefined || item.data[MonksEnhancedJournal.quantityname] == "" ? "" : this.getQuantity(item.data[MonksEnhancedJournal.quantityname])) || "";
-            if (qty != "" && parseInt(qty) < 1) {
+            let qty = this.getQuantity(item.data[MonksEnhancedJournal.quantityname], null);
+            if (!game.user.isGM && (qty != null && qty <= 0)) {
                 ui.notifications.warn("Cannot transfer this item, not enough of this item remains.");
+                return false;
+            }
+
+            let hasGM = (game.users.find(u => u.isGM && u.active) != undefined);
+            if (!hasGM) {
+                ui.notifications.warn("Cannot take loot without the GM present.");
                 return false;
             }
 
@@ -469,7 +482,7 @@ export class LootSheet extends EnhancedJournalSheet {
                         item.quantity = parseInt($('input[name="quantity"]', html).val());
                         item.maxquantity = (qty != "" ? parseInt(qty) : null);
 
-                        LootSheet.createRequestMessage.call(entry, item, actor);
+                        LootSheet.createRequestMessage.call(this, entry, item, actor);
                         MonksEnhancedJournal.emit("notify", { actor: actor.name, item: item.name });
                     });
                     return false;

@@ -19,11 +19,11 @@
                     <input type="text" name="flags.monks-enhanced-journal.location" value="{{data.flags.monks-enhanced-journal.location}}" />
                 </div>
             </section>
-            {{#if (and data.flags.monks-enhanced-journal.actor owner)}}
+            {{#if (and actor owner)}}
             <div class="actor-img">
                 <div class="person-actor">{{localize 'MonksEnhancedJournal.Actor'}}</div>
-                <img src="{{data.flags.monks-enhanced-journal.actor.img}}" data-id="{{data.flags.monks-enhanced-journal.actor.id}}" data-document="Actor" onerror="$(this).hide();">
-                <div style="text-align: center;">{{data.flags.monks-enhanced-journal.actor.name}}</div>
+                <img src="{{actor.img}}" data-id="{{actor.id}}" data-document="Actor" onerror="$(this).hide();">
+                <div style="text-align: center;">{{actor.name}}</div>
             </div>
             {{/if}}
         </header>

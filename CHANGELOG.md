@@ -1,3 +1,31 @@
+# Version 1.0.48
+
+Swapped the highlight on the Note HUD so that the invisible icon reflects the when the NOte really is invisible to players.
+
+Added transition effect to the slide show.
+
+Added sounds to individual Slides, the default transition and default slide duration for all slides.
+
+Added the option to automatically play a slide show when a scene is activated.  Change the Journal Entry for the Scene to a Slideshow and it will automatically 
+
+Fixed issue with purchasing while there is not GM present.
+
+Fixed an issue where selling from a player wasn't checkign to see if there was still enough left to complete the sale.
+
+Added relationship field to the Organization sheet, and Quest Sheet
+
+Added the option to drag a Shop Keeper or Person actor onto the canvas
+
+Added relationships between Point of Interest and Person or Place.
+
+Fixed issues with purchasing items that have decimals.
+
+Started to add currency for the AGE Systems
+
+Fixed issue with person sheet if the actor linked to the sheet didn't exist any more.
+
+
+
 # Version 1.0.47
 
 Fixed an issue with hiding inline links if the link is broken
