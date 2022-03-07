@@ -24,7 +24,13 @@ Started to add currency for the AGE Systems
 
 Fixed issue with person sheet if the actor linked to the sheet didn't exist any more.
 
+Removed the two way relationship update between Person entries.  I believe that the rest can stay as it's all dependant on the relationship a Person has with something.
 
+Rebuilt the way prices, currency, and quantity is handled.  This should make things a little easier to read and some what stabler.
+
+Added the option for the GM to specify the quantity of items being added to the player via the shop.
+
+Fixed an issue with the Quest Sheet not remembering scroll positions on the reward items tab.
 
 # Version 1.0.47
 
