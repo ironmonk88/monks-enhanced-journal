@@ -1,5 +1,5 @@
 import { Objectives } from "../apps/objectives.js";
-import { setting, i18n, log, makeid, MonksEnhancedJournal } from "../monks-enhanced-journal.js";
+import { setting, i18n, log, makeid, MonksEnhancedJournal, quantityname, pricename, currencyname } from "../monks-enhanced-journal.js";
 import { EnhancedJournalSheet } from "../sheets/EnhancedJournalSheet.js";
 
 export class QuestSheet extends EnhancedJournalSheet {
@@ -21,7 +21,7 @@ export class QuestSheet extends EnhancedJournalSheet {
                 { dragSelector: ".reward-items .item-list .item .item-name", dropSelector: "null" },
                 { dragSelector: ".objective-items .item-list .item", dropSelector: ".quest-container" }
             ],
-            scrollY: [".objective-items", ".reward-items", ".tab.description .tab-inner"]
+            scrollY: [".objective-items", ".reward-container", ".tab.description .tab-inner"]
         });
     }
 
@@ -511,10 +511,10 @@ export class QuestSheet extends EnhancedJournalSheet {
 
             let items = reward.items;
 
-            let qty = this.setQuantity(item.data.data[MonksEnhancedJournal.quantityname], 1);
-            let data = { remaining: 1 };
-            data[MonksEnhancedJournal.quantityname] = qty;
-            items.push(mergeObject(itemData, { _id: makeid(), data: data }));
+            let update = { _id: makeid(), data: { remaining: 1 } };
+            update[quantityname()] = item.data.data[quantityname()];
+            this.setValue(update, quantityname(), 1);
+            items.push(mergeObject(itemData, update));
             this.object.setFlag('monks-enhanced-journal', 'rewards', rewards);
         }
     }
@@ -546,7 +546,7 @@ export class QuestSheet extends EnhancedJournalSheet {
                     }
 
                     this.purchaseItem.call(this, entry, id, actor);
-                    return true;
+                    return 1;
                 }
             }
         }
@@ -614,7 +614,7 @@ export class QuestSheet extends EnhancedJournalSheet {
         let li = $(event.currentTarget).closest('li')[0];
         let item = items.find(i => i._id == li.dataset.id);
         if (item) {
-            item.data.remaining = this.getCurrency(item.data[MonksEnhancedJournal.quantityname]);
+            item.data.remaining = this.getValue(item, quantityname());
             this.object.setFlag('monks-enhanced-journal', 'rewards', rewards);
         }
     }

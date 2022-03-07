@@ -1,4 +1,4 @@
-import { setting, i18n, log, makeid, MonksEnhancedJournal } from "../monks-enhanced-journal.js";
+import { setting, i18n, log, makeid, MonksEnhancedJournal, quantityname, pricename, currencyname } from "../monks-enhanced-journal.js";
 import { EditFields } from "../apps/editfields.js";
 import { SelectPlayer } from "../apps/selectplayer.js";
 
@@ -245,22 +245,125 @@ export class EnhancedJournalSheet extends JournalSheet {
         $('.editor-edit', form).css({ width: '0px !important', height: '0px !important' });
     }
 
-    static getQuantity(quantity, defvalue) {
-        if (!quantity)
+    static getValue(item, name, defvalue = 0) {
+        name = name || pricename();
+        if (!item)
+            return defvalue;
+        let value = (item.data != undefined ? item?.data[name] : item[name]);
+        return (value?.hasOwnProperty("value") ? value.value : value) ?? defvalue;
+    }
+
+    getValue(item, name, defvalue) {
+        return this.constructor.getValue(item, name, defvalue);
+    }
+
+    static setValue(item, name, value = 1) {
+        let prop = (item.data != undefined ? item.data : item);
+        prop[name] = (prop[name] && prop[name].hasOwnProperty("value") ? { value: value } : value);
+    }
+
+    setValue(item, name, value) {
+        this.constructor.setValue(item, name, value);
+    }
+
+    static defaultCurrency() {
+        if (MonksEnhancedJournal.currencies["gp"])
+            return "gp";
+        else {
+            if (game.system.id == 'tormenta20')
+                return "tp";
+            let currencies = Object.keys(MonksEnhancedJournal.currencies);
+            return (currencies.length > 0 ? currencies[0] : "");
+        }
+    }
+
+    static getCurrency(actor, denomination) {
+        let coinage;
+        if (game.system.id == 'pf2e') {
+            let coin = actor.data.items.find(i => { return i.isCoinage && i.data.data.denomination.value == denomination });
+            coinage = (coin && this.getValue(coin.data, quantityname(), 0));
+        } else if (game.system.id == 'age-system') {
+            coinage = parseInt(actor.data.data[denomination]);
+        } else if (game.system.id == 'swade') {
+            coinage = parseInt(actor.data.data.details.currency);
+        } else {
+            let coin = this.getValue(actor.data, currencyname());
+            coinage = parseInt(this.getValue(coin, denomination));
+        }
+
+        return parseInt(coinage ?? 0);
+    }
+
+    getCurrency(actor, denomination) {
+        return this.constructor.getCurrency(actor, denomination);
+    }
+
+    static addCurrency(actor, denomination, value) {
+        let newVal = parseInt(this.getCurrency(actor, denomination) ?? 0) + value;
+        let updates = {};
+        if (game.system.id == 'pf2e') {
+            let coinage = actor.data.items.find(i => { return i.isCoinage && i.data.data.denomination.value == denomination });
+            updates[`data.quantity.value`] = newVal;
+            return coinage.update(updates);
+        } else if (game.system.id == 'age-system') {
+            updates[`data.${price.currency}`] = newVal;
+        } else if (game.system.id == 'swade') {
+            updates[`data.details.currency`] = newVal;
+        } else {
+            let coin = this.getValue(actor.data, currencyname());
+            updates[`data.${currencyname()}.${denomination}`] = (coin[denomination] && coin[denomination].hasOwnProperty("value") ? { value: newVal } : newVal);
+        }
+        return actor.update(updates);
+    }
+
+    addCurrency(actor, denomination, value) {
+        return this.constructor.addCurrency(actor, denomination, value);
+    }
+
+    static getPrice(item, name) {
+        name = name || pricename();
+        var countDecimals = function (value) {
+            if (Math.floor(value) !== value)
+                return value.toString().split(".")[1].length || 0;
             return 0;
-        return (quantity?.hasOwnProperty("value") ? quantity.value : quantity) ?? defvalue;
+        }
+
+        let cost = (typeof item == "string" ? item : (item.data?.denomination != undefined ? item.data?.value.value + " " + item.data?.denomination.value : this.getValue(item, name)));
+
+        cost = "" + cost;
+        let price = parseFloat(cost.replace(',', ''));
+        if (price == 0 || isNaN(price)) {
+            return { value: 0, currency: this.defaultCurrency() };
+        }
+
+        let currency = cost.replace(/[^a-z]/gi, '');
+
+        if (currency == "")
+            currency = this.defaultCurrency();
+
+        if (parseInt(price) != price) {
+            if (game.system.id == "dnd5e") {
+                if (currency == "ep") {
+                    price = price / 2;
+                    currency = "gp";
+                }
+
+                let decimals = countDecimals(price);
+                let curArr = ["pp", "gp", "sp", "cp"];
+                let idx = curArr.indexOf(currency);
+                let idx2 = Math.min(idx + decimals, 3);
+
+                price = Math.floor(price * (10 ** (idx2 - idx)));
+                currency = curArr[idx2];
+            } else
+                price = Math.floor(price);
+        }
+
+        return { value: price, currency };
     }
 
-    getQuantity(quantity, defvalue) {
-        return this.constructor.getQuantity(quantity, defvalue);
-    }
-
-    static setQuantity(quantity, value = 1) {
-        return (quantity?.hasOwnProperty("value") ? { value: value } : value);
-    }
-
-    setQuantity(quantity, value) {
-        return this.constructor.setQuantity(quantity, value);
+    getPrice(item, name) {
+        return this.constructor.getPrice(item, name);
     }
 
     _onClickInlineRequestRoll(event) {
@@ -502,7 +605,7 @@ export class EnhancedJournalSheet extends JournalSheet {
             }).filter(r => !!r);
 
             let hasRequest = (requests.find(r => r.id == game.user.id) != undefined);
-            let quantity = (item.data[MonksEnhancedJournal.quantityname] == undefined ? "" : (this.getQuantity(item.data[MonksEnhancedJournal.quantityname])));
+            let quantity = this.getValue(item, quantityname(), "");
             let text = (type == 'shop' ?
                 (quantity === 0 ? "Sold Out" : (item.lock ? "Unavailable" : "Purchase")) :
                 (purchasing == "free" || purchasing == "confirm" ? "Take" : (hasRequest ? "Cancel" : "Request")));
@@ -510,7 +613,7 @@ export class EnhancedJournalSheet extends JournalSheet {
                 (quantity === 0 ? "" : (item.lock ? "fa-lock" : "fa-dollar-sign")) :
                 (purchasing == "free" || purchasing == "confirm" ? "fa-hand-paper" : (hasRequest ? "" : "fa-hand-holding-medical")));
 
-            let price = (item.data?.denomination != undefined ? item.data?.value.value + " " + item.data?.denomination.value : this.getCurrency(item.data[MonksEnhancedJournal.pricename]));
+            let price = this.getPrice(item);
             let itemData = {
                 id: item._id,
                 name: item.name,
@@ -521,8 +624,8 @@ export class EnhancedJournalSheet extends JournalSheet {
                 from: item.from,
                 quantity: quantity,
                 remaining: item.data?.remaining,
-                price: price,
-                cost: this.getCurrency(item.data?.cost) || price,
+                price: price.value + " " + price.currency,
+                cost: this.getValue(item, "cost") ?? (price.value + " " + price.currency),
                 text: text,
                 icon: icon,
                 assigned: item.assigned,
@@ -587,10 +690,10 @@ export class EnhancedJournalSheet extends JournalSheet {
     }
 
     static async createRequestMessage(entry, item, actor) {
-        let price = (this.getPrice ? this.getPrice(item.data?.cost) : null);
+        let price = this.getPrice(item, "cost");
         item.sell = price?.value;
         item.currency = price?.currency;
-        item.maxquantity = item.maxquantity ?? this.getQuantity(item.data[MonksEnhancedJournal.quantityname]);
+        item.maxquantity = item.maxquantity ?? this.getValue(item, quantityname());
         if (item.maxquantity)
             item.quantity = Math.max(Math.min(item.maxquantity, item.quantity), 1);
         item.total = (price ? item.quantity * item.sell : null);
@@ -623,8 +726,8 @@ export class EnhancedJournalSheet extends JournalSheet {
         ChatMessage.create(messageData, {});
     }
 
-    static async confirmQuantity(item, max, yes) {
-        let price = (this.getPrice ? this.getPrice(item.data?.cost) : null);
+    static async confirmQuantity(item, max, yes, showTotal = true) {
+        let price = this.getPrice(item, "cost");
         let content = await renderTemplate('/modules/monks-enhanced-journal/templates/confirm-purchase.html',
             {
                 msg: `How many would you like to ${price ? 'purchase' : 'take'}?`,
@@ -632,7 +735,7 @@ export class EnhancedJournalSheet extends JournalSheet {
                 name: item.name,
                 quantity: 1,
                 maxquantity: max != "" ? parseInt(max) : null,
-                total: (price ? price.value + " " + price.currency : null)
+                total: (showTotal ? price.value + " " + price.currency : null)
             });
         let result = await Dialog.confirm({
             title: `Confirm ${price ? 'buying' : 'taking'} item`,
@@ -640,11 +743,11 @@ export class EnhancedJournalSheet extends JournalSheet {
             render: (html) => {
                 $('input[name="quantity"]', html).change((event) => {
                     let q = parseInt($(event.currentTarget).val());
-                    if (max != "") {
+                    if (max) {
                         q = Math.max(Math.min(parseInt(max), q), 1);
                         $(event.currentTarget).val(q);
                     }
-                    if (price)
+                    if (showTotal)
                         $('.request-total', html).html((q * price.value) + " " + price.currency);
                 });
             },
@@ -671,16 +774,17 @@ export class EnhancedJournalSheet extends JournalSheet {
                     item.received = actor.name;
                     item.assigned = true;
                 } else {
-                    if (item.data[MonksEnhancedJournal.quantityname] && this.getCurrency(item.data[MonksEnhancedJournal.quantityname], "") != "") {
-                        let newQty = Math.max(this.getCurrency(item.data[MonksEnhancedJournal.quantityname]) - quantity, 0);
-                        item.data[MonksEnhancedJournal.quantityname] = this.setQuantity(item.data[MonksEnhancedJournal.quantityname], newQty);
+                    let qty = this.getValue(item, quantityname(), "");
+                    if (qty != "") {
+                        let newQty = Math.max(qty - quantity, 0);
+                        this.setValue(item, quantityname(), newQty);
                     }
                 }
                 if (rewards)
                     entry.setFlag('monks-enhanced-journal', 'rewards', rewards);
                 else {
                     if(entry.getFlag('monks-enhanced-journal', 'type') == 'loot')
-                        items = items.filter(i => this.getCurrency(i.data[MonksEnhancedJournal.quantityname]) > 0);
+                        items = items.filter(i => this.getValue(i, quantityname()) > 0);
                     entry.setFlag('monks-enhanced-journal', 'items', items);
                 }
                 if(purchased != 'nochat')
@@ -863,7 +967,8 @@ export class EnhancedJournalSheet extends JournalSheet {
                         } else {
                             // Try to find it in the compendium
                             const items = game.packs.get(result.results[0].data.collection);
-                            item = await items.getDocument(result.results[0].data.resultId);
+                            if (items)
+                                item = await items.getDocument(result.results[0].data.resultId);
                         }
 
                         if (item) {
@@ -877,10 +982,10 @@ export class EnhancedJournalSheet extends JournalSheet {
                                 let oldId = itemData._id;
                                 let oldItem = items.find(i => i.flags['monks-enhanced-journal']?.parentId == oldId);
                                 if (oldItem) {
-                                    let qty = this.getQuantity(oldItem.data[MonksEnhancedJournal.quantityname]);
+                                    let qty = this.getValue(oldItem, quantityname());
                                     if (qty == undefined) qty = 1;
                                     qty = parseInt(qty) + 1;
-                                    oldItem.data[MonksEnhancedJournal.quantityname] = this.setQuantity(oldItem.data[MonksEnhancedJournal.quantityname], qty);
+                                    this.setValue(oldItem, quantityname(), qty);
                                 } else {
                                     itemData._id = makeid();
                                     itemData.flags['monks-enhanced-journal'] = { parentId: oldId };
@@ -949,6 +1054,8 @@ export class EnhancedJournalSheet extends JournalSheet {
         const id = li.data("id");
         let journal = game.journal.get(id);
         if (journal) {
+            if (this.object.type == "person" && journal.type == "person")
+                return;
             let relationships = duplicate(journal.data.flags["monks-enhanced-journal"].relationships);
             let relationship = relationships.find(r => r.id == this.object.id);
             relationship.relationship = $(event.currentTarget).val();
@@ -1065,16 +1172,6 @@ export class EnhancedJournalSheet extends JournalSheet {
         return ['lootsheetnpc5e', 'merchantsheetnpc', 'item-piles'].includes(lootsheet);
     }
 
-    static getCurrency(currency, defvalue = 0) {
-        if (!currency)
-            return 0;
-        return (currency.hasOwnProperty("value") ? currency.value : currency) || defvalue;
-    }
-
-    getCurrency(currency) {
-        return this.constructor.getCurrency(currency);
-    }
-
     static async assignItems(items, currency = {}, { clear = false, name = null } = {}) {
         let lootSheet = setting('loot-sheet');
         let lootentity = setting('loot-entity');
@@ -1148,14 +1245,14 @@ export class EnhancedJournalSheet extends JournalSheet {
             let newcurr = entity.data.data.currency || {};
             for (let curr of Object.keys(MonksEnhancedJournal.currencies)) {
                 if (currency[curr]) {
-                    newVal = parseInt(this.getCurrency(newcurr[curr]) + (currency[curr] || 0));
-                    newcurr[curr] = (newcurr[curr].hasOwnProperty("value") ? { value: newVal } : newVal);
+                    newVal = parseInt(this.getValue(newcurr, curr) + (currency[curr] || 0));
+                    this.setValue(newcurr, curr, newVal);
                 }
             }
 
             if (Object.keys(newcurr).length > 0) {
                 let data = {};
-                data[MonksEnhancedJournal.currencyname] = newcurr;
+                data[currencyname()] = newcurr;
                 entity.update({ data: data });
             }
         } else if (lootSheet == 'monks-enhanced-journal') {
@@ -1167,7 +1264,7 @@ export class EnhancedJournalSheet extends JournalSheet {
             let newcurr = entity.getFlag("monks-enhanced-journal", "currency") || {};
             for (let curr of Object.keys(MonksEnhancedJournal.currencies)) {
                 if (currency[curr]) {
-                    newcurr[curr] = parseInt(EnhancedJournalSheet.getCurrency(newcurr[curr]) + (currency[curr] || 0));
+                    newcurr[curr] = parseInt(EnhancedJournalSheet.getValue(newcurr, curr) + (currency[curr] || 0));
                 }
             }
             await entity.setFlag('monks-enhanced-journal', 'currency', newcurr);

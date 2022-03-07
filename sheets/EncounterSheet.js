@@ -1,6 +1,6 @@
 import { DCConfig } from "../apps/dc-config.js";
 import { TrapConfig } from "../apps/trap-config.js";
-import { setting, i18n, log, makeid, MonksEnhancedJournal } from "../monks-enhanced-journal.js";
+import { setting, i18n, log, makeid, MonksEnhancedJournal, quantityname, pricename, currencyname } from "../monks-enhanced-journal.js";
 import { EnhancedJournalSheet } from "../sheets/EnhancedJournalSheet.js";
 
 export class EncounterSheet extends EnhancedJournalSheet {
@@ -221,7 +221,7 @@ export class EncounterSheet extends EnhancedJournalSheet {
         let item = await this.getDocument(data);
 
         if (item) {
-            if (item.data.data[MonksEnhancedJournal.quantityname] || (item.data.type == "spell" && game.system.id == 'dnd5e')) {
+            if (this.getValue(item.data, quantityname()) || (item.data.type == "spell" && game.system.id == 'dnd5e')) {
                 let items = duplicate(this.object.data.flags["monks-enhanced-journal"].items || []);
 
                 let itemData = item.toObject();
@@ -229,10 +229,11 @@ export class EncounterSheet extends EnhancedJournalSheet {
                     itemData = await EncounterSheet.createScrollFromSpell(itemData);
                 }
 
-                let qty = (item.data.data[MonksEnhancedJournal.quantityname]?.hasOwnProperty("value") ? { value: 1 } : 1);
-                let data = { remaining: 1 };
-                data[MonksEnhancedJournal.quantityname] = qty;
-                items.push(mergeObject(itemData, { _id: makeid(), data: data }));
+                let update = { _id: makeid(), data: { remaining: 1 } };
+                data[quantityname()] = item.data.data[quantityname()];
+                this.setValue(update, quantityname(), 1);
+
+                items.push(mergeObject(itemData, update));
                 this.object.setFlag('monks-enhanced-journal', 'items', items);
             } else {
                 ui.notifications.warn("Cannot add item of this type");
@@ -380,7 +381,7 @@ export class EncounterSheet extends EnhancedJournalSheet {
             }
 
             this.purchaseItem.call(this, entry, id, actor);
-            return true;
+            return 1;
         }
         return false;
     }
@@ -391,7 +392,7 @@ export class EncounterSheet extends EnhancedJournalSheet {
         let li = $(event.currentTarget).closest('li')[0];
         let item = items.find(i => i._id == li.dataset.id);
         if (item) {
-            item.data.remaining = this.getCurrency(item.data[MonksEnhancedJournal.quantityname]);
+            item.data.remaining = this.getValue(item, quantityname());
             this.object.setFlag('monks-enhanced-journal', 'items', items);
         }
     }

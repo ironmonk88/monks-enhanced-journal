@@ -34,6 +34,16 @@ export let setting = key => {
     return game.settings.get("monks-enhanced-journal", key);
 };
 
+export let quantityname = () => {
+    return MonksEnhancedJournal.quantityname
+}
+export let pricename = () => {
+    return MonksEnhancedJournal.pricename;
+}
+export let currencyname = () => {
+    return MonksEnhancedJournal.currencyname;
+}
+
 export let makeid = () => {
     var result = '';
     var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -1476,9 +1486,9 @@ export class MonksEnhancedJournal {
                     if (data.purchase === true) {
                         let item = (entry.getFlag('monks-enhanced-journal', 'items') || []).find(i => i._id == data.itemid);
                         if (item) {
-                            let price = cls.getPrice(item.data.cost);
+                            let price = cls.getPrice(item, "cost");
                             price.value = price.value * (data.quantity ?? 1);
-                            cls.actorPurchase(price, actor);
+                            cls.actorPurchase(actor, price);
                         }
                     }
                 }
@@ -1622,14 +1632,15 @@ export class MonksEnhancedJournal {
                     if (!item)
                         continue;
 
-                    if (parseInt(item.data[MonksEnhancedJournal.quantityname]) < msgitem.quantity) {
+                    const cls = (entry._getSheetClass ? entry._getSheetClass() : null);
+
+                    let remaining = cls.getValue(item, quantityname(), null);
+                    if (remaining && remaining < msgitem.quantity) {
                         //check to see if there's enough quantity
                         ui.notifications.warn("Cannot transfer this item, not enough of this item remains.");
                         msg = `<span class="request-msg"><i class="fas fa-times"></i> Cannot transfer this item, not enough of this item remains.</span>`
                         continue;
                     }
-
-                    const cls = (entry._getSheetClass ? entry._getSheetClass() : null);
 
                     if (msgitem.sell > 0) {
                         //check if the player can afford it
@@ -1645,14 +1656,14 @@ export class MonksEnhancedJournal {
                     if ((itemData.type === "spell") && game.system.id == 'dnd5e') {
                         itemData = await cls.createScrollFromSpell(itemData);
                     }
-                    itemData.data[MonksEnhancedJournal.quantityname] = msgitem.quantity;
+                    cls.setValue(itemData, quantityname(), msgitem.quantity);
                     if (msgitem.sell > 0)
-                        itemData.data[MonksEnhancedJournal.pricename] = msgitem.sell + " " + msgitem.currency;
+                        cls.setValue(itemData, pricename(), msgitem.sell + " " + msgitem.currency);
                     delete itemData._id;
                     actor.createEmbeddedDocuments("Item", [itemData]);
                     //deduct the gold
                     if (msgitem.sell > 0)
-                        cls.actorPurchase({ value: (msgitem.sell * msgitem.quantity), currency: msgitem.currency }, actor);
+                        cls.actorPurchase(actor, { value: (msgitem.sell * msgitem.quantity), currency: msgitem.currency });
                     cls.purchaseItem.call(cls, entry, item._id, actor, msgitem.quantity, null, 'nochat');
                 }
 
@@ -1683,29 +1694,28 @@ export class MonksEnhancedJournal {
                         if (!actoritem)
                             continue;
 
-                        msgitem.maxquantity = cls.getQuantity(actoritem.data.data[MonksEnhancedJournal.quantityname]);
+                        msgitem.maxquantity = cls.getValue(actoritem.data, quantityname());
                         if (msgitem.maxquantity < msgitem.quantity) {
                             msgitem.quantity = Math.min(msgitem.maxquantity, msgitem.quantity);
                             ui.notifications.warn(`Not enough of the item remains, only selling ${msgitem.quantity}`);
                         }
 
                         //give the player the money
-                        await cls.actorPurchase({ value: -(msgitem.sell * msgitem.quantity), currency: msgitem.currency }, actor);
+                        await cls.actorPurchase(actor, { value: -(msgitem.sell * msgitem.quantity), currency: msgitem.currency });
 
                         //remove the item from the actor
                         if (msgitem.quantity == msgitem.maxquantity) {
                             await actoritem.delete();
                         } else {
                             let qty = msgitem.maxquantity - msgitem.quantity;
-                            let newQty = (actoritem.data.data[MonksEnhancedJournal.quantityname]?.hasOwnProperty("value") ? { value: qty } : qty);
-                            let data = {};
-                            data[MonksEnhancedJournal.quantityname] = newQty;
-                            await actoritem.update({ data: data });
+                            let update = { data: actoritem.data.data[quantityname()]};
+                            cls.setValue(update, quantityname(), qty);
+                            await actoritem.update(update);
                         }
 
                         //add the item to the shop
-                        msgitem.data.quantity = msgitem.quantity;
-                        msgitem.data[MonksEnhancedJournal.pricename] = (msgitem.sell * 2) + " " + msgitem.currency;
+                        cls.setValue(msgitem, quantityname(), msgitem.quantity);
+                        cls.setValue(msgitem, pricename(), (msgitem.sell * 2) + " " + msgitem.currency);
                         msgitem.lock = true;
                         msgitem.from = actor.name;
                         delete msgitem.quantity;
@@ -1751,7 +1761,7 @@ export class MonksEnhancedJournal {
 
         item.quantity = parseInt($(`li[data-id="${id}"] input[name="quantity"]`, html).val());
         let sell = $(`li[data-id="${id}"] input[name="sell"]`, html).val();
-        let price = ShopSheet.getPrice(sell);
+        let price = EnhancedJournalSheet.getPrice(sell);
 
         item.sell = price.value;
         item.currency = price.currency;
@@ -1990,31 +2000,6 @@ Hooks.on("preCreateJournalEntry", (entry, data, options, userId) => {
         if (cls && cls.defaultObject)
             flags = mergeObject(flags, cls.defaultObject);
     }
-    /*
-    switch (data.type) {
-        case 'encounter':
-            flags = mergeObject(flags, EncounterSheet.defaultObject);
-            break;
-        case 'checklist':
-            flags = mergeObject(flags, CheckListSheet.defaultObject);
-            break;
-        case 'shop':
-            flags = mergeObject(flags, ShopSheet.defaultObject);
-            break;
-        case 'place':
-            flags = mergeObject(flags, PlaceSheet.defaultObject);
-            break;
-        case 'slideshow':
-            flags = mergeObject(flags, SlideshowSheet.defaultObject);
-            break;
-        case 'quest':
-            flags = mergeObject(flags, QuestSheet.defaultObject);
-            break;
-        case 'person':
-            flags = mergeObject(flags, PersonSheet.defaultObject);
-            break;
-    }
-    */
     entry.data._source.flags['monks-enhanced-journal'] = flags;
 });
 
@@ -2073,16 +2058,18 @@ Hooks.on('dropActorSheetData', (actor, sheet, data) => {
     if (data.id == MonksEnhancedJournal._dragItem) {
         MonksEnhancedJournal._dragItem = null;
         let entry = game.journal.get(data.journalid);
-        const cls = (entry._getSheetClass ? entry._getSheetClass() : null);
-        if (cls && cls.itemDropped) {
-            cls.itemDropped.call(cls, data.id, actor, entry).then((result) => {
-                if (!!result) {
-                    data.data.data.quantity = cls.setQuantity(data.data.data.quantity, result);
-                    sheet._onDropItem(null, data);
-                }
-            });
+        if (entry) {
+            const cls = (entry._getSheetClass ? entry._getSheetClass() : null);
+            if (cls && cls.itemDropped) {
+                cls.itemDropped.call(cls, data.id, actor, entry).then((result) => {
+                    if (!!result) {
+                        cls.setValue(data.data, quantityname(), result);
+                        sheet._onDropItem(null, data);
+                    }
+                });
 
-            return false;
+                return false;
+            }
         }
     }
 });

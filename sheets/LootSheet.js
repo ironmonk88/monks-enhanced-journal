@@ -1,4 +1,4 @@
-import { setting, i18n, log, makeid, MonksEnhancedJournal } from "../monks-enhanced-journal.js";
+import { setting, i18n, log, makeid, MonksEnhancedJournal, quantityname, pricename, currencyname } from "../monks-enhanced-journal.js";
 import { EnhancedJournalSheet } from "../sheets/EnhancedJournalSheet.js";
 import { DistributeCurrency } from "../apps/distribute-currency.js";
 
@@ -75,7 +75,7 @@ export class LootSheet extends EnhancedJournalSheet {
         data.players = players.join(", ");
 
         data.valStr = (['pf2e'].includes(game.system.id) ? ".value" : "");
-        data.quantityname = MonksEnhancedJournal.quantityname;
+        data.quantityname = quantityname();
 
         data.canSplit = !['pf2e'].includes(game.system.id);
 
@@ -140,52 +140,16 @@ export class LootSheet extends EnhancedJournalSheet {
         }
 
         new DistributeCurrency(actors, currency, this).render(true);
-        /*
-        let actors = (this.object.getFlag('monks-enhanced-journal', 'actors') || []).map(a => {
-            return game.actors.get(a);
-        }).filter(a => !!a);
-
-        if (actors.length == 0)
-            return;
-
-        let split = {};
-        let remainder = {};
-        let currency = duplicate(this.object.getFlag('monks-enhanced-journal', 'currency') || {});
-        for (let [k, v] of Object.entries(currency)) {
-            split[k] = Math.floor(v / actors.length);
-            remainder[k] = parseInt(v - (split[k] * actors.length));
-        }
-
-        for (let actor of actors) {
-            let curr = actor.data.data[MonksEnhancedJournal.currencyname] || {};
-            for (let [k, v] of Object.entries(split)) {
-                if (v != 0) {
-                    let newVal = this.getCurrency(curr[k]) + v;
-                    curr[k] = (curr[k].hasOwnProperty("value") ? { value: newVal } : newVal);
-                }
-            }
-            let data = {};
-            data[MonksEnhancedJournal.currencyname] = curr;
-            await actor.update({ data: data });
-        }
-        await this.object.setFlag('monks-enhanced-journal', 'currency', remainder);
-        */
     }
 
     async doSplitMoney(characters, remainder){
         for (let character of characters) {
             let actor = game.actors.get(character.id);
-
-            let curr = actor.data.data[MonksEnhancedJournal.currencyname] || {};
             for (let [k, v] of Object.entries(character.currency)) {
                 if (v != 0) {
-                    let newVal = this.getCurrency(curr[k]) + v;
-                    curr[k] = (curr[k].hasOwnProperty("value") ? { value: newVal } : newVal);
+                    await this.addCurrency(actor, k, v);
                 }
             }
-            let data = {};
-            data[MonksEnhancedJournal.currencyname] = curr;
-            await actor.update({ data: data });
         }
         await this.object.setFlag('monks-enhanced-journal', 'currency', remainder);
     }
@@ -211,7 +175,7 @@ export class LootSheet extends EnhancedJournalSheet {
         }
         delete data.items;
 
-        data.flags['monks-enhanced-journal'].items = data.flags['monks-enhanced-journal'].items.filter(i => this.getCurrency(i.data[MonksEnhancedJournal.quantityname]) > 0);
+        data.flags['monks-enhanced-journal'].items = data.flags['monks-enhanced-journal'].items.filter(i => this.getValue(i, quantityname()) > 0);
 
         return flattenObject(data);
     }
@@ -237,11 +201,11 @@ export class LootSheet extends EnhancedJournalSheet {
 
         let id = li.dataset.id;
         let item = this.object.data.flags["monks-enhanced-journal"].items.find(i => i._id == id);
-        if (item == undefined || (!game.user.isGM && (item?.lock === true || this.getCurrency(item.data.quantity) <= 0)))
+        if (item == undefined || (!game.user.isGM && (item?.lock === true || this.getValue(item, quantityname()) <= 0)))
             return;
 
         item = duplicate(item);
-        item.data[MonksEnhancedJournal.quantityname] = this.setQuantity(item.data[MonksEnhancedJournal.quantityname], 1);
+        this.setValue(item, quantityname(), 1);
 
         dragData.id = id;
         dragData.journalid = this.object.id;
@@ -277,7 +241,7 @@ export class LootSheet extends EnhancedJournalSheet {
                         itemData = await LootSheet.createScrollFromSpell(itemData);
                     }
                     delete itemData._id;
-                    itemData.data[MonksEnhancedJournal.quantityname] = this.setQuantity(itemData.data[MonksEnhancedJournal.quantityname], 1);
+                    this.setValue(itemData, quantityname(), 1);
                     actor.createEmbeddedDocuments("Item", [itemData]);
                     this.constructor.purchaseItem.call(this.constructor, this.object, data.data._id, actor);
                 }
@@ -326,7 +290,7 @@ export class LootSheet extends EnhancedJournalSheet {
             return;
         }
 
-        let qty = this.getQuantity(item.data[MonksEnhancedJournal.quantityname], null);
+        let qty = this.getValue(item, quantityname(), null);
         if (!game.user.isGM && (qty != null && qty <= 0)) {
             ui.notifications.warn("Cannot transfer this item, not enough of this item remains.");
             return false;
@@ -354,7 +318,7 @@ export class LootSheet extends EnhancedJournalSheet {
 
                 LootSheet.createRequestMessage.call(this, this.object, item, actor);
                 MonksEnhancedJournal.emit("notify", { actor: actor.name, item: item.name });
-            });
+            }, false);
         } else if (this.object.data.flags['monks-enhanced-journal'].purchasing == 'free') {
             LootSheet.confirmQuantity(item, qty, async (html) => {
                 let quantity = parseInt($('input[name="quantity"]', html).val());
@@ -363,7 +327,7 @@ export class LootSheet extends EnhancedJournalSheet {
                     // Create the owned item
                     let itemData = duplicate(item);
                     delete itemData._id;
-                    itemData.data[MonksEnhancedJournal.quantityname] = this.setQuantity(itemData.data[MonksEnhancedJournal.quantityname], quantity);
+                    this.setValue(itemData, quantityname(), quantity);
                     actor.createEmbeddedDocuments("Item", [itemData]);
                     MonksEnhancedJournal.emit("purchaseItem",
                         {
@@ -374,7 +338,7 @@ export class LootSheet extends EnhancedJournalSheet {
                             quantity: quantity
                         })
                 }
-            });
+            }, false);
         }
     }
 
@@ -399,7 +363,7 @@ export class LootSheet extends EnhancedJournalSheet {
         // Create the owned item
         let itemData = duplicate(item);
         delete itemData._id;
-        itemData.data[MonksEnhancedJournal.quantityname] = this.setQuantity(itemData.data[MonksEnhancedJournal.quantityname], 1);
+        this.setValue(itemData, quantityname(), 1);
         actor.createEmbeddedDocuments("Item", [itemData]);
 
         item.requests[userid] = false;
@@ -460,7 +424,7 @@ export class LootSheet extends EnhancedJournalSheet {
     static async itemDropped(id, actor, entry) {
         let item = (entry.getFlag('monks-enhanced-journal', 'items') || []).find(i => i._id == id);
         if (item) {
-            let qty = this.getQuantity(item.data[MonksEnhancedJournal.quantityname], null);
+            let qty = this.getValue(item, quantityname(), null);
             if (!game.user.isGM && (qty != null && qty <= 0)) {
                 ui.notifications.warn("Cannot transfer this item, not enough of this item remains.");
                 return false;
@@ -484,7 +448,7 @@ export class LootSheet extends EnhancedJournalSheet {
 
                         LootSheet.createRequestMessage.call(this, entry, item, actor);
                         MonksEnhancedJournal.emit("notify", { actor: actor.name, item: item.name });
-                    });
+                    }, false);
                     return false;
                 } else {
                     let result = await LootSheet.confirmQuantity(item, qty, async (html) => {
@@ -502,7 +466,7 @@ export class LootSheet extends EnhancedJournalSheet {
                             return quantity;
                         }
                         return false;
-                    });
+                    }, false);
                     return result;
                 }
             }
