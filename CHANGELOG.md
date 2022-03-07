@@ -1,3 +1,9 @@
+# Version 1.0.49
+
+Fixing some very generous shops.  They were paying the players to take their items.
+
+And fixed an issue where Person sheets weren't loading if they didn't have a character attached.
+
 # Version 1.0.48
 
 Swapped the highlight on the Note HUD so that the invisible icon reflects the when the NOte really is invisible to players.

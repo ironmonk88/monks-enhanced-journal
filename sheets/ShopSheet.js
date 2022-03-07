@@ -543,7 +543,7 @@ export class ShopSheet extends EnhancedJournalSheet {
         if (Object.keys(currencies).length == 0)
             return;
 
-        ShopSheet.addCurrency(actor, price.currency, price.value);
+        ShopSheet.addCurrency(actor, price.currency, -price.value);
     }
 
     static async itemDropped(id, actor, entry) {

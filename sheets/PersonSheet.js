@@ -53,10 +53,12 @@ export class PersonSheet extends EnhancedJournalSheet {
         }
 
         let actorLink = this.object.getFlag('monks-enhanced-journal', 'actor');
-        let actor = game.actors.find(a => a.id == actorLink.id);
+        if (actorLink) {
+            let actor = game.actors.find(a => a.id == actorLink.id);
 
-        if (actor) {
-            data.actor = { id: actor.id, name: actor.name, img: actor.img };
+            if (actor) {
+                data.actor = { id: actor.id, name: actor.name, img: actor.img };
+            }
         }
 
         return data;
