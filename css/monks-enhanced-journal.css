@@ -1696,7 +1696,7 @@ height: fit-content;*/
     object-fit: contain;
 }
 
-.monks-journal-sheet.sheet .items-list .item.received .item-name .item-image {
+.monks-journal-sheet.sheet .items-list .item.received.empty .item-name .item-image {
     filter: grayscale(100%);
     opacity: 0.7;
 }
@@ -2606,4 +2606,21 @@ a.picture-link.broken {
 .monks-enhanced-journal.request-sale .items-list .item-name h4 {
     height: 27px;
     line-height: 27px;
+}
+
+.monks-enhanced-journal .content .actor.sheet {
+    min-height: 100%;
+    max-height: 100%;
+}
+
+.monks-enhanced-journal .content .actor.sheet > form {
+    height: 100%;
+}
+
+.monks-enhanced-journal .content .actor.sheet > form .tab {
+    height: 100%;
+}
+
+.monks-enhanced-journal .content .actor.sheet > form .tab.attributes {
+    overflow-y: auto;
 }

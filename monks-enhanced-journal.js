@@ -853,9 +853,9 @@ export class MonksEnhancedJournal {
             MonksEnhancedJournal.fixType(document);
 
             let sheet = (!document?._sheet ? document?._getSheetClass() : document?._sheet);
-            if (sheet?.constructor?.name == 'QuestPreviewShim')
+            if ((sheet?.name || sheet?.constructor?.name) == 'QuestPreviewShim')
                 return false;
-            if (document.data.flags["forien-quest-log"] && game.modules.get('forien-quest-log')?.active)
+            if ((sheet?.name || sheet?.constructor?.name) == 'DscrybApp')
                 return false;
         }
 
@@ -1184,6 +1184,8 @@ export class MonksEnhancedJournal {
                     MonksEnhancedJournal.slideshow.element = $('#slideshow-display');
                 } else {
                     MonksEnhancedJournal.slideshow.element = $('#slideshow-canvas');
+                    let canvascolor = slideshow.data.flags["monks-enhanced-journal"].canvascolor || "";
+                    $(MonksEnhancedJournal.slideshow.element).css({ 'background-color': canvascolor});
                     $('.slide-padding', MonksEnhancedJournal.slideshow.element).css({ flex: '0 0 ' + $('#sidebar').width() + 'px' });
                     MonksEnhancedJournal.slideshow.element.toggleClass('fullscreen', showas == 'fullscreen');
                 }
@@ -1479,10 +1481,10 @@ export class MonksEnhancedJournal {
             let entry = game.journal.get(data.shopid);
             let actor = game.actors.get(data.actorid);
 
-            if (entry && actor) {
+            if (entry) {
                 const cls = (entry._getSheetClass ? entry._getSheetClass() : null);
                 if (cls && cls.purchaseItem) {
-                    cls.purchaseItem.call(cls, entry, data.itemid, actor, data.quantity, data.user);
+                    cls.purchaseItem.call(cls, entry, data.itemid, data.quantity, { actor, user: data.user, chatmessage: data.chatmessage, purchased: data.purchased, remaining: data.remaining });
                     if (data.purchase === true) {
                         let item = (entry.getFlag('monks-enhanced-journal', 'items') || []).find(i => i._id == data.itemid);
                         if (item) {
@@ -1520,7 +1522,7 @@ export class MonksEnhancedJournal {
             const cls = (entry._getSheetClass ? entry._getSheetClass() : null);
             const sheet = new cls(entry, { render: false });
 
-            sheet.addItem(data.itemdata);
+            sheet.addItem({ data: data.itemdata });
         }
     }
 
@@ -1629,8 +1631,11 @@ export class MonksEnhancedJournal {
                     if (msgitem.quantity == 0)
                         continue;
                     let item = (entry.getFlag('monks-enhanced-journal', 'items') || []).find(i => i._id == msgitem._id);
-                    if (!item)
+                    if (!item) {
+                        ui.notifications.warn("Cannot transfer this item, not enough of this item remains.");
+                        msg = `<span class="request-msg"><i class="fas fa-times"></i> Cannot transfer this item, not enough of this item remains.</span>`
                         continue;
+                    }
 
                     const cls = (entry._getSheetClass ? entry._getSheetClass() : null);
 
@@ -1664,7 +1669,7 @@ export class MonksEnhancedJournal {
                     //deduct the gold
                     if (msgitem.sell > 0)
                         cls.actorPurchase(actor, { value: (msgitem.sell * msgitem.quantity), currency: msgitem.currency });
-                    cls.purchaseItem.call(cls, entry, item._id, actor, msgitem.quantity, null, 'nochat');
+                    cls.purchaseItem.call(cls, entry, item._id, msgitem.quantity, { actor, chatmessage: false });
                 }
 
                 $('.request-buttons', content).remove();
@@ -1708,7 +1713,8 @@ export class MonksEnhancedJournal {
                             await actoritem.delete();
                         } else {
                             let qty = msgitem.maxquantity - msgitem.quantity;
-                            let update = { data: actoritem.data.data[quantityname()]};
+                            let update = { data: {} };
+                            update.data[quantityname()] = actorItem.data.data[quantityname()];
                             cls.setValue(update, quantityname(), qty);
                             await actoritem.update(update);
                         }
@@ -1760,17 +1766,21 @@ export class MonksEnhancedJournal {
         let html = $(event.currentTarget).closest('ol.items-list');
 
         item.quantity = parseInt($(`li[data-id="${id}"] input[name="quantity"]`, html).val());
-        let sell = $(`li[data-id="${id}"] input[name="sell"]`, html).val();
-        let price = EnhancedJournalSheet.getPrice(sell);
-
-        item.sell = price.value;
-        item.currency = price.currency;
-        item.total = item.quantity * item.sell;
-
-        $(`li[data-id="${id}"] input[name="sell"]`, html).val(item.sell + ' ' + price.currency);
         $(`li[data-id="${id}"] .item-quantity span`, content).html(item.quantity);
-        $(`li[data-id="${id}"] .item-price span`, content).html(item.sell + ' ' + price.currency);
-        $(`li[data-id="${id}"] .item-total span`, content).html(item.total + ' ' + price.currency);
+
+        if ($(`li[data-id="${id}"] input[name="sell"]`, html).length) {
+            let sell = $(`li[data-id="${id}"] input[name="sell"]`, html).val();
+            let price = EnhancedJournalSheet.getPrice(sell);
+
+            item.sell = price.value;
+            item.currency = price.currency;
+            item.total = item.quantity * item.sell;
+
+            $(`li[data-id="${id}"] input[name="sell"]`, html).val(item.sell + ' ' + price.currency);
+
+            $(`li[data-id="${id}"] .item-price span`, content).html(item.sell + ' ' + price.currency);
+            $(`li[data-id="${id}"] .item-total span`, content).html(item.total + ' ' + price.currency);
+        }
 
         message.update({ content: content[0].outerHTML, flags: { 'monks-enhanced-journal': { items: items } } });
     }
@@ -1855,9 +1865,13 @@ export class MonksEnhancedJournal {
             type = (type == 'journalentry' || type == 'oldentry' ? 'base' : type);
 
             if (game.modules.get('_document-sheet-registrar')?.active) {
-                object.setFlag('_document-sheet-registrar', 'type', type);
-                object.data.flags["_document-sheet-registrar"] = { type: type };
-                warn(`Lib: Document Sheet Registrar is causing errors with Enhanced Journal.  It's recommended that you disable it`);
+                if (object.getFlag('_document-sheet-registrar', 'type') == undefined) {
+                    if(!object?.compendium?.locked)
+                        object.setFlag('_document-sheet-registrar', 'type', type);
+                    object.data.flags["_document-sheet-registrar"] = { type: type };
+                    warn(`Lib: Document Sheet Registrar is causing errors with Enhanced Journal.  It's recommended that you disable it`);
+                } else if (!object?.compendium?.locked)
+                    object.setFlag('_document-sheet-registrar', 'type', type);
             } else {
                 object.data.type = type;    //set the type of all entries since Foundry won't save the new type
             }
@@ -1985,7 +1999,6 @@ Hooks.once("ready", async function () {
 });
 
 Hooks.on("preCreateJournalEntry", (entry, data, options, userId) => {
-    let flags = { type: data.type };//(data.type == 'base' ? 'journalentry' : data.type) };
     if (data.type) {
         if (entry.id)
             MonksEnhancedJournal.fixType(entry);
@@ -1996,11 +2009,22 @@ Hooks.on("preCreateJournalEntry", (entry, data, options, userId) => {
                 entry.data.type = data.type;
         }
 
-        const cls = (entry._getSheetClass ? entry._getSheetClass() : null);
-        if (cls && cls.defaultObject)
-            flags = mergeObject(flags, cls.defaultObject);
+        if (entry.data.flags["monks-enhanced-journal"] == undefined) {
+            let flags = { type: data.type };//(data.type == 'base' ? 'journalentry' : data.type) };
+
+            const cls = (entry._getSheetClass ? entry._getSheetClass() : null);
+            if (cls && cls.defaultObject)
+                flags = mergeObject(flags, cls.defaultObject);
+
+            entry.data._source.flags['monks-enhanced-journal'] = flags;
+        }
+    } else if (entry.data.flags["monks-enhanced-journal"]) {
+        data.type = entry.data.flags["monks-enhanced-journal"].type;
+        if (game.modules.get("_document-sheet-registrar")?.active)
+            entry.data.flags["_document-sheet-registrar"] = { type: data.type };
+        else
+            entry.data.type = data.type;
     }
-    entry.data._source.flags['monks-enhanced-journal'] = flags;
 });
 
 Hooks.on("updateJournalEntry", (document, data, options, userId) => {
@@ -2062,6 +2086,27 @@ Hooks.on('dropActorSheetData', (actor, sheet, data) => {
             const cls = (entry._getSheetClass ? entry._getSheetClass() : null);
             if (cls && cls.itemDropped) {
                 cls.itemDropped.call(cls, data.id, actor, entry).then((result) => {
+                    if (!!result?.quantity) {
+                        cls.setValue(data.data, quantityname(), result.quantity);
+                        sheet._onDropItem(null, data);
+                    }
+                });
+
+                return false;
+            }
+        }
+    }
+});
+
+Hooks.on('dropJournalSheetData', (journal, sheet, data) => {
+    //check to see if an item was dropped from another Journal Sheet
+    if (data.id == MonksEnhancedJournal._dragItem) {
+        MonksEnhancedJournal._dragItem = null;
+        let entry = game.journal.get(data.journalid);
+        if (entry) {
+            const cls = (entry._getSheetClass ? entry._getSheetClass() : null);
+            if (cls && cls.itemDropped) {
+                cls.itemDropped.call(cls, data.id, journal, entry).then((result) => {
                     if (!!result) {
                         cls.setValue(data.data, quantityname(), result);
                         sheet._onDropItem(null, data);
@@ -2297,7 +2342,13 @@ Hooks.on("renderItemSheet", (sheet, html, data) => {
     //Change the price so we can specify the currency type
     $('input[name="data.price"]', html).attr('data-dtype', 'String');
 
-    if (data.options.addcost == true) {
+    if (data.options?.addcost == true) {
+        let quantityGroup = $('input[name="data.quantity"]', html).closest('.form-group');
+        $('<div>').addClass('form-group')
+            .append($('<label>').html("Remaining"))
+            .append($('<input>').attr('type', 'text').attr('name', 'data.remaining').attr('data-dtype', 'String').val(data.data.remaining))
+            .insertAfter(quantityGroup);
+
         let priceGroup = $('input[name="data.price"]', html).closest('.form-group');
         $('<div>').addClass('form-group')
             .append($('<label>').html("Cost"))

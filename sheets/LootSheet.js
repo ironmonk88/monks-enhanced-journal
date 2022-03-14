@@ -192,7 +192,7 @@ export class LootSheet extends EnhancedJournalSheet {
     async _onDragStart(event) {
         const li = $(event.currentTarget).closest("li")[0];
 
-        const dragData = { from: 'monks-enhanced-journal' };
+        const dragData = { from: this.object.id };
 
         if (!game.user.isGM && !['free', 'confirm'].includes(this.object.data.flags["monks-enhanced-journal"].purchasing)) {
             event.preventDefault();
@@ -205,7 +205,7 @@ export class LootSheet extends EnhancedJournalSheet {
             return;
 
         item = duplicate(item);
-        this.setValue(item, quantityname(), 1);
+        //this.setValue(item, quantityname(), 1);
 
         dragData.id = id;
         dragData.journalid = this.object.id;
@@ -229,37 +229,86 @@ export class LootSheet extends EnhancedJournalSheet {
         }
 
         if (data.type == 'Item') {
-            if (data.from == 'monks-enhanced-journal') {
+            if (data.from == this.object.id) {
                 if (!$(event.currentTarget).hasClass('loot-character'))
                     return;
 
                 event.preventDefault;
                 let actor = game.actors.get(event.currentTarget.id);
                 if (actor) {
-                    let itemData = duplicate(data.data);
-                    if ((itemData.type === "spell") && game.system.id == 'dnd5e') {
-                        itemData = await LootSheet.createScrollFromSpell(itemData);
+                    let item = await this.getDocument(data);
+                    let max = this.getValue(item.data, quantityname(), null);
+                    let result = await LootSheet.confirmQuantity(item, max, "transfer", false);
+                    if (!!result?.quantity) {
+                        let itemData = item.toObject();
+                        if ((itemData.type === "spell") && game.system.id == 'dnd5e') {
+                            itemData = await LootSheet.createScrollFromSpell(itemData);
+                        }
+                        delete itemData._id;
+                        this.setValue(itemData.data, quantityname(), result.quantity);
+                        actor.createEmbeddedDocuments("Item", [itemData]);
+
+                        let entry = game.journal.get(data.from);
+                        if (entry)
+                            this.constructor.purchaseItem.call(this.constructor, entry, data.data._id, result.quantity, { actor });
                     }
-                    delete itemData._id;
-                    this.setValue(itemData, quantityname(), 1);
-                    actor.createEmbeddedDocuments("Item", [itemData]);
-                    this.constructor.purchaseItem.call(this.constructor, this.object, data.data._id, actor);
                 }
             } else {
-                if (game.user.isGM) {
-                    this.addItem(data);
-                } else
-                    MonksEnhancedJournal.emit("addItem",
-                        {
-                            lootid: this.object.id,
-                            itemdata: data
-                        });
+                let item = await this.getDocument(data);
+                let max = this.getValue(item.data, quantityname(), null);
+                let result = await LootSheet.confirmQuantity(item, max, (game.user.isGM ? "transfer" : "take"), false);
+                if (!!result?.quantity) {
+                    this.setValue(item.data, quantityname(), result.quantity);
 
-                if (data.data && data.actorId) {
-                    let actor = game.actors.get(data.actorId);
-                    if (actor) {
-                        let item = actor.items.get(data.data._id);
-                        item.delete();
+                    if (game.user.isGM) {
+                        this.addItem(item);
+                    } else {
+                        MonksEnhancedJournal.emit("addItem",
+                            {
+                                lootid: this.object.id,
+                                itemdata: item.toObject()
+                            });
+                    }
+
+                    //is this transferring from another journal entry?
+                    let entry = game.journal.get(data.from);
+                    if (entry) {
+                        if(game.user.isGM)
+                            this.constructor.purchaseItem.call(this.constructor, entry, data.data._id, result.quantity, { chatmessage: false });
+                        else
+                            MonksEnhancedJournal.emit("purchaseItem",
+                                {
+                                    shopid: entry.id,
+                                    itemid: data.data._id,
+                                    user: game.user.id,
+                                    quantity: result.quantity,
+                                    chatmessage: false
+                                });
+                    }
+
+                    if (data.data && data.actorId) {
+                        let actor = game.actors.get(data.actorId);
+                        if (actor) {
+                            let item = actor.items.get(data.data._id);
+                            let quantity = this.getValue(item.data, quantityname());
+                            if (result.quantity >= quantity)
+                                item.delete();
+                            else {
+                                let newQty = quantity - result.quantity;
+                                item.update({ quantity: newQty });
+                            }
+                        }
+                    }
+                }
+            }
+        } else if (data.type == 'Folder' && data.documentName == "Item") {
+            // Import items from the folder
+            let folder = game.folders.get(data.id);
+            if (folder) {
+                for (let item of folder.content) {
+                    if (item instanceof Item) {
+                        let itemData = item.toObject();
+                        await this.addItem({data: itemData });
                     }
                 }
             }
@@ -290,8 +339,8 @@ export class LootSheet extends EnhancedJournalSheet {
             return;
         }
 
-        let qty = this.getValue(item, quantityname(), null);
-        if (!game.user.isGM && (qty != null && qty <= 0)) {
+        let max = this.getValue(item, quantityname(), null);
+        if (!game.user.isGM && (max != null && max <= 0)) {
             ui.notifications.warn("Cannot transfer this item, not enough of this item remains.");
             return false;
         }
@@ -311,23 +360,23 @@ export class LootSheet extends EnhancedJournalSheet {
                 }
             );
         } else if (this.object.data.flags['monks-enhanced-journal'].purchasing == 'confirm') {
-            await LootSheet.confirmQuantity(item, qty, (html) => {
+            let result = await LootSheet.confirmQuantity(item, max, "take", false);
+            if (!!result?.quantity) {
                 //create the chat message informaing the GM that player is trying to sell an item.
-                item.quantity = parseInt($('input[name="quantity"]', html).val());
-                item.maxquantity = qty;
+                item.quantity = result.quantity;
+                item.maxquantity = max;
 
                 LootSheet.createRequestMessage.call(this, this.object, item, actor);
                 MonksEnhancedJournal.emit("notify", { actor: actor.name, item: item.name });
-            }, false);
+            }
         } else if (this.object.data.flags['monks-enhanced-journal'].purchasing == 'free') {
-            LootSheet.confirmQuantity(item, qty, async (html) => {
-                let quantity = parseInt($('input[name="quantity"]', html).val());
-
-                if (quantity > 0) {
+            let result = await LootSheet.confirmQuantity(item, max, "take", false);
+            if (!!result?.quantity) {
+                if (result.quantity > 0) {
                     // Create the owned item
                     let itemData = duplicate(item);
                     delete itemData._id;
-                    this.setValue(itemData, quantityname(), quantity);
+                    this.setValue(itemData, quantityname(), result.quantity);
                     actor.createEmbeddedDocuments("Item", [itemData]);
                     MonksEnhancedJournal.emit("purchaseItem",
                         {
@@ -335,10 +384,10 @@ export class LootSheet extends EnhancedJournalSheet {
                             itemid: item._id,
                             actorid: actor.id,
                             user: game.user.id,
-                            quantity: quantity
+                            quantity: result.quantity
                         })
                 }
-            }, false);
+            }
         }
     }
 
@@ -353,23 +402,27 @@ export class LootSheet extends EnhancedJournalSheet {
         if (!item || item.requests.length == 0)
             return;
 
-        let userid = Object.entries(item.requests || {}).find(([k,v]) => v)[0];
+        let userid = Object.entries(item.requests || {}).find(([k, v]) => v)[0];
         let user = game.users.get(userid);
         if (!user) return;
 
         const actor = user.character;
         if (!actor) return;
 
-        // Create the owned item
-        let itemData = duplicate(item);
-        delete itemData._id;
-        this.setValue(itemData, quantityname(), 1);
-        actor.createEmbeddedDocuments("Item", [itemData]);
+        let max = this.getValue(item.data, quantityname(), null);
+        let result = await LootSheet.confirmQuantity(item, max, "grant", false);
+        if (!!result?.quantity) {
+            // Create the owned item
+            let itemData = duplicate(item);
+            delete itemData._id;
+            this.setValue(itemData, quantityname(), result.quantity);
+            actor.createEmbeddedDocuments("Item", [itemData]);
 
-        item.requests[userid] = false;
-        await this.object.setFlag('monks-enhanced-journal', 'items', items);
+            item.requests[userid] = false;
+            await this.object.setFlag('monks-enhanced-journal', 'items', items);
 
-        await this.constructor.purchaseItem.call(this.constructor, this.object, id, actor, 1, user);
+            await this.constructor.purchaseItem.call(this.constructor, this.object, id, result.quantity, { actor, user });
+        }
     }
 
     async addItem(data) {
@@ -384,7 +437,7 @@ export class LootSheet extends EnhancedJournalSheet {
             }
 
             items.push(mergeObject(itemData, { _id: makeid() }));
-            this.object.setFlag('monks-enhanced-journal', 'items', items);
+            await this.object.setFlag('monks-enhanced-journal', 'items', items);
             return true;
         }
     }
@@ -424,8 +477,8 @@ export class LootSheet extends EnhancedJournalSheet {
     static async itemDropped(id, actor, entry) {
         let item = (entry.getFlag('monks-enhanced-journal', 'items') || []).find(i => i._id == id);
         if (item) {
-            let qty = this.getValue(item, quantityname(), null);
-            if (!game.user.isGM && (qty != null && qty <= 0)) {
+            let max = this.getValue(item, quantityname(), null);
+            if (!game.user.isGM && (max != null && max <= 0)) {
                 ui.notifications.warn("Cannot transfer this item, not enough of this item remains.");
                 return false;
             }
@@ -436,38 +489,31 @@ export class LootSheet extends EnhancedJournalSheet {
                 return false;
             }
 
-            if (game.user.isGM) {
-                this.purchaseItem.call(this, entry, id, actor);
-                return true;
-            } else {
-                if (entry.data.flags["monks-enhanced-journal"].purchasing == 'confirm') {
-                    await LootSheet.confirmQuantity(item, qty, (html) => {
+            let result = await LootSheet.confirmQuantity(item, max, "take", false);
+            if (!!result?.quantity) {
+                if (game.user.isGM) {
+                    LootSheet.purchaseItem.call(this, entry, id, result.quantity, { actor });
+                    return result;
+                } else {
+                    if (entry.data.flags["monks-enhanced-journal"].purchasing == 'confirm') {
                         //create the chat message informaing the GM that player is trying to sell an item.
-                        item.quantity = parseInt($('input[name="quantity"]', html).val());
-                        item.maxquantity = (qty != "" ? parseInt(qty) : null);
+                        item.quantity = result.quantity;
+                        item.maxquantity = (max != "" ? parseInt(max) : null);
 
                         LootSheet.createRequestMessage.call(this, entry, item, actor);
                         MonksEnhancedJournal.emit("notify", { actor: actor.name, item: item.name });
-                    }, false);
-                    return false;
-                } else {
-                    let result = await LootSheet.confirmQuantity(item, qty, async (html) => {
-                        let quantity = parseInt($('input[name="quantity"]', html).val());
-
-                        if (quantity > 0) {
+                    } else {
+                        if (result.quantity > 0) {
                             MonksEnhancedJournal.emit("purchaseItem",
                                 {
                                     shopid: entry.id,
                                     actorid: actor.id,
                                     itemid: id,
-                                    quantity: quantity,
+                                    quantity: result.quantity,
                                     user: game.user.id
                                 });
-                            return quantity;
                         }
-                        return false;
-                    }, false);
-                    return result;
+                    }
                 }
             }
         }

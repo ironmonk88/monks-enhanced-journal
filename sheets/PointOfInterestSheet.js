@@ -71,13 +71,15 @@ export class PointOfInterestSheet extends EnhancedJournalSheet {
     _getSubmitData(updateData = {}) {
         let data = expandObject(super._getSubmitData(updateData));
 
-        data.flags['monks-enhanced-journal'].relationships = duplicate(this.object.getFlag("monks-enhanced-journal", "relationships") || []);
-        for (let relationship of data.flags['monks-enhanced-journal'].relationships) {
-            let dataRel = data.relationships[relationship.id];
-            if (dataRel)
-                relationship = mergeObject(relationship, dataRel);
+        if (data.relationships) {
+            data.flags['monks-enhanced-journal'].relationships = duplicate(this.object.getFlag("monks-enhanced-journal", "relationships") || []);
+            for (let relationship of data.flags['monks-enhanced-journal'].relationships) {
+                let dataRel = data.relationships[relationship.id];
+                if (dataRel)
+                    relationship = mergeObject(relationship, dataRel);
+            }
+            delete data.relationships;
         }
-        delete data.relationships;
 
         return flattenObject(data);
     }

@@ -71,6 +71,7 @@ export class EncounterSheet extends EnhancedJournalSheet {
         data.currency = Object.keys(MonksEnhancedJournal.currencies).reduce((a, v) => ({ ...a, [v]: currency[v] || 0 }), {});
 
         data.valStr = (['pf2e'].includes(game.system.id) ? ".value" : "");
+        data.quantityname = quantityname();
 
         return data;
     }
@@ -128,23 +129,27 @@ export class EncounterSheet extends EnhancedJournalSheet {
     _getSubmitData(updateData = {}) {
         let data = expandObject(super._getSubmitData(updateData));
 
-        data.flags['monks-enhanced-journal'].items = duplicate(this.object.getFlag("monks-enhanced-journal", "items") || []);
-        for (let item of data.flags['monks-enhanced-journal'].items) {
-            let dataItem = data.items[item._id];
-            if (dataItem)
-                item = mergeObject(item, dataItem);
-            if (!item.assigned && item.received)
-                delete item.received;
+        if (data.items) {
+            data.flags['monks-enhanced-journal'].items = duplicate(this.object.getFlag("monks-enhanced-journal", "items") || []);
+            for (let item of data.flags['monks-enhanced-journal'].items) {
+                let dataItem = data.items[item._id];
+                if (dataItem)
+                    item = mergeObject(item, dataItem);
+                if (!item.assigned && item.received)
+                    delete item.received;
+            }
+            delete data.items;
         }
-        delete data.items;
 
-        data.flags['monks-enhanced-journal'].actors = duplicate(this.object.getFlag("monks-enhanced-journal", "actors") || []);
-        for (let actor of data.flags['monks-enhanced-journal'].actors) {
-            let dataActor = data.actors[actor.id];
-            if (dataActor)
-                actor = mergeObject(actor, dataActor);
+        if (data.actors) {
+            data.flags['monks-enhanced-journal'].actors = duplicate(this.object.getFlag("monks-enhanced-journal", "actors") || []);
+            for (let actor of data.flags['monks-enhanced-journal'].actors) {
+                let dataActor = data.actors[actor.id];
+                if (dataActor)
+                    actor = mergeObject(actor, dataActor);
+            }
+            delete data.actors;
         }
-        delete data.actors;
 
         return flattenObject(data);
     }
@@ -156,7 +161,7 @@ export class EncounterSheet extends EnhancedJournalSheet {
     _onDragStart(event) {
         const target = event.currentTarget;
 
-        const dragData = { from: 'monks-enhanced-journal' };
+        const dragData = { from: this.object.id };
 
         if ($(target).hasClass('create-encounter')) {
             dragData.type = "CreateEncounter";
@@ -199,7 +204,7 @@ export class EncounterSheet extends EnhancedJournalSheet {
             //let scrollTop = $('.encounter-content', this.element).scrollTop();
             this.addActor(data);
         } else if (data.type == 'Item') {
-            if (data.from == 'monks-enhanced-journal')  //don't drop on yourself
+            if (data.from == this.object.id)  //don't drop on yourself
                 return;
             this.addItem(data);
         }
@@ -375,13 +380,17 @@ export class EncounterSheet extends EnhancedJournalSheet {
     static async itemDropped(id, actor, entry) {
         let item = (entry.getFlag('monks-enhanced-journal', 'items') || []).find(i => i._id == id);
         if (item) {
-            if (item.remaining < 1) {
-                ui.notifications.warn("Cannot transfer this item, not enough of this item remains.");
-                return false;
-            }
+            let max = this.getValue(item, "remaining", null);
+            let result = await EncounterSheet.confirmQuantity(item, max, "transfer", false);
+            if (!!result?.quantity) {
+                if (item.data.remaining < result?.quantity) {
+                    ui.notifications.warn("Cannot transfer this item, not enough of this item remains.");
+                    return false;
+                }
 
-            this.purchaseItem.call(this, entry, id, actor);
-            return 1;
+                this.purchaseItem.call(this, entry, id, result.quantity, { actor, remaining: true });
+                return result;
+            }
         }
         return false;
     }

@@ -1,5 +1,6 @@
 import { MonksEnhancedJournal, log, setting, i18n, makeid } from '../monks-enhanced-journal.js';
 import { SlideText } from "../apps/slidetext.js";
+import { createSlideThumbnail } from "../sheets/SlideshowSheet.js";
 
 export class SlideConfig extends FormApplication {
     constructor(object, journalentry, options = {}) {
@@ -49,8 +50,10 @@ export class SlideConfig extends FormApplication {
             return text;
         });
 
+        data.thumbnail = (this.journalentry._thumbnails && this.journalentry._thumbnails[this.object.id]) || this.object.img;
+
         if (this.object.background?.color == '') {
-            data.background = `background-image:url(\'${this.object.img}\');`;
+            data.background = `background-image:url(\'${data.thumbnail}\');`;
         }
         else
             data.background = `background-color:${this.object.color}`;
@@ -172,18 +175,16 @@ export class SlideConfig extends FormApplication {
         });
     }
 
-    updateImage() {
-        /*
-         <div class="slide-background"><div style="{{this.background}}"></div></div>
-            <img class="slide-image" src="{{object.img}}" style="object-fit:{{object.sizing}}" />
-            */
+    async updateImage() {
+        let src = $('input[name="img"]').val()
+        this.journalentry._thumbnails[this.object.id] = await createSlideThumbnail(src);
+        let thumbnail = this.journalentry._thumbnails[this.object.id] || src;
         if ($('input[name="background.color"]').val() == '')
-            $('.slide-background div', this.element).css({ 'background-image': `url(${$('input[name="img"]').val()})`, 'background-color':'' });
+            $('.slide-background div', this.element).css({ 'background-image': `url(${thumbnail})`, 'background-color':'' });
         else
             $('.slide-background div', this.element).css({ 'background-image': '', 'background-color': $('input[name="background.color"]').val() });
 
-        $('.slide-image', this.element).attr('src', $('input[name="img"]').val()).css({ 'object-fit': $('select[name="sizing"]').val()});
-
+        $('.slide-image', this.element).attr('src', thumbnail).css({ 'object-fit': $('select[name="sizing"]').val()});
     }
 
     selectText(ev) {

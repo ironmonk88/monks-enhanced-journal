@@ -19,7 +19,7 @@
         </li>
         <li class="item flexrow" data-id="{{this._id}}">
             <div class="item-name flexrow">
-                <h4>Quantity</h4>
+                <h4>Quantity{{#if this.maxquantity}} <i><small>(Max {{this.maxquantity}})</small></i>{{/if}}</h4>
             </div>
 
             <div class="item-quantity flexrow" style="flex: 0 0 70px;">

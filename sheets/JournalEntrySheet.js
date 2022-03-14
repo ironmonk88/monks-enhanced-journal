@@ -92,7 +92,7 @@ export class JournalEntrySheet extends EnhancedJournalSheet {
                 condition: () => game.user.isGM,
                 callback: li => {
                     if (this.enhancedjournal) {
-                        this.enhancedjournal.doShowPlayers({ ctrlKey: true });
+                        this.enhancedjournal.doShowPlayers.call(this, { ctrlKey: true });
                     } else
                         this.object.show('image', true);
                 }

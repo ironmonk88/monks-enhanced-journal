@@ -29,6 +29,13 @@
                         <input type="checkbox" name="flags.monks-enhanced-journal.loop" {{checked data.flags.monks-enhanced-journal.loop}}>
                     </div>
                 </div>
+                <div class="form-group">
+                    <label for="canvascolor">{{localize 'MonksEnhancedJournal.CanvasColour'}}</label>
+                    <div class="form-fields" style="justify-content: flex-end;">
+                        <input type="text" name="flags.monks-enhanced-journal.canvascolor" data-dtype="String" value="{{data.flags.monks-enhanced-journal.canvascolor}}" style="flex: 0 0 100px;">
+                        <input type="color" data-edit="flags.monks-enhanced-journal.canvascolor" value="{{data.flags.monks-enhanced-journal.canvascolor}}" style="flex: 0 0 100px;">
+                    </div>
+                </div>
                 <header class="form-header" style="font-size:16px;">
                     <h3><i class="fas fa-music"></i> {{localize 'MonksEnhancedJournal.Audio'}}</h3>
                 </header>
@@ -76,7 +83,7 @@
                         <div class="slide{{#if this.active}} active{{/if}}" data-slide-id="{{this.id}}">
                             <div class="slide-inner">
                                 <div class="slide-background"><div style="{{this.background}}"></div></div>
-                                <img class="slide-image" src="{{this.img}}" style="object-fit:{{this.sizing}}" />
+                                <img class="slide-image" src="{{this.thumbnail}}" style="object-fit:{{this.sizing}}" />
                                 <div class="slide-textarea flexcol">
                                     {{#each this.texts}}
                                     <div class="slide-text" data-id="{{this.id}}" style="{{this.style}}">{{this.text}}</div>

@@ -4,15 +4,25 @@
     <div class="flexrow" style="align-items:center;">
         <img style="flex:0 0 30px;width:30px;height:30px;margin-right:8px;" src="{{img}}" /><i>{{name}}</i>
     </div>
+    <hr />
     <div class="flexrow" style="align-items: center;">
-        <div>
-            <b>Quantity:</b> <input type="number" min="1" {{#if maxquantity}}max="{{maxquantity}}"{{/if}} step="1" name="quantity" style="width:50px;text-align:right;" value="{{quantity}}" /> {{#if maxquantity}}<i>(Max: {{maxquantity}})</i>{{/if}}
+        <div></div>
+        <div class="flexcol">
+            <div class="flexrow">
+                <span><b>Quantity:</b>{{#if maxquantity}}<i><small>(Max: {{maxquantity}})</small></i>{{/if}}</span>
+                <input type="number" min="1" {{#if maxquantity}} max="{{maxquantity}}" {{/if}} step="1" name="quantity" style="flex:0 0 75px;text-align:right;" value="{{quantity}}" />
+            </div>
+            {{#if total }}
+            <div class="flexrow">
+                <span><b>Price:</b></span>
+                {{#if isGM}}<input type="text" name="price" style="flex: 0 0 75px; text-align: right;" value="{{price}}" />{{else}}{{price}}{{/if}}
+            </div>
+            <div class="flexrow" style="border-top: 1px solid #C0C0C0;">
+                <span><b>Total:</b></span>
+                <span class="request-total" style="text-align:right;">{{total}}</span>
+            </div>
+            {{/if}}
         </div>
-        {{#if total }}
-        <div style="text-align:right;">
-            <b>Total:</b> <span class="request-total">{{total}}</span>
-        </div>
-        {{/if}}
     </div>
 </div>
 <hr />

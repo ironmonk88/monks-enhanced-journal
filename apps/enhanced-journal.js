@@ -157,6 +157,8 @@ export class EnhancedJournal extends Application {
             else
                 this.subsheet = new cls(this.object, { editable: this.object.isOwner });
 
+            this.subsheet._state = this.subsheet.constructor.RENDER_STATES.RENDERING;
+
             if (this.subsheet._getHeaderButtons && this.object.id) {
                 let buttons = this.subsheet._getHeaderButtons();
                 buttons.findSplice(b => b.class == "share-image");
@@ -281,6 +283,7 @@ export class EnhancedJournal extends Application {
                 $('footer', this.element).hide();
 
             this.object._sheet = null; //set this to null so that other things can open the sheet
+            this.subsheet._state = this.subsheet.constructor.RENDER_STATES.RENDERED;
             
         } catch(err) {
             //+++ display an error rendering the subsheet
@@ -903,7 +906,7 @@ export class EnhancedJournal extends Application {
         const target = event.currentTarget;
 
         if ($(target).hasClass('journal-tab')) {
-            const dragData = { from: 'monks-enhanced-journal' };
+            const dragData = { from: this.object.id };
 
             let tabid = target.dataset.tabid;
             let tab = this.tabs.find(t => t.id == tabid);
@@ -990,9 +993,9 @@ export class EnhancedJournal extends Application {
 
     doShowPlayers(event) {
         if (event.shiftKey)
-            this._onShowPlayers(this.object, null, { showpic: false }, event);
+            this._onShowPlayers({ data: { users: null, object: this.object, options: { showpic: false } } });
         else if (event.ctrlKey)
-            this._onShowPlayers(this.object, null, { showpic: true }, event);
+            this._onShowPlayers({ data: { users: null, object: this.object, options: { showpic: true } } });
         else {
             let type = this.entitytype;
             new SelectPlayer(this, { showpic: $('.fullscreen-image', this.element).is(':visible') || ((type == 'journalentry' || type == 'oldentry') && $('.tab.picture', this.element).hasClass('active') )}).render(true);

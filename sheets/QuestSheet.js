@@ -52,6 +52,7 @@ export class QuestSheet extends EnhancedJournalSheet {
         }
 
         data.valStr = (['pf2e'].includes(game.system.id) ? ".value" : "");
+        data.quantityname = quantityname();
 
         data.relationships = {};
         for (let item of (data.data.flags['monks-enhanced-journal']?.relationships || [])) {
@@ -277,41 +278,47 @@ export class QuestSheet extends EnhancedJournalSheet {
     _getSubmitData(updateData = {}) {
         let data = expandObject(super._getSubmitData(updateData));
 
-        data.flags['monks-enhanced-journal'].rewards = duplicate(this.getRewardData() || []);
-        for (let reward of data.flags['monks-enhanced-journal'].rewards) {
-            let dataReward = data.reward[reward.id];
-            let olditems = duplicate(reward.items);
-            reward = mergeObject(reward, dataReward);
-            reward.items = olditems;
-            if (reward.items && dataReward) {
-                for (let item of reward.items) {
-                    let dataItem = dataReward.items[item._id];
-                    if (dataItem)
-                        item = mergeObject(item, dataItem);
-                    if (!item.assigned && item.received)
-                        delete item.received;
+        if (data.reward) {
+            data.flags['monks-enhanced-journal'].rewards = duplicate(this.getRewardData() || []);
+            for (let reward of data.flags['monks-enhanced-journal'].rewards) {
+                let dataReward = data.reward[reward.id];
+                let olditems = duplicate(reward.items);
+                reward = mergeObject(reward, dataReward);
+                reward.items = olditems;
+                if (reward.items && dataReward) {
+                    for (let item of reward.items) {
+                        let dataItem = dataReward.items[item._id];
+                        if (dataItem)
+                            item = mergeObject(item, dataItem);
+                        if (!item.assigned && item.received)
+                            delete item.received;
+                    }
                 }
             }
+            delete data.reward;
         }
-        delete data.reward;
 
-        data.flags['monks-enhanced-journal'].objectives = duplicate(this.object.getFlag("monks-enhanced-journal", "objectives") || []);
-        if (data.flags['monks-enhanced-journal'].objectives) {
-            for (let objective of data.flags['monks-enhanced-journal'].objectives) {
-                let dataObj= data.objectives[objective.id];
-                if (dataObj)
-                    objective = mergeObject(objective, dataObj);
+        if (data.objectives) {
+            data.flags['monks-enhanced-journal'].objectives = duplicate(this.object.getFlag("monks-enhanced-journal", "objectives") || []);
+            if (data.flags['monks-enhanced-journal'].objectives) {
+                for (let objective of data.flags['monks-enhanced-journal'].objectives) {
+                    let dataObj = data.objectives[objective.id];
+                    if (dataObj)
+                        objective = mergeObject(objective, dataObj);
+                }
             }
+            delete data.objectives;
         }
-        delete data.objectives;
 
-        data.flags['monks-enhanced-journal'].relationships = duplicate(this.object.getFlag("monks-enhanced-journal", "relationships") || []);
-        for (let relationship of data.flags['monks-enhanced-journal'].relationships) {
-            let dataRel = data.relationships[relationship.id];
-            if (dataRel)
-                relationship = mergeObject(relationship, dataRel);
+        if (data.relationships) {
+            data.flags['monks-enhanced-journal'].relationships = duplicate(this.object.getFlag("monks-enhanced-journal", "relationships") || []);
+            for (let relationship of data.flags['monks-enhanced-journal'].relationships) {
+                let dataRel = data.relationships[relationship.id];
+                if (dataRel)
+                    relationship = mergeObject(relationship, dataRel);
+            }
+            delete data.relationships;
         }
-        delete data.relationships;
 
         return flattenObject(data);
     }
@@ -460,7 +467,7 @@ export class QuestSheet extends EnhancedJournalSheet {
         }
 
         if (data.type == 'Item') {
-            if (data.from == 'monks-enhanced-journal')  //don't drop on yourself
+            if (data.from == this.object.id)  //don't drop on yourself
                 return;
             this.addItem(data);
         } else if (data.type == 'Actor') {
@@ -540,13 +547,17 @@ export class QuestSheet extends EnhancedJournalSheet {
             if (items) {
                 let item = items.find(i => i._id == id);
                 if (item) {
-                    if (item.remaining < 1) {
-                        ui.notifications.warn("Cannot transfer this item, not enough of this item remains.");
-                        return false;
-                    }
+                    let max = this.getValue(item, "remaining", null);
+                    let result = await QuestSheet.confirmQuantity(item, max, "transfer", false);
+                    if (!!result?.quantity) {
+                        if (item.data.remaining < result?.quantity) {
+                            ui.notifications.warn("Cannot transfer this item, not enough of this item remains.");
+                            return false;
+                        }
 
-                    this.purchaseItem.call(this, entry, id, actor);
-                    return 1;
+                        this.purchaseItem.call(this, entry, id, result.quantity, { actor, remaining: true });
+                        return result;
+                    }
                 }
             }
         }

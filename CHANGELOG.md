@@ -1,3 +1,33 @@
+# Version 1.0.50
+
+Added the option to drag and drop items between Loot Entries
+
+Change the slideshow so that images are being buffered.
+
+Fixed issues with the Actor sheet not scrolling
+
+Added support for dScryb
+
+Added option to change the background colour used when the slideshow fills the screen rather than in a window.
+
+Fixed issues when create a new Journal Entry
+
+Fixed an issue with saving changes to the Notes text area.
+
+Added check to make sure that Notes aren't editable if the GM isn't present.
+
+Fixed an issue displaying infinity quantity items when Zero Quantity is set to be hidden.
+
+Sorted item lists by type, so when items change the categories don't shift around
+
+Added option to add a relationship between two organizations
+
+Fixed an issue with showing the picture of a Journal Entry to players
+
+Fixed an issue when converting to a Place Entry
+
+Fixed an issue saving the sound file for Slide
+
 # Version 1.0.49
 
 Fixing some very generous shops.  They were paying the players to take their items.

@@ -2,6 +2,10 @@ import { SlideConfig } from "../apps/slideconfig.js";
 import { setting, i18n, log, makeid, MonksEnhancedJournal } from "../monks-enhanced-journal.js";
 import { EnhancedJournalSheet } from "../sheets/EnhancedJournalSheet.js";
 
+export let createSlideThumbnail = (src) => {
+    return SlideshowSheet.createSlideThumbnail(src);
+}
+
 export class SlideshowSheet extends EnhancedJournalSheet {
     constructor(data, options) {
         super(data, options);
@@ -27,8 +31,12 @@ export class SlideshowSheet extends EnhancedJournalSheet {
         return { state: 'stopped', slides: [] };
     }
 
-    getData() {
+    async getData() {
         let data = super.getData();
+
+        if (this.object._thumbnails == undefined && (game.user.isGM || this.object.isOwner))
+            this.loadThumbnails();
+
         let flags = (data.data.flags["monks-enhanced-journal"]);
         if (flags == undefined) {
             data.data.flags["monks-enhanced-journal"] = {};
@@ -72,8 +80,11 @@ export class SlideshowSheet extends EnhancedJournalSheet {
 
             data.slides = flags.slides.map(s => {
                 let slide = duplicate(s);
+
+                slide.thumbnail = (this.object._thumbnails && this.object._thumbnails[slide.id]) || "/modules/monks-enhanced-journal/assets/loading.gif"; //slide.img;
+
                 if (slide.background?.color == '') {
-                    slide.background = `background-image:url(\'${slide.img}\');`;
+                    slide.background = `background-image:url(\'${slide.thumbnail}\');`;
                 }
                 else
                     slide.background = `background-color:${slide.background.color}`;
@@ -112,6 +123,39 @@ export class SlideshowSheet extends EnhancedJournalSheet {
         }
 
         return data;
+    }
+
+    static async createSlideThumbnail(src) {
+        try {
+            const texture = await loadTexture(src);
+            let sprite = PIXI.Sprite.from(texture);
+
+            // Reduce to the smaller thumbnail texture
+            let ratio = 400 / sprite.width;
+            let width = sprite.width * ratio;
+            let height = sprite.height * ratio;
+            const reduced = ImageHelper.compositeCanvasTexture(sprite, { width: width, height: height });
+            const thumb = ImageHelper.textureToImage(reduced, { format: "image/jpeg", quality: 0.5 });
+            reduced.destroy(true);
+
+            return thumb;
+        } catch (err) {
+            log('error', err);
+        }
+
+        return null;
+    }
+
+    async loadThumbnails() {
+        this.object._thumbnails = {};
+        for (let slide of this.object.data.flags["monks-enhanced-journal"].slides || []) {
+            this.object._thumbnails[slide.id] = await SlideshowSheet.createSlideThumbnail(slide.img);
+            if (this.object._thumbnails[slide.id]) {
+                $(`.slide[data-slide-id="${slide.id}"] .slide-image`).attr('src', this.object._thumbnails[slide.id]);
+                if (slide.background?.color == '')
+                    $(`.slide[data-slide-id="${slide.id}"] .slide-background div`).css({ 'background-image': `url('${this.object._thumbnails[slide.id]}')` });
+            }
+        }
     }
 
     _documentControls() {
@@ -165,7 +209,7 @@ export class SlideshowSheet extends EnhancedJournalSheet {
     _onDragStart(event) {
         const li = event.currentTarget;
 
-        const dragData = { from: 'monks-enhanced-journal' };
+        const dragData = { from: this.object.id };
 
         let id = li.dataset.slideId;
         dragData.slideId = id;
@@ -224,13 +268,18 @@ export class SlideshowSheet extends EnhancedJournalSheet {
             texts: [],//{ color: '#FFFFFF', background: '#000000', align: 'center', valign: 'middle' },
             transition: { duration: 5, effect: 'fade' }
         }, (data instanceof Event || data?.originalEvent instanceof Event ? {} : data));
-        //slide.id = makeid();
-        //this.object.data.flags["monks-enhanced-journal"].slides.push(slide);
-
-        //MonksEnhancedJournal.createSlide(slide, $('.slideshow-body', this.element));
+        
 
         if (options.showdialog)
             new SlideConfig(slide, this.object).render(true);
+        else {
+            let slides = duplicate(this.object.data.flags["monks-enhanced-journal"].slides || []);
+            slide.id = makeid();
+            slides.push(slide);
+            this.object.setFlag("monks-enhanced-journal", 'slides', slides);
+
+            MonksEnhancedJournal.createSlide(slide, $('.slideshow-body', this.element));
+        }
     }
 
     deleteAll() {
