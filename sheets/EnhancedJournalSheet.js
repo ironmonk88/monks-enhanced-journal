@@ -759,9 +759,9 @@ export class EnhancedJournalSheet extends JournalSheet {
             content: content,
             render: (html) => {
                 $('input[name="quantity"]', html).change((event) => {
-                    quantity = parseInt($(event.currentTarget).val());
+                    quantity = parseInt($(event.currentTarget).val() || 0);
                     if (max) {
-                        quantity = Math.max(Math.min(parseInt(max), quantity), 1);
+                        quantity = Math.max(Math.min(parseInt(max), quantity), 0);
                         $(event.currentTarget).val(quantity);
                     }
                     if (showTotal)
@@ -944,22 +944,24 @@ export class EnhancedJournalSheet extends JournalSheet {
     async rollTable(itemtype = "items", useFrom = false) {
         let rolltables = [];
 
-        for (let pack of game.packs) {
-            if (pack.documentName == 'RollTable') {
-                const index = await pack.getIndex();
-                let entries = [];
-                const tableString = `Compendium.${pack.collection}.`;
-                for (let table of index) {
-                    entries.push({
-                        name: table.name,
-                        uuid: tableString + table._id,
-                    });
-                }
+        if (!setting("hide-rolltables")) {
+            for (let pack of game.packs) {
+                if (pack.documentName == 'RollTable') {
+                    const index = await pack.getIndex();
+                    let entries = [];
+                    const tableString = `Compendium.${pack.collection}.`;
+                    for (let table of index) {
+                        entries.push({
+                            name: table.name,
+                            uuid: tableString + table._id,
+                        });
+                    }
 
-                let groups = entries.sort((a, b) => { return a.name.localeCompare(b.name) }).reduce((a, v) => ({ ...a, [v.uuid]: v.name }), {});
-                rolltables.push({ text: pack.metadata.label, groups: groups });
-            }
-        };
+                    let groups = entries.sort((a, b) => { return a.name.localeCompare(b.name) }).reduce((a, v) => ({ ...a, [v.uuid]: v.name }), {});
+                    rolltables.push({ text: pack.metadata.label, groups: groups });
+                }
+            };
+        }
 
         let groups = game.tables.map(t => { return { uuid: t.uuid, name: t.name } }).sort((a, b) => { return a.name.localeCompare(b.name) }).reduce((a, v) => ({ ...a, [v.uuid]: v.name }), {});
         rolltables.push({ text: "Rollable Tables", groups: groups });

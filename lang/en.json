@@ -36,6 +36,8 @@
   "MonksEnhancedJournal.open-new-tab.hint": "Open Sidebar directory links in a new tab rather than overwriting current tab",
   "MonksEnhancedJournal.hide-inline.name": "Hide Inline Links",
   "MonksEnhancedJournal.hide-inline.hint": "Hide Inline Links for documents that players don't havee access to.'",
+  "MonksEnhancedJournal.hide-rolltables.name": "Hide Compendium Rolltables",
+  "MonksEnhancedJournal.hide-rolltables.hint": "When adding loot from a RollTable, exclude tables contained in Compendiums",
 
   "MonsEnhancedJournal.SlideConfiguration": "Slide Configuration",
   "MonsEnhancedJournal.DCConfiguration": "DC Configuration",

@@ -28,6 +28,12 @@ Fixed an issue when converting to a Place Entry
 
 Fixed an issue saving the sound file for Slide
 
+Added the option to fill loot currency from roll table.
+
+Fixed issue when creating a PDFoundry entry.
+
+Added the option to exclude Rolltables from compendium when generating loot.
+
 # Version 1.0.49
 
 Fixing some very generous shops.  They were paying the players to take their items.

@@ -130,6 +130,15 @@ export const registerSettings = function () {
 		type: Boolean,
 	});
 
+	game.settings.register(modulename, "hide-rolltables", {
+		name: i18n("MonksEnhancedJournal.hide-rolltables.name"),
+		hint: i18n("MonksEnhancedJournal.hide-rolltables.hint"),
+		scope: "world",
+		config: true,
+		default: false,
+		type: Boolean,
+	});
+
 	game.settings.register(modulename, "loot-sheet", {
 		name: game.i18n.localize("MonksEnhancedJournal.loot-sheet.name"),
 		hint: game.i18n.localize("MonksEnhancedJournal.loot-sheet.hint"),

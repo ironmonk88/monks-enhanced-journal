@@ -857,6 +857,8 @@ export class MonksEnhancedJournal {
                 return false;
             if ((sheet?.name || sheet?.constructor?.name) == 'DscrybApp')
                 return false;
+            if (document.data.flags["pdfoundry"])
+                return false;
         }
 
         if (options.render == false || options.activate == false)
