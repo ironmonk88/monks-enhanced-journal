@@ -438,9 +438,18 @@
     color: #FFF;
 }
 
+#journal-directory li.folder.collapsed .folder-header.customcolor.context {
+    color: var(--color-text-dark-primary);
+}
+
 #journal-directory li.folder.collapsed > .folder-header.customcolor .create-folder,
 #journal-directory li.folder.collapsed > .folder-header.customcolor .create-document {
     color: #CCC;
+}
+
+#journal-directory li.folder.collapsed > .folder-header.customcolor.context .create-folder,
+#journal-directory li.folder.collapsed > .folder-header.customcolor.context .create-document {
+    color: var(--color-text-dark-secondary);
 }
 
 #journal-directory .subdirectory {

@@ -34,6 +34,10 @@ Fixed issue when creating a PDFoundry entry.
 
 Added the option to exclude Rolltables from compendium when generating loot.
 
+Fixed icons for the sidebar directory listing.
+
+Fixed styling when right-clicking on a custom coloured directory.
+
 # Version 1.0.49
 
 Fixing some very generous shops.  They were paying the players to take their items.
