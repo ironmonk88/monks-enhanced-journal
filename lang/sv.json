@@ -39,7 +39,8 @@
   "MonksEnhancedJournal.open-new-tab.hint": "Öppna sidomenyn i en ny flik istälet för att skriva över den befintliga",
   "MonksEnhancedJournal.hide-inline.name": "Dölj länkar",
   "MonksEnhancedJournal.hide-inline.hint": "Dölj länkar till dokument som spelarna inte har tillgång till.'",
-
+  "MonksEnhancedJournal.hide-rolltables.name": "Dölj tärningstabeller från kompendier",
+  "MonksEnhancedJournal.hide-rolltables.hint": "Dölj tabeller som ligger i kompendier, när du lägger till byten från en tärningstabell",																			
   "MonsEnhancedJournal.SlideConfiguration": "Inställning för bildspel",
   "MonsEnhancedJournal.DCConfiguration": "Inställning för svårighetsnivå",
   "MonsEnhancedJournal.TrapConfiguration": "Inställning för fällor",
@@ -79,8 +80,8 @@
   "MonksEnhancedJournal.Qty": "Antal",
   "MonksEnhancedJournal.Quantity": "Antal",
   "MonksEnhancedJournal.Remaining": "Kvar",
-  "MonksEnhancedJournal.Price": "Pris",
-  "MonksEnhancedJournal.Cost": "Kostnad",
+  "MonksEnhancedJournal.Price": "Köper",
+  "MonksEnhancedJournal.Cost": "Säljer",
   "MonksEnhancedJournal.Total": "Summa",
   "MonksEnhancedJournal.CreateDC": "Skapa svårighetsgrad",
   "MonksEnhancedJournal.Add": "Lägg till",
@@ -244,6 +245,9 @@
   "MonksEnhancedJournal.Players": "Spelare",
   "MonksEnhancedJournal.Offer": "Erbjud",
   "MonksEnhancedJournal.RemoveRelationship": "Ta bort relation",
+  "MonksEnhancedJournal.Audio": "Audio",
+  "MonksEnhancedJournal.Slides": "Bilder",
+  "MonksEnhancedJournal.CanvasColour": "Bakgrundsfärg",													   
 
 
   "MonksEnhancedJournal.Contain": "Innehåller",
