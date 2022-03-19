@@ -327,7 +327,7 @@ export class EncounterSheet extends EnhancedJournalSheet {
                 //}
 
                 // Prepare the Token data
-                let quantity = (String(ea.quantity) || "1");
+                let quantity = String(ea.quantity || "1");
                 if (quantity.indexOf("d") != -1) {
                     let r = new Roll(quantity);
                     await r.evaluate({ async: true });
