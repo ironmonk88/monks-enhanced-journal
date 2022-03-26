@@ -39,6 +39,8 @@
   "MonksEnhancedJournal.open-new-tab.hint": "Abrir enlaces a directorios en la barra lateral en una nueva pestaña en lugar de en la pestaña actual",
   "MonksEnhancedJournal.hide-inline.name": "Ocultar referencias",
   "MonksEnhancedJournal.hide-inline.hint": "Ocultar referencias a documentos a los que los jugadores no tienen acceso",
+  "MonksEnhancedJournal.hide-rolltables.name": "Ocultar tablas de compendios",
+  "MonksEnhancedJournal.hide-rolltables.hint": "Cuando se añada botín desde una tabla, excluir las tablas contenidas en compendios",
 
   "MonsEnhancedJournal.SlideConfiguration": "Configuración de diapositivas",
   "MonsEnhancedJournal.DCConfiguration": "Configuración de DC",
@@ -244,6 +246,9 @@
   "MonksEnhancedJournal.Players": "Jugadores",
   "MonksEnhancedJournal.Offer": "Ofrecer",
   "MonksEnhancedJournal.RemoveRelationship": "Eliminar relación",
+  "MonksEnhancedJournal.Audio": "Audio",
+  "MonksEnhancedJournal.Slides": "Diapositivas",
+  "MonksEnhancedJournal.CanvasColour": "Color del lienzo",
 
   "MonksEnhancedJournal.Contain": "Contener",
   "MonksEnhancedJournal.Cover": "Cubir",
