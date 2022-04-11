@@ -76,7 +76,7 @@
                 <div class="tab-inner flexcol">
                     <div style="flex-grow: 0;">{{localize 'MonksEnhancedJournal.OnlyViewable'}}{{#unless hasGM}}<span style="color:darkred;font-weight:bold;"> Cannot edit notes if there's no GM present</span>{{/unless}}</div>
                     <div>
-                        <textarea name="flags.monks-enhanced-journal.{{userid}}.notes" style="width: calc(100% - 4px);height: calc(100% - 4px)">{{userdata.notes}}</textarea>
+                        <textarea name="flags.monks-enhanced-journal.{{userid}}.notes" class="trim-textarea">{{userdata.notes}}</textarea>
                     </div>
                 </div>
             </div>

@@ -58,7 +58,7 @@
     <div class="slide">
         <div class="slide-inner">
             <div class="slide-background"><div style="{{background}}"></div></div>
-            <img class="slide-image" src="{{thumbnail}}" style="object-fit:{{object.sizing}}" />
+            <img class="slide-image" {{#if thumbnail}}src="{{thumbnail}}"{{/if}} style="object-fit:{{object.sizing}}" />
             <div class="slide-textarea">
                 {{#each this.texts}}
                 <textarea class="slide-text" data-id="{{this.id}}" style="{{this.style}}">{{this.text}}</textarea>

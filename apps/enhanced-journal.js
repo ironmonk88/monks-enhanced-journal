@@ -41,6 +41,8 @@ export class EnhancedJournal extends Application {
         let classes = ["monks-enhanced-journal", `${game.system.id}`];
         if (game.modules.get("rippers-ui")?.active)
             classes.push('rippers-ui');
+        if (!setting("show-bookmarkbar"))
+            classes.push('hide-bookmark');
         return mergeObject(super.defaultOptions, {
             id: "MonksEnhancedJournal",
             template: "modules/monks-enhanced-journal/templates/main.html",

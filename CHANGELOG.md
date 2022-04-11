@@ -1,3 +1,41 @@
+# Version 1.0.51
+
+Added the option to hide the bookmark bar.
+
+Added the option to turn on the extra menu bars for all journal entry descriptions and not just the regular journal entry.
+
+When using the HUD to give players permission to view an entry, there's now a setting to assign observer and not just limited.
+
+Fixed issues with Slideshow.  When creating a new slide the thumbnails don't create properly.  And additional slides wouldn't save correctly.
+
+Fixed a whole bunch of styling issues.
+
+Fixed issues with slideshow sounds not responding to Global Audio volume.
+
+Fixed issues with quantities being able to be set to zero and negative values.
+
+Removed the equipped status of items added to Loot and Shop sheets.
+
+Added support for having text anchors in text descriptions.
+
+Fixed issues with PF2E and setting quantities.
+
+Added price calculations for PF2E and PF1E so it can convert from decimals to the appropriate denomination isntead of translating to 0.
+
+Added helpful instruction to click on the picture to add image
+
+Added option to handle duplicate items rolled form roll table.  You can now choose to have duplicate items increae quantity, add a second item, or do nothing.
+
+Fixed issue when dragging an item from a shop onto a player not adding the item to the player.
+
+Added the option to open an actor sheet in a new window when clicking on attached actors.
+
+Fixed issue with relationship images not defaulting to the correct default image for the type.
+
+Fixed styling issues with request chat cards and PF2E.
+
+
+
 # Version 1.0.50
 
 Added the option to drag and drop items between Loot Entries

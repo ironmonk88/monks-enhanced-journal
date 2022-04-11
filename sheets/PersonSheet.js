@@ -72,7 +72,8 @@ export class PersonSheet extends EnhancedJournalSheet {
             'eyes': { name: "MonksEnhancedJournal.Eyes", value: true },
             'skin': { name: "MonksEnhancedJournal.Skin", value: false },
             'hair': { name: "MonksEnhancedJournal.Hair", value: true },
-            'pronoun': { name: "MonksEnhancedJournal.Pronoun", value: false },
+            'skin': { name: "MonksEnhancedJournal.Skin", value: false },
+            'life': { name: "MonksEnhancedJournal.LifeStatus", value: false },
             'profession': { name: "MonksEnhancedJournal.Profession", value: false },
             'voice': { name: "MonksEnhancedJournal.Voice", value: true },
             'faction': { name: "MonksEnhancedJournal.Faction", value: false },
@@ -202,7 +203,13 @@ export class PersonSheet extends EnhancedJournalSheet {
     openActor(event) {
         let actorLink = this.object.getFlag('monks-enhanced-journal', 'actor');
         let actor = game.actors.find(a => a.id == actorLink.id);
-        this.open(actor);
+        if (!actor)
+            return;
+
+        if (event.newtab == true || event.altKey)
+            actor.sheet.render(true);
+        else
+            this.open(actor);
     }
 
     removeActor() {
@@ -223,6 +230,14 @@ export class PersonSheet extends EnhancedJournalSheet {
                         content: i18n("MonksEnhancedJournal.ConfirmRemoveLink"),
                         yes: this.removeActor.bind(this)
                     });
+                }
+            },
+            {
+                name: "Open Actor Sheet",
+                icon: '<i class="fas fa-user fa-fw"></i>',
+                condition: () => game.user.isGM,
+                callback: li => {
+                    this.openActor.call(this, { newtab: true });
                 }
             }
         ];

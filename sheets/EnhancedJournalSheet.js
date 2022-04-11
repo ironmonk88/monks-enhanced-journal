@@ -171,6 +171,8 @@ export class EnhancedJournalSheet extends JournalSheet {
         $("a.inline-request-roll", html).click(this._onClickInlineRequestRoll.bind(this));//.contextmenu(this._onClickInlineRequestRoll);
         html.on("click", "a.picture-link", this._onClickPictureLink.bind(this));
 
+        $('a[href^="#"]').click(this._onClickAnchor.bind(this));
+
         $('.sheet-image .profile', html).contextmenu(() => { $('.fullscreen-image').show(); });
         $('.fullscreen-image', html).click(() => { $('.fullscreen-image', html).hide(); });
 
@@ -205,17 +207,17 @@ export class EnhancedJournalSheet extends JournalSheet {
         $('.editor .editor-content', this.element).unmark();
 
         if (this.editors[name] != undefined) {
-            if (this.object.type == 'base' || this.object.type == 'journalentry' || this.object.type == 'oldentry') {
+            if (this.object.type == 'base' || this.object.type == 'journalentry' || this.object.type == 'oldentry' || setting("show-menubar")) {
                 options = foundry.utils.mergeObject(options, {
                     menubar: true,
-                    plugins: CONFIG.TinyMCE.plugins + ' background',
-                    toolbar: CONFIG.TinyMCE.toolbar + ' background'//,
+                    plugins: CONFIG.TinyMCE.plugins + ' background anchor',
+                    toolbar: CONFIG.TinyMCE.toolbar + ' background anchor'//,
                     //font_formats: "Andale Mono=andale mono,times; Arial=arial,helvetica,sans-serif; Arial Black=arial black,avant garde; Book Antiqua=book antiqua,palatino; Comic Sans MS=comic sans ms,sans-serif; Courier New=courier new,courier; Georgia=georgia,palatino; Helvetica=helvetica; Impact=impact,chicago; Oswald=oswald; Symbol=symbol; Tahoma=tahoma,arial,helvetica,sans-serif; Terminal=terminal,monaco; Times New Roman=times new roman,times; Trebuchet MS=trebuchet ms,geneva; Verdana=verdana,geneva; Webdings=webdings; Wingdings=wingdings,zapf dingbats;Anglo Text=anglo_textregular;Lovers Quarrel=lovers_quarrelregular;Play=Play-Regular"
                 });
             }
             super.activateEditor(name, options, initialContent);
             //need this because foundry doesn't allow access to the init of the editor
-            if (this.object.type == 'base' || this.object.type == 'journalentry' || this.object.type == 'oldentry') {
+            if (this.object.type == 'base' || this.object.type == 'journalentry' || this.object.type == 'oldentry' || setting("show-menubar")) {
                 let count = 0;
                 let that = this;
                 let data = this.object.getFlag('monks-enhanced-journal', 'style');
@@ -306,7 +308,7 @@ export class EnhancedJournalSheet extends JournalSheet {
         let updates = {};
         if (game.system.id == 'pf2e') {
             let coinage = actor.data.items.find(i => { return i.isCoinage && i.data.data.denomination.value == denomination });
-            updates[`data.quantity.value`] = newVal;
+            updates[`data.quantity`] = newVal;
             return coinage.update(updates);
         } else if (game.system.id == 'age-system') {
             updates[`data.${price.currency}`] = newVal;
@@ -324,6 +326,8 @@ export class EnhancedJournalSheet extends JournalSheet {
     }
 
     static getPrice(item, name) {
+        let result = {};
+
         name = name || pricename();
         var countDecimals = function (value) {
             if (Math.floor(value) !== value)
@@ -331,12 +335,16 @@ export class EnhancedJournalSheet extends JournalSheet {
             return 0;
         }
 
-        let cost = (typeof item == "string" ? item : (item.data?.denomination != undefined ? item.data?.value.value + " " + item.data?.denomination.value : this.getValue(item, name)));
+        let cost = (typeof item == "string" ? item : (item.data?.denomination != undefined && name != "cost" ? item.data?.value.value + " " + item.data?.denomination.value : this.getValue(item, name)));
 
         cost = "" + cost;
         let price = parseFloat(cost.replace(',', ''));
         if (price == 0 || isNaN(price)) {
             return { value: 0, currency: this.defaultCurrency() };
+        }
+        if (price < 0) {
+            result.consume = true;
+            price = Math.abs(price);
         }
 
         let currency = cost.replace(/[^a-z]/gi, '');
@@ -345,7 +353,7 @@ export class EnhancedJournalSheet extends JournalSheet {
             currency = this.defaultCurrency();
 
         if (parseInt(price) != price) {
-            if (game.system.id == "dnd5e") {
+            if (["dnd5e", "pf2e", "pf1e"].includes(game.system.id)) {
                 if (currency == "ep") {
                     price = price / 2;
                     currency = "gp";
@@ -362,7 +370,10 @@ export class EnhancedJournalSheet extends JournalSheet {
                 price = Math.floor(price);
         }
 
-        return { value: price, currency };
+        result.value = price;
+        result.currency = currency;
+
+        return result;
     }
 
     getPrice(item, name) {
@@ -429,6 +440,19 @@ export class EnhancedJournalSheet extends JournalSheet {
         //    this._onShowPlayers({ data: { object: document } });
     }
 
+    _onClickAnchor(event) {
+        event.preventDefault();
+        event.stopPropagation();
+        const a = $(event.currentTarget);
+
+        const href = a.attr("href");
+
+        const anchor = $(href);
+        if (anchor.length) {
+            anchor[0].scrollIntoView();
+        }
+    }
+
     _onEditImage(event) {
         if (this.object.permission < CONST.ENTITY_PERMISSIONS.OWNER)
             return null;
@@ -438,10 +462,8 @@ export class EnhancedJournalSheet extends JournalSheet {
             current: this.object.data.img,
             callback: path => {
                 $(event.currentTarget).attr('src', path).css({ backgroundImage: `url(${path})` });
-                //I have no idea why the form gets deleted sometimes, but add it back.
-                //if (this.form == undefined)
-                //    this.form = $('.monks-enhanced-journal .body > .content form', this.element).get(0);
-                $('img[data-edit="img"]').css({ opacity: '' });
+                $('img[data-edit="img"]', this.element).css({ opacity: '' });
+                $('.tab.picture .instruction', this.element).hide();
                 this._onSubmit(event, { preventClose: true });
             },
             top: this.position.top + 40,
@@ -617,6 +639,9 @@ export class EnhancedJournalSheet extends JournalSheet {
                 (purchasing == "free" || purchasing == "confirm" ? "fa-hand-paper" : (hasRequest ? "" : "fa-hand-holding-medical")));
 
             let price = this.getPrice(item);
+            let cost = price;
+            if (item.data.cost != undefined)
+                cost = this.getPrice(item, "cost");
             let itemData = {
                 id: item._id,
                 name: item.name,
@@ -627,8 +652,8 @@ export class EnhancedJournalSheet extends JournalSheet {
                 from: item.from,
                 quantity: quantity,
                 remaining: item.data?.remaining,
-                price: price.value + " " + price.currency,
-                cost: this.getValue(item, "cost") ?? (price.value + " " + price.currency),
+                price: (price.consume ? "-" : "") + price.value + " " + price.currency,
+                cost: (cost.consume && (game.user.isGM || this.object.isOwner) ? "-" : "") + (cost.value + " " + cost.currency), //this.getValue(item, "cost") ?? (price.value + " " + price.currency),
                 text: text,
                 icon: icon,
                 assigned: item.assigned,
@@ -759,7 +784,11 @@ export class EnhancedJournalSheet extends JournalSheet {
             content: content,
             render: (html) => {
                 $('input[name="quantity"]', html).change((event) => {
-                    quantity = parseInt($(event.currentTarget).val() || 0);
+                    quantity = parseInt($(event.currentTarget).val() || 1);
+                    if (quantity < 1) {
+                        quantity = 1;
+                        $(event.currentTarget).val(quantity);
+                    }
                     if (max) {
                         quantity = Math.max(Math.min(parseInt(max), quantity), 0);
                         $(event.currentTarget).val(quantity);
@@ -864,7 +893,7 @@ export class EnhancedJournalSheet extends JournalSheet {
             uuid: document.uuid,
             img: document.img || document.data?.img,
             name: document.name,
-            quantity: 1,
+            quantity: "1",
             type: document.data.flags['monks-enhanced-journal']?.type
         };
 
@@ -976,6 +1005,7 @@ export class EnhancedJournalSheet extends JournalSheet {
                 let rolltable = $('[name="rollable-table"]').val();
                 let count = $('[name="count"]').val();
                 let clear = $('[name="clear"]').prop("checked");
+                let duplicate = $('[name="duplicate"]').val();
 
                 let table = await fromUuid(rolltable);
                 if (table) {
@@ -1044,11 +1074,13 @@ export class EnhancedJournalSheet extends JournalSheet {
 
                                 let oldId = itemData._id;
                                 let oldItem = items.find(i => i.flags['monks-enhanced-journal']?.parentId == oldId);
-                                if (oldItem) {
-                                    let qty = this.getValue(oldItem, quantityname());
-                                    if (qty == undefined) qty = 1;
-                                    qty = parseInt(qty) + 1;
-                                    this.setValue(oldItem, quantityname(), qty);
+                                if (oldItem && duplicate != "additional") {
+                                    if (duplicate == "increase") {
+                                        let oldqty = this.getValue(oldItem, quantityname(), 1);
+                                        let newqty = this.getValue(itemData.data, quantityname(), 1);
+                                        newqty = parseInt(oldqty) + parseInt(newqty);
+                                        this.setValue(oldItem, quantityname(), newqty);
+                                    }
                                 } else {
                                     itemData._id = makeid();
                                     itemData.flags['monks-enhanced-journal'] = { parentId: oldId };

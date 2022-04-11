@@ -261,7 +261,7 @@ export class ShopSheet extends EnhancedJournalSheet {
                         let buy = this.object.getFlag('monks-enhanced-journal', 'buy') ?? 0.5;
                         price.value = Math.floor(price.value * buy);
                         let result = await this.constructor.confirmQuantity(item, max, "sell", true, price);
-                        if (!!result?.quantity) {
+                        if ((result?.quantity ?? 0) > 0) {
                             this.setValue(item.data, quantityname(), result.quantity);
                             this.addItem(item);
 
@@ -294,7 +294,7 @@ export class ShopSheet extends EnhancedJournalSheet {
                     let buy = this.object.getFlag('monks-enhanced-journal', 'buy') ?? 0.5;
                     price.value = Math.floor(price.value * buy);
                     let result = await this.constructor.confirmQuantity(item, max, "sell", true, price);
-                    if (!!result?.quantity) {
+                    if ((result?.quantity ?? 0) > 0) {
                         let itemData = item.toObject();
                         itemData.quantity = result.quantity;
                         let actor = game.actors.get(data.actorId);
@@ -406,7 +406,7 @@ export class ShopSheet extends EnhancedJournalSheet {
         let price = ShopSheet.getPrice(item, "cost");
 
         let result = await ShopSheet.confirmQuantity(item, max, "purchase");
-        if (!!result?.quantity) {
+        if ((result?.quantity ?? 0) > 0) {
             if (this.object.data.flags['monks-enhanced-journal'].purchasing == 'confirm') {
                 //create the chat message informaing the GM that player is trying to sell an item.
                 item.quantity = result.quantity;
@@ -495,7 +495,7 @@ export class ShopSheet extends EnhancedJournalSheet {
                 _id: makeid(),
                 hide: !!data.data?.hide,
                 lock: !!data.data?.lock,
-                data: { cost: (price.value * adjustment) + " " + price.currency }
+                data: { cost: (price.value * adjustment) + " " + price.currency, equipped: false }
             }));
             this.object.setFlag('monks-enhanced-journal', 'items', items);
         }
@@ -570,7 +570,7 @@ export class ShopSheet extends EnhancedJournalSheet {
             let price = ShopSheet.getPrice(item, "cost");
 
             let result = await ShopSheet.confirmQuantity(item, max, "purchase");
-            if (!!result?.quantity) {
+            if ((result?.quantity ?? 0) > 0) {
                 price = result.price;
                 if (game.user.isGM) {
                     ShopSheet.actorPurchase.call(entry, actor, { value: (price.value * result.quantity), currency: price.currency });
@@ -605,9 +605,11 @@ export class ShopSheet extends EnhancedJournalSheet {
                                     });
                             }
                         }
+                        return result;
                     }
                 }
-            }
+            } else
+                ui.notifications.warn("Cannot add less than 1 item");
         }
         return false;
     }
@@ -619,7 +621,13 @@ export class ShopSheet extends EnhancedJournalSheet {
     openActor(event) {
         let actorLink = this.object.getFlag('monks-enhanced-journal', 'actor');
         let actor = game.actors.get(actorLink.id || actorLink);
-        this.open(actor);
+        if (!actor)
+            return;
+
+        if (event.newtab == true || event.altKey)
+            actor.sheet.render(true);
+        else
+            this.open(actor);
     }
 
     removeActor() {
@@ -689,6 +697,14 @@ export class ShopSheet extends EnhancedJournalSheet {
                         content: "Confirm that you'd like to import all items from this actor into this shop?",
                         yes: this.importActorItems.bind(this)
                     });
+                }
+            },
+            {
+                name: "Open Actor Sheet",
+                icon: '<i class="fas fa-user fa-fw"></i>',
+                condition: () => game.user.isGM,
+                callback: li => {
+                    this.openActor.call(this, { newtab: true });
                 }
             }
         ];

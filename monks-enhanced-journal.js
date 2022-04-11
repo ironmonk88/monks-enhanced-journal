@@ -61,6 +61,7 @@ export let oldSheetClass = () => {
 export class MonksEnhancedJournal {
     static _oldSheetClass;
     static journal;
+    static sounds = [];
 
     static pricename = "price";
     static quantityname = "quantity";
@@ -1194,9 +1195,14 @@ export class MonksEnhancedJournal {
                 MonksEnhancedJournal.slideshow.element.addClass('active');
 
                 if (MonksEnhancedJournal.slideshow.content.audiofile != undefined && MonksEnhancedJournal.slideshow.content.audiofile != '' && MonksEnhancedJournal.slideshow.sound == undefined)
-                    AudioHelper.play({ src: MonksEnhancedJournal.slideshow.content.audiofile, loop: MonksEnhancedJournal.slideshow.content.loopaudio }).then((sound) => {
+                    AudioHelper.play({
+                        src: MonksEnhancedJournal.slideshow.content.audiofile,
+                        loop: MonksEnhancedJournal.slideshow.content.loopaudio,
+                        volume: game.settings.get("core", "globalAmbientVolume")
+                    }).then((sound) => {
                         if (MonksEnhancedJournal.slideshow)
                             MonksEnhancedJournal.slideshow.sound = sound;
+                        MonksEnhancedJournal.sounds.push(sound);
                         return sound;
                     });
 
@@ -1268,8 +1274,13 @@ export class MonksEnhancedJournal {
                                         MonksEnhancedJournal.slideshow.slidesound = undefined;
                                     }
                                     if (MonksEnhancedJournal.slideshow.slide.audiofile != undefined && MonksEnhancedJournal.slideshow.slide.audiofile != '') {
-                                        AudioHelper.play({ src: MonksEnhancedJournal.slideshow.slide.audiofile, loop: false }).then((sound) => {
+                                        AudioHelper.play({
+                                            src: MonksEnhancedJournal.slideshow.slide.audiofile,
+                                            loop: false,
+                                            volume: game.settings.get("core", "globalAmbientVolume")
+                                        }).then((sound) => {
                                             MonksEnhancedJournal.slideshow.slidesound = sound;
+                                            MonksEnhancedJournal.sounds.push(sound);
                                             return sound;
                                         });
                                     }
@@ -1283,8 +1294,13 @@ export class MonksEnhancedJournal {
                                 MonksEnhancedJournal.slideshow.slidesound = undefined;
                             }
                             if (MonksEnhancedJournal.slideshow.slide.audiofile != undefined && MonksEnhancedJournal.slideshow.slide.audiofile != '') {
-                                AudioHelper.play({ src: MonksEnhancedJournal.slideshow.slide.audiofile, loop: false }).then((sound) => {
+                                AudioHelper.play({
+                                    src: MonksEnhancedJournal.slideshow.slide.audiofile,
+                                    loop: false,
+                                    volume: game.settings.get("core", "globalAmbientVolume")
+                                }).then((sound) => {
                                     MonksEnhancedJournal.slideshow.slidesound = sound;
+                                    MonksEnhancedJournal.sounds.push(sound);
                                     return sound;
                                 });
                             }
@@ -2088,7 +2104,7 @@ Hooks.on('dropActorSheetData', (actor, sheet, data) => {
             const cls = (entry._getSheetClass ? entry._getSheetClass() : null);
             if (cls && cls.itemDropped) {
                 cls.itemDropped.call(cls, data.id, actor, entry).then((result) => {
-                    if (!!result?.quantity) {
+                    if ((result?.quantity ?? 0) > 0) {
                         cls.setValue(data.data, quantityname(), result.quantity);
                         sheet._onDropItem(null, data);
                     }
@@ -2357,4 +2373,10 @@ Hooks.on("renderItemSheet", (sheet, html, data) => {
             .append($('<input>').attr('type', 'text').attr('name', 'data.cost').attr('data-dtype', 'String').val(data.data.cost))
             .insertAfter(priceGroup);
     }
-})
+});
+
+Hooks.on("globalAmbientVolumeChanged", (volume) => {
+    for (let sound of MonksEnhancedJournal.sounds) {
+        sound.volume = volume;
+    }
+});

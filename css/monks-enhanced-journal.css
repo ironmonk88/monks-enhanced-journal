@@ -3,6 +3,10 @@
     flex-wrap: nowrap;
 }
 
+.monks-enhanced-journal .window-content {
+    padding: 0px;
+}
+
 .monks-enhanced-journal > header a.subsheet {
     background: rgba(255, 255, 255, 0.1);
     margin-left: 0px;
@@ -34,13 +38,15 @@
 
 .monks-enhanced-journal .body {
     height: 100%;
-    width:100%;
+    width: 100%;
+    margin-top: 0px;
 }
 
 .monks-enhanced-journal .content {
     height: 100%;
     overflow: hidden;
     position: relative;
+    width: 100%;
 }
 
 .monks-enhanced-journal .content > section{
@@ -63,19 +69,27 @@
     flex: 0 0 90px;
 }
 
+.monks-enhanced-journal.hide-bookmark .mainbar {
+    flex: 0 0 60px;
+}
+
 .monks-enhanced-journal .mainbar > div {
     flex: 0 0 30px;
     border-bottom: 1px solid #C0C0C0;
 }
 
-/*
 .monks-enhanced-journal .mainbar .bookmark-bar {
-    overflow: hidden;
-}*/
+    margin-left: 4px;
+}
+
+.monks-enhanced-journal.hide-bookmark .mainbar .bookmark-bar {
+    display:none;
+}
 
 .monks-enhanced-journal .tab-bar {
     position: relative;
     transition: padding-right 0.5s;
+    padding: 2px 2px 0px 2px;
 }
 
 .monks-enhanced-journal .collapse .tab-bar {
@@ -132,7 +146,7 @@
 
 .monks-enhanced-journal .collapse .tab-bar .tab-button.sidebar-toggle {
     right: 0px;
-    top: 0px;
+    top: 2px;
 }
 
 .monks-enhanced-journal .sidebar-directory .action-buttons {
@@ -314,9 +328,12 @@
     flex: 0 0 20px;
     line-height: 20px;
     font-size: 16px;
-    padding: 0px 6px;
-    padding-top:5px;
+    padding: 5px 6px;
     border-top: 1px solid #C0C0C0;
+}
+
+.monks-enhanced-journal .collapse footer {
+    padding-right: 26px;
 }
 
 .monks-enhanced-journal footer > div.navigate-prev,
@@ -332,6 +349,12 @@
 
 .monks-enhanced-journal footer > div.navigate-next {
     text-align: right;
+}
+
+.monks-enhanced-journal .tab.notes textarea.trim-textarea {
+    resize: none;
+    width: calc(100% - 4px);
+    height: calc(100% - 4px);
 }
 
 .monks-enhanced-journal .content[document-type="actor"] + footer {
@@ -767,6 +790,7 @@ height: fit-content;*/
     height: 100%;
     overflow-y: auto !important;
     align-content: flex-start;
+    position: relative;
 }
 
 .monks-journal-sheet.sheet header.sheet-header.journal-header {
@@ -781,6 +805,7 @@ height: fit-content;*/
 .monks-journal-sheet.sheet .loot-container,
 .monks-journal-sheet.sheet .poi-container {
     height: 100%;
+    padding: 4px;
 }
 
 .monks-journal-sheet.sheet .sheet-header .sheet-image {
@@ -1032,6 +1057,9 @@ height: fit-content;*/
 .monks-journal-sheet .slideshow-container.playing .tab.slides{
     display:block;
 }
+.monks-journal-sheet .slideshow-container .slide-details {
+    padding: 8px;
+}
 
 .monks-journal-sheet .slideshow-container .slide-details > * {
     flex-grow: 0;
@@ -1060,7 +1088,7 @@ height: fit-content;*/
     overflow: hidden;
     max-height: 100%;
     position: absolute;
-    top: 70px;
+    top: 0px;
     bottom: 0px;
     width: 100%;
     transition: top 0.3s ease-out;
@@ -1080,7 +1108,7 @@ height: fit-content;*/
 
 .monks-journal-sheet .slideshow-container:not(.playing) .slideshow-body {
     overflow-y: auto;
-    padding:0px;
+    padding: 8px;
 }
 
 .monks-journal-sheet .slideshow-container.playing .slideshow-body {
@@ -1383,6 +1411,7 @@ height: fit-content;*/
     flex: 0 0 30px !important;
     border-bottom: 2px solid #782e22;
     z-index: 1;
+    padding-left: 8px;
 }
 
 .monks-journal-sheet.condensed .tab-bar, .monks-journal-sheet.condensed .bookmark-bar, .monks-journal-sheet.condensed .directory-sidebar {
@@ -2253,6 +2282,10 @@ a.picture-link.broken {
     align-items: flex-end;
 }
 
+.monks-journal-sheet li.instruction {
+    height: 100px;
+}
+
 .monks-enhanced-journal .mainbar .navigation .button-group .nav-text i.fa-search {
     padding-top: 4px;
 }
@@ -2288,7 +2321,6 @@ a.picture-link.broken {
 
 .fallout.monks-enhanced-journal .window-content {
     background: url(../../../ui/parchment.jpg) repeat;
-    padding: 8px;
     color: var(--color-text-dark-primary);
 }
 
@@ -2632,4 +2664,64 @@ a.picture-link.broken {
 
 .monks-enhanced-journal .content .actor.sheet > form .tab.attributes {
     overflow-y: auto;
+}
+
+.monks-enhanced-journal.pf2e .tab[data-tab="picture"].active {
+    display: block;
+}
+
+.monks-enhanced-journal.demonlord .tab-bar .tab-button.tab-add {
+    color: #FFFFFF;
+}
+
+.monks-enhanced-journal.demonlord .bookmark-bar {
+    color: #FFFFFF;
+}
+
+.monks-enhanced-journal.demonlord .bookmark-bar .bookmark-button {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+.monks-enhanced-journal.demonlord .bookmark-bar .bookmark-button:hover {
+    background-color: rgba(255, 255, 255, 0.5);
+}
+
+.monks-enhanced-journal.demonlord .header-name > i {
+    line-height: 1px;
+    flex: 0 0 35px;
+    top: 18px;
+    text-align: center;
+    position: relative;
+}
+
+.monks-enhanced-journal.demonlord .monks-journal-sheet.sheet .sheet-navigation.tabs {
+    color: #000;
+}
+
+.monks-enhanced-journal.demonlord .window-content {
+    background-size: auto 92px, cover;
+}
+
+.monks-enhanced-journal.hide-bookmark.demonlord .window-content {
+    background-size: auto 62px, cover;
+}
+
+.monks-enhanced-journal.demonlord .tab.description {
+    display: none;
+}
+
+.monks-enhanced-journal.demonlord .tab.description.active {
+    display: block;
+}
+
+.monks-enhanced-journal.demonlord .tab.notes textarea.trim-textarea {
+    height: calc(100% - 6px);
+}
+
+.monks-enhanced-journal.demonlord .collapse .tab-bar .tab-button.sidebar-toggle {
+    color: #fff;
+}
+
+.monks-enhanced-journal.l5r5e .window-content .monks-enhanced-journal {
+    padding: 0px;
 }

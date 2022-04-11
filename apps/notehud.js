@@ -44,7 +44,7 @@ export class NoteHUD extends BasePlaceableHUD {
         let permissions = {};
         Object.assign(permissions, this.entry.data.permission);
         let isHidden = permissions["default"] >= CONST.ENTITY_PERMISSIONS.LIMITED;
-        permissions["default"] = (isHidden ? CONST.ENTITY_PERMISSIONS.NONE : (this.entry.type == "loot" || this.entry.type == "shop" ? CONST.ENTITY_PERMISSIONS.OBSERVER : CONST.ENTITY_PERMISSIONS.LIMITED));
+        permissions["default"] = (isHidden ? CONST.ENTITY_PERMISSIONS.NONE : (this.entry.type == "loot" || this.entry.type == "shop" || !setting("hud-limited") ? CONST.ENTITY_PERMISSIONS.OBSERVER : CONST.ENTITY_PERMISSIONS.LIMITED));
         this.entry.update({ permission: permissions });
 
         event.currentTarget.classList.toggle("active", !isHidden);

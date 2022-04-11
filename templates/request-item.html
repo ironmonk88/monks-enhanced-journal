@@ -1,9 +1,9 @@
 <div class="monks-enhanced-journal request-item item-card monks-journal-sheet sheet">
-    <div class="flexrow" style="align-items: center;">
+    <div class="flexrow" style="align-items: center;flex: 0 0 30px;">
         <img src="{{actor.img}}" class="actor-icon" />
         <h4 style="margin-bottom:0px;">{{actor.name}}</h4>
     </div>
-    <div class="flexrow" style="align-items: center;">
+    <div class="flexrow" style="align-items: center; flex: 0 0 30px;">
         <img src="{{shop.img}}" class="shop-icon" />
         <h4 style="margin-bottom:0px;">{{shop.name}}</h4>
     </div>
@@ -51,11 +51,11 @@
         {{/if}}
         {{/each}}
     </ol>
-    <div class="gm-only flexrow request-buttons">
+    <div class="gm-only flexrow request-buttons" style="flex: 0 0 30px;">
         <button type="button" class="request-accept"><i class="fas fa-check"></i> {{localize 'MonksEnhancedJournal.Accept'}}</button>
         <button type="button" class="request-reject"><i class="fas fa-times"></i> {{localize 'MonksEnhancedJournal.Reject'}}</button>
     </div>
-    <div class="player-only flexrow request-buttons">
+    <div class="player-only flexrow request-buttons" style="flex: 0 0 30px;">
         <button type="button" class="request-reject"><i class="fas fa-times"></i> {{localize 'MonksEnhancedJournal.Cancel'}}</button>
     </div>
     <footer class="card-footer"></footer>

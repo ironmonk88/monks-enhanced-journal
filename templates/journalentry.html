@@ -17,6 +17,11 @@
         <div class="tab picture active" data-group="primary" data-tab="picture" style="position:relative;">
             <div class="tab-inner flexrow">
                 <div class="picture-img lightbox-image" name="img" src="{{data.img}}" style="background-image: url({{data.img}})" data-edit="img" onerror="$(this).css({opacity:0});"></div>
+                {{#unless data.img }}
+                {{#if owner}}
+                <div class="instruction">Click to add a picture</div>
+                {{/if}}
+                {{/unless}}
             </div>
         </div>
     </section>

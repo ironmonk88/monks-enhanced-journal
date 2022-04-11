@@ -76,6 +76,15 @@ export const registerSettings = function () {
 		type: Boolean,
 	});
 
+	game.settings.register(modulename, "hud-limited", {
+		name: i18n("MonksEnhancedJournal.hud-limited.name"),
+		hint: i18n("MonksEnhancedJournal.hud-limited.hint"),
+		scope: "world",
+		config: true,
+		default: true,
+		type: Boolean,
+	});
+
 	game.settings.register(modulename, "start-collapsed", {
 		name: i18n("MonksEnhancedJournal.start-collapsed.name"),
 		hint: i18n("MonksEnhancedJournal.start-collapsed.hint"),
@@ -127,6 +136,33 @@ export const registerSettings = function () {
 		scope: "world",
 		config: true,
 		default: true,
+		type: Boolean,
+	});
+
+	game.settings.register(modulename, "hide-rolltables", {
+		name: i18n("MonksEnhancedJournal.hide-rolltables.name"),
+		hint: i18n("MonksEnhancedJournal.hide-rolltables.hint"),
+		scope: "world",
+		config: true,
+		default: false,
+		type: Boolean,
+	});
+
+	game.settings.register(modulename, "show-bookmarkbar", {
+		name: i18n("MonksEnhancedJournal.show-bookmarkbar.name"),
+		hint: i18n("MonksEnhancedJournal.show-bookmarkbar.hint"),
+		scope: "world",
+		config: true,
+		default: true,
+		type: Boolean,
+	});
+
+	game.settings.register(modulename, "show-menubar", {
+		name: i18n("MonksEnhancedJournal.show-menubar.name"),
+		hint: i18n("MonksEnhancedJournal.show-menubar.hint"),
+		scope: "world",
+		config: true,
+		default: false,
 		type: Boolean,
 	});
 

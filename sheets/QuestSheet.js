@@ -518,7 +518,7 @@ export class QuestSheet extends EnhancedJournalSheet {
 
             let items = reward.items;
 
-            let update = { _id: makeid(), data: { remaining: 1 } };
+            let update = { _id: makeid(), data: { remaining: 1, equipped: false } };
             update[quantityname()] = item.data.data[quantityname()];
             this.setValue(update, quantityname(), 1);
             items.push(mergeObject(itemData, update));
@@ -549,7 +549,7 @@ export class QuestSheet extends EnhancedJournalSheet {
                 if (item) {
                     let max = this.getValue(item, "remaining", null);
                     let result = await QuestSheet.confirmQuantity(item, max, "transfer", false);
-                    if (!!result?.quantity) {
+                    if ((result?.quantity ?? 0) > 0) {
                         if (item.data.remaining < result?.quantity) {
                             ui.notifications.warn("Cannot transfer this item, not enough of this item remains.");
                             return false;

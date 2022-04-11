@@ -239,7 +239,7 @@ export class LootSheet extends EnhancedJournalSheet {
                     let item = await this.getDocument(data);
                     let max = this.getValue(item.data, quantityname(), null);
                     let result = await LootSheet.confirmQuantity(item, max, "transfer", false);
-                    if (!!result?.quantity) {
+                    if ((result?.quantity ?? 0) > 0) {
                         let itemData = item.toObject();
                         if ((itemData.type === "spell") && game.system.id == 'dnd5e') {
                             itemData = await LootSheet.createScrollFromSpell(itemData);
@@ -271,7 +271,7 @@ export class LootSheet extends EnhancedJournalSheet {
                     return;
 
                 let result = await LootSheet.confirmQuantity(item, max, "transfer", false);
-                if (!!result?.quantity) {
+                if ((result?.quantity ?? 0) > 0) {
                     let itemData = item.toObject();
                     this.setValue(itemData, quantityname(), result.quantity);
 
@@ -378,7 +378,7 @@ export class LootSheet extends EnhancedJournalSheet {
             );
         } else if (this.object.data.flags['monks-enhanced-journal'].purchasing == 'confirm') {
             let result = await LootSheet.confirmQuantity(item, max, "take", false);
-            if (!!result?.quantity) {
+            if ((result?.quantity ?? 0) > 0) {
                 //create the chat message informaing the GM that player is trying to sell an item.
                 item.quantity = result.quantity;
                 item.maxquantity = max;
@@ -388,22 +388,20 @@ export class LootSheet extends EnhancedJournalSheet {
             }
         } else if (this.object.data.flags['monks-enhanced-journal'].purchasing == 'free') {
             let result = await LootSheet.confirmQuantity(item, max, "take", false);
-            if (!!result?.quantity) {
-                if (result.quantity > 0) {
-                    // Create the owned item
-                    let itemData = duplicate(item);
-                    delete itemData._id;
-                    this.setValue(itemData, quantityname(), result.quantity);
-                    actor.createEmbeddedDocuments("Item", [itemData]);
-                    MonksEnhancedJournal.emit("purchaseItem",
-                        {
-                            shopid: this.object.id,
-                            itemid: item._id,
-                            actorid: actor.id,
-                            user: game.user.id,
-                            quantity: result.quantity
-                        })
-                }
+            if ((result?.quantity ?? 0) > 0) {
+                // Create the owned item
+                let itemData = duplicate(item);
+                delete itemData._id;
+                this.setValue(itemData, quantityname(), result.quantity);
+                actor.createEmbeddedDocuments("Item", [itemData]);
+                MonksEnhancedJournal.emit("purchaseItem",
+                    {
+                        shopid: this.object.id,
+                        itemid: item._id,
+                        actorid: actor.id,
+                        user: game.user.id,
+                        quantity: result.quantity
+                    });
             }
         }
     }
@@ -428,7 +426,7 @@ export class LootSheet extends EnhancedJournalSheet {
 
         let max = this.getValue(item.data, quantityname(), null);
         let result = await LootSheet.confirmQuantity(item, max, `grant to <b>${actor.name}</b>`, false);
-        if (!!result?.quantity) {
+        if ((result?.quantity ?? 0) > 0) {
             item.requests[userid] = false;
             await this.object.setFlag('monks-enhanced-journal', 'items', items);
 
@@ -456,7 +454,7 @@ export class LootSheet extends EnhancedJournalSheet {
                 itemData = await LootSheet.createScrollFromSpell(itemData);
             }
 
-            items.push(mergeObject(itemData, { _id: makeid() }));
+            items.push(mergeObject(itemData, { _id: makeid(), data: { equipped: false } }));
             await this.object.setFlag('monks-enhanced-journal', 'items', items);
             return true;
         }
@@ -510,7 +508,7 @@ export class LootSheet extends EnhancedJournalSheet {
             }
 
             let result = await LootSheet.confirmQuantity(item, max, "take", false);
-            if (!!result?.quantity) {
+            if ((result?.quantity ?? 0) > 0) {
                 if (game.user.isGM) {
                     LootSheet.purchaseItem.call(this, entry, id, result.quantity, { actor });
                     return result;

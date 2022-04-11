@@ -7,7 +7,7 @@
     </div>
     <div class="form-group">
         <label>Number of items</label>
-        <input name="count" type="number" min="1" value="1" style="text-align:right;" />
+        <input name="count" type="number" min="1" value="1" style="text-align:right;flex: 0 0 50px;" />
     </div>
     {{#if useFrom}}
     <div class="form-group">
@@ -18,5 +18,13 @@
     <div class="form-group">
         <label>Clear Items</label>
         <input name="clear" type="checkbox" />
+    </div>
+    <div class="form-group">
+        <label>Duplicate Items</label>
+        <select name="duplicate">
+            <option value="increase">Increase Quantity</option>
+            <option value="additional">Add Additional</option>
+            <option value="nothing">Do Not Add</option>
+        </select>
     </div>
 </form>

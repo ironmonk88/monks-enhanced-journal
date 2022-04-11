@@ -19,6 +19,10 @@ export class SlideConfig extends FormApplication {
         });
     }
 
+    get slideid() {
+        return this.object.id || 'new';
+    }
+
     getData(options) {
         let data = mergeObject(super.getData(options),
             {
@@ -50,7 +54,7 @@ export class SlideConfig extends FormApplication {
             return text;
         });
 
-        data.thumbnail = (this.journalentry._thumbnails && this.journalentry._thumbnails[this.object.id]) || this.object.img;
+        data.thumbnail = (this.journalentry._thumbnails && this.object.id && this.journalentry._thumbnails[this.object.id]) || this.object.img;
 
         if (this.object.background?.color == '') {
             data.background = `background-image:url(\'${data.thumbnail}\');`;
@@ -92,6 +96,8 @@ export class SlideConfig extends FormApplication {
             this.object.id = makeid();
             mergeObject(this.object, formData);
             slides.push(this.object);
+            this.journalentry._thumbnails[this.slideid] = this.journalentry._thumbnails.new;
+            delete this.journalentry._thumbnails.new;
         } else {
             let slide = slides.find(s => s.id == this.object.id);
             mergeObject(slide, formData);
@@ -177,8 +183,8 @@ export class SlideConfig extends FormApplication {
 
     async updateImage() {
         let src = $('input[name="img"]').val()
-        this.journalentry._thumbnails[this.object.id] = await createSlideThumbnail(src);
-        let thumbnail = this.journalentry._thumbnails[this.object.id] || src;
+        this.journalentry._thumbnails[this.slideid] = await createSlideThumbnail(src);
+        let thumbnail = this.journalentry._thumbnails[this.slideid] || src;
         if ($('input[name="background.color"]').val() == '')
             $('.slide-background div', this.element).css({ 'background-image': `url(${thumbnail})`, 'background-color':'' });
         else

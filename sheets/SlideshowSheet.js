@@ -344,8 +344,13 @@ export class SlideshowSheet extends EnhancedJournalSheet {
             this.object.sound = undefined;
 
             if (flags.audiofile != undefined && flags.audiofile != '')
-                AudioHelper.play({ src: flags.audiofile, loop: flags.loopaudio }).then((sound) => {
+                AudioHelper.play({
+                    src: flags.audiofile,
+                    loop: flags.loopaudio,
+                    volume: game.settings.get("core", "globalAmbientVolume")
+                }).then((sound) => {
                     this.object.sound = sound;
+                    MonksEnhancedJournal.sounds.push(sound);
                     return sound;
                 });
         } else {
@@ -508,8 +513,13 @@ export class SlideshowSheet extends EnhancedJournalSheet {
                             that.object.slidesound = undefined;
                         }
                         if (slide.audiofile != undefined && slide.audiofile != '') {
-                            AudioHelper.play({ src: slide.audiofile, loop: false }).then((sound) => {
+                            AudioHelper.play({
+                                src: slide.audiofile,
+                                loop: false,
+                                volume: game.settings.get("core", "globalAmbientVolume")
+                            }).then((sound) => {
                                 that.object.slidesound = sound;
+                                MonksEnhancedJournal.sounds.push(sound);
                                 return sound;
                             });
                         }
@@ -525,8 +535,13 @@ export class SlideshowSheet extends EnhancedJournalSheet {
                     that.object.slidesound = undefined;
                 }
                 if (slide.audiofile != undefined && slide.audiofile != '') {
-                    AudioHelper.play({ src: slide.audiofile, loop: false }).then((sound) => {
+                    AudioHelper.play({
+                        src: slide.audiofile,
+                        loop: false,
+                        volume: game.settings.get("core", "globalAmbientVolume")
+                    }).then((sound) => {
                         that.object.slidesound = sound;
+                        MonksEnhancedJournal.sounds.push(sound);
                         return sound;
                     });
                 }
