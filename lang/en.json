@@ -44,6 +44,10 @@
   "MonksEnhancedJournal.show-bookmarkbar.hint": "Show the bookmark bar in the journal browser",
   "MonksEnhancedJournal.show-menubar.name": "Show editor menu",
   "MonksEnhancedJournal.show-menubar.hint": "When editing a journal entry turn on the menu bar for all journal types",
+  "MonksEnhancedJournal.distribute-conversion.name": "Distribution Conversion",
+  "MonksEnhancedJournal.distribute-conversion.hint": "When distributing coins, convert remainder to lesser currency to split",
+  "MonksEnhancedJournal.purchase-conversion.name": "Purchase Conversion",
+  "MonksEnhancedJournal.purchase-conversion.hint": "When purchasing items allow converting between currencies",
 
   "MonsEnhancedJournal.SlideConfiguration": "Slide Configuration",
   "MonsEnhancedJournal.DCConfiguration": "DC Configuration",

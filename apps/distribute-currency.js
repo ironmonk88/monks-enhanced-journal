@@ -24,6 +24,8 @@ export class DistributeCurrency extends FormApplication {
                 currency: duplicate(playercurrency)
             }
         });
+
+        this.currencies = MonksEnhancedJournal.currencies;
     }
 
     /** @override */
@@ -45,6 +47,7 @@ export class DistributeCurrency extends FormApplication {
         return mergeObject(super.getData(options),
             {
                 characters: this.characters,
+                currencies: this.currencies,
                 currency: this.currency,
                 totals: this.totals
             }
@@ -83,7 +86,7 @@ export class DistributeCurrency extends FormApplication {
         let charId = event.currentTarget.dataset.character;
 
         if (charId == undefined)
-            this.currency[curr] = parseInt($(event.currentTarget).val());
+            this.currency[curr] = parseInt($(event.currentTarget).val() || 0);
         else {
             let character = this.characters.find(c => c.id == charId);
             let value = $(event.currentTarget).val();
@@ -113,6 +116,18 @@ export class DistributeCurrency extends FormApplication {
             }
 
             this.currency[curr] = this.currency[curr] - (part * characters.length);
+            if (setting("distribute-conversion") && this.currency[curr] > 0) {
+                //find the next lower currency
+                let idx = this.currencies.findIndex(c => c.id == curr);
+                let newIdx = idx + 1;
+                if (newIdx < this.currencies.length) {
+                    //convert to default
+                    let convVal = this.currency[curr] * (this.currencies[idx].convert || 1);
+                    convVal = convVal / (this.currencies[newIdx].convert || 1);
+                    this.currency[curr] = 0;
+                    this.currency[this.currencies[newIdx].id] = this.currency[this.currencies[newIdx].id] + convVal;
+                }
+            }
         }
 
         this.calcTotal();

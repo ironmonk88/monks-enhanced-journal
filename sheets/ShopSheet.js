@@ -143,6 +143,8 @@ export class ShopSheet extends EnhancedJournalSheet {
 
         $('.item-relationship .item-field', html).on('change', this.alterRelationship.bind(this));
 
+        $('.items-header', html).on("click", this.collapseItemSection.bind(this));
+
         const actorOptions = this._getPersonActorContextOptions();
         if (actorOptions) new ContextMenu($(html), ".actor-img", actorOptions);
     }
@@ -524,12 +526,27 @@ export class ShopSheet extends EnhancedJournalSheet {
         if (price.value == 0)
             return true;
 
-        let currencies = MonksEnhancedJournal.currencies;
-        if (Object.keys(currencies).length == 0)
+        if (MonksEnhancedJournal.currencies.length == 0)
             return true;
 
-        let coins = this.getCurrency(actor, price.currency);
-        return coins >= price.value;
+        if (setting("purchase-conversion")) {
+            let coins = this.getCurrency(actor, price.currency);
+            if (coins >= price.value) {
+                return true;
+            } else {
+                let totalDefault = 0;
+                for (let curr of MonksEnhancedJournal.currencies) {
+                    totalDefault += (this.getCurrency(actor, curr.id) * (curr.convert || 1));
+                }
+                let check = MonksEnhancedJournal.currencies.find(c => c.id == price.currency);
+                totalDefault = totalDefault / (check.convert || 1);
+
+                return totalDefault >= price.value;
+            }
+        } else {
+            let coins = this.getCurrency(actor, price.currency);
+            return coins >= price.value;
+        }
     }
 
     static actorPurchase(actor, price) {
@@ -537,8 +554,7 @@ export class ShopSheet extends EnhancedJournalSheet {
         if (price.value == 0)
             return;
 
-        let currencies = MonksEnhancedJournal.currencies;
-        if (Object.keys(currencies).length == 0)
+        if (MonksEnhancedJournal.currencies.length == 0)
             return;
 
         ShopSheet.addCurrency(actor, price.currency, -price.value);
@@ -608,8 +624,10 @@ export class ShopSheet extends EnhancedJournalSheet {
                         return result;
                     }
                 }
-            } else
+            } else if (result !== false) {
+                log("result", result);
                 ui.notifications.warn("Cannot add less than 1 item");
+            }
         }
         return false;
     }

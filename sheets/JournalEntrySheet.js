@@ -17,6 +17,12 @@ export class JournalEntrySheet extends EnhancedJournalSheet {
         return (this.object.data.img != undefined && this.object.data.img != '' && this.object.data.content == '' ? 'image' : 'text');
     }
 
+    get template() {
+        let mode = this.options.sheetMode || this._sheetMode;
+        if (!this.object.isOwner && mode === "image" && this.object.data.img) return ImagePopout.defaultOptions.template;
+        return this.options.template;
+    }
+
     static get defaultOptions() {
         return mergeObject(super.defaultOptions, {
             title: i18n("MonksEnhancedJournal.journalentry"),

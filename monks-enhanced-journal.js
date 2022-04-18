@@ -1,6 +1,7 @@
 import { registerSettings } from "./settings.js";
 import { EnhancedJournal } from "./apps/enhanced-journal.js"
 import { SlideshowWindow } from "./apps/slideshow-window.js"
+import { ObjectiveDisplay } from "./apps/objective-display.js"
 import { CheckListSheet } from "./sheets/CheckListSheet.js"
 import { EncounterSheet } from "./sheets/EncounterSheet.js"
 import { JournalEntrySheet, JournalEntrySheetTextOnly } from "./sheets/JournalEntrySheet.js"
@@ -14,6 +15,7 @@ import { OrganizationSheet } from "./sheets/OrganizationSheet.js"
 import { ShopSheet } from "./sheets/ShopSheet.js"
 import { LootSheet } from "./sheets/LootSheet.js"
 import { backgroundinit } from "./plugins/background.plugin.js"
+import { dcconfiginit } from "./plugins/dcconfig.plugin.js"
 import { NoteHUD } from "./apps/notehud.js"
 import { EnhancedJournalSheet } from "./sheets/EnhancedJournalSheet.js";
 
@@ -135,6 +137,8 @@ export class MonksEnhancedJournal {
             MonksEnhancedJournal.pricename = "preco";
             MonksEnhancedJournal.quantityname = "qtd";
             MonksEnhancedJournal.currencyname = "dinheiro";
+        } else if (game.system.id == "shadowrun5e") {
+            MonksEnhancedJournal.quantityname = "technology.quantity";
         }
 
         game.MonksEnhancedJournal = this;
@@ -266,6 +270,11 @@ export class MonksEnhancedJournal {
             const html = document.createElement("div");
             html.innerHTML = String(data);
 
+            $('a[href]', html).each(function () {
+                if ($(this).attr('href').startsWith("#"))
+                    $(this).addClass("journal-link");
+            });
+
             let updateTextArray = true;
             let text = [];
 
@@ -276,9 +285,6 @@ export class MonksEnhancedJournal {
             }
 
             if (updateTextArray) text = this._getTextNodes(html);
-            //const rgx = /%\[(\/[a-zA-Z]+\s)?(.*?)([0-9]{1,3})(\]%)?/gi;
-            //const rgx = new RegExp(`@(Request)\\[([^\\]]+)\\](?:{([^}]+)})?`, 'g');
-            //const rgx = new RegExp(`@(Request)\\[([^\\]]+)\\](?:{([^}]+)})?`, 'g');
             const rgx = /@(Request|Contested)\[([^\]]+)\](?:{([^}]+)})?/gi;
             this._replaceTextContent(text, rgx, MonksEnhancedJournal._createRequestRoll);
 
@@ -344,9 +350,13 @@ export class MonksEnhancedJournal {
                 }
             }
             else {
-                if (doc.documentName === "Scene")
-                    game.scenes.get(id).view();
-                else
+                if (doc.documentName === "Scene") {
+                    let scene = game.scenes.get(id);
+                    if (event.ctrlKey)
+                        scene.activate();
+                    else
+                        scene.view();
+                } else
                     return doc.sheet.render(true);
             }
         }
@@ -1066,12 +1076,19 @@ export class MonksEnhancedJournal {
         //CONFIG.TinyMCE.font_formats = CONFIG.TinyMCE.font_formats = (CONFIG.TinyMCE.font_formats ? CONFIG.TinyMCE.font_formats + ";" : "") + "Anglo Text=anglo_textregular;Lovers Quarrel=lovers_quarrelregular;Play=Play-Regular";
 
         tinyMCE.PluginManager.add('background', backgroundinit);
+        tinyMCE.PluginManager.add('dcconfig', dcconfiginit);
 
         if (game.modules.get("polyglot")?.active && !isNewerVersion(game.modules.get("polyglot").data.version, "1.7.30")) {
             let root = $('<div>').attr('id', 'enhanced-journal-fonts').appendTo('body');
             for (let [k, v] of Object.entries(polyglot.polyglot.LanguageProvider.alphabets)) {
                 $('<span>').attr('lang', k).css({ font: v }).appendTo(root);
             }
+        }
+
+        let oldDragMouseUp = Draggable.prototype._onDragMouseUp;
+        Draggable.prototype._onDragMouseUp = function (event) {
+            Hooks.call(`dragEnd${this.app.constructor.name}`, this.app);
+            return oldDragMouseUp.call(this, event);
         }
     }
 
@@ -1390,7 +1407,19 @@ export class MonksEnhancedJournal {
             .append(textarea);
     }
 
-    static refreshObjectives() {
+    static refreshObjectives(resize = false) {
+        let showObjectives = (ui.controls.activeControl == 'notes' && setting('show-objectives') && setting('show-dialog'));
+        if (showObjectives) {
+            if (!MonksEnhancedJournal.objdisp)
+                MonksEnhancedJournal.objdisp = new ObjectiveDisplay();
+            MonksEnhancedJournal.objdisp.render(true);
+            if (resize)
+                MonksEnhancedJournal.objdisp.setPosition();
+        } else if (MonksEnhancedJournal.objdisp)
+            MonksEnhancedJournal.objdisp.close({ properClose: true });
+
+
+        /*
         let display = $('#objective-display').empty();
 
         if (setting('show-dialog')) {
@@ -1424,7 +1453,7 @@ export class MonksEnhancedJournal {
             if (quests.children().length > 0) {
                 display.append($('<div>').addClass('title').html('Quests')).append(quests);
             }
-        }
+        }*/
     }
 
     static updateDirectory(html) {
@@ -1912,30 +1941,38 @@ export class MonksEnhancedJournal {
         return lootsheetoptions;
     }
 
-    static get config() {
-        let system = game.system.id.toUpperCase();
-        if (game.system.id == 'dnd4e' && !CONFIG[system])
-            system = "DND4EBETA";
-        if (game.system.id == 'tormenta20')
-            system = "T20";
-
-        return CONFIG[system] || {};
+    static get defaultCurrencies() {
+        switch (game.system.id) {
+            case "sw5e":
+                return [{ id: "gc", name: "Galactic Credit", convert: 0 }, { id: "cr", name: "Credit", convert: 0 }];
+            case "swade":
+                return [{ id: "gp", name: "Gold", convert: 0 }];
+            case "age-system":
+                return [{ id: "gp", name: "Gold", convert: 0 }, { id: "sp", name: "Silver", convert: 0.1 }, { id: "cp", name: "Copper", convert: 0.01 }];
+            case "tormenta20":
+                return [{ id: "to", name: "TO", convert: 1 }, { id: "tp", name: "T$", convert: 0 }, { id: "tc", name: "TC", convert: 1 }];
+            case "starwarsffg":
+                return [{ id: "cr", name: "Credit", convert: 0 }];
+            case "shadowrun5e":
+                return [{ id: "ny", name: "Nuyen", convert: 0 }];
+            case "dnd5e":
+            case "dnd4e":
+            case "dnd3e":
+            case "pf2e":
+            case "pf1e":
+                return [{ id: "pp", name: "Platinum", convert: 10 }, { id: "gp", name: "Gold", convert: 0 }, { id: "ep", name: "Electrum", convert: 0.5 }, { id: "sp", name: "Silver", convert: 0.1 }, { id: "cp", name: "Copper", convert: 0.01 }];
+            default:
+            return [];
+        }
     }
 
     static get currencies() {
-        let system = game.system.id.toUpperCase();
-        if (game.system.id == 'dnd4e' && !CONFIG[system])
-            system = "DND4EBETA";
-
-        if (game.system.id == "sw5e")
-            return { gc: "", cr: "" };
-        else if (game.system.id == "swade")
-            return { gp: "Gold" };
-        else if (game.system.id == "age-system")
-            return { gp: "Gold", sp: "Silver", cp: "Copper" };
-        else if (game.system.id == "tormenta20")
-            return { to: "TO", tp: "T$", tc: "TC"};
-        return MonksEnhancedJournal.config.currencies || {};
+        let currency = game.settings.get('monks-enhanced-journal', 'currency');
+        return (currency.length == 0 || currency[0] == null ? MonksEnhancedJournal.defaultCurrencies : currency).sort((a, b) => {
+            let a_c = (a.convert == 0 ? 1 : (a.convert == 1 ? 0 : a.convert));
+            let b_c = (b.convert == 0 ? 1 : (b.convert == 1 ? 0 : b.convert));
+            return b_c - a_c;
+        });
     }
 
     static isLootActor(lootsheet) {
@@ -2012,8 +2049,6 @@ Hooks.once("init", async function () {
 
 Hooks.once("ready", async function () {
     MonksEnhancedJournal.ready();
-
-    $('<div>').attr('id', 'objective-display').appendTo('body');
 });
 
 Hooks.on("preCreateJournalEntry", (entry, data, options, userId) => {
@@ -2047,8 +2082,8 @@ Hooks.on("preCreateJournalEntry", (entry, data, options, userId) => {
 
 Hooks.on("updateJournalEntry", (document, data, options, userId) => {
     let type = document.data.flags['monks-enhanced-journal']?.type;
-    if (type == 'quest' && ui.controls.activeControl == 'notes' && setting('show-objectives'))
-        MonksEnhancedJournal.refreshObjectives();
+    if (type == 'quest')
+        MonksEnhancedJournal.refreshObjectives(true);
 
     if (MonksEnhancedJournal.journal) {
         if (data.name) {
@@ -2057,7 +2092,7 @@ Hooks.on("updateJournalEntry", (document, data, options, userId) => {
 
         if (MonksEnhancedJournal.journal.tabs.active().entityId?.endsWith(data._id) &&
             (data.content != undefined ||
-            data.permission != undefined ||
+                data.permission != undefined ||
                 (data?.flags && (data?.flags['monks-enhanced-journal']?.actor != undefined ||
                     data?.flags['monks-enhanced-journal']?.actors != undefined ||
                     data?.flags['monks-enhanced-journal']?.relationships != undefined ||
@@ -2075,7 +2110,7 @@ Hooks.on("updateJournalEntry", (document, data, options, userId) => {
                     data?.flags['core']?.sheetClass != undefined)))) {
             //if (data?.flags['core']?.sheetClass != undefined)
             //    MonksEnhancedJournal.journal.object._sheet = null;
-            MonksEnhancedJournal.journal.render();
+            MonksEnhancedJournal.journal.render(true, { reload: true });
         }
     }
 });
@@ -2084,15 +2119,12 @@ Hooks.on("deleteJournalEntry", (document, html, userId) => {
     if (MonksEnhancedJournal.journal) {
         MonksEnhancedJournal.journal.deleteEntity(document.uuid);
         if (document.data.flags['monks-enhanced-journal']?.type == 'quest' && ui.controls.activeControl == 'notes' && setting('show-objectives'))
-            MonksEnhancedJournal.refreshObjectives();
+            MonksEnhancedJournal.refreshObjectives(true);
     }
 });
 
 Hooks.on('renderSceneControls', (controls) => {
-    let showObjectives = (controls.activeControl == 'notes' && setting('show-objectives'));
-    $('#objective-display').toggleClass('active', showObjectives);
-    if (showObjectives)
-        MonksEnhancedJournal.refreshObjectives();
+    MonksEnhancedJournal.refreshObjectives();
 });
 
 Hooks.on('dropActorSheetData', (actor, sheet, data) => {
@@ -2380,3 +2412,7 @@ Hooks.on("globalAmbientVolumeChanged", (volume) => {
         sound.volume = volume;
     }
 });
+
+Hooks.on('dragEndObjectiveDisplay', (app) => {
+    game.user.setFlag("monks-enhanced-journal", "objectivePos", { left: app.position.left, top: app.position.top, width: app.position.width });
+})

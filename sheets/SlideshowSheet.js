@@ -34,7 +34,7 @@ export class SlideshowSheet extends EnhancedJournalSheet {
     async getData() {
         let data = super.getData();
 
-        if (this.object._thumbnails == undefined && (game.user.isGM || this.object.isOwner))
+        if (this.object._thumbnails == undefined && (game.user.isGM || this.object.testUserPermission(game.user, "OBSERVER")))
             this.loadThumbnails();
 
         let flags = (data.data.flags["monks-enhanced-journal"]);
@@ -125,6 +125,14 @@ export class SlideshowSheet extends EnhancedJournalSheet {
         return data;
     }
 
+    async _render(force, options = {}) {
+        await super._render(force, options);
+
+        if (this.object.testUserPermission(game.user, "OBSERVER", { exact: true })) {
+            this.playSlideshow();
+        }
+    }
+
     static async createSlideThumbnail(src) {
         try {
             const texture = await loadTexture(src);
@@ -200,6 +208,11 @@ export class SlideshowSheet extends EnhancedJournalSheet {
         $('.nav-button.play').click(this.playSlideshow.bind(this));
         $('.nav-button.pause').click(this.pauseSlideshow.bind(this));
         $('.nav-button.stop').click(this.stopSlideshow.bind(this));
+    }
+
+    async close(options) {
+        this.stopSlideshow();
+        return super.close(options);
     }
 
     _canDragDrop(selector) {

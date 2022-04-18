@@ -1,4 +1,5 @@
 import { MonksEnhancedJournal, i18n } from "./monks-enhanced-journal.js"
+import { EditCurrency } from "./apps/editcurrency.js"
 
 export const registerSettings = function () {
 	// Register any custom module settings here
@@ -11,6 +12,15 @@ export const registerSettings = function () {
 	let lootsheetoptions = MonksEnhancedJournal.getLootSheetOptions();
 	let lootentity = {};
 	let lootfolder = {};
+
+	game.settings.registerMenu(modulename, 'editCurrency', {
+		name: 'Edit Currency',
+		label: 'Edit Currency',
+		hint: 'Edit the currency that this worls will use',
+		icon: 'fas fa-coins',
+		restricted: true,
+		type: EditCurrency
+	});
 
 	game.settings.register(modulename, "allow-player", {
 		name: i18n("MonksEnhancedJournal.allow-player.name"),
@@ -175,6 +185,24 @@ export const registerSettings = function () {
 		type: Boolean,
 	});
 
+	game.settings.register(modulename, "distribute-conversion", {
+		name: i18n("MonksEnhancedJournal.distribute-conversion.name"),
+		hint: i18n("MonksEnhancedJournal.distribute-conversion.hint"),
+		scope: "world",
+		config: true,
+		default: true,
+		type: Boolean,
+	});
+
+	game.settings.register(modulename, "purchase-conversion", {
+		name: i18n("MonksEnhancedJournal.purchase-conversion.name"),
+		hint: i18n("MonksEnhancedJournal.purchase-conversion.hint"),
+		scope: "world",
+		config: true,
+		default: true,
+		type: Boolean,
+	});
+
 	game.settings.register(modulename, "loot-sheet", {
 		name: game.i18n.localize("MonksEnhancedJournal.loot-sheet.name"),
 		hint: game.i18n.localize("MonksEnhancedJournal.loot-sheet.hint"),
@@ -201,6 +229,13 @@ export const registerSettings = function () {
 		default: "",
 		choices: lootfolder,
 		type: String,
+	});
+
+	game.settings.register(modulename, "currency", {
+		scope: "world",
+		config: false,
+		default: [],
+		type: Array,
 	});
 
 	game.settings.register(modulename, "show-dialog", {

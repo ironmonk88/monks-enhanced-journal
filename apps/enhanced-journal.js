@@ -157,7 +157,7 @@ export class EnhancedJournal extends Application {
             if (!cls)
                 this.subsheet = new EnhancedJournalSheet(this.object);
             else
-                this.subsheet = new cls(this.object, { editable: this.object.isOwner });
+                this.subsheet = new cls(this.object, { editable: this.object.isOwner, enhancedjournal: this });
 
             this.subsheet._state = this.subsheet.constructor.RENDER_STATES.RENDERING;
 
@@ -191,12 +191,15 @@ export class EnhancedJournal extends Application {
             this.subdocument = $(html).get(0);
             this.subsheet.form = (this.subdocument.tagName == 'FORM' ? this.subdocument : $('form:first', this.subdocument));
             this.subsheet._element = $(this.subdocument);
-            this.subsheet.enhancedjournal = this;
+            //this.subsheet.enhancedjournal = this;
             if(this.subsheet.refresh)
                 this.subsheet.refresh();
 
+            $('.window-title', this.element).html(this.subsheet.title + ' - ' + i18n("MonksEnhancedJournal.Title"));
+
             $('.content', this.element).attr('entity-type', this.object.data.type).attr('entity-id', this.object.id);
-            contentform.empty().attr('class', this.subsheet.options.classes.join(' ')).append(this.subdocument); //.concat([`${game.system.id}`]).join(' ')
+            let classes = this.subsheet.options.classes.join(' ').replace('monks-enhanced-journal', '').replace(game.system.id, '');
+            contentform.empty().attr('class', classes).append(this.subdocument); //.concat([`${game.system.id}`]).join(' ')
 
             if (!this.isEditable) {
                 this.subsheet._disableFields(contentform[0]);
@@ -321,7 +324,8 @@ export class EnhancedJournal extends Application {
         $('.nav-button.edit i', this.element).addClass('fa-pencil-alt').removeClass('fa-download').attr('title', i18n("MonksEnhancedJournal.EditDescription"));
         $('.nav-button.split', this.element).removeClass('disabled');
         const editor = this.subsheet.editors[name];
-        editor.button.style.display = "";
+        if (editor)
+            editor.button.style.display = "";
 
         const owner = this.object.isOwner;
         const content = TextEditor.enrichHTML(this.object.data.content, { secrets: owner, documents: true });

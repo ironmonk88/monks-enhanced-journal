@@ -1,7 +1,7 @@
 <form class="flexcol journal-subsheet {{entrytype}}{{#if isGM}} gm{{/if}}{{#if owner}} owner{{/if}}" editable="{{editable}}">
-    <div class="loot-container">
+    <div class="loot-container flexcol">
         <img class="fullscreen-image" src="{{data.img}}" />
-        <header class="sheet-header journal-header flexrow">
+        <header class="sheet-header journal-header flexrow" style="max-height: 162px; overflow: hidden;">
             <div class="sheet-image">
                 <img class="profile" src="{{data.img}}" data-edit="img" onerror="this.src='modules/monks-enhanced-journal/assets/loot.png'">
             </div>
@@ -23,15 +23,15 @@
                     </label>
                     <div class="form-fields" style="flex-wrap:nowrap;">
                         {{#each currency}}
-                        <label>{{localize @key}}</label>
-                        <input type="text" name="flags.monks-enhanced-journal.currency.{{@key}}" placeholder="0" value="{{this}}" data-dtype="Number" style="text-align:right;" />
+                        <label>{{localize this.name}}</label>
+                        <input type="text" name="flags.monks-enhanced-journal.currency.{{this.id}}" placeholder="0" value="{{this.value}}" data-dtype="Number" style="text-align:right;" />
                         {{/each}}
                     </div>
                 </div>
                 {{/if}}
-                <div class="form-group owner-only">
+                <div class="form-group owner-only" style="align-items: flex-start;">
                     <label>{{localize 'MonksEnhancedJournal.Players'}}</label>
-                    <div class="configure-permissions" title="Configure Permissions" style="flex: 0 0 25px;cursor: pointer;"><i class="fas fa-lock"></i></div><span>{{players}}</span>
+                    <div class="configure-permissions" title="Configure Permissions" style="flex: 0 0 25px;cursor: pointer;"><i class="fas fa-lock"></i></div><span style="flex: 1;">{{players}}</span>
                 </div>
             </section>
         </header>
@@ -86,10 +86,10 @@
 
                 <ol class="items-list">
                     {{#each groups}}
-                    <li class="items-header flexrow">
-                        <h3 class="item-name flexrow">{{localize this.name}}</h3>
+                    <li class="items-header flexrow{{#if this.collapsed}} collapsed{{/if}}" data-id="{{this.id}}">
+                        <h3 class="item-name flexrow">{{localize this.name}} <span class="item-count">({{this.items.length}} items)</span></h3>
                     </li>
-                    <ul class="item-list">
+                    <ul class="item-list" {{#if this.collapsed}}style="display: none;"{{/if}}>
                         {{#each this.items}}
                         <li class="item flexrow" data-id="{{this.id}}" data-container="items" data-document="Item" draggable="false">
                             <div class="item-name flexrow">

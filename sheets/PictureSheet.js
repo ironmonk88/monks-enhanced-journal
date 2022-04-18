@@ -21,6 +21,11 @@ export class PictureSheet extends EnhancedJournalSheet {
         return "image";
     }
 
+    get template() {
+        if (!this.object.isOwner) return ImagePopout.defaultOptions.template;
+        return this.options.template;
+    }
+
     _documentControls() {
         let ctrls = [
             { id: 'show', text: i18n("MonksEnhancedJournal.ShowToPlayers"), icon: 'fa-eye', conditional: game.user.isGM, callback: this.enhancedjournal.doShowPlayers },

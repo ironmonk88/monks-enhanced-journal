@@ -54,7 +54,9 @@ export class LootSheet extends EnhancedJournalSheet {
         };
 
         let currency = (data.data.flags['monks-enhanced-journal'].currency || []);
-        data.currency = Object.keys(MonksEnhancedJournal.currencies).reduce((a, v) => ({ ...a, [v]: currency[v] || 0 }), {});
+        data.currency = MonksEnhancedJournal.currencies.map(c => {
+            return { id: c.id, name: c.name, value: currency[c.id] ?? 0 };
+        });
 
         data.groups = this.getItemGroups(data);
 
@@ -115,6 +117,8 @@ export class LootSheet extends EnhancedJournalSheet {
         $('.loot-character', html).dblclick(this.openActor.bind(this));
 
         $('.configure-permissions', html).click(this.configure.bind(this));
+
+        $('.items-header', html).on("click", this.collapseItemSection.bind(this));
 
         const actorOptions = this._getActorContextOptions();
         if (actorOptions) new ContextMenu($(html), ".loot-character", actorOptions);

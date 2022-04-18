@@ -67,8 +67,10 @@ export class EncounterSheet extends EnhancedJournalSheet {
 
         data.groups = this.getItemGroups(data);
 
-        let currency = this.object.data.flags["monks-enhanced-journal"].currency || {};
-        data.currency = Object.keys(MonksEnhancedJournal.currencies).reduce((a, v) => ({ ...a, [v]: currency[v] || 0 }), {});
+        let currency = (data.data.flags['monks-enhanced-journal'].currency || []);
+        data.currency = MonksEnhancedJournal.currencies.map(c => {
+            return { id: c.id, name: c.name, value: currency[c.id] ?? 0 };
+        });
 
         data.valStr = (['pf2e'].includes(game.system.id) ? ".value" : "");
         data.quantityname = quantityname();
@@ -124,6 +126,9 @@ export class EncounterSheet extends EnhancedJournalSheet {
         $('.item-refill', html).click(this.refillItems.bind(this));
         $('.roll-table', html).click(this.rollTable.bind(this, "actors", false));
         $('.item-name h4', html).click(this._onItemSummary.bind(this));
+
+        $('.items-header', html).on("click", this.collapseItemSection.bind(this));
+        $('.refill-all', html).click(this.refillItems.bind(this, 'all'));
     }
 
     _getSubmitData(updateData = {}) {
@@ -235,7 +240,7 @@ export class EncounterSheet extends EnhancedJournalSheet {
                 }
 
                 let update = { _id: makeid(), data: { remaining: 1, equipped: false } };
-                data[quantityname()] = item.data.data[quantityname()];
+                setProperty(data, quantityname(), getProperty(item.data.data, quantityname()));
                 this.setValue(update, quantityname(), 1);
 
                 items.push(mergeObject(itemData, update));
@@ -398,11 +403,18 @@ export class EncounterSheet extends EnhancedJournalSheet {
     refillItems(event) {
         let items = duplicate(this.object.data.flags["monks-enhanced-journal"].items || []);
 
-        let li = $(event.currentTarget).closest('li')[0];
-        let item = items.find(i => i._id == li.dataset.id);
-        if (item) {
-            item.data.remaining = this.getValue(item, quantityname());
+        if (event == 'all') {
+            for (let item of items) {
+                item.data.remaining = this.getValue(item, quantityname());
+            }
             this.object.setFlag('monks-enhanced-journal', 'items', items);
+        } else {
+            let li = $(event.currentTarget).closest('li')[0];
+            let item = items.find(i => i._id == li.dataset.id);
+            if (item) {
+                item.data.remaining = this.getValue(item, quantityname());
+                this.object.setFlag('monks-enhanced-journal', 'items', items);
+            }
         }
     }
 }

@@ -71,10 +71,10 @@
                         <ol class="items-list">
                             {{#unless hideitems}}
                             {{#each groups}}
-                            <li class="items-header flexrow">
-                                <h3 class="item-name flexrow">{{localize this.name}}</h3>
+                            <li class="items-header flexrow{{#if this.collapsed}} collapsed{{/if}}" data-id="{{this.id}}">
+                                <h3 class="item-name flexrow">{{localize this.name}} <span class="item-count">({{this.items.length}} items)</span></h3>
                             </li>
-                            <ul class="item-list">
+                            <ul class="item-list" {{#if this.collapsed}}style="display: none;"{{/if}}>
                                 {{#each this.items}}
                                 <li class="item flexrow{{#if (eq this.quantity 0)}} empty{{/if}}" data-id="{{this.id}}" data-container="items" data-document="Item" draggable="false">
                                     <div class="item-name flexrow">
@@ -136,10 +136,10 @@
                                 {{#if @root.owner}}<div class="item-controls flexrow"></div>{{/if}}
                             </li>
                             {{#each documents}}
-                            <li class="item flexrow" data-id="{{this.id}}" data-container="relationships" data-document="JournalEntry" draggable="false">
+                            <li class="item flexrow" data-id="{{this.id}}" data-pack="{{this.pack}}" data-container="relationships" data-document="JournalEntry" draggable="false">
                                 <div class="item-name flexrow">
                                     <img class="item-image actor-icon" src="{{this.img}}" onerror="this.src='modules/monks-enhanced-journal/assets/person.png'" />
-                                    <h4>{{this.name}}</h4>
+                                    <h4>{{#if this.pack}}<i class="fas fa-atlas" title="From Compendium"></i> {{/if}}{{this.name}}</h4>
                                 </div>
 
                                 <div class="item-name item-relationship flexrow">

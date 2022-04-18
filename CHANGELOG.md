@@ -1,3 +1,7 @@
+# Version 1.0.52
+
+
+
 # Version 1.0.51
 
 Added the option to hide the bookmark bar.
@@ -33,8 +37,6 @@ Added the option to open an actor sheet in a new window when clicking on attache
 Fixed issue with relationship images not defaulting to the correct default image for the type.
 
 Fixed styling issues with request chat cards and PF2E.
-
-
 
 # Version 1.0.50
 

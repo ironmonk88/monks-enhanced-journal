@@ -37,10 +37,16 @@ export class QuestSheet extends EnhancedJournalSheet {
             failed: "MonksEnhancedJournal.failed"
         };
 
-        data.objectives = this.object.data.flags["monks-enhanced-journal"].objectives?.filter(o => {
+        data.objectives = duplicate(this.object.data.flags["monks-enhanced-journal"].objectives || [])?.filter(o => {
             return this.object.isOwner || o.available;
         }).map(o => {
             let counter = { counter: ($.isNumeric(o.required) ? (o.done || 0) + '/' + o.required : '') };
+            
+            if (!this.object.isOwner) {
+                let content = $("<div>").html(o.content);
+                $("section.secret", content).remove();
+                o.content = content[0].innerHTML;
+            }
             return mergeObject(o, counter);
         });
 
@@ -50,6 +56,10 @@ export class QuestSheet extends EnhancedJournalSheet {
         if (data.rewards.length) {
             data.reward = this.getReward(data.rewards);
         }
+
+        data.currency = MonksEnhancedJournal.currencies.map(c => {
+            return { id: c.id, name: c.name, value: data.reward?.currency[c.id] ?? 0 };
+        });
 
         data.valStr = (['pf2e'].includes(game.system.id) ? ".value" : "");
         data.quantityname = quantityname();
@@ -104,7 +114,7 @@ export class QuestSheet extends EnhancedJournalSheet {
     }
 
     convertRewards() {
-        let currency = Object.keys(MonksEnhancedJournal.currencies).reduce((a, v) => ({ ...a, [v]: this.object.data.flags["monks-enhanced-journal"][v] }), {});
+        let currency = MonksEnhancedJournal.currencies.reduce((a, v) => ({ ...a, [v.id]: this.object.data.flags["monks-enhanced-journal"][v.id] }), {});
         return [{
             id: makeid(),
             name: "Rewards",
@@ -132,8 +142,6 @@ export class QuestSheet extends EnhancedJournalSheet {
             reward = rewards[0];
             this.object.setFlag('monks-enhanced-journal', 'reward', reward.id);
         }
-        let currency = Object.keys(MonksEnhancedJournal.currencies).reduce((a, v) => ({ ...a, [v]: 0 }), {});
-        reward.currency = mergeObject(currency, reward.currency);
 
         reward.groups = this.getItemGroups(reward);
 
@@ -195,6 +203,9 @@ export class QuestSheet extends EnhancedJournalSheet {
         $('.items-list .actor-icon', html).click(this.openRelationship.bind(this));
 
         $('.item-relationship .item-field', html).on('change', this.alterRelationship.bind(this));
+
+        $('.items-header', html).on("click", this.collapseItemSection.bind(this));
+        $('.refill-all', html).click(this.refillItems.bind(this, 'all'));
 
         const actorOptions = this._getPersonActorContextOptions();
         if (actorOptions) new ContextMenu($(html), ".actor-img", actorOptions);
@@ -335,7 +346,7 @@ export class QuestSheet extends EnhancedJournalSheet {
 
     async addReward() {
         let rewards = duplicate(this.getRewardData());
-        let currency = Object.keys(MonksEnhancedJournal.currencies).reduce((a, v) => ({ ...a, [v]: 0 }), {});
+        let currency = MonksEnhancedJournal.currencies.reduce((a, v) => ({ ...a, [v.id]: 0 }), {});
         let reward = {
             id: makeid(),
             name: "Rewards",
@@ -622,11 +633,18 @@ export class QuestSheet extends EnhancedJournalSheet {
             return;
         let items = reward.items;
 
-        let li = $(event.currentTarget).closest('li')[0];
-        let item = items.find(i => i._id == li.dataset.id);
-        if (item) {
-            item.data.remaining = this.getValue(item, quantityname());
+        if (event == 'all') {
+            for (let item of items) {
+                item.data.remaining = this.getValue(item, quantityname());
+            }
             this.object.setFlag('monks-enhanced-journal', 'rewards', rewards);
+        } else {
+            let li = $(event.currentTarget).closest('li')[0];
+            let item = items.find(i => i._id == li.dataset.id);
+            if (item) {
+                item.data.remaining = this.getValue(item, quantityname());
+                this.object.setFlag('monks-enhanced-journal', 'rewards', rewards);
+            }
         }
     }
 

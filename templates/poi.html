@@ -38,10 +38,10 @@
                                 {{#if @root.owner}}<div class="item-controls flexrow"></div>{{/if}}
                             </li>
                             {{#each documents}}
-                            <li class="item flexrow" data-id="{{this.id}}" data-container="relationships" data-document="JournalEntry" draggable="false">
+                            <li class="item flexrow" data-id="{{this.id}}" data-pack="{{this.pack}}" data-container="relationships" data-document="JournalEntry" draggable="false">
                                 <div class="item-name flexrow">
                                     <img class="item-image actor-icon" src="{{this.img}}" onerror="this.src='modules/monks-enhanced-journal/assets/person.png'" />
-                                    <h4>{{this.name}}</h4>
+                                    <h4>{{#if this.pack}}<i class="fas fa-atlas" title="From Compendium"></i> {{/if}}{{this.name}}</h4>
                                 </div>
 
                                 <div class="item-name item-relationship flexrow">

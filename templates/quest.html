@@ -114,7 +114,7 @@
                                     {{/if}}
                                 </div>
                                 <div class="item-content" style="width:100%;">
-                                    <h4 style="white-space: normal;">{{this.content}}</h4>
+                                    <h4 style="white-space: normal;">{{{this.content}}}</h4>
                                 </div>
                             </li>
                             {{else}}
@@ -173,13 +173,13 @@
                                 <label>{{localize 'MonksEnhancedJournal.Additional'}}</label>
                                 <textarea type="text" name="reward.{{reward.id}}.additional" style="height:50px;">{{reward.additional}}</textarea>
                             </div>
-                            {{#if reward.currency}}
+                            {{#if currency}}
                             <div class="form-group currency-group">
                                 <label>{{localize 'MonksEnhancedJournal.Currency'}}</label>
                                 <div class="form-fields" style="flex-wrap:nowrap;">
-                                    {{#each reward.currency}}
-                                    <label>{{localize @key}}</label>
-                                    <input type="number" min="0" name="reward.{{../reward.id}}.currency.{{@key}}" placeholder="0" value="{{this}}" data-dtype="Number" style="text-align:right;" />
+                                    {{#each currency}}
+                                    <label>{{localize this.name}}</label>
+                                    <input type="number" min="0" name="reward.{{../reward.id}}.currency.{{this.id}}" placeholder="0" value="{{this.value}}" data-dtype="Number" style="text-align:right;" />
                                     {{/each}}
                                 </div>
                             </div>
@@ -199,15 +199,16 @@
                                 <div class="item-controls item-remaining">{{localize 'MonksEnhancedJournal.Remaining'}}</div>
 
                                 <div class="item-controls flexrow">
+                                    <a class="item-control refill-all" title="Refill all items"><i class="fas fa-cart-arrow-down"></i></a>
                                 </div>
                             </li>
 
                             <ol class="item-list">
                                 {{#each reward.groups}}
-                                <li class="items-header flexrow">
-                                    <h3 class="item-name flexrow">{{localize this.name}}</h3>
+                                <li class="items-header flexrow{{#if this.collapsed}} collapsed{{/if}}" data-id="{{this.id}}">
+                                    <h3 class="item-name flexrow">{{localize this.name}} <span class="item-count">({{this.items.length}} items)</span></h3>
                                 </li>
-                                <ul class="item-list">
+                                <ul class="item-list" {{#if this.collapsed}}style="display: none;"{{/if}}>
                                     {{#each this.items}}
                                     <li class="item flexrow{{#if this.received}} received{{/if}}{{#if (eq this.remaining 0)}} empty{{/if}}" data-id="{{this.id}}" data-container="items" data-document="Item" draggable="false">
                                         <div class="item-name flexrow">
@@ -270,10 +271,10 @@
                                 {{#if @root.owner}}<div class="item-controls flexrow"></div>{{/if}}
                             </li>
                             {{#each documents}}
-                            <li class="item flexrow" data-id="{{this.id}}" data-container="relationships" data-document="JournalEntry" draggable="false">
+                            <li class="item flexrow" data-id="{{this.id}}" data-pack="{{this.pack}}" data-container="relationships" data-document="JournalEntry" draggable="false">
                                 <div class="item-name flexrow">
                                     <img class="item-image actor-icon" src="{{this.img}}" onerror="this.src='modules/monks-enhanced-journal/assets/person.png'" />
-                                    <h4>{{this.name}}</h4>
+                                    <h4>{{#if this.pack}}<i class="fas fa-atlas" title="From Compendium"></i> {{/if}}{{this.name}}</h4>
                                 </div>
 
                                 <div class="item-name item-relationship flexrow">

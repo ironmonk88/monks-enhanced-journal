@@ -18,11 +18,16 @@ export class DCConfig extends FormApplication {
     }
 
     getData(options) {
-        let config = (game.system.id == "tormenta20" ? CONFIG.T20 : CONFIG[game.system.id.toUpperCase()]);
+        let config = CONFIG[game.system.id.toUpperCase()];
+        if (game.system.id == "tormenta20")
+            config = CONFIG.T20;
+        else if (game.system.id == "shadowrun5e")
+            config = CONFIG.SR5;
         let attributeOptions = [
             { id: "ability", text: "MonksEnhancedJournal.Ability", groups: config.abilities || config.scores || config.atributos },
             { id: "skill", text: "MonksEnhancedJournal.Skill", groups: config.skills || config.pericias }
-        ]
+        ].filter(g => g.groups);
+
         return mergeObject(super.getData(options),
             {
                 attributeOptions: attributeOptions
