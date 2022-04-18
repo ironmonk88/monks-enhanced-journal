@@ -44,6 +44,10 @@ Fixed an issue where closing a Journal Entry that was playing a slideshow wouldn
 
 Fixed an issue with editing the quantity of items in an Encounter.
 
+Swedish translations, thank you rangertheman
+
+Chinese (Taiwan) translations, thank you zeteticl
+
 # Version 1.0.51
 
 Added the option to hide the bookmark bar.
