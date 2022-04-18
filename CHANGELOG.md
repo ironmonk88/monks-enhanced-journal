@@ -1,6 +1,48 @@
 # Version 1.0.52
 
+Changed how currency is being handled.  Instead of relying on the system to give us the information, I've changed to storing it with the module.  So you can now customise what currency you want to use.  Be aware that this will not affect the Actor sheet, so make sure the Actor has the currency you want to use.
 
+But, this also means that I can now split currency evenly and then if there's any left over, convert it to the next lower currency.
+
+And, it menas when purchasing items, it will now check to see if you have enough and draw from other currencies to make up any difference in purchase price.
+
+Fixed error with adding DC if the system doesn't have any attributes to base a DC on.
+
+Update the window title when a new tab is opened so if the window is minimized you can see what sheet is opened.
+
+Switched the Objective Display to use an actual application window, this will allow you to reposition it where you'd like it.
+
+Changed the styling of inline anchor links so they don't look like html anchors, but look more like inline clickable links.
+
+Added the ability to collapse and expand item list on Encounters, Quests, Loots, and Shops.
+
+Added styling fixes for Shadowrun 5e.
+
+Added the option to hold down CTRL while clicking on an inline Scene link, to have it open and activate the Scene.
+
+Added a dialog to the editor window to generate a Roll Request.  Makes it easier to generate the properties rather trying to remember what the syntax looks like.
+
+Added the option to refill all items on the Encounter and Quest sheet.
+
+Fixed issue where editing then closing the editing was hiding the side menu.
+
+Fixed issue where clicking on the edit description button was triggering even if you weren't looking at the tabs where the description was visible.
+
+Fixed getting results from roll table, if there are multiple results associated with the same roll.
+
+Fixed issue with adding relationships to Journal Entries in a compendium
+
+Fixed issue with sheet that gets opened when a player opens a Picture, or a Journal Entry that's just a Picture.  It should like like an Image Viewer rather than a Journal Entry.
+
+Updated the Quest Objectives to use a text editor rather than just a textbox, so you can have fancy objectives.
+
+Fixed issue with slideshows not loading the thumbnails if the player is viewing it.
+
+Updated the slideshows to automatically start if a player is viewing it.
+
+Fixed an issue where closing a Journal Entry that was playing a slideshow wouldn't stop the sound from playing.
+
+Fixed an issue with editing the quantity of items in an Encounter.
 
 # Version 1.0.51
 
