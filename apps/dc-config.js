@@ -24,7 +24,7 @@ export class DCConfig extends FormApplication {
         else if (game.system.id == "shadowrun5e")
             config = CONFIG.SR5;
         let attributeOptions = [
-            { id: "ability", text: "MonksEnhancedJournal.Ability", groups: config.abilities || config.scores || config.atributos },
+            { id: "ability", text: "MonksEnhancedJournal.Ability", groups: config.abilities || config.scores || config.attribute },
             { id: "skill", text: "MonksEnhancedJournal.Skill", groups: config.skills || config.pericias }
         ].filter(g => g.groups);
 
