@@ -1,5 +1,6 @@
 import { MonksEnhancedJournal, i18n } from "./monks-enhanced-journal.js"
 import { EditCurrency } from "./apps/editcurrency.js"
+import { EditPersonDefault } from "./apps/editpersondefault.js"
 
 export const registerSettings = function () {
 	// Register any custom module settings here
@@ -21,6 +22,17 @@ export const registerSettings = function () {
 		restricted: true,
 		type: EditCurrency
 	});
+
+	
+	game.settings.registerMenu(modulename, 'editPersonDefault', {
+		name: 'Edit Person Default Fields',
+		label: 'Edit Person Default Fields',
+		hint: 'Edit the default fields when creating a new Person Journal Entry',
+		icon: 'fas fa-user',
+		restricted: true,
+		type: EditPersonDefault
+	});
+	
 
 	game.settings.register(modulename, "allow-player", {
 		name: i18n("MonksEnhancedJournal.allow-player.name"),
@@ -250,5 +262,12 @@ export const registerSettings = function () {
 		default: true,
 		type: Boolean,
 		config: false
+	});
+
+	game.settings.register(modulename, "person-default-fields", {
+		scope: "world",
+		config: true,
+		default: MonksEnhancedJournal.defaultPersonFields,
+		type: Object,
 	});
 }

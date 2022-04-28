@@ -1,0 +1,15 @@
+<form class="edit-fields" autocomplete="off" onsubmit="event.preventDefault();">
+    {{#each fields}}
+    <div class="form-group">
+        <label for="content">{{localize this.name}}</label>
+        <div class="form-fields">
+            <input type="checkbox" name="{{@key}}.value" {{checked this.value}} />
+        </div>
+    </div>
+    {{/each}}
+    <footer class="sheet-footer flexrow">
+        <button type="button" name="submit">
+            <i class="far fa-save"></i> Save Changes
+        </button>
+    </footer>
+</form>

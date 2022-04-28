@@ -65,29 +65,7 @@ export class PersonSheet extends EnhancedJournalSheet {
     }
 
     fieldlist() {
-        return {
-            'race': { name: "MonksEnhancedJournal.Race", value: true },
-            'gender': { name: "MonksEnhancedJournal.Gender", value: false },
-            'age': { name: "MonksEnhancedJournal.Age", value: true },
-            'eyes': { name: "MonksEnhancedJournal.Eyes", value: true },
-            'skin': { name: "MonksEnhancedJournal.Skin", value: false },
-            'hair': { name: "MonksEnhancedJournal.Hair", value: true },
-            'skin': { name: "MonksEnhancedJournal.Skin", value: false },
-            'life': { name: "MonksEnhancedJournal.LifeStatus", value: false },
-            'profession': { name: "MonksEnhancedJournal.Profession", value: false },
-            'voice': { name: "MonksEnhancedJournal.Voice", value: true },
-            'faction': { name: "MonksEnhancedJournal.Faction", value: false },
-            'height': { name: "MonksEnhancedJournal.Height", value: false },
-            'weight': { name: "MonksEnhancedJournal.Weight", value: false },
-            'traits': { name: "MonksEnhancedJournal.Traits", value: true },
-            'ideals': { name: "MonksEnhancedJournal.Ideals", value: true },
-            'bonds': { name: "MonksEnhancedJournal.Bonds", value: true },
-            'flaws': { name: "MonksEnhancedJournal.Flaws", value: true },
-            'longterm': { name: "MonksEnhancedJournal.LongTermGoal", value: false },
-            'shortterm': { name: "MonksEnhancedJournal.ShortTermGoal", value: false },
-            'beliefs': { name: "MonksEnhancedJournal.Beliefs", value: false },
-            'secret': { name: "MonksEnhancedJournal.Secret", value: false }
-        };
+        return game.settings.get('monks-enhanced-journal', 'person-default-fields');
     }
 
     _documentControls() {
