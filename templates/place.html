@@ -38,7 +38,7 @@
                                 {{#unless this.full}}
                                 <li {{#if this.hidden}} style="display:none;" {{/if}}>
                                     <label>{{localize this.name}}</label>
-                                    <input type="text" name="flags.monks-enhanced-journal.attributes.{{this.id}}" value="{{ this.value }}" />
+                                    <input type="text" name="flags.monks-enhanced-journal.attributes.{{this.id}}.value" value="{{ this.value }}" />
                                 </li>
                                 {{/unless}}
                                 {{/each}}
@@ -50,7 +50,7 @@
                         {{#if this.full}}
                         <div class="form-group" {{#if this.hidden}} style="display:none;" {{/if}}>
                             <label>{{localize this.name}}</label>
-                            <textarea name="flags.monks-enhanced-journal.attributes.{{this.id}}">{{this.value}}</textarea>
+                            <textarea name="flags.monks-enhanced-journal.attributes.{{this.id}}.value">{{this.value}}</textarea>
                         </div>
                         {{/if}}
                         {{/each}}

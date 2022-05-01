@@ -1,3 +1,7 @@
+# Version 1.0.55
+
+Fixed an issue with saving attribute data on the Place Sheet.
+
 # Version 1.0.54
 
 Added the option to reorder person and place attributes

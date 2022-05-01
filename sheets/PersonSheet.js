@@ -34,7 +34,16 @@ export class PersonSheet extends EnhancedJournalSheet {
     async getData() {
         let data = super.getData();
 
-        if (data?.data?.flags['monks-enhanced-journal']?.attributes == undefined) {
+        let needsAttributes = data?.data?.flags['monks-enhanced-journal']?.attributes == undefined;
+        if (!needsAttributes) {
+            for (let value of Object.values(data?.data?.flags['monks-enhanced-journal']?.attributes || {})) {
+                if (typeof value != "object") {
+                    needsAttributes = true;
+                    break;
+                }
+            }
+        }
+        if (needsAttributes) {
             let fields = data?.data?.flags['monks-enhanced-journal']?.fields || {};
             let attributes = {};
             for (let attr of ['race','gender','age','eyes','skin','hair', 'life','profession','voice',  'faction','height','weight','traits','ideals','bonds', 'flaws','longterm','shortterm','beliefs','secret']) {
@@ -141,8 +150,8 @@ export class PersonSheet extends EnhancedJournalSheet {
             delete data.relationships;
         }
 
-        if (data.attributes) {
-            data.attributes = mergeObject((this.object.data?.flags['monks-enhanced-journal']?.attributes || {}), data.attributes);
+        if (data.flags['monks-enhanced-journal']?.attributes) {
+            data.flags['monks-enhanced-journal'].attributes = mergeObject((this.object.data?.flags['monks-enhanced-journal']?.attributes || {}), (data.flags['monks-enhanced-journal']?.attributes || {}));
         }
 
         return flattenObject(data);
