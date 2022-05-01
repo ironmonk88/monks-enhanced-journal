@@ -3,6 +3,7 @@
         <div class="dialog-content">
             <ol class="items-list">
                 <li class="items-header flexrow" style="position: relative;">
+                    <div class="item-controls"></div>
                     <div class="item-name">Code</div>
                     <div class="item-name">Name</div>
                     <div class="item-controls">Hidden</div>
@@ -15,6 +16,10 @@
                 <ol class="item-list" style="padding-left: 0px; max-height: 500px; overflow-y: auto;">
                     {{#each fields}}
                     <li class="item flexrow" data-id="{{this.id}}" style="position:relative;">
+                        <div class="item-controls">
+                            <i class="fas fa-bars reorder" style="cursor:ns-resize;"></i>
+                        </div>
+
                         <div class="item-name">
                             <input type="text" name="id" autocomplete="off" value="{{this.id}}" />
                         </div>

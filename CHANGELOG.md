@@ -1,3 +1,15 @@
+# Version 1.0.54
+
+Added the option to reorder person and place attributes
+
+Removed some debugging code accidentally left in that was preventing the Place sheet from responding to hidden fields.
+
+Added the option to add a relationship between places and other places.
+
+Added German translation, thank you Miccolo02
+
+And a late thank you to GSBicalho for providing the base code for editing attributes.
+
 # Version 1.0.53
 
 Added the option to edit what attributes are being shown on the Person and Place sheets.  So those sheets can now be fully customized how you want them.

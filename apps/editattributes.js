@@ -15,7 +15,8 @@ export class EditAttributes extends FormApplication {
             width: 600,
             submitOnChange: false,
             closeOnSubmit: true,
-            scrollY: [".item-list"]
+            scrollY: [".item-list"],
+            dragDrop: [{ dragSelector: ".reorder", dropSelector: ".item-list" }]
         });
     }
 
@@ -71,6 +72,45 @@ export class EditAttributes extends FormApplication {
         $('.item-delete', html).click(this.removeAttribute.bind(this));
         $('.item-add', html).click(this.addAttribute.bind(this));
     };
+
+    _onDragStart(event) {
+        let li = event.currentTarget.closest(".item");
+        const dragData = { id: li.dataset.id };
+        event.dataTransfer.setData("text/plain", JSON.stringify(dragData));
+    }
+
+    _canDragStart(selector) {
+        return true;
+    }
+
+    _onDrop(event) {
+        // Try to extract the data
+        let data;
+        try {
+            data = JSON.parse(event.dataTransfer.getData('text/plain'));
+        }
+        catch (err) {
+            return false;
+        }
+
+        // Identify the drop target
+        const target = event.target.closest(".item") || null;
+
+        // Call the drop handler
+        if (target && target.dataset.id) {
+            if (data.id === target.dataset.id) return; // Don't drop on yourself
+
+            let from = this.attributes.findIndex(a => a.id == data.id);
+            let to = this.attributes.findIndex(a => a.id == target.dataset.id);
+            log('from', from, 'to', to);
+            this.attributes.splice(to, 0, this.attributes.splice(from, 1)[0]);
+
+            if (from < to)
+                $('.item-list .item[data-id="' + data.id + '"]', this.element).insertAfter(target);
+            else
+                $('.item-list .item[data-id="' + data.id + '"]', this.element).insertBefore(target);
+        }
+    }
 }
 
 export class EditPersonAttributes extends EditAttributes {

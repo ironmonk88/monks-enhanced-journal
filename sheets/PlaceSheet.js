@@ -39,7 +39,7 @@ export class PlaceSheet extends EnhancedJournalSheet {
     }
 
     get allowedRelationships() {
-        return ['organization', 'person', 'shop', 'poi'];
+        return ['organization', 'person', 'shop', 'poi', 'place'];
     }
 
     async getData() {
@@ -51,7 +51,7 @@ export class PlaceSheet extends EnhancedJournalSheet {
             this.object.unsetFlag('monks-enhanced-journal', 'townsfolk');
         }
 
-        if (true || data?.data?.flags['monks-enhanced-journal']?.attributes == undefined) {
+        if (data?.data?.flags['monks-enhanced-journal']?.attributes == undefined) {
             let fields = data?.data?.flags['monks-enhanced-journal']?.fields || {};
             let attributes = {};
             for (let attr of ['age','size','government','alignment','faction','inhabitants','districts','agricultural','cultural','educational','indistrial','mercantile','military']) {
