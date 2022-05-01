@@ -14,7 +14,7 @@ export class PlaceSheet extends EnhancedJournalSheet {
             dragDrop: [
                 { dragSelector: ".document.actor", dropSelector: ".place-container" },
                 { dragSelector: ".document.item", dropSelector: ".place-container" }],
-            scrollY: [".tab.details .tab-inner", ".tab.townsfolk .tab-inner", ".tab.shops .tab-inner", ".tab.description .tab-inner"]
+            scrollY: [".tab.entry-details .tab-inner", ".tab.townsfolk .tab-inner", ".tab.shops .tab-inner", ".tab.description .tab-inner"]
         });
     }
 
@@ -23,25 +23,19 @@ export class PlaceSheet extends EnhancedJournalSheet {
     }
 
     fieldlist() {
-        return {
-            'age': { name: "MonksEnhancedJournal.Age", value: true },
-            'size': { name: "MonksEnhancedJournal.Size", value: true },
-            'government': { name: "MonksEnhancedJournal.Government", value: true },
-            'alignment': { name: "MonksEnhancedJournal.Alignment", value: false },
-            'faction': { name: "MonksEnhancedJournal.Faction", value: false },
-            'inhabitants': { name: "MonksEnhancedJournal.Inhabitants", value: true },
-            'districts': { name: "MonksEnhancedJournal.Districts", value: false },
-            'agricultural': { name: "MonksEnhancedJournal.Agricultural", value: false },
-            'cultural': { name: "MonksEnhancedJournal.Cultural", value: false },
-            'educational': { name: "MonksEnhancedJournal.Educational", value: false },
-            'indistrial': { name: "MonksEnhancedJournal.Industrial", value: false },
-            'mercantile': { name: "MonksEnhancedJournal.Mercantile", value: false },
-            'military': { name: "MonksEnhancedJournal.Military", value: false }
-        };
+        let fields = duplicate(setting("place-attributes"));
+        let attributes = this.object.data.flags['monks-enhanced-journal'].attributes;
+        for (let field of fields) {
+            if (attributes[field.id]) {
+                field = mergeObject(field, attributes[field.id]);
+            }
+        }
+
+        return fields;
     }
 
     static get defaultObject() {
-        return { shops: [], townsfolk: [] };
+        return { shops: [], townsfolk: [], attributes: {} };
     }
 
     get allowedRelationships() {
@@ -55,6 +49,20 @@ export class PlaceSheet extends EnhancedJournalSheet {
             data.data.flags['monks-enhanced-journal'].relationships = data?.data?.flags['monks-enhanced-journal']?.townsfolk;
             this.object.setFlag('monks-enhanced-journal', 'relationships', data.data.flags['monks-enhanced-journal'].relationships);
             this.object.unsetFlag('monks-enhanced-journal', 'townsfolk');
+        }
+
+        if (true || data?.data?.flags['monks-enhanced-journal']?.attributes == undefined) {
+            let fields = data?.data?.flags['monks-enhanced-journal']?.fields || {};
+            let attributes = {};
+            for (let attr of ['age','size','government','alignment','faction','inhabitants','districts','agricultural','cultural','educational','indistrial','mercantile','military']) {
+                attributes[attr] = { value: data?.data?.flags['monks-enhanced-journal'][attr] || "" };
+                if (fields[attr] != undefined)
+                    attributes[attr].hidden = !fields[attr]?.value;
+                //delete data?.data?.flags['monks-enhanced-journal'][attr]
+            }
+            data.data.flags['monks-enhanced-journal'].attributes = attributes;
+            this.object.data.flags['monks-enhanced-journal'].attributes = attributes;
+            this.object.setFlag('monks-enhanced-journal', 'attributes', data.data.flags['monks-enhanced-journal'].attributes);
         }
 
         if (data?.data?.flags['monks-enhanced-journal']?.shops) {
@@ -88,6 +96,8 @@ export class PlaceSheet extends EnhancedJournalSheet {
         data.shops = data.shops.sort((a, b) => a.name.localeCompare(b.name));
         data.organizations = data.organizations.sort((a, b) => a.name.localeCompare(b.name));
         data.townsfolk = data.townsfolk.sort((a, b) => a.name.localeCompare(b.name));
+
+        data.fields = this.fieldlist();
 
         return data;
     }
@@ -129,6 +139,10 @@ export class PlaceSheet extends EnhancedJournalSheet {
                     relationship = mergeObject(relationship, dataRel);
             }
             delete data.relationships;
+        }
+
+        if (data.attributes) {
+            data.attributes = mergeObject((this.object.data?.flags['monks-enhanced-journal']?.attributes || {}), data.attributes);
         }
 
         return flattenObject(data);

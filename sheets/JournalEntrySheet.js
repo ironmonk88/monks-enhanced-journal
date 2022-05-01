@@ -19,7 +19,7 @@ export class JournalEntrySheet extends EnhancedJournalSheet {
 
     get template() {
         let mode = this.options.sheetMode || this._sheetMode;
-        if (!this.object.isOwner && mode === "image" && this.object.data.img) return ImagePopout.defaultOptions.template;
+        if (!this.object.isOwner && mode === "image" && this.object.data.img && !setting("allow-player")) return ImagePopout.defaultOptions.template;
         return this.options.template;
     }
 

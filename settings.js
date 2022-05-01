@@ -1,5 +1,6 @@
 import { MonksEnhancedJournal, i18n } from "./monks-enhanced-journal.js"
 import { EditCurrency } from "./apps/editcurrency.js"
+import { EditPersonAttributes, EditPlaceAttributes } from "./apps/editattributes.js"
 
 export const registerSettings = function () {
 	// Register any custom module settings here
@@ -14,12 +15,27 @@ export const registerSettings = function () {
 	let lootfolder = {};
 
 	game.settings.registerMenu(modulename, 'editCurrency', {
-		name: 'Edit Currency',
 		label: 'Edit Currency',
 		hint: 'Edit the currency that this worls will use',
 		icon: 'fas fa-coins',
 		restricted: true,
 		type: EditCurrency
+	});
+
+	game.settings.registerMenu(modulename, 'editPersonAttributes', {
+		label: 'Edit Person Attributes',
+		hint: 'Edit the attributes shown on the Person sheet',
+		icon: 'fas fa-user',
+		restricted: true,
+		type: EditPersonAttributes
+	});
+
+	game.settings.registerMenu(modulename, 'editPlaceAttributes', {
+		label: 'Edit Place Attributes',
+		hint: 'Edit the attributes shown on the Place sheet',
+		icon: 'fas fa-place-of-worship',
+		restricted: true,
+		type: EditPlaceAttributes
 	});
 
 	game.settings.register(modulename, "allow-player", {
@@ -235,6 +251,55 @@ export const registerSettings = function () {
 		scope: "world",
 		config: false,
 		default: [],
+		type: Array,
+	});
+
+	game.settings.register(modulename, "person-attributes", {
+		scope: "world",
+		config: false,
+		default: [
+			{ id: 'race', name: "MonksEnhancedJournal.Race", hidden: false, full: false },
+			{ id: 'gender', name: "MonksEnhancedJournal.Gender", hidden: true, full: false },
+			{ id: 'age', name: "MonksEnhancedJournal.Age", hidden: false, full: false },
+			{ id: 'eyes', name: "MonksEnhancedJournal.Eyes", hidden: false, full: false },
+			{ id: 'skin', name: "MonksEnhancedJournal.Skin", hidden: true, full: false },
+			{ id: 'hair', name: "MonksEnhancedJournal.Hair", hidden: false, full: false },
+			{ id: 'life', name: "MonksEnhancedJournal.LifeStatus", hidden: true, full: false },
+			{ id: 'profession', name: "MonksEnhancedJournal.Profession", hidden: true, full: false },
+			{ id: 'voice', name: "MonksEnhancedJournal.Voice", hidden: false, full: false },
+			{ id: 'faction', name: "MonksEnhancedJournal.Faction", hidden: true, full: false },
+			{ id: 'height', name: "MonksEnhancedJournal.Height", hidden: true, full: false },
+			{ id: 'weight', name: "MonksEnhancedJournal.Weight", hidden: true, full: false },
+			{ id: 'traits', name: "MonksEnhancedJournal.Traits", hidden: false, full: false },
+			{ id: 'ideals', name: "MonksEnhancedJournal.Ideals", hidden: false, full: true },
+			{ id: 'bonds', name: "MonksEnhancedJournal.Bonds", hidden: false, full: true },
+			{ id: 'flaws', name: "MonksEnhancedJournal.Flaws", hidden: false, full: true },
+			{ id: 'longterm', name: "MonksEnhancedJournal.LongTermGoal", hidden: true, full: true },
+			{ id: 'shortterm', name: "MonksEnhancedJournal.ShortTermGoal", hidden: true, full: true },
+			{ id: 'beliefs', name: "MonksEnhancedJournal.Beliefs", hidden: true, full: true },
+			{ id: 'secret', name: "MonksEnhancedJournal.Secret", hidden: true, full: true }
+		],
+		type: Array,
+	});
+
+	game.settings.register(modulename, "place-attributes", {
+		scope: "world",
+		config: false,
+		default: [
+			{ id: 'age', name: "MonksEnhancedJournal.Age", hidden: false, full: false },
+			{ id: 'size', name: "MonksEnhancedJournal.Size", hidden: false, full: false },
+			{ id: 'government', name: "MonksEnhancedJournal.Government", hidden: false, full: false },
+			{ id: 'alignment', name: "MonksEnhancedJournal.Alignment", hidden: true, full: false },
+			{ id: 'faction', name: "MonksEnhancedJournal.Faction", hidden: true, full: false },
+			{ id: 'inhabitants', name: "MonksEnhancedJournal.Inhabitants", hidden: false, full: true },
+			{ id: 'districts', name: "MonksEnhancedJournal.Districts", hidden: true, full: true },
+			{ id: 'agricultural', name: "MonksEnhancedJournal.Agricultural", hidden: true, full: true },
+			{ id: 'cultural', name: "MonksEnhancedJournal.Cultural", hidden: true, full: true },
+			{ id: 'educational', name: "MonksEnhancedJournal.Educational", hidden: true, full: true },
+			{ id: 'indistrial', name: "MonksEnhancedJournal.Industrial", hidden: true, full: true },
+			{ id: 'mercantile', name: "MonksEnhancedJournal.Mercantile", hidden: true, full: true },
+			{ id: 'military', name: "MonksEnhancedJournal.Military", hidden: true, full: true }
+		],
 		type: Array,
 	});
 

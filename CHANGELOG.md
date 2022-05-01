@@ -1,3 +1,31 @@
+# Version 1.0.53
+
+Added the option to edit what attributes are being shown on the Person and Place sheets.  So those sheets can now be fully customized how you want them.
+
+Fixed an issue with the Note HUD where toggling visibility wasn't showing the correct highlighting.
+
+Fixed issues with the details section disappearing in a system... that I can't remember right now.
+
+Fixed issues with clicking on an NPC to display the NPC chat messages from a Journal Entry.
+
+Added the option to have some NPC chat messages only appear to the player that clicks the NPC.
+
+Fixed issues with dScryb nearby sheets being "caught" by Enhanced Journal.
+
+Added default currency to AE5.
+
+Added an Active Tile action to change the status of a Quest.
+
+Fixed an issue with dragging monsters off an Encounter sheet.
+
+Fixed an issue with displaying a Journal picture to a player.
+
+Allow a quest to have a relationship to another quest.  This way you can have sub quests linked to a main quest.
+
+Fixed an issue with quest sheet not showing the default image properly.
+
+Added perception to the list of attributes for PF2E.
+
 # Version 1.0.52
 
 Changed how currency is being handled.  Instead of relying on the system to give us the information, I've changed to storing it with the module.  So you can now customise what currency you want to use.  Be aware that this will not affect the Actor sheet, so make sure the Actor has the currency you want to use.

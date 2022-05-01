@@ -104,10 +104,6 @@ export class EnhancedJournalSheet extends JournalSheet {
         data.isGM = game.user.isGM;
         data.hasGM = (game.users.find(u => u.isGM && u.active) != undefined);
 
-        let fields = this.fieldlist();
-        if (fields != undefined)
-            data.fields = mergeObject(fields, data.data.flags['monks-enhanced-journal'].fields);
-
         return data;
     }
 
@@ -656,7 +652,7 @@ export class EnhancedJournalSheet extends JournalSheet {
 
     onEditFields() {
         //popup a dialog with the available fields to edit
-        let fields = mergeObject(this.fieldlist(), this.object.data.flags['monks-enhanced-journal'].fields);
+        let fields = this.fieldlist();
         new EditFields(this.object, fields).render(true);
     }
 

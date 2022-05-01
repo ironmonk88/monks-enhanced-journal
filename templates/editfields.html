@@ -1,10 +1,22 @@
-<form class="edit-fields" autocomplete="off" onsubmit="event.preventDefault();">
-    {{#each fields}}
-    <div class="form-group">
-        <label for="content">{{localize this.name}}</label>
-        <div class="form-fields">
-            <input type="checkbox" name="{{@key}}.value" {{checked this.value}} />
-        </div>
-    </div>
-    {{/each}}
+<form class="edit-fields monks-journal-sheet sheet" autocomplete="off" onsubmit="event.preventDefault();">
+    <ol class="items-list">
+        <li class="items-header flexrow" style="position: relative;">
+            <div class="item-name" style="text-align: left;">Name</div>
+            <div class="item-controls">Hidden</div>
+        </li>
+
+        <ol class="item-list" style="padding-left: 0px; max-height: 500px; overflow-y: auto;">
+            {{#each fields}}
+            <li class="item flexrow" data-id="{{this.id}}" style="position:relative;">
+                <div class="item-name">
+                    <h3 for="content">{{localize this.name}}</h3>
+                </div>
+
+                <div class="item-controls" style="text-align: center;">
+                    <input type="checkbox" name="attributes.{{this.id}}.hidden" {{checked this.hidden}} />
+                </div>
+            </li>
+            {{/each}}
+        </ol>
+    </ol>
 </form>

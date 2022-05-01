@@ -10,7 +10,7 @@ export class EditCurrency extends FormApplication {
     static get defaultOptions() {
         return mergeObject(super.defaultOptions, {
             id: "journal-editcurrency",
-            title: 'Edit Stats',
+            title: 'Edit Currency',
             classes: ["edit-currency"],
             template: "./modules/monks-enhanced-journal/templates/edit-currency.html",
             width: 400,
@@ -51,6 +51,8 @@ export class EditCurrency extends FormApplication {
                     val = parseFloat(val);
             }
             else if (prop == "id") {
+                val = val.replace(/[^a-z]/gi, '');
+                $(event.currentTarget).val(val);
                 if (!!this.currency.find(c => c.id == val)) {
                     $(event.currentTarget).val(currid)
                     return;

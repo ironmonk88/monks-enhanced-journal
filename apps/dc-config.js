@@ -23,10 +23,15 @@ export class DCConfig extends FormApplication {
             config = CONFIG.T20;
         else if (game.system.id == "shadowrun5e")
             config = CONFIG.SR5;
+
         let attributeOptions = [
             { id: "ability", text: "MonksEnhancedJournal.Ability", groups: config.abilities || config.scores || config.atributos },
             { id: "skill", text: "MonksEnhancedJournal.Skill", groups: config.skills || config.pericias }
-        ].filter(g => g.groups);
+        ];
+        if (game.system.id == "pf2e")
+            attributeOptions.push({ id: "attribute", text: i18n("MonksTokenBar.Attribute"), groups: { perception: CONFIG.PF2E.attributes.perception } });
+        
+        attributeOptions = attributeOptions.filter(g => g.groups);
 
         return mergeObject(super.getData(options),
             {

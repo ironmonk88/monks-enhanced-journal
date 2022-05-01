@@ -708,6 +708,7 @@
 .monks-journal-sheet.sheet .sheet-header h1 input {
     font-size: 32px !important;
     height: 36px !important;
+    margin: 8px;
 }
 
 .monks-journal-sheet.sheet .form-group label {
@@ -888,8 +889,8 @@ height: fit-content;*/
     margin-right: 8px;
 }
 
-.monks-journal-sheet.sheet .tab.details .details,
-.monks-journal-sheet.sheet .tab.description .details,
+.monks-journal-sheet.sheet .tab.entry-details .details-section,
+.monks-journal-sheet.sheet .tab.description .details-section,
 .monks-journal-sheet.sheet .tab.rewards .form-group {
     font-family: "Modesto Condensed", "Palatino Linotype", serif;
     font-size: 20px;
@@ -898,7 +899,7 @@ height: fit-content;*/
 }
 
 .monks-journal-sheet.sheet .tab.rewards .currency-group .form-group,
-.monks-journal-sheet.sheet .tab.details .details .form-group,
+.monks-journal-sheet.sheet .tab.entry-details .details-section .form-group,
 .monks-journal-sheet.sheet .tab.items .currency-group {
     flex-grow: 0 !important;
 }
@@ -911,8 +912,8 @@ height: fit-content;*/
     flex: 2;
 }
 
-.monks-journal-sheet.sheet .tab.details .details label,
-.monks-journal-sheet.sheet .tab.description .details label,
+.monks-journal-sheet.sheet .tab.entry-details .details-section label,
+.monks-journal-sheet.sheet .tab.description .details-section label,
 .monks-journal-sheet.sheet .tab.rewards .form-group label {
     flex: 1;
     max-width: 175px;
@@ -946,8 +947,8 @@ height: fit-content;*/
     flex: 0 0 215px;
 }
 
-.monks-journal-sheet.sheet .person-container .tab.details .details .document-details ul li label,
-.monks-journal-sheet.sheet .place-container .tab.details .details .document-details ul li label {
+.monks-journal-sheet.sheet .person-container .tab.entry-details .details-section .document-details ul li label,
+.monks-journal-sheet.sheet .place-container .tab.entry-details .details-section .document-details ul li label {
     flex: 0 0 60px;
 }
 /*
@@ -1058,7 +1059,7 @@ height: fit-content;*/
 }*/
 
 .monks-journal-sheet .slideshow-container.playing .sheet-navigation,
-.monks-journal-sheet .slideshow-container.playing .tab.details{
+.monks-journal-sheet .slideshow-container.playing .tab.entry-details{
     display:none;
 }
 
@@ -1695,6 +1696,11 @@ height: fit-content;*/
 .monks-journal-sheet.sheet .items-list .item-controls {
     flex: 0 0 80px;
     justify-content: space-between;
+}
+
+.monks-journal-sheet.sheet.editattributes .items-list .item-controls {
+    flex: 0 0 45px;
+    text-align: center;
 }
 
 .monks-journal-sheet.sheet .journal-subsheet .objective-items .item-list > li > div:first-child {

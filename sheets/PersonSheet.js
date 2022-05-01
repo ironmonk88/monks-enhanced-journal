@@ -15,7 +15,7 @@ export class PersonSheet extends EnhancedJournalSheet {
                 { dragSelector: ".document.actor", dropSelector: ".person-container" },
                 { dragSelector: ".actor-img img", dropSelector: "null" }
             ],
-            scrollY: [".tab.details .tab-inner", ".tab.description .tab-inner", ".relationships .items-list"]
+            scrollY: [".tab.entry-details .tab-inner", ".tab.description .tab-inner", ".relationships .items-list"]
         });
     }
 
@@ -28,11 +28,25 @@ export class PersonSheet extends EnhancedJournalSheet {
     }
 
     static get defaultObject() {
-        return { relationships: [] };
+        return { relationships: [], attributes: {} };
     }
 
     async getData() {
         let data = super.getData();
+
+        if (data?.data?.flags['monks-enhanced-journal']?.attributes == undefined) {
+            let fields = data?.data?.flags['monks-enhanced-journal']?.fields || {};
+            let attributes = {};
+            for (let attr of ['race','gender','age','eyes','skin','hair', 'life','profession','voice',  'faction','height','weight','traits','ideals','bonds', 'flaws','longterm','shortterm','beliefs','secret']) {
+                attributes[attr] = { value: data?.data?.flags['monks-enhanced-journal'][attr] || ""};
+                if (fields[attr] != undefined)
+                    attributes[attr].hidden = !fields[attr]?.value;
+                //delete data?.data?.flags['monks-enhanced-journal'][attr]
+            }
+            data.data.flags['monks-enhanced-journal'].attributes = attributes;
+            this.object.data.flags['monks-enhanced-journal'].attributes = attributes;
+            this.object.setFlag('monks-enhanced-journal', 'attributes', data.data.flags['monks-enhanced-journal'].attributes);
+        }
 
         data.relationships = {};
         for (let item of (data.data.flags['monks-enhanced-journal']?.relationships || [])) {
@@ -61,33 +75,20 @@ export class PersonSheet extends EnhancedJournalSheet {
             }
         }
 
+        data.fields = this.fieldlist();
+
         return data;
     }
 
     fieldlist() {
-        return {
-            'race': { name: "MonksEnhancedJournal.Race", value: true },
-            'gender': { name: "MonksEnhancedJournal.Gender", value: false },
-            'age': { name: "MonksEnhancedJournal.Age", value: true },
-            'eyes': { name: "MonksEnhancedJournal.Eyes", value: true },
-            'skin': { name: "MonksEnhancedJournal.Skin", value: false },
-            'hair': { name: "MonksEnhancedJournal.Hair", value: true },
-            'skin': { name: "MonksEnhancedJournal.Skin", value: false },
-            'life': { name: "MonksEnhancedJournal.LifeStatus", value: false },
-            'profession': { name: "MonksEnhancedJournal.Profession", value: false },
-            'voice': { name: "MonksEnhancedJournal.Voice", value: true },
-            'faction': { name: "MonksEnhancedJournal.Faction", value: false },
-            'height': { name: "MonksEnhancedJournal.Height", value: false },
-            'weight': { name: "MonksEnhancedJournal.Weight", value: false },
-            'traits': { name: "MonksEnhancedJournal.Traits", value: true },
-            'ideals': { name: "MonksEnhancedJournal.Ideals", value: true },
-            'bonds': { name: "MonksEnhancedJournal.Bonds", value: true },
-            'flaws': { name: "MonksEnhancedJournal.Flaws", value: true },
-            'longterm': { name: "MonksEnhancedJournal.LongTermGoal", value: false },
-            'shortterm': { name: "MonksEnhancedJournal.ShortTermGoal", value: false },
-            'beliefs': { name: "MonksEnhancedJournal.Beliefs", value: false },
-            'secret': { name: "MonksEnhancedJournal.Secret", value: false }
-        };
+        let fields = duplicate(setting("person-attributes"));
+        let attributes = this.object.data.flags['monks-enhanced-journal'].attributes;
+        for (let field of fields) {
+            if (attributes[field.id]) {
+                field = mergeObject(field, attributes[field.id]);
+            }
+        }
+        return fields;
     }
 
     _documentControls() {
@@ -138,6 +139,10 @@ export class PersonSheet extends EnhancedJournalSheet {
                     relationship = mergeObject(relationship, dataRel);
             }
             delete data.relationships;
+        }
+
+        if (data.attributes) {
+            data.attributes = mergeObject((this.object.data?.flags['monks-enhanced-journal']?.attributes || {}), data.attributes);
         }
 
         return flattenObject(data);

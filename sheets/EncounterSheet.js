@@ -177,8 +177,9 @@ export class EncounterSheet extends EnhancedJournalSheet {
         } else {
             let li = $(event.currentTarget).closest('li')[0];
             let id = li.dataset.id;
-            let item = this.object.data.flags["monks-enhanced-journal"].items.find(i => i._id == id);
-            if (!game.user.isGM && (this.object.data.flags["monks-enhanced-journal"].purchasing == 'locked' || item?.lock === true)) {
+            let container = li.dataset.container;
+            let item = this.object.data.flags["monks-enhanced-journal"][container].find(i => i._id == id || i.id == id);
+            if (container == "items" && !game.user.isGM && (this.object.data.flags["monks-enhanced-journal"].purchasing == 'locked' || item?.lock === true)) {
                 event.preventDefault();
                 return;
             }
@@ -186,8 +187,9 @@ export class EncounterSheet extends EnhancedJournalSheet {
             dragData.id = id;
             dragData.journalid = this.object.id;
             dragData.pack = li.dataset.pack;
-            dragData.type = li.dataset.document;
-            dragData.data = item;
+            dragData.type = li.dataset.document || li.dataset.type;
+            if (container == "items")
+                dragData.data = item;
 
             log('Drag Start', dragData);
             MonksEnhancedJournal._dragItem = id;

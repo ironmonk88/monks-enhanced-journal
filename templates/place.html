@@ -22,74 +22,38 @@
         </header>
         <nav class="sheet-navigation tabs" data-group="primary">
             <a class="item" data-tab="description">{{localize 'MonksEnhancedJournal.Description'}}</a>
-            <a class="item" data-tab="details">{{localize 'MonksEnhancedJournal.Details'}}</a>
+            <a class="item" data-tab="entry-details">{{localize 'MonksEnhancedJournal.Details'}}</a>
             <a class="item" data-tab="townsfolk">{{localize 'MonksEnhancedJournal.Townsfolk'}}</a>
             <a class="item" data-tab="shops">{{localize 'MonksEnhancedJournal.Shops'}}</a>
             <a class="item" data-tab="organizations">{{localize 'MonksEnhancedJournal.Organizations'}}</a>
             <a class="item" data-tab="notes">{{localize 'MonksEnhancedJournal.Notes'}}</a>
         </nav>
         <section class="sheet-body half-size">
-            <div class="tab details active" data-group="primary" data-tab="details">
+            <div class="tab entry-details active" data-group="primary" data-tab="entry-details">
                 <div class="tab-inner flexcol">
-                    <div class="details flexrow" style="border-bottom: 2px groove #eeede0;flex-grow:0;">
+                    <div class="details-section flexrow" style="border-bottom: 2px groove #eeede0;flex-grow:0;">
                         <div class="document-details">
                             <ul>
-                                <li {{#unless fields.age.value}} style="display:none;" {{/unless}}>
-                                    <label>{{localize 'MonksEnhancedJournal.Age'}}</label>
-                                    <input type="text" name="flags.monks-enhanced-journal.age" value="{{data.flags.monks-enhanced-journal.age}}" />
+                                {{#each fields}}
+                                {{#unless this.full}}
+                                <li {{#if this.hidden}} style="display:none;" {{/if}}>
+                                    <label>{{localize this.name}}</label>
+                                    <input type="text" name="flags.monks-enhanced-journal.attributes.{{this.id}}" value="{{ this.value }}" />
                                 </li>
-                                <li {{#unless fields.size.value}} style="display:none;" {{/unless}}>
-                                    <label>{{localize 'MonksEnhancedJournal.Size'}}</label>
-                                    <input type="text" name="flags.monks-enhanced-journal.size" value="{{data.flags.monks-enhanced-journal.size}}" />
-                                </li>
-                                <li {{#unless fields.government.value}} style="display:none;" {{/unless}}>
-                                    <label>{{localize 'MonksEnhancedJournal.Government'}}</label>
-                                    <input type="text" name="flags.monks-enhanced-journal.government" value="{{data.flags.monks-enhanced-journal.government}}" />
-                                </li>
-                                <li {{#unless fields.alignment.value}} style="display:none;" {{/unless}}>
-                                    <label>{{localize 'MonksEnhancedJournal.Alignment'}}</label>
-                                    <input type="text" name="flags.monks-enhanced-journal.alignment" value="{{data.flags.monks-enhanced-journal.alignment}}" />
-                                </li>
-                                <li {{#unless fields.faction.value}} style="display:none;" {{/unless}}>
-                                    <label>{{localize 'MonksEnhancedJournal.Faction'}}</label>
-                                    <input type="text" name="flags.monks-enhanced-journal.faction" value="{{data.flags.monks-enhanced-journal.faction}}" />
-                                </li>
+                                {{/unless}}
+                                {{/each}}
                             </ul>
                         </div>
                     </div>
-                    <div class="details flexcol" style="border-bottom: 2px groove #eeede0; flex-grow: 0;">
-                        <div class="form-group" {{#unless fields.inhabitants.value}} style="display:none;" {{/unless}}>
-                            <label>{{localize 'MonksEnhancedJournal.Inhabitants'}}</label>
-                            <textarea name="flags.monks-enhanced-journal.inhabitants">{{data.flags.monks-enhanced-journal.inhabitants}}</textarea>
+                    <div class="details-section flexcol" style="border-bottom: 2px groove #eeede0; overflow-y: auto;">
+                        {{#each fields}}
+                        {{#if this.full}}
+                        <div class="form-group" {{#if this.hidden}} style="display:none;" {{/if}}>
+                            <label>{{localize this.name}}</label>
+                            <textarea name="flags.monks-enhanced-journal.attributes.{{this.id}}">{{this.value}}</textarea>
                         </div>
-                        <div class="form-group" {{#unless fields.districts.value}} style="display:none;" {{/unless}}>
-                            <label>{{localize 'MonksEnhancedJournal.Districts'}}</label>
-                            <textarea name="flags.monks-enhanced-journal.districts">{{data.flags.monks-enhanced-journal.districts}}</textarea>
-                        </div>
-                        <div class="form-group" {{#unless fields.agricultural.value}} style="display:none;" {{/unless}}>
-                            <label>{{localize 'MonksEnhancedJournal.Agricultural'}}</label>
-                            <textarea name="flags.monks-enhanced-journal.agricultural">{{data.flags.monks-enhanced-journal.agricultural}}</textarea>
-                        </div>
-                        <div class="form-group" {{#unless fields.cultural.value}} style="display:none;" {{/unless}}>
-                            <label>{{localize 'MonksEnhancedJournal.Cultural'}}</label>
-                            <textarea name="flags.monks-enhanced-journal.cultural">{{data.flags.monks-enhanced-journal.cultural}}</textarea>
-                        </div>
-                        <div class="form-group" {{#unless fields.educational.value}} style="display:none;" {{/unless}}>
-                            <label>{{localize 'MonksEnhancedJournal.Educational'}}</label>
-                            <textarea name="flags.monks-enhanced-journal.educational">{{data.flags.monks-enhanced-journal.educational}}</textarea>
-                        </div>
-                        <div class="form-group" {{#unless fields.industrial.value}} style="display:none;" {{/unless}}>
-                            <label>{{localize 'MonksEnhancedJournal.Industrial'}}</label>
-                            <textarea name="flags.monks-enhanced-journal.industrial">{{data.flags.monks-enhanced-journal.industrial}}</textarea>
-                        </div>
-                        <div class="form-group" {{#unless fields.mercantile.value}} style="display:none;" {{/unless}}>
-                            <label>{{localize 'MonksEnhancedJournal.Mercantile'}}</label>
-                            <textarea name="flags.monks-enhanced-journal.mercantile">{{data.flags.monks-enhanced-journal.mercantile}}</textarea>
-                        </div>
-                        <div class="form-group" {{#unless fields.military.value}} style="display:none;" {{/unless}}>
-                            <label>{{localize 'MonksEnhancedJournal.Military'}}</label>
-                            <textarea name="flags.monks-enhanced-journal.military">{{data.flags.monks-enhanced-journal.military}}</textarea>
-                        </div>
+                        {{/if}}
+                        {{/each}}
                     </div>
                 </div>
             </div>

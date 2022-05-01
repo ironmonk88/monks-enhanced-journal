@@ -20,9 +20,9 @@ export class EditFields extends FormApplication {
     }
 
     async _updateObject(event, formData) {
-        let fields = mergeObject({}, formData);
-        //mergeObject(this.object.data.flags['monks-enhanced-journal'], fields);
-        this.object.setFlag('monks-enhanced-journal', 'fields', fields)
+        let fd = mergeObject({}, formData);
+        let attributes = mergeObject(this.object.data.flags['monks-enhanced-journal'].attributes, fd.attributes);
+        this.object.setFlag('monks-enhanced-journal', 'attributes', attributes)
         this.change = true;
     }
 

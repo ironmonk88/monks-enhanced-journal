@@ -110,7 +110,7 @@ export class QuestSheet extends EnhancedJournalSheet {
     }
 
     get allowedRelationships() {
-        return ['person'];
+        return ['person', 'quest'];
     }
 
     convertRewards() {
