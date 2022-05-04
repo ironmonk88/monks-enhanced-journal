@@ -253,8 +253,10 @@
   "MonksEnhancedJournal.RemoveRelationship": "Ta bort relation",
   "MonksEnhancedJournal.Audio": "Audio",
   "MonksEnhancedJournal.Slides": "Bilder",
-  "MonksEnhancedJournal.CanvasColour": "Spelduk",													   
+  "MonksEnhancedJournal.CanvasColour": "Spelduk",
+  
   "MonksEnhancedJournal.LifeStatus": "Livsstatus",
+  "MonksEnhancedJournal.EditAttributes": "Redigera attribut",
 
   "MonksEnhancedJournal.Contain": "Innehåller",
   "MonksEnhancedJournal.Cover": "Täcker",
