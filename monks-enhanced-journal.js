@@ -2067,7 +2067,7 @@ export class MonksEnhancedJournal {
     static get defaultCurrencies() {
         switch (game.system.id) {
             case "sw5e":
-                return [{ id: "gc", name: "Galactic Credit", convert: 0 }, { id: "cr", name: "Credit", convert: 0 }];
+                return [{ id: "gc", name: "Galactic Credit", convert: 0 }];
             case "swade":
                 return [{ id: "gp", name: "Gold", convert: 0 }];
             case "age-system":
