@@ -160,6 +160,50 @@ export class MonksEnhancedJournal {
                 { inline: "span", classes: "drop-cap", title: "Drop Cap" }]
         });
 
+        const moreNoteIcons = {
+            "Acid": "icons/svg/acid.svg",
+            "Angel": "icons/svg/angel.svg",
+            "Aura": "icons/svg/aura.svg",
+            "Blind": "icons/svg/blind.svg",
+            "Blood": "icons/svg/blood.svg",
+            "Bones": "icons/svg/bones.svg",
+            "Circle": "icons/svg/circle.svg",
+            "Clockwork": "icons/svg/clockwork.svg",
+            "Combat": "icons/svg/combat.svg",
+            "Cowled": "icons/svg/cowled.svg",
+            "Daze": "icons/svg/daze.svg",
+            "Deaf": "icons/svg/deaf.svg",
+            "Direction": "icons/svg/direction.svg",
+            "Door-Closed": "icons/svg/door-closed.svg",
+            "Door-Exit": "icons/svg/door-exit.svg",
+            "Down": "icons/svg/down.svg",
+            "Explosion": "icons/svg/explosion.svg",
+            "Eye": "icons/svg/eye.svg",
+            "Falling": "icons/svg/falling.svg",
+            "Frozen": "icons/svg/frozen.svg",
+            "Hazard": "icons/svg/hazard.svg",
+            "Heal": "icons/svg/heal.svg",
+            "Holy Shield": "icons/svg/holy-shield.svg",
+            "Ice Aura": "icons/svg/ice-aura.svg",
+            "Lightning": "icons/svg/lightning.svg",
+            "Net": "icons/svg/net.svg",
+            "Padlock": "icons/svg/padlock.svg",
+            "Paralysis": "icons/svg/paralysis.svg",
+            "Poison": "icons/svg/poison.svg",
+            "Radiation": "icons/svg/radiation.svg",
+            "Sleep": "icons/svg/sleep.svg",
+            "Sound": "icons/svg/sound.svg",
+            "Sun": "icons/svg/sun.svg",
+            "Terror": "icons/svg/terror.svg",
+            "Up": "icons/svg/up.svg",
+            "Wing": "icons/svg/wing.svg"
+        }
+        Object.assign(CONFIG.JournalEntry.noteIcons, moreNoteIcons);
+
+        CONFIG.JournalEntry.noteIcons = Object.entries(CONFIG.JournalEntry.noteIcons)
+            .sort(([a,], [b,]) => a.localeCompare(b))
+            .reduce((r, [k, v]) => ({ ...r, [k]: v }), {});
+
         Note.prototype._canHUD = function(user, event) {
             return game.user.isGM && this.entry;
         }
@@ -273,6 +317,7 @@ export class MonksEnhancedJournal {
         TextEditor.prototype.constructor._onClickContentLink = async function (event) {
             event.preventDefault();
             const a = event.currentTarget;
+            const app = a.closest('.app');
             let doc = null;
             let id = a.dataset.id;
 
@@ -323,7 +368,7 @@ export class MonksEnhancedJournal {
 
             // Action 3 - Render the Entity sheet
             if (doc.documentName == 'Actor' || doc.documentName == 'JournalEntry') {
-                if (event.altKey || setting('open-outside') || !MonksEnhancedJournal.openJournalEntry(doc, { newtab: event.ctrlKey && !setting("open-new-tab") })) {
+                if (event.altKey || setting('open-outside') || ["SFDialog", "forge-compendium-browser"].includes(app?.id) || !MonksEnhancedJournal.openJournalEntry(doc, { newtab: event.ctrlKey && !setting("open-new-tab") })) {
                     return doc.sheet.render(true);
                 }
             }
@@ -1890,7 +1935,7 @@ export class MonksEnhancedJournal {
             event.preventDefault();
             event.stopPropagation();
             $(`[name="${documentId}"]`, html).val(this.id);
-            $('.journal-select > div > span', html).html(this.name);
+            $('> div > span', ctrl.next()).html(this.name);
             $('.journal-list.open').removeClass('open');
             $(event.currentTarget).addClass('selected').siblings('.selected').removeClass('selected');
         }
@@ -1926,7 +1971,47 @@ export class MonksEnhancedJournal {
             .append(list)
             //.focus(function () { list.addClass('open') })
             //.blur(function () { list.removeClass('open') })
-            .click(function (evt) { list.toggleClass('open'); evt.preventDefault; evt.stopPropagation(); });
+            .click(function (evt) { $('.journal-list', html).removeClass('open'); list.toggleClass('open'); evt.preventDefault; evt.stopPropagation(); });
+    }
+
+    static noteIcons(ctrl, html, value) {
+        function selectItem(value, name, event) {
+            event.preventDefault();
+            event.stopPropagation();
+            $(`[name="icon"]`, html).val(value);
+            $(' > div > span', this.next()).html(name);
+            $('.journal-list.open').removeClass('open');
+            $(event.currentTarget).addClass('selected').siblings('.selected').removeClass('selected');
+        }
+
+        let name = "";
+        let list = $('<ul>')
+            .addClass('journal-list')
+            .append(Object.entries(CONFIG.JournalEntry.noteIcons)
+                .sort(([a,], [b,]) => a.localeCompare(b))
+                .map(([k, v]) => {
+                    if (value == v)
+                        name = k;
+                    return $('<li>')
+                        .addClass('journal-item note-item')
+                        .toggleClass("selected", v == value)
+                        .attr('value', v)
+                        .append(
+                            $('<div>')
+                                .addClass('journal-title flexrow')
+                                .append($('<img>').addClass('journal-icon').attr('src', v))
+                                .append($('<span>').addClass('journal-text').html(k))
+                        ).click(selectItem.bind(ctrl, v, k));
+                }));
+
+        $(html).click(function () { list.removeClass('open') });
+
+        return $('<div>')
+            .addClass('journal-select')
+            .attr('tabindex', '0')
+            .append($('<div>').addClass('flexrow').css({ font: ctrl.css('font') }).append($('<span>').html(name)).append($('<i>').addClass('fas fa-chevron-down')))
+            .append(list)
+            .click(function (evt) { $('.journal-list', html).removeClass('open'); list.toggleClass('open'); evt.preventDefault; evt.stopPropagation(); });
     }
 
     static convertReward() {
@@ -2254,6 +2339,11 @@ Hooks.on('renderNoteConfig', (app, html, data) => {
     let ctrl = $('select[name="entryId"]', html);
 
     MonksEnhancedJournal.journalListing(ctrl, html, app.object.data.entryId, data.entry.name).insertAfter(ctrl);
+    ctrl.hide();
+
+    ctrl = $('select[name="icon"]', html);
+
+    MonksEnhancedJournal.noteIcons(ctrl, html, app.object.data.icon).insertAfter(ctrl);
     ctrl.hide();
 
     $('<div>').addClass('form-group')

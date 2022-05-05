@@ -22,7 +22,7 @@ export class PictureSheet extends EnhancedJournalSheet {
     }
 
     get template() {
-        if (!this.object.isOwner) return ImagePopout.defaultOptions.template;
+        if (!this.object.isOwner && !setting("allow-player")) return ImagePopout.defaultOptions.template;
         return this.options.template;
     }
 

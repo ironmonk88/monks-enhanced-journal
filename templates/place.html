@@ -25,7 +25,7 @@
             <a class="item" data-tab="entry-details">{{localize 'MonksEnhancedJournal.Details'}}</a>
             <a class="item" data-tab="townsfolk">{{localize 'MonksEnhancedJournal.Townsfolk'}}</a>
             <a class="item" data-tab="shops">{{localize 'MonksEnhancedJournal.Shops'}}</a>
-            <a class="item" data-tab="organizations">{{localize 'MonksEnhancedJournal.Organizations'}}</a>
+            <a class="item" data-tab="relationships">{{localize 'MonksEnhancedJournal.Relationships'}}</a>
             <a class="item" data-tab="notes">{{localize 'MonksEnhancedJournal.Notes'}}</a>
         </nav>
         <section class="sheet-body half-size">
@@ -145,19 +145,20 @@
                     </div>
                 </div>
             </div>
-            <div class="tab organizations" data-group="primary" data-tab="organizations">
+            <div class="tab relationships" data-group="primary" data-tab="relationships">
                 <div class="tab-inner flexcol">
-                    <div class="organizations flexrow">
+                    <div class="relationships flexrow">
                         <ul class="items-list">
+                            {{#each relationships}}
                             <li class="items-header flexrow">
-                                <h3 class="item-name flexrow">{{localize 'MonksEnhancedJournal.Name'}}</h3>
+                                <h3 class="item-name flexrow">{{this.name}}</h3>
                                 <h3 class="item-name flexrow">{{localize 'MonksEnhancedJournal.Relationship'}}</h3>
                                 {{#if @root.owner}}<div class="item-controls flexrow"></div>{{/if}}
                             </li>
-                            {{#each organizations}}
-                            <li class="item flexrow" data-id="{{this.id}}" data-pack="{{this.pack}}" data-container="relationships" data-document="Organization" draggable="false">
+                            {{#each documents}}
+                            <li class="item flexrow" data-id="{{this.id}}" data-pack="{{this.pack}}" data-container="relationships" data-document="JournalEntry" draggable="false">
                                 <div class="item-name flexrow">
-                                    <img class="item-image organization-icon" src="{{this.img}}" onerror="this.src='modules/monks-enhanced-journal/assets/organization.png'" />
+                                    <img class="item-image actor-icon" src="{{this.img}}" onerror="this.src='modules/monks-enhanced-journal/assets/{{this.type}}.png'" />
                                     <h4>{{#if this.pack}}<i class="fas fa-atlas" title="From Compendium"></i> {{/if}}{{this.name}}</h4>
                                 </div>
 
@@ -169,15 +170,16 @@
                                 <div class="item-controls flexrow owner">
                                     <input type="checkbox" name="relationships.{{this.id}}.hidden" {{checked this.hidden}} style="display:none;" />
                                     <a class="item-control item-hide" title="Hide/Show Relationship"><i class="fas fa-eye-slash"></i></a>
-                                    <a class="item-control item-delete" title="{{localize 'MonksEnhancedJournal.RemoveOrganization'}}"><i class="fas fa-trash"></i></a>
+                                    <a class="item-control item-delete" title="{{localize 'MonksEnhancedJournal.RemoveRelationship'}}"><i class="fas fa-trash"></i></a>
                                 </div>
                                 {{/if}}
                             </li>
+                            {{/each}}
                             {{else}}
                             {{#if owner}}
-                            <li class="instruction">Drag an Organization journal entry here to create an organization</li>
+                            <li class="instruction">Drag a Point of Interest, Place, or Organization here to make a relationship</li>
                             {{else}}
-                            <li class="instruction">No Organizations at the moment</li>
+                            <li class="instruction">No relationships at the moment</li>
                             {{/if}}
                             {{/each}}
                         </ul>

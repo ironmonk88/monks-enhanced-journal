@@ -1,3 +1,15 @@
+# Version 1.0.56
+
+Changed the icon list for the Notes Config so that it shows the actual image, making it a little easier to pick something that represents what you want.
+
+Ignoring opening text editor links from dialogs that shouldn't be opened in Enhanced Journal
+
+Fixed issues with Picture Sheet loading improperly for players.
+
+Fixed relationships on the Place sheet.  Instead of Shop, Person and Organization tabs, the Organization has been changed to a generic Relationships tab, so that places can be linked to other places.
+
+Fixed issue with editing attributes so you can actually change the hidden attribute
+
 # Version 1.0.55
 
 Fixed an issue with saving attribute data on the Place Sheet.

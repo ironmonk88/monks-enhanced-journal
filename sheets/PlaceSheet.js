@@ -82,29 +82,34 @@ export class PlaceSheet extends EnhancedJournalSheet {
         }
 
         data.shops = [];
-        data.organizations = [];
         data.townsfolk = [];
+        data.relationships = {};
         for (let item of (data.data.flags['monks-enhanced-journal'].relationships || [])) {
             let entity = await this.getDocument(item, "JournalEntry", false);
             if (entity && entity.testUserPermission(game.user, "LIMITED") && (game.user.isGM || !item.hidden)) {
                 item.name = entity.name;
                 item.img = entity.data.img;
 
-                if (entity.getFlag('monks-enhanced-journal', 'type') == "shop" || entity.getFlag('monks-enhanced-journal', 'type') == "poi") {
+                if (entity.getFlag('monks-enhanced-journal', 'type') == "shop") {
                     item.shoptype = entity.getFlag("monks-enhanced-journal", "shoptype");
                     data.shops.push(item);
-                } else if (entity.getFlag('monks-enhanced-journal', 'type') == "organization") {
-                    data.organizations.push(item);
-                } else {
+                } else if (entity.getFlag('monks-enhanced-journal', 'type') == "person") {
                     item.role = entity.getFlag("monks-enhanced-journal", "role");
                     data.townsfolk.push(item);
+                } else if(entity instanceof JournalEntry) {
+                    if (!data.relationships[entity.type])
+                        data.relationships[entity.type] = { type: entity.type, name: i18n(`MonksEnhancedJournal.${entity.type.toLowerCase()}`), documents: [] };
+
+                    data.relationships[entity.type].documents.push(item);
                 }
             }
         }
 
         data.shops = data.shops.sort((a, b) => a.name.localeCompare(b.name));
-        data.organizations = data.organizations.sort((a, b) => a.name.localeCompare(b.name));
         data.townsfolk = data.townsfolk.sort((a, b) => a.name.localeCompare(b.name));
+        for (let [k, v] of Object.entries(data.relationships)) {
+            v.documents = v.documents.sort((a, b) => a.name.localeCompare(b.name));
+        }
 
         data.fields = this.fieldlist();
 
@@ -128,7 +133,7 @@ export class PlaceSheet extends EnhancedJournalSheet {
 
         $('.townsfolk .actor-icon', html).click(this.openRelationship.bind(this));
         $('.shop-icon', html).click(this.openRelationship.bind(this));
-        $('.organization-icon', html).click(this.openRelationship.bind(this));
+        $('.actor-icon', html).click(this.openRelationship.bind(this));
 
         $('.item-action', html).on('click', this.alterItem.bind(this));
         $('.item-delete', html).on('click', $.proxy(this._deleteItem, this));
