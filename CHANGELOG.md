@@ -10,6 +10,8 @@ Fixed relationships on the Place sheet.  Instead of Shop, Person and Organizatio
 
 Fixed issue with editing attributes so you can actually change the hidden attribute
 
+Swedish translation have been updated, thank you rangertheman
+
 # Version 1.0.55
 
 Fixed an issue with saving attribute data on the Place Sheet.
