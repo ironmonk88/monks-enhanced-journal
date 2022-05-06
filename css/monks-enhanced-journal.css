@@ -2411,6 +2411,17 @@ a.picture-link.broken {
     color: var(--color-text-dark-primary);
 }
 
+/*Fix Wfrp4e & Monk's Enhanced Journal*/
+.wfrp4e.app.window-app .dialog-buttons button,
+.app.window-app .sheet-footer button,
+.app.window-app .form-group .file-picker,
+.app.window-app button[type="button"],
+.app.window-app button[type="submit"],
+.app.window-app button[type="reset"]
+ {
+    width: auto !important;
+ }
+
 .wfrp4e.monks-enhanced-journal .directory .directory-header .header-search {
     padding-left: 8px;
 }
