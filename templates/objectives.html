@@ -2,7 +2,7 @@
     <div class="form-group">
         <label for="content">{{localize 'MonksEnhancedJournal.Name'}}</label>
         <div class="form-fields">
-            <input type="text" name="title" placeholder="Name" value="{{object.title}}" />
+            <input type="text" name="title" placeholder="{{localize 'MonksEnhancedJournal.Name'}}" value="{{object.title}}" />
         </div>
     </div>
     <div class="form-group">
@@ -20,9 +20,9 @@
     <div class="form-group">
         <label for="content">{{localize 'MonksEnhancedJournal.Counter'}}</label>
         <div class="form-fields">
-            <label for="content">completed</label>
+            <label for="content">{{localize 'MonksEnhancedJournal.completed'}}</label>
             <input type="number" name="done" value="{{object.done}}" />
-            <label for="content">required</label>
+            <label for="content">{{localize 'MonksEnhancedJournal.required'}}</label>
             <input type="number" name="required" value="{{object.required}}" />
         </div>
     </div>

@@ -13,6 +13,12 @@ export class PictureSheet extends EnhancedJournalSheet {
         });
     }
 
+    async getData() {
+        let data = super.getData();
+
+        return data;
+    }
+
     get type() {
         return 'picture';
     }
@@ -29,6 +35,7 @@ export class PictureSheet extends EnhancedJournalSheet {
     _documentControls() {
         let ctrls = [
             { id: 'show', text: i18n("MonksEnhancedJournal.ShowToPlayers"), icon: 'fa-eye', conditional: game.user.isGM, callback: this.enhancedjournal.doShowPlayers },
+            { id: 'sound', text: i18n("MonksEnhancedJournal.AddSound"), icon: 'fa-music', conditional: this.isEditable, callback: () => { this.onAddSound(); } },
             { id: 'convert', text: i18n("MonksEnhancedJournal.Convert"), icon: 'fa-clipboard-list', conditional: (game.user.isGM && this.isEditable), callback: () => { } }
         ];
         return ctrls.concat(super._documentControls());

@@ -1,7 +1,7 @@
 {
   "I18N.LANGUAGE": "Español",
   "I18N.MAINTAINERS": "@Viriato139ac#0342",
-  
+
   "MonksEnhancedJournal.Title": "Monk's Enhanced Journal",
   "MonksEnhancedJournal.BackTooltip": "",
   "MonksEnhancedJournal.ForwardTooltip": "",
@@ -42,9 +42,9 @@
   "MonksEnhancedJournal.hide-rolltables.name": "Ocultar tablas de compendios",
   "MonksEnhancedJournal.hide-rolltables.hint": "Cuando se añada botín desde una tabla, excluir las tablas contenidas en compendios",
 
-  "MonsEnhancedJournal.SlideConfiguration": "Configuración de diapositivas",
-  "MonsEnhancedJournal.DCConfiguration": "Configuración de DC",
-  "MonsEnhancedJournal.TrapConfiguration": "Configuración de trampas",
+  "MonksEnhancedJournal.SlideConfiguration": "Configuración de diapositivas",
+  "MonksEnhancedJournal.DCConfiguration": "Configuración de DC",
+  "MonksEnhancedJournal.TrapConfiguration": "Configuración de trampas",
   "MonksEnhancedJournal.Update": "Actualizar",
   "MonksEnhancedJournal.Ability": "Capacidad",
   "MonksEnhancedJournal.Skill": "Habilidad",
@@ -283,12 +283,13 @@
   "MonksEnhancedJournal.purchasing.free": "Cualquiera",
   "MonksEnhancedJournal.purchasing.request": "Solicitar compra",
 
-  "MonksEnhancedJournal.inactive": "Inactiva",
-  "MonksEnhancedJournal.unavailable": "No disponible",
-  "MonksEnhancedJournal.available": "Disponible",
-  "MonksEnhancedJournal.inprogress": "En progreso",
-  "MonksEnhancedJournal.completed": "Completeda",
-  "MonksEnhancedJournal.failed": "Fallida",
+  "MonksEnhancedJournal.queststatus.notactive": "Inactiva",
+  "MonksEnhancedJournal.queststatus.unavailable": "No disponible",
+  "MonksEnhancedJournal.queststatus.available": "Disponible",
+  "MonksEnhancedJournal.queststatus.inprogress": "En progreso",
+  "MonksEnhancedJournal.queststatus.completed": "Completeda",
+  "MonksEnhancedJournal.queststatus.failed": "Fallida",
+
   "MonksEnhancedJournal.purchasing.hidden": "Oculta",
   "MonksEnhancedJournal.purchasing.visible": "Visible"
 }

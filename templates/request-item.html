@@ -20,7 +20,7 @@
         </li>
         <li class="item flexrow" data-id="{{this._id}}">
             <div class="item-name flexrow">
-                <h4>Quantity{{#if this.maxquantity}}  <i><small>(Max {{this.maxquantity}})</small></i>{{/if}}</h4>
+                <h4>{{localize 'MonksEnhancedJournal.Quantity'}}{{#if this.maxquantity}}  <i><small>(Max {{this.maxquantity}})</small></i>{{/if}}</h4>
             </div>
 
             <div class="item-quantity flexrow" style="flex: 0 0 70px;">
@@ -31,7 +31,7 @@
         {{#if this.total}}
         <li class="item flexrow" data-id="{{this._id}}">
             <div class="item-name flexrow">
-                <h4>Price</h4>
+                <h4>{{localize 'MonksEnhancedJournal.Price'}}</h4>
             </div>
 
             <div class="item-price flexrow" style="flex: 0 0 70px;">
@@ -41,7 +41,7 @@
         </li>
         <li class="item flexrow" data-id="{{this._id}}" style="border-top: 1px solid #FFFFFF;">
             <div class="item-name flexrow">
-                <h4 style="font-weight:bold;">Total</h4>
+                <h4 style="font-weight:bold;">{{localize 'MonksEnhancedJournal.Total'}}</h4>
             </div>
 
             <div class="item-total flexrow">

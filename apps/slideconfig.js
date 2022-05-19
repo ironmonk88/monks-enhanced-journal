@@ -13,7 +13,7 @@ export class SlideConfig extends FormApplication {
         return mergeObject(super.defaultOptions, {
             id: "slide-config",
             classes: ["form", "slide-sheet"],
-            title: i18n("MonsEnhancedJournal.SlideConfiguration"),
+            title: i18n("MonksEnhancedJournal.SlideConfiguration"),
             template: "modules/monks-enhanced-journal/templates/slideconfig.html",
             width: 620
         });
@@ -31,7 +31,7 @@ export class SlideConfig extends FormApplication {
                     cover: "MonksEnhancedJournal.Cover",
                     fill: "MonksEnhancedJournal.Stretch"
                 },
-                effectOptions: Object.assign({'': "--Inherit from Slideshow--"}, MonksEnhancedJournal.effectTypes)
+                effectOptions: Object.assign({ '': i18n("MonksEnhancedJournal.InheritFromSlideshow")}, MonksEnhancedJournal.effectTypes)
             }, { recursive: false }
         );
 
@@ -53,6 +53,8 @@ export class SlideConfig extends FormApplication {
             text.style = Object.entries(style).filter(([k, v]) => v).map(([k, v]) => `${k}:${v}`).join(';');
             return text;
         });
+
+        data.volume = this.object.volume ?? 1;
 
         data.thumbnail = (this.journalentry._thumbnails && this.object.id && this.journalentry._thumbnails[this.object.id]) || this.object.img;
 

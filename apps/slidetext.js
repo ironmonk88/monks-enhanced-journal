@@ -11,7 +11,7 @@ export class SlideText extends FormApplication {
         return mergeObject(super.defaultOptions, {
             id: "slide-text",
             classes: ["form", "slide-sheet"],
-            title: "Slide Text",
+            title: i18n("MonksEnhancedJournal.SlideText"),
             template: "modules/monks-enhanced-journal/templates/slidetext.html",
             width: 350,
             submitOnChange: true

@@ -1,6 +1,7 @@
-﻿import { setting, i18n, log, warn, makeid, MonksEnhancedJournal, quantityname, pricename, currencyname } from "../monks-enhanced-journal.js";
+﻿import { setting, i18n, format, log, warn, makeid, MonksEnhancedJournal, quantityname, pricename, currencyname } from "../monks-enhanced-journal.js";
 import { EditFields } from "../apps/editfields.js";
 import { SelectPlayer } from "../apps/selectplayer.js";
+import { EditSound } from "../apps/editsound.js";
 
 export class EnhancedJournalSheet extends JournalSheet {
     constructor(object, options = {}) {
@@ -23,6 +24,10 @@ export class EnhancedJournalSheet extends JournalSheet {
     static get defaultOptions() {
         let defOptions = super.defaultOptions;
         let classes = defOptions.classes.concat(['monks-journal-sheet', 'monks-enhanced-journal', `${game.system.id}`]);
+        if (game.modules.get("rippers-ui")?.active)
+            classes.push('rippers-ui');
+        if (game.modules.get("rpg-styled-ui")?.active)
+            classes.push('rpg-styled-ui');
 
         return foundry.utils.mergeObject(defOptions, {
             id: "enhanced-journal-sheet",
@@ -81,6 +86,10 @@ export class EnhancedJournalSheet extends JournalSheet {
         return {};
     }
 
+    get canPlaySound() {
+        return true;
+    }
+
     getData() {
         let data = (this.object.id ? super.getData() : {
             cssClass: this.isEditable ? "editable" : "locked",
@@ -103,6 +112,14 @@ export class EnhancedJournalSheet extends JournalSheet {
         data.entrytype = this.type;
         data.isGM = game.user.isGM;
         data.hasGM = (game.users.find(u => u.isGM && u.active) != undefined);
+
+        if (this.canPlaySound) {
+            data.sound = (data.data.flags['monks-enhanced-journal']?.sound || {});
+            if (this.enhancedjournal)
+                data.sound.playing = this.enhancedjournal._backgroundsound[this.object.id]?.playing;
+            else
+                data.sound.playing = this._backgroundsound?.playing;
+        }
 
         return data;
     }
@@ -135,6 +152,26 @@ export class EnhancedJournalSheet extends JournalSheet {
             $(this.element).removeClass('monks-journal-sheet monks-enhanced-journal dnd5e');
         }
 
+        if (!this.enhancedjournal && !this._backgroundsound) {
+            // check to see if this object has a sound, and that sound sets an autoplay.
+            let sound = this.object.getFlag("monks-enhanced-journal", "sound");
+            if (sound?.audiofile && sound?.autoplay) {
+                this._playSound(sound).then((sound) => {
+                    this._backgroundsound = sound;
+                });
+            }
+
+            this._soundHook = Hooks.on("globalInterfaceVolumeChanged", (volume) => {
+                this._backgroundsound.volume = volume * game.settings.get("core", "globalInterfaceVolume");
+            });
+        }
+
+        if (options?.anchor) {
+            const anchor = $(`#${options?.anchor}`, this.element);
+            if (anchor.length) {
+                anchor[0].scrollIntoView();
+            }
+        }
 
         log('Subsheet rendering');
 
@@ -172,12 +209,14 @@ export class EnhancedJournalSheet extends JournalSheet {
         $("a.inline-request-roll", html).click(this._onClickInlineRequestRoll.bind(this));//.contextmenu(this._onClickInlineRequestRoll);
         html.on("click", "a.picture-link", this._onClickPictureLink.bind(this));
 
-        $('a[href^="#"]').click(this._onClickAnchor.bind(this));
+        $('a[href^="#"]', html).click(this._onClickAnchor.bind(this));
 
         $('.sheet-image .profile', html).contextmenu(() => { $('.fullscreen-image').show(); });
         $('.fullscreen-image', html).click(() => { $('.fullscreen-image', html).hide(); });
 
         html.find('img[data-edit],div.picture-img').click(this._onEditImage.bind(this));
+
+        $('.play-journal-sound', html).prop("disabled", false).click(this.toggleSound.bind(this));
 
         if (enhancedjournal) {
             html.find('.recent-link').click(async (ev) => {
@@ -256,7 +295,11 @@ export class EnhancedJournalSheet extends JournalSheet {
         if (!item)
             return defvalue;
         let value = (item.data != undefined ? getProperty(item?.data, name) : getProperty(item, name));
-        return (value?.hasOwnProperty("value") ? value.value : value) ?? defvalue;
+        value = (value?.hasOwnProperty("value") ? value.value : value);
+        if (value && typeof value === 'object') {
+            value = Object.values(value)[0];
+        }
+        return value ?? defvalue;
     }
 
     getValue(item, name, defvalue) {
@@ -317,47 +360,64 @@ export class EnhancedJournalSheet extends JournalSheet {
     static addCurrency(actor, denomination, value) {
         let changes = {};
         if (value < 0 && setting("purchase-conversion")) {
-            let currencies = duplicate(MonksEnhancedJournal.currencies);
+            let currencies = duplicate(MonksEnhancedJournal.currencies || []).filter(c => c.convert != undefined);
             for (let curr of currencies) {
                 curr.value = parseInt(this.getCurrency(actor, curr.id) || 0);
             }
 
             changes = currencies.reduce((a, v) => ({ ...a, [v.id]: v.value }), {});
-            let startIdx = currencies.findIndex(c => c.id == denomination);
+            let denomIdx = currencies.findIndex(c => c.id == denomination);
 
-            let idx = currencies.length - 1;
-            while (-value > changes[denomination] && idx >= 0) {
-                let remainder = -value - changes[denomination]
-                if (idx != startIdx && currencies[idx].value > 0) {
-                    let available = currencies[idx].value * (currencies[idx].convert || 1);
-                    available = Math.floor(available / (currencies[startIdx].convert || 1));
+            let remainder = -value;
+            // pull from the actual currency first
+            let available = Math.floor(Math.min(remainder, changes[denomination]));
+            if (available > 0) {
+                remainder -= available;
+                changes[denomination] -= available;
+            }
 
-                    let used = Math.floor(Math.min(remainder, available));
-                    if (used > 0) {
-                        changes[denomination] += used;
-                        used = used * (currencies[startIdx].convert || 1);
-                        used = used / (currencies[idx].convert || 1);
-                        changes[currencies[idx].id] -= Math.ceil(used);
-                        let remainUsed = used - Math.floor(used);
-                        if (remainUsed > 0) {
-                            //need to fold the extra back into the lesser currencies
-                            let jdx = idx;
-                            while (jdx < currencies.length - 1 && remainUsed != 0) {
-                                remainUsed = remainUsed * (currencies[jdx].convert || 1);
-                                remainUsed = remainUsed / (currencies[jdx + 1].convert || 1);
+            let idx = denomIdx + 1;
+            let dir = 1;
+            // move to lower denominations, then work through the higher denomination
+            while (remainder > 0 && idx >= 0) {
+                if (idx >= currencies.length) {
+                    idx = denomIdx - 1;
+                    dir = -1;
+                }
 
-                                changes[currencies[jdx + 1].id] += Math.floor(remainUsed);
-                                remainUsed = remainUsed - Math.floor(remainUsed);
-                                jdx++
+                //check to make sure the currency in question has some available
+                if (idx >= 0 && currencies[idx].value > 0) {
+                    let rate = (currencies[idx].convert || 1) / (currencies[denomIdx].convert || 1);
+                    available = Math.floor(currencies[idx].value * rate); // convert from lower denomination to currenct denomination
+
+                    if (available > 0) {
+                        let used = Math.floor(Math.min(remainder, available));
+
+                        remainder -= used;
+                        
+                        let unused = available - used;
+                        changes[currencies[idx].id] = Math.floor(unused / rate);
+                        unused -= Math.floor(unused / rate) * rate;
+
+                        if (idx < denomIdx && unused > 0) {
+                            // If this is a greater denomination, then we need to disperse the unused between the lower denominations
+                            let jdx = idx + 1;
+                            while (unused > 0 && jdx < currencies.length) {
+                                let r = (currencies[jdx].convert || 1) / (currencies[denomIdx].convert || 1);
+                                let disperse = unused / r;
+                                changes[currencies[jdx].id] += Math.floor(disperse);
+                                unused -= Math.floor(disperse) * r;
+
+                                jdx--;
                             }
                         }
                     }
                 }
 
-                idx--;
+                idx += dir;
             }
 
-            changes[denomination] += value;
+            //changes[denomination] += value;
 
             for (let curr of Object.keys(changes)) {
                 let orig = currencies.find(c => c.id == curr);
@@ -410,9 +470,10 @@ export class EnhancedJournalSheet extends JournalSheet {
 
         name = name || pricename();
         var countDecimals = function (value) {
-            if (Math.floor(value) !== value)
-                return value.toString().split(".")[1].length || 0;
-            return 0;
+            let parts = value.toString().split(".");
+            if (parts.length == 1)
+                return 0;
+            return (parts[1].length || 0);
         }
 
         let cost = (typeof item == "string" ? item : (item.data?.denomination != undefined && name != "cost" ? item.data?.value.value + " " + item.data?.denomination.value : this.getValue(item, name)));
@@ -433,19 +494,19 @@ export class EnhancedJournalSheet extends JournalSheet {
             currency = this.defaultCurrency();
 
         if (parseInt(price) != price) {
-            if (["dnd5e", "pf2e", "pf1e"].includes(game.system.id)) {
-                if (currency == "ep") {
-                    price = price / 2;
-                    currency = "gp";
+            if (MonksEnhancedJournal.currencies.length) {
+                let numDecimal = price.toString().split(".")[1].length || 0;
+                let curr = MonksEnhancedJournal.currencies.find(c => {
+                    if (!c.convert)
+                        return false;
+                    return countDecimals(c.convert) >= numDecimal;
+                });
+                if (!curr)
+                    curr = MonksEnhancedJournal.currencies[MonksEnhancedJournal.currencies.length - 1];
+                if (curr) {
+                    currency = curr.id;
+                    price = Math.floor(price / curr.convert);
                 }
-
-                let decimals = countDecimals(price);
-                let curArr = ["pp", "gp", "sp", "cp"];
-                let idx = curArr.indexOf(currency);
-                let idx2 = Math.min(idx + decimals, 3);
-
-                price = Math.floor(price * (10 ** (idx2 - idx)));
-                currency = curArr[idx2];
             } else
                 price = Math.floor(price);
         }
@@ -458,6 +519,60 @@ export class EnhancedJournalSheet extends JournalSheet {
 
     getPrice(item, name) {
         return this.constructor.getPrice(item, name);
+    }
+
+    onAddSound() {
+        let sound = (this.enhancedjournal ? this.enhancedjournal._backgroundsound[this.object.id] : this._backgroundsound);
+        new EditSound(this.object, sound).render(true);
+    }
+
+    toggleSound() {
+        let sound = (this.enhancedjournal ? this.enhancedjournal._backgroundsound[this.object.id] : this._backgroundsound);
+
+        if (!sound)
+            return;
+
+        if (sound.playing) {
+            // stop sound playing
+            this._stopSound(sound);
+        } else {
+            // start sound playing
+            if (!sound) {
+                sound = this.object.getFlag("monks-enhanced-journal", "sound");
+            }
+            this._playSound(sound);
+        }
+    }
+
+    _playSound(sound) {
+        $('.play-journal-sound', this.element).addClass("active").find("i").addClass('fa-volume-up').removeClass('fa-volume-off');
+        if (sound.audiofile) {
+            let volume = sound.volume ?? 1;
+            return AudioHelper.play({
+                src: sound.audiofile,
+                loop: sound.loop,
+                volume: 0
+            }).then((soundfile) => {
+                soundfile.fade(volume * game.settings.get("core", "globalInterfaceVolume"), { duration: 500 });
+                soundfile.on("end", () => {
+                    $('.play-journal-sound', this.element).removeClass("active").find("i").removeClass('fa-volume-up').addClass('fa-volume-off');
+                });
+                soundfile._mejvolume = volume;
+                return soundfile;
+            });
+        } else {
+            let soundData = this.object.getFlag("monks-enhanced-journal", "sound");
+            sound.play({ volume: (soundData.volume ?? 1), fade: 500, loop: soundData.loop });
+        }
+    }
+
+    _stopSound(sound) {
+        if (sound && sound.stop) {
+            sound.fade(0, { duration: 500 }).then(() => {
+                sound.stop();
+                $('.play-journal-sound', this.element).removeClass("active").find("i").removeClass('fa-volume-up').addClass('fa-volume-off');
+            });
+        }
     }
 
     _onClickInlineRequestRoll(event) {
@@ -504,7 +619,7 @@ export class EnhancedJournalSheet extends JournalSheet {
             document = game.journal.get(id);
             if (!document) return;
             if (!document.testUserPermission(game.user, "LIMITED")) {
-                return ui.notifications.warn(`You do not have permission to view this ${document.documentName} sheet.`);
+                return ui.notifications.warn(format("MonksEnhancedJournal.msg.YouDontHaveDocumentPermissions", {documentName: document.documentName}));
             }
         //}
         if (!document) return;
@@ -736,8 +851,8 @@ export class EnhancedJournalSheet extends JournalSheet {
             let hasRequest = (requests.find(r => r.id == game.user.id) != undefined);
             let quantity = this.getValue(item, quantityname(), "");
             let text = (type == 'shop' ?
-                (quantity === 0 ? "Sold Out" : (item.lock ? "Unavailable" : "Purchase")) :
-                (purchasing == "free" || purchasing == "confirm" ? "Take" : (hasRequest ? "Cancel" : "Request")));
+                (quantity === 0 ? i18n("MonksEnhancedJournal.SoldOut") : (item.lock ? i18n("MonksEnhancedJournal.Unavailable") : i18n("MonksEnhancedJournal.Purchase"))) :
+                (purchasing == "free" || purchasing == "confirm" ? i18n("MonksEnhancedJournal.Take") : (hasRequest ? i18n("MonksEnhancedJournal.Cancel") : i18n("MonksEnhancedJournal.Request"))));
             let icon = (type == 'shop' ?
                 (quantity === 0 ? "" : (item.lock ? "fa-lock" : "fa-dollar-sign")) :
                 (purchasing == "free" || purchasing == "confirm" ? "fa-hand-paper" : (hasRequest ? "" : "fa-hand-holding-medical")));
@@ -814,7 +929,7 @@ export class EnhancedJournalSheet extends JournalSheet {
                         if (document.documentName === "Scene" && document.journal)
                             document = document.journal;
                         if (notify && !document.testUserPermission(game.user, "LIMITED")) {
-                            return ui.notifications.warn(`You do not have permission to view this ${document.documentName} sheet.`);
+                            return ui.notifications.warn(format("MonksEnhancedJournal.msg.YouDontHaveDocumentPermissions", { documentName: document.documentName }));
                         }
                     }
                 }
@@ -858,7 +973,7 @@ export class EnhancedJournalSheet extends JournalSheet {
             speaker: speaker,
             type: CONST.CHAT_MESSAGE_TYPES.OTHER,
             content: content,
-            flavor: (speaker.alias ? speaker.alias + ` wants to <b>${price ? 'purchase' : 'take'}</b> an item` : null),
+            flavor: (speaker.alias ? format("MonksEnhancedJournal.ActorWantsToPurchase", { alias: speaker.alias, verb: (price ? i18n("MonksEnhancedJournal.Purchase").toLowerCase() : i18n("MonksEnhancedJournal.Take").toLowerCase()) }): null),
             whisper: whisper,
             flags: {
                 'monks-enhanced-journal': messageContent
@@ -879,7 +994,7 @@ export class EnhancedJournalSheet extends JournalSheet {
         let quantity = 1;
         let content = await renderTemplate('/modules/monks-enhanced-journal/templates/confirm-purchase.html',
             {
-                msg: `How many would you like to ${verb}?`,
+                msg: format("MonksEnhancedJournal.HowManyWouldYouLike", { verb: verb }),
                 img: item.img,
                 name: item.name,
                 quantity: quantity,
@@ -889,7 +1004,7 @@ export class EnhancedJournalSheet extends JournalSheet {
                 isGM: game.user.isGM
             });
         let result = await Dialog.confirm({
-            title: `Confirm Quantity`,
+            title: i18n("MonksEnhancedJournal.ConfirmQuantity"),
             content: content,
             render: (html) => {
                 $('input[name="quantity"]', html).change((event) => {
@@ -984,7 +1099,7 @@ export class EnhancedJournalSheet extends JournalSheet {
                 speaker: speaker,
                 type: CONST.CHAT_MESSAGE_TYPES.OTHER,
                 content: content,
-                flavor: (actor.alias ? actor.alias : actor.name) + (purchased ? " purchased" : " received") + " an item",
+                flavor: format("MonksEnhancedJournal.ActorPurchasedAnItem", { alias: (actor.alias ? actor.alias : actor.name), verb: (purchased ? i18n("MonksEnhancedJournal.Purchased").toLowerCase() : i18n("MonksEnhancedJournal.Received").toLowerCase()) }),
                 whisper: whisper,
             };
 
@@ -1014,8 +1129,8 @@ export class EnhancedJournalSheet extends JournalSheet {
 
     clearAllItems() {
         Dialog.confirm({
-            title: `Clear contents`,
-            content: `<h4>${game.i18n.localize("AreYouSure")}</h4><p>All items will be permanently deleted and cannot be recovered.</p>`,
+            title: i18n("MonksEnhancedJournal.ClearContents"),
+            content: `<h4>${game.i18n.localize("AreYouSure")}</h4><p>${i18n("MonksEnhancedJournal.msg.AllItemsWillBeDeleted")}</p>`,
             yes: () => {
                 this.object.setFlag('monks-enhanced-journal', 'items', []);
             },
@@ -1074,7 +1189,7 @@ export class EnhancedJournalSheet extends JournalSheet {
                 let result = sheet.render(true);
                 result.options.addcost = true;
             } catch {
-                ui.notifications.warn("Error trying to edit this object");
+                ui.notifications.warn(i18n("MonksEnhancedJournal.msg.ErrorTryingToEdit"));
             }
         }
     }
@@ -1102,13 +1217,13 @@ export class EnhancedJournalSheet extends JournalSheet {
         }
 
         let groups = game.tables.map(t => { return { uuid: t.uuid, name: t.name } }).sort((a, b) => { return a.name.localeCompare(b.name) }).reduce((a, v) => ({ ...a, [v.uuid]: v.name }), {});
-        rolltables.push({ text: "Rollable Tables", groups: groups });
+        rolltables.push({ text: i18n("MonksEnhancedJournal.RollTables"), groups: groups });
 
         let that = this;
 
         let html = await renderTemplate("modules/monks-enhanced-journal/templates/roll-table.html", { rollTables: rolltables, useFrom: useFrom});
         Dialog.confirm({
-            title: `Populate from Rollable table`,
+            title: i18n("MonksEnhancedJournal.PopulateFromRollTable"),
             content: html,
             yes: async (html) => {
                 let rolltable = $('[name="rollable-table"]').val();
@@ -1308,6 +1423,12 @@ export class EnhancedJournalSheet extends JournalSheet {
                     this.object.setFlag('monks-enhanced-journal', 'scrollPos', JSON.stringify(scrollPos));
             }
 
+            if (!this.enhancedjournal) {
+                // check to see if there's a sound playing and stop it playing.
+                this._stopSound(this._backgroundsound);
+                Hooks.off("globalInterfaceVolumeChanged", this._soundHook);
+            }
+
             return super.close(options);
         }
     }
@@ -1329,7 +1450,7 @@ export class EnhancedJournalSheet extends JournalSheet {
             if (users instanceof Array && users.length == 0)
                 return;
 
-            if (!object.isOwner) throw new Error("You may only request to show Journal Entries which you own.");
+            if (!object.isOwner) throw new Error(i18n("MonksEnhancedJournal.msg.YouMayOnlyRequestToShowThoseYouOwn"));
 
             let args = {
                 title: object.name,
@@ -1341,7 +1462,7 @@ export class EnhancedJournalSheet extends JournalSheet {
                 args.image = object.data.img;
 
             if (!object.data.img && !object.data.content)
-                return ui.notifications.warn("Cannot show an entry that has no content or image");
+                return ui.notifications.warn(i18n("MonksEnhancedJournal.msg.CannotShowNoContent"));
 
             MonksEnhancedJournal.emit("showEntry", args);
 
@@ -1405,7 +1526,7 @@ export class EnhancedJournalSheet extends JournalSheet {
             ).sort((a, b) => { return b - a; });
             let num = (previous.length ? previous[0] + 1 : 1);
 
-            name = (num == 1 ? 'Loot Entry' : `Loot Entry (${num})`);
+            name = `${i18n("MonksEnhancedJournal.LootEntry")}${(num > 1 ? ' (${num})' : '')}`;
             return name;
         }
 
@@ -1415,7 +1536,7 @@ export class EnhancedJournalSheet extends JournalSheet {
             name = entity?.name;
 
             if (entity == undefined)
-                warn("Could not find Loot Entity, defaulting to creating one");
+                warn(i18n("MonksEnhancedJournal.msg.CouldNotFindLootEntityCreating"));
         }
 
         if (lootentity == 'create' || entity == undefined) {
@@ -1438,7 +1559,7 @@ export class EnhancedJournalSheet extends JournalSheet {
         }
 
         if (!entity)
-            return ui.notifications.warn("Could not find Loot Entity");
+            return ui.notifications.warn(i18n("MonksEnhancedJournal.msg.CouldNotFindLootEntity"));
 
         if (clear && lootentity != 'create') {
             if (EnhancedJournalSheet.isLootActor(lootSheet)) {
@@ -1487,7 +1608,7 @@ export class EnhancedJournalSheet extends JournalSheet {
             await entity.setFlag('monks-enhanced-journal', 'currency', newcurr);
         }
 
-        ui.notifications.info(`Items added to ${entity.name}`);
+        ui.notifications.info(format("MonksEnhancedJournal.ItemAddedToActor", { name: entity.name }));
 
         //set the currency to 0 and the remaining to 0 for all items
         for (let item of items) {
@@ -1512,17 +1633,21 @@ export class EnhancedJournalSheet extends JournalSheet {
             return;
 
         let item = new CONFIG.Item.documentClass(itemData);
-        const chatData = item.getChatData({ secrets: false });
+        let chatData = getProperty(item, "data.data.description");
+        if (item.getChatData)
+            chatData = item.getChatData({ secrets: false });
 
         // Toggle summary
         if (li.hasClass("expanded")) {
             let summary = li.children(".item-summary");
             summary.slideUp(200, () => summary.remove());
         } else {
-            let div = $(`<div class="item-summary">${chatData.description.value}</div>`);
-            let props = $('<div class="item-properties"></div>');
-            chatData.properties.forEach(p => props.append(`<span class="tag">${p}</span>`));
-            div.append(props);
+            let div = $(`<div class="item-summary">${(typeof chatData == "string" ? chatData : chatData.description.value)}</div>`);
+            if (typeof chatData !== "string") {
+                let props = $('<div class="item-properties"></div>');
+                chatData.properties.forEach(p => props.append(`<span class="tag">${p}</span>`));
+                div.append(props);
+            }
             li.append(div.hide());
             div.slideDown(200);
         }

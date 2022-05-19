@@ -120,7 +120,7 @@ export class DistributeCurrency extends FormApplication {
                 //find the next lower currency
                 let idx = this.currencies.findIndex(c => c.id == curr);
                 let newIdx = idx + 1;
-                if (newIdx < this.currencies.length) {
+                if (newIdx < this.currencies.length && this.currencies[newIdx].convert != undefined) {
                     //convert to default
                     let convVal = this.currency[curr] * (this.currencies[idx].convert || 1);
                     convVal = convVal / (this.currencies[newIdx].convert || 1);

@@ -91,6 +91,7 @@ export class LootSheet extends EnhancedJournalSheet {
     _documentControls() {
         let ctrls = [
             { id: 'show', text: i18n("MonksEnhancedJournal.ShowToPlayers"), icon: 'fa-eye', conditional: game.user.isGM, callback: this.enhancedjournal.doShowPlayers },
+            { id: 'sound', text: i18n("MonksEnhancedJournal.AddSound"), icon: 'fa-music', conditional: this.isEditable, callback: () => { this.onAddSound(); } },
             { id: 'convert', text: i18n("MonksEnhancedJournal.Convert"), icon: 'fa-clipboard-list', conditional: (game.user.isGM && this.isEditable), callback: () => { } }
         ];
         return ctrls.concat(super._documentControls());
@@ -133,13 +134,13 @@ export class LootSheet extends EnhancedJournalSheet {
             return game.actors.get(a);
         }).filter(a => !!a);
         if (actors.length == 0) {
-            ui.notifications.warn("There are no characters to distribute to");
+            ui.notifications.warn(i18n("MonksEnhancedJournal.msg.ThereAreNoCharactersToDistribute"));
             return;
         }
 
         let currency = duplicate(this.object.getFlag('monks-enhanced-journal', 'currency') || {});
         if (Object.values(currency).find(v => v > 0) == undefined) {
-            ui.notifications.warn("There's no money to split");
+            ui.notifications.warn(i18n("MonksEnhancedJournal.msg.ThereAreNoMoneyToDistribute"));
             return;
         }
 
@@ -356,19 +357,19 @@ export class LootSheet extends EnhancedJournalSheet {
 
         const actor = game.user.character;
         if (!actor) {
-            ui.notifications.warn("You don't have a character associated with your user");
+            ui.notifications.warn(i18n("MonksEnhancedJournal.msg.YouDontHaveCharacter"));
             return;
         }
 
         let max = this.getValue(item, quantityname(), null);
         if (!game.user.isGM && (max != null && max <= 0)) {
-            ui.notifications.warn("Cannot transfer this item, not enough of this item remains.");
+            ui.notifications.warn(i18n("MonksEnhancedJournal.msg.CannotTransferItemQuantity"));
             return false;
         }
 
         let hasGM = (game.users.find(u => u.isGM && u.active) != undefined);
         if (!hasGM) {
-            ui.notifications.warn("Cannot take loot without the GM present.");
+            ui.notifications.warn(i18n("MonksEnhancedJournal.msg.CannotTakeLootWithoutGM"));
             return false;
         }
 
@@ -429,7 +430,7 @@ export class LootSheet extends EnhancedJournalSheet {
         if (!actor) return;
 
         let max = this.getValue(item.data, quantityname(), null);
-        let result = await LootSheet.confirmQuantity(item, max, `grant to <b>${actor.name}</b>`, false);
+        let result = await LootSheet.confirmQuantity(item, max, format("MonksEnhancedJournal.GrantToActor", { name: actor.name }), false);
         if ((result?.quantity ?? 0) > 0) {
             item.requests[userid] = false;
             await this.object.setFlag('monks-enhanced-journal', 'items', items);
@@ -501,13 +502,13 @@ export class LootSheet extends EnhancedJournalSheet {
         if (item) {
             let max = this.getValue(item, quantityname(), null);
             if (!game.user.isGM && (max != null && max <= 0)) {
-                ui.notifications.warn("Cannot transfer this item, not enough of this item remains.");
+                ui.notifications.warn(i18n("MonksEnhancedJournal.msg.CannotTransferItemQuantity"));
                 return false;
             }
 
             let hasGM = (game.users.find(u => u.isGM && u.active) != undefined);
             if (!hasGM) {
-                ui.notifications.warn("Cannot take loot without the GM present.");
+                ui.notifications.warn(i18n("MonksEnhancedJournal.msg.CannotTakeLootWithoutGM"));
                 return false;
             }
 
@@ -566,7 +567,7 @@ export class LootSheet extends EnhancedJournalSheet {
                 let props = $('<div class="item-properties"></div>');
                 chatData.properties.forEach(p => props.append(`<span class="tag">${p}</span>`));
                 if (chatData.price != undefined)
-                    props.append(`<span class="tag">Price: ${chatData.price}</span>`)
+                    props.append(`<span class="tag">${i18n("MonksEnhancedJournal.Price")}: ${chatData.price}</span>`)
                 div.append(props);
                 li.append(div.hide());
                 div.slideDown(200);
@@ -598,8 +599,8 @@ export class LootSheet extends EnhancedJournalSheet {
                 callback: li => {
                     const id = li.attr('id');
                     Dialog.confirm({
-                        title: `Remove Actor`,
-                        content: 'Are you sure you want to remove this Actor?',
+                        title: i18n("MonksEnhancedJournal.RemoveActor"),
+                        content: i18n("MonksEnhancedJournal.AreYouSureRemoveActor"),
                         yes: this.removeActor.bind(this, id)
                     });
                 }

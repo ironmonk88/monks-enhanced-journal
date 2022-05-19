@@ -13,7 +13,7 @@
         <a class="item" data-tab="slides">{{localize 'MonksEnhancedJournal.Slides'}}</a>
     </nav>
     <section class="sheet-body half-size">
-        <div class="tab entry-details active" data-group="primary" data-tab="details">
+        <div class="tab entry-details active" data-group="primary" data-tab="entry-details">
             <div class="tab-inner slide-details flexcol">
                 <div class="form-group">
                     <label for="flags.monks-enhanced-journal.showas">{{localize 'MonksEnhancedJournal.ShowAs'}}</label>
@@ -52,6 +52,13 @@
                         <input type="checkbox" name="flags.monks-enhanced-journal.loopaudio" {{checked data.flags.monks-enhanced-journal.loopaudio}}>
                     </div>
                 </div>
+                <div class="form-group">
+                    <label for="volume">{{localize 'MonksEnhancedJournal.Volume'}}</label>
+                    <div class="form-fields">
+                        <input type="range" name="flags.monks-enhanced-journal.volume" min="0" max="1" step="0.1" value="{{ data.flags.monks-enhanced-journal.volume }}">
+                        <span class="range-value" style="flex: 0 1 48px;min-height: 22px;">{{ data.flags.monks-enhanced-journal.volume }}</span>
+                    </div>
+                </div>
                 <header class="form-header" style="font-size:16px;">
                     <h3><i class="fas fa-running"></i> {{localize 'MonksEnhancedJournal.Transition'}}</h3>
                 </header>
@@ -67,7 +74,7 @@
                     <label for="transition.duration">{{localize 'MonksEnhancedJournal.Duration'}}</label>
                     <div class="form-fields" style="justify-content:flex-end;">
                         <input type="number" name="flags.monks-enhanced-journal.transition.duration" value="{{data.flags.monks-enhanced-journal.transition.duration}}" style="height: 28px; flex: 0 0 60px; text-align: right;">
-                        <label style="flex: 0 0 60px;">seconds</label>
+                        <label style="flex: 0 0 60px;">{{localize 'MonksEnhancedJournal.seconds'}}</label>
                     </div>
                 </div>
             </div>

@@ -45,6 +45,10 @@ export class CheckListSheet extends EnhancedJournalSheet {
         return data;
     }
 
+    get canPlaySound() {
+        return false;
+    }
+
     static setupFolders(folders, documents) {
         //documents = documents.filter(d => d.visible);
         const depths = [];
@@ -251,8 +255,8 @@ export class CheckListSheet extends EnhancedJournalSheet {
         let that = this;
         // Collect data
         const folders = this.folders;//.filter(f => f.displayed);
-        const label = (data.id ? (options.type == 'folder' ? game.i18n.localize("FOLDER.Update") : 'Update Entry')
-            : (options.type == 'folder' ? game.i18n.localize("FOLDER.Create") : game.i18n.format("DOCUMENT.Create", { type: (options.type == 'folder' ? game.i18n.localize("DOCUMENT.Folder") : 'Entry') })));
+        const label = (data.id ? (options.type == 'folder' ? game.i18n.localize("FOLDER.Update") : i18n("MonksEnhancedJournal.UpdateEntry"))
+            : (options.type == 'folder' ? game.i18n.localize("FOLDER.Create") : game.i18n.format("DOCUMENT.Create", { type: (options.type == 'folder' ? game.i18n.localize("DOCUMENT.Folder") : i18n("MonksEnhancedJournal.Entry")) })));
         const title = label + (data.id && options.type == 'folder' ? ' : ' + data.name : '');
 
         // Render the entity creation form
@@ -562,7 +566,7 @@ export class CheckListSheet extends EnhancedJournalSheet {
         let that = this;
         return [
             {
-                name: "Edit Item",
+                name: i18n("MonksEnhancedJournal.EditItem"),
                 icon: '<i class="fas fa-edit"></i>',
                 condition: game.user.isGM,
                 callback: li => {
@@ -580,7 +584,7 @@ export class CheckListSheet extends EnhancedJournalSheet {
                     const item = that.items.find(i => i.id == li[0].dataset.documentId);
                     if (!item) return;
                     return Dialog.confirm({
-                        title: `Delete Item`,
+                        title: i18n("MonksEnhancedJournal.DeleteItem"),
                         content: `<h4>${game.i18n.localize("AreYouSure")}</h4><p>${game.i18n.localize("FOLDER.RemoveWarning")}</p>`,
                         yes: () => {
                             let items = (that.object.data.flags['monks-enhanced-journal'].items || []);

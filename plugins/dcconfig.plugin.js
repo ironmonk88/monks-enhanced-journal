@@ -5,7 +5,7 @@ let DCConfigPlugin = {
         
         /* Add a button that opens a window */
         editor.ui.registry.addButton('dcconfig', {
-            tooltip: "Request Roll Config",
+            tooltip: i18n("MonksEnhancedJournal.RequestRollConfig"),
             icon: "non-breaking",
             onAction: function () {
                 /* Open window */
@@ -14,7 +14,7 @@ let DCConfigPlugin = {
         });
         /* Adds a menu item, which can then be included in any menu via the menu/menubar configuration */
         editor.ui.registry.addMenuItem('dcconfig', {
-            text: 'Request Roll Config',
+            text: i18n("MonksEnhancedJournal.RequestRollConfig"),
             onAction: function () {
                 /* Open window */
                 DCConfigPlugin.openDialog(editor);
@@ -33,57 +33,57 @@ let DCConfigPlugin = {
 
     openDialog: function (editor) {
         return editor.windowManager.open({
-            title: 'DC Config',
+            title: i18n("MonksEnhancedJournal.RequestRollConfig"),
             body: {
                 type: 'panel',
                 items: [
                     {
                         type: 'input',
                         name: 'request',
-                        label: 'Request'
+                        label: i18n("MonksEnhancedJournal.Request")
                     },
                     {
                         type: 'input',
                         name: 'dc',
                         inputMode: 'number',
-                        label: 'DC'
+                        label: i18n("MonksEnhancedJournal.DC")
                     },
                     {
                         type: 'checkbox',
                         name: 'silent',
-                        label: 'Silent'
+                        label: i18n("MonksEnhancedJournal.Silent")
                     },
                     {
                         type: 'checkbox',
                         name: 'fastForward',
-                        label: 'Fast Forward'
+                        label: i18n("MonksEnhancedJournal.FastForward")
                     },
                     {
                         type: 'selectbox',
                         name: 'rollmode',
-                        label: 'Roll Mode',
+                        label: i18n("MonksEnhancedJournal.RollMode"),
                         items: [
-                            { value: 'roll', text: 'Public Roll' },
-                            { value: 'gmroll', text: 'Public, Hidden Roll' },
-                            { value: 'blindroll', text: 'Private, Hidden Roll' },
-                            { value: 'selfroll', text: 'GM Only Roll' }
+                            { value: 'roll', text: i18n("MonksEnhancedJournal.PublicRoll") },
+                            { value: 'gmroll', text: i18n("MonksEnhancedJournal.PublicHiddenRoll") },
+                            { value: 'blindroll', text: i18n("MonksEnhancedJournal.PrivateHiddenRoll") },
+                            { value: 'selfroll', text: i18n("MonksEnhancedJournal.GMOnlyRoll") }
                         ]
                     },
                     {
                         type: 'input',
                         name: 'flavor',
-                        label: 'Flavor Text'
+                        label: i18n("MonksEnhancedJournal.FlavorText")
                     }
                 ]
             },
             buttons: [
                 {
                     type: 'cancel',
-                    text: 'Close'
+                    text: i18n("MonksEnhancedJournal.Close")
                 },
                 {
                     type: 'submit',
-                    text: 'Save',
+                    text: i18n("MonksEnhancedJournal.Save"),
                     primary: true
                 }
             ],

@@ -35,9 +35,9 @@
   "MonksEnhancedJournal.open-new-tab.name": "新しいタブで開く",
   "MonksEnhancedJournal.open-new-tab.hint": "サイドバーから資料を開くとき、現在のタブの上書きでなく新しいタブで開くようになります。",
 
-  "MonsEnhancedJournal.SlideConfiguration": "スライド設定",
-  "MonsEnhancedJournal.DCConfiguration": "判定設定",
-  "MonsEnhancedJournal.TrapConfiguration": "トラップ設定",
+  "MonksEnhancedJournal.SlideConfiguration": "スライド設定",
+  "MonksEnhancedJournal.DCConfiguration": "判定設定",
+  "MonksEnhancedJournal.TrapConfiguration": "トラップ設定",
   "MonksEnhancedJournal.Update": "更新",
   "MonksEnhancedJournal.Ability": "能力値",
   "MonksEnhancedJournal.Skill": "スキル",
@@ -262,12 +262,13 @@
   "MonksEnhancedJournal.purchasing.confirm": "要申請",
   "MonksEnhancedJournal.purchasing.free": "誰でも",
 
-  "MonksEnhancedJournal.inactive": "休止",
-  "MonksEnhancedJournal.unavailable": "無効",
-  "MonksEnhancedJournal.available": "有効",
-  "MonksEnhancedJournal.inprogress": "進行中",
-  "MonksEnhancedJournal.completed": "完了",
-  "MonksEnhancedJournal.failed": "失敗",
+  "MonksEnhancedJournal.queststatus.notactive": "休止",
+  "MonksEnhancedJournal.queststatus.unavailable": "無効",
+  "MonksEnhancedJournal.queststatus.available": "有効",
+  "MonksEnhancedJournal.queststatus.inprogress": "進行中",
+  "MonksEnhancedJournal.queststatus.completed": "完了",
+  "MonksEnhancedJournal.queststatus.failed": "失敗",
+
   "MonksEnhancedJournal.purchasing.hidden": "非表示",
   "MonksEnhancedJournal.purchasing.visible": "表示"
 }

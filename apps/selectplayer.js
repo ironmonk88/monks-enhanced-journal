@@ -87,7 +87,7 @@ export class SelectPlayer extends FormApplication {
     showPlayers(mode, event) {
         let users = this.users.filter(u => u.selected);
         if (mode == 'players' && users.length == 0) {
-            ui.notifications.info('No players selected to send this entry to');
+            ui.notifications.info(i18n("MonksEnhancedJournal.msg.NoPlayersSelected"));
             return;
         }
         event.data = { users: (mode == 'all' ? null : users), options: { showpic: this.showpic, updatepermission: this.updatepermission }};

@@ -1,14 +1,14 @@
 <div class="monks-enhanced-journal flexcol editcurrency">
     <form>
-        <p class="notes">Set the conversion to 0 if you want the currency to be the default currency. All other currencies currency conversion will be based on the default currency.</p>
+        <p class="notes">{{localize 'MonksEnhancedJournal.msg.SetTheConversionToZero'}}</p>
         <div class="dialog-content">
             <ol class="items-list">
                 <li class="items-header flexrow" style="position: relative;">
-                    <div class="item-controls" style="margin-left: 8px;">Code</div>
-                    <div class="item-name">Name</div>
-                    <div class="item-controls" style="text-align: right;">Convert</div>
+                    <div class="item-controls" style="margin-left: 8px;">{{localize 'MonksEnhancedJournal.Code'}}</div>
+                    <div class="item-name">{{localize 'MonksEnhancedJournal.Name'}}</div>
+                    <div class="item-controls" style="text-align: right;">{{localize 'MonksEnhancedJournal.Convert'}}</div>
                     <div class="item-controls flexrow" style="text-align: center;">
-                        <a class="item-control item-add"><i class="fas fa-plus"></i> Add</a>
+                        <a class="item-control item-add"><i class="fas fa-plus"></i> {{localize 'MonksEnhancedJournal.Add'}}</a>
                     </div>
                 </li>
 
@@ -37,10 +37,10 @@
         </div>
         <footer class="sheet-footer flexrow">
             <button type="button" name="submit">
-                <i class="far fa-save"></i> Save Changes
+                <i class="far fa-save"></i> {{localize 'MonksEnhancedJournal.SaveChanges'}}
             </button>
             <button type="button" name="reset">
-                <i class="fas fa-undo"></i> Reset Defaults
+                <i class="fas fa-undo"></i> {{localize 'MonksEnhancedJournal.ResetDefaults'}}
             </button>
         </footer>
     </form>

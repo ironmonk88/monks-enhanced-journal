@@ -32,15 +32,26 @@ export class EnhancedJournal extends Application {
 
         this.subdocument = null;
 
+        this._lastentry = null;
+        this._backgroundsound = {};
+
         //load up the last entry being shown
         if (object != undefined)
-            this.open(object);
+            this.open(object, null, { anchor: options?.anchor });
+
+        this._soundHook = Hooks.on("globalInterfaceVolumeChanged", (volume) => {
+            for (let sound of Object.values(this._backgroundsound)) {
+                sound.volume = volume * game.settings.get("core", "globalInterfaceVolume")
+            }
+        });
     }
 
     static get defaultOptions() {
         let classes = ["monks-enhanced-journal", `${game.system.id}`];
         if (game.modules.get("rippers-ui")?.active)
             classes.push('rippers-ui');
+        if (game.modules.get("rpg-styled-ui")?.active)
+            classes.push('rpg-styled-ui');
         if (!setting("show-bookmarkbar"))
             classes.push('hide-bookmark');
         return mergeObject(super.defaultOptions, {
@@ -100,8 +111,16 @@ export class EnhancedJournal extends Application {
                 MonksEnhancedJournal.updateDirectory(html);
             })
 
-            this.renderSubSheet();
+            this.renderSubSheet().then(() => {
+                if (options?.anchor) {
+                    const anchor = $(`#${options?.anchor}`, this.element);
+                    if (anchor.length) {
+                        anchor[0].scrollIntoView();
+                    }
+                }
+            });
         }
+
         return result;
     }
 
@@ -113,8 +132,8 @@ export class EnhancedJournal extends Application {
             canCreate: cfg.documentClass.canUserCreate(game.user),
             sidebarIcon: cfg.sidebarIcon,
             user: game.user,
-            label: "Entry",
-            labelPlural: "Journal Entries"
+            label: i18n("MonksEnhancedJournal.Entry"),
+            labelPlural: i18n("MonksEnhancedJournal.JournalEntries")
         };
 
         let html = await renderTemplate(template, data);
@@ -273,6 +292,28 @@ export class EnhancedJournal extends Application {
             if (this.object.data.type != 'blank')
                 Hooks.callAll('renderJournalSheet', this.subsheet, contentform, templateData); //this.object);
 
+            //if this entry is different from the last one...
+            if (this._lastentry != this.object.id) {
+                // end a sound file if it's playing
+                for(let [key, sound] of Object.entries(this._backgroundsound)) {
+                    sound.fade(0, { duration: 250 }).then(() => {
+                        sound?.stop();
+                        delete this._backgroundsound[key];
+                    });
+                }
+                // if the new entry has a sound file, that autoplays, then start the sound file playing
+                if (this.object.data.type != "blank") {
+                    let sound = this.object.getFlag("monks-enhanced-journal", "sound");
+                    if (sound?.audiofile && sound?.autoplay && this.subsheet?.canPlaySound) {
+                        this.subsheet._playSound(sound).then((soundfile) => {
+                            this._backgroundsound[this.object.id] = soundfile;
+                        });
+                    }
+                }
+            }
+            
+            this._lastentry = this.object.id;
+
             this.activateControls($('#journal-buttons', this.element).empty());
 
             $('.navigate-prev', this.element).html('').attr('data-entity-id', '');
@@ -291,7 +332,7 @@ export class EnhancedJournal extends Application {
             this.subsheet._state = this.subsheet.constructor.RENDER_STATES.RENDERED;
             
         } catch(err) {
-            //+++ display an error rendering the subsheet
+            // display an error rendering the subsheet
             error(err);
         }
     }
@@ -405,6 +446,13 @@ export class EnhancedJournal extends Application {
             if (await this?.subsheet?.close() === false)
                 return false;
             MonksEnhancedJournal.journal = null;
+            // if there's a sound file playing, then close it
+            for (let [key, sound] of Object.entries(this._backgroundsound)) {
+                sound.stop();
+            }
+
+            Hooks.off("globalInterfaceVolumeChanged", this._soundHook);
+
             return super.close(options);
         }
     }
@@ -496,7 +544,7 @@ export class EnhancedJournal extends Application {
         return tab;
     }
 
-    async activateTab(tab, event) {
+    async activateTab(tab, event, options) {
         if (await this?.subsheet?.close() === false)
             return false;
 
@@ -544,14 +592,14 @@ export class EnhancedJournal extends Application {
 
         //this.updateHistory();
 
-        this.render(true);
+        this.render(true, options);
 
         this.updateRecent(tab.entity);
 
         return true;
     }
 
-    updateTab(tab, entity) {
+    updateTab(tab, entity, options) {
         if (!entity)
             return;
 
@@ -590,7 +638,7 @@ export class EnhancedJournal extends Application {
         if (!this.rendered)
             return;
 
-        this.render(true, { focus: true });
+        this.render(true, { focus: true, anchor: options?.anchor });
     }
 
     removeTab(tab, event) {
@@ -706,7 +754,7 @@ export class EnhancedJournal extends Application {
                 let type = (entity.getFlag && entity.getFlag('monks-enhanced-journal', 'type'));
                 let icon = MonksEnhancedJournal.getIcon(type);
                 let item = {
-                    name: entity.name || 'Unknown',
+                    name: entity.name || i18n("MonksEnhancedJournal.Unknown"),
                     icon: `<i class="fas ${icon}"></i>`,
                     callback: (li) => {
                         let idx = i;
@@ -781,7 +829,7 @@ export class EnhancedJournal extends Application {
         game.user.setFlag('monks-enhanced-journal', 'bookmarks', update);
     }
 
-    async open(entity, newtab) {
+    async open(entity, newtab, options) {
         //if there are no tabs, then create one
         this._tabs.active = null;
         if (this.tabs.length == 0) {
@@ -792,14 +840,14 @@ export class EnhancedJournal extends Application {
                 //lets see if we can find  tab with this entity?
                 let tab = this.tabs.find(t => t.entityId.endsWith(entity.id));
                 if (tab != undefined)
-                    this.activateTab(tab);
+                    this.activateTab(tab, null, options);
                 else
                     this.addTab(entity);
             } else {
                 if (await this?.subsheet?.close() !== false)
                     //this.addTab(entity, { activate: false, refresh: false }); //If we're editing, then open in a new tab but don't activate
                 //else
-                    this.updateTab(this.tabs.active(), entity);
+                    this.updateTab(this.tabs.active(), entity, options);
             }
         }
     }
@@ -965,7 +1013,6 @@ export class EnhancedJournal extends Application {
     }
 
     async _onSwapMode(event, mode) {
-        //+++ Do we need this any more?
         //don't do anything, but leave this here to prevent the regular journal page from doing anything
     }
 

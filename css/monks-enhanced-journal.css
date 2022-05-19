@@ -504,11 +504,6 @@
     font-weight: bold;
 }
 
-
-
-
-
-
 .monks-journal-sheet{
     height:100%;
 }
@@ -2105,6 +2100,10 @@ height: fit-content;*/
     padding-left: 4px;
 }
 
+.journal-list .journal-item .journal-text.custom-text {
+    color: #333333;
+}
+
 .journal-list .journal-item:not(.folder):hover,
 .journal-list .journal-item.selected {
     background-color: #1e90ff;
@@ -2244,9 +2243,9 @@ a.journal-link:hover {
 
 .monks-journal-sheet .header-details .sheet-icon {
     flex: 0 0 20px;
-    line-height: 40px;
     font-size: 20px;
-    width: 30px;
+    height: 20px;
+    margin-top: 18px;
 }
 
 .monks-enhanced-journal.request-item img{
@@ -2881,4 +2880,42 @@ a.picture-link.broken {
 .monks-enhanced-journal.shadowrun5e .loot-container .loot-items,
 .monks-enhanced-journal.shadowrun5e .checklist-list {
     flex: 1;
+}
+
+button.play-journal-sound {
+    flex: 0 0 30px;
+    height: 30px;
+    border: none;
+    font-size: 18px;
+    line-height: 28px;
+    padding: 0px 3px;
+    cursor: pointer;
+    box-shadow: none;
+    color: var(--primary-font);
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 3px;
+}
+
+.monks-journal-sheet .header-details button.play-journal-sound {
+    margin-top: 10px;
+}
+
+.monks-journal-sheet .header-name button.play-journal-sound {
+    margin-top: 3px;
+}
+
+button.play-journal-sound.active {
+    border: 1px solid #ff6400;
+    color: #ff6400;
+}
+
+.rpg-styled-ui.monks-journal-sheet.journal-sheet form select {
+    display: inline-block;
+    color: #191813;
+    background: rgba(0, 0, 0, 0.05);
+}
+
+.monks-journal-sheet.journal-sheet form select:hover {
+    border: 1px solid #111;
+    box-shadow: 0 0 8px red;
 }

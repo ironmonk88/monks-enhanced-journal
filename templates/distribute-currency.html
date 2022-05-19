@@ -1,6 +1,6 @@
 <div class="distribute-container">
     <form autocomplete="off" onsubmit="event.preventDefault();" style="flex-grow: 0;">
-        <p class="notes">Clear the value for the player to remove the character from receiving a split of the money</p>
+        <p class="notes">{{localize 'MonksEnhancedJournal.msg.ClearTheValueToRemoveCharacterFromSplit'}}</p>
 
         <div class="form-group">
             <label>
@@ -17,18 +17,18 @@
         <ol class="items-list">
             <li class="items-header flexrow">
                 <h3 class="item-name flexrow"></h3>
-                <a class="item-control split" title="Split Currency evenly between players">
-                    <i class="fas fa-dollar-sign"></i> Split
+                <a class="item-control split" title="{{localize 'MonksEnhancedJournal.SplitBetweenPlayers'}}">
+                    <i class="fas fa-dollar-sign"></i> {{localize 'MonksEnhancedJournal.Split'}}
                 </a>
-                <a class="item-control reset" title="Reset all the values">
-                    <i class="fas fa-trash"></i> Clear
+                <a class="item-control reset" title="{{localize 'MonksEnhancedJournal.ResetAllTheValues'}}">
+                    <i class="fas fa-trash"></i> {{localize 'MonksEnhancedJournal.Clear'}}
                 </a>
             </li>
         </ol>
 
         <ol class="items-list">
             <li class="items-header flexrow">
-                <h3 class="item-name flexrow">Character</h3>
+                <h3 class="item-name flexrow">{{localize 'MonksEnhancedJournal.Character'}}</h3>
                 {{#each currencies}}
                 <div class="item-controls">{{localize this.name}}</div>
                 {{/each}}
@@ -45,14 +45,14 @@
                     <input type="number" class="player-amount" data-currency="{{this.id}}" data-character="{{../id}}" charactername="character.{{../id}}.currency.{{this.id}}" placeholder="-" value="{{lookup ../currency this.id}}" data-dtype="Number" />
                     {{/each}}
 
-                    <a class="item-control assign" data-character="{{this.id}}" title="Assign the remainder of the currency to this character">
-                        <i class="fas fa-dollar-sign"></i> Assign
+                    <a class="item-control assign" data-character="{{this.id}}" title="{{localize 'MonksEnhancedJournal.msg.AssignRemainderToCharacter'}}">
+                        <i class="fas fa-dollar-sign"></i> {{localize 'MonksEnhancedJournal.Assign'}}
                     </a>
                 </li>
                 {{/each}}
             </ul>
             <li class="items-header flexrow">
-                <h3 class="item-name flexrow">Totals</h3>
+                <h3 class="item-name flexrow">{{localize 'MonksEnhancedJournal.Totals'}}</h3>
                 {{#each currencies}}
             <div class="item-controls total-amount{{#if (gt (lookup ../totals this.id) 0)}} more{{/if}}{{#if (lt (lookup ../totals this.id) 0)}} less{{/if}}" data-currency="{{this.id}}" name="totalcurrency.{{this.id}}">{{lookup ../totals this.id}}</div>
                 {{/each}}

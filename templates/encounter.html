@@ -3,6 +3,11 @@
         <div class="header-name flexrow">
             <i class="fas fa-toolbox sheet-icon"></i>
             <input name="name" type="text" value="{{data.name}}" placeholder="{{localize 'MonksEnhancedJournal.EncounterName'}}">
+            {{#if sound.audiofile}}
+            <button type="button" class="play-journal-sound">
+                <i class="fas {{#if sound.playing}}fa-volume-up{{else}}fa-volume-off{{/if}}"></i>
+            </button>
+            {{/if}}
         </div>
         <nav class="sheet-navigation tabs" data-group="primary">
             <a class="item active" data-tab="description">{{localize 'MonksEnhancedJournal.Description'}}</a>
@@ -36,7 +41,7 @@
                                 <div class="item-controls item-hidden">{{localize 'MonksEnhancedJournal.Hidden'}}</div>
                                 <div class="item-controls item-quantity">{{localize 'MonksEnhancedJournal.Quantity'}}</div>
                                 <div class="item-controls flexrow">
-                                    <a class="item-control roll-table" title="Populate from Rolltable"><i class="fas fa-th-list"></i></a>
+                                    <a class="item-control roll-table" title="{{localize 'MonksEnhancedJournal.PopulateFromRollTable'}}"><i class="fas fa-th-list"></i></a>
                                 </div>
                             </li>
 
@@ -62,9 +67,9 @@
                                 </li>
                                 {{else}}
                                 {{#if owner}}
-                                <li class="instruction">Drag an actor here to add it to the encounter</li>
+                                <li class="instruction">{{localize 'MonksEnhancedJournal.msg.DragAnActorToAddToEncounter'}}</li>
                                 {{else}}
-                                <li class="instruction">No monsters at the moment</li>
+                                <li class="instruction">{{localize 'MonksEnhancedJournal.msg.NoMonstersAtTheMoment'}}</li>
                                 {{/if}}
                                 {{/each}}
                             </ol>
@@ -95,7 +100,7 @@
                             <div class="item-controls item-quantity">{{localize 'MonksEnhancedJournal.Qty'}}</div>
                             <div class="item-controls item-quantity">{{localize 'MonksEnhancedJournal.Remaining'}}</div>
                             <div class="item-controls flexrow">
-                                <a class="item-control refill-all" title="Refill all items"><i class="fas fa-cart-arrow-down"></i></a>
+                                <a class="item-control refill-all" title="{{localize 'MonksEnhancedJournal.RefillAllItems'}}"><i class="fas fa-cart-arrow-down"></i></a>
                             </div>
                         </li>
 
@@ -113,7 +118,7 @@
                                     </div>
 
                                     <div class="item-name item-received">
-                                        {{#if this.received}}received by {{this.received}}{{/if}}
+                                        {{#if this.received}}{{localize 'MonksEnhancedJournal.ReceivedBy'}} {{this.received}}{{/if}}
                                     </div>
 
                                     <div class="item-controls item-assigned">
@@ -138,9 +143,9 @@
                             </ul>
                             {{else}}
                             {{#if owner}}
-                            <li class="instruction">Drag an Item onto the encounter to add it to the rewards</li>
+                            <li class="instruction">{{localize 'MonksEnhancedJournal.msg.DragAnItemToAddToRewards'}}</li>
                             {{else}}
-                            <li class="instruction">No rewards at the moment</li>
+                            <li class="instruction">{{localize 'MonksEnhancedJournal.msg.NoRewardsAtTheMoment'}}</li>
                             {{/if}}
                             {{/each}}
                         </ol>
@@ -185,9 +190,9 @@
                             </li>
                             {{else}}
                             {{#if owner}}
-                            <li class="instruction">No DCs added yet, press the Add button to create one</li>
+                            <li class="instruction">{{localize 'MonksEnhancedJournal.msg.NoDCsAddedPressAddButton'}}</li>
                             {{else}}
-                            <li class="instruction">No DCs at the moment</li>
+                            <li class="instruction">{{localize 'MonksEnhancedJournal.msg.NoDCsAtTheMoment'}}</li>
                             {{/if}}
                             {{/each}}
                         </ol>
@@ -242,7 +247,7 @@
             {{/if}}
             <div class="tab notes" data-group="primary" data-tab="notes">
                 <div class="tab-inner flexcol">
-                    <div style="flex-grow: 0;">{{localize 'MonksEnhancedJournal.OnlyViewable'}}{{#unless hasGM}}<span style="color:darkred;font-weight:bold;"> Cannot edit notes if there's no GM present</span>{{/unless}}</div>
+                    <div style="flex-grow: 0;">{{localize 'MonksEnhancedJournal.OnlyViewable'}}{{#unless hasGM}}<span style="color:darkred;font-weight:bold;"> {{localize 'MonksEnhancedJournal.msg.CannotEditNotesWithoutGM'}}</span>{{/unless}}</div>
                 <div>
                     <textarea name="flags.monks-enhanced-journal.{{userid}}.notes" class="trim-textarea">{{userdata.notes}}</textarea>
                 </div>

@@ -107,6 +107,7 @@ export class PersonSheet extends EnhancedJournalSheet {
             /*{ id: 'random', text: 'Generate Random Character', icon: 'fa-exchange-alt', conditional: game.user.isGM, callback: MonksEnhancedJournal.journal._randomizePerson },*/
             { id: 'show', text: i18n("MonksEnhancedJournal.ShowToPlayers"), icon: 'fa-eye', conditional: game.user.isGM, callback: this.enhancedjournal.doShowPlayers },
             { id: 'edit', text: i18n("MonksEnhancedJournal.EditDescription"), icon: 'fa-pencil-alt', conditional: this.isEditable, callback: () => { this.onEditDescription(); } },
+            { id: 'sound', text: i18n("MonksEnhancedJournal.AddSound"), icon: 'fa-music', conditional: this.isEditable, callback: () => { this.onAddSound(); } },
             { id: 'convert', text: i18n("MonksEnhancedJournal.Convert"), icon: 'fa-clipboard-list', conditional: (game.user.isGM && this.isEditable), callback: () => { } }
         ];
         //if (game.modules.get("VoiceActor")?.active) {
@@ -247,7 +248,7 @@ export class PersonSheet extends EnhancedJournalSheet {
                 }
             },
             {
-                name: "Open Actor Sheet",
+                name: i18n("MonksEnhancedJournal.OpenActorSheet"),
                 icon: '<i class="fas fa-user fa-fw"></i>',
                 condition: () => game.user.isGM,
                 callback: li => {

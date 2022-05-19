@@ -11,7 +11,7 @@ export class Objectives extends FormApplication {
         return mergeObject(super.defaultOptions, {
             id: "objectives",
             classes: ["form", "objective-sheet"],
-            title: "Objectives",
+            title: i18n("MonksEnhancedJournal.Objectives"),
             template: "modules/monks-enhanced-journal/templates/objectives.html",
             width: 500,
             resizable: true

@@ -21,9 +21,9 @@
   "MonksEnhancedJournal.open-outside.name": "Ouvrir les liens du Chat",
   "MonksEnhancedJournal.open-outside.hint": "Ouvrir les liens du Chat en dehors de Enhanced Journal plutôt que dans un nouvel onglet",
 
-  "MonsEnhancedJournal.SlideConfiguration": "Configuration des Slides",
-  "MonsEnhancedJournal.DCConfiguration": "Configuration DD",
-  "MonsEnhancedJournal.TrapConfiguration": "Configuration de Piège",
+  "MonksEnhancedJournal.SlideConfiguration": "Configuration des Slides",
+  "MonksEnhancedJournal.DCConfiguration": "Configuration DD",
+  "MonksEnhancedJournal.TrapConfiguration": "Configuration de Piège",
   "MonksEnhancedJournal.Update": "Mise à jour",
   "MonksEnhancedJournal.Ability": "Compétence",
   "MonksEnhancedJournal.Skill": "Talent",
@@ -44,7 +44,7 @@
   "MonksEnhancedJournal.Play": "Play",
   "MonksEnhancedJournal.Pause": "Pause",
   "MonksEnhancedJournal.Stop": "Stop",
-    "MonksEnhancedJournal.EditSlide": "Éditer Slide",
+  "MonksEnhancedJournal.EditSlide": "Éditer Slide",
   "MonksEnhancedJournal.Delete": "Supprimer",
   "MonksEnhancedJournal.Name": "Nom",
   "MonksEnhancedJournal.Image": "Image",
@@ -226,11 +226,12 @@
   "MonksEnhancedJournal.purchasing.confirm": "Demander l'achat",
   "MonksEnhancedJournal.purchasing.free": "Tout le monde",
 
-  "MonksEnhancedJournal.inactive": "Inactif",
-  "MonksEnhancedJournal.available": "Disponible",
-  "MonksEnhancedJournal.inprogress": "En cours",
-  "MonksEnhancedJournal.completed": "Complétée",
-  "MonksEnhancedJournal.failed": "Échouée",
+  "MonksEnhancedJournal.queststatus.notactive": "Inactif",
+  "MonksEnhancedJournal.queststatus.available": "Disponible",
+  "MonksEnhancedJournal.queststatus.inprogress": "En cours",
+  "MonksEnhancedJournal.queststatus.completed": "Complétée",
+  "MonksEnhancedJournal.queststatus.failed": "Échouée",
+
   "MonksEnhancedJournal.purchasing.hidden": "Cachée",
   "MonksEnhancedJournal.purchasing.visible": "Visible"
 }

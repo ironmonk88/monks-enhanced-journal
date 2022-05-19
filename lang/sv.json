@@ -1,6 +1,6 @@
 {
   "I18N.LANGUAGE": "Svenska",
-  "I18N.MAINTAINERS": "@Rangertheman#4927",  
+  "I18N.MAINTAINERS": "@Rangertheman#4927",
 
   "MonksEnhancedJournal.Title": "Monk's Enhanced Journal",
   "MonksEnhancedJournal.BackTooltip": "",
@@ -40,7 +40,7 @@
   "MonksEnhancedJournal.hide-inline.name": "Dölj länkar",
   "MonksEnhancedJournal.hide-inline.hint": "Dölj länkar till dokument som spelarna inte har tillgång till.'",
   "MonksEnhancedJournal.hide-rolltables.name": "Dölj tärningstabeller från kompendier",
-  "MonksEnhancedJournal.hide-rolltables.hint": "Dölj tabeller som ligger i kompendier, när du lägger till byten från en tärningstabell",																			
+  "MonksEnhancedJournal.hide-rolltables.hint": "Dölj tabeller som ligger i kompendier, när du lägger till byten från en tärningstabell",
   "MonksEnhancedJournal.hud-limited.name": "Behörighet för Anteckningsdisplayen",
   "MonksEnhancedJournal.hud-limited.hint": "Använd begränsad behörighet när du ändrar synligheten medan du använder Anteckningsdisplayen (HUD)",
   "MonksEnhancedJournal.show-bookmarkbar.name": "Visa bokmärkesfältet",
@@ -49,12 +49,12 @@
   "MonksEnhancedJournal.show-menubar.hint": "Aktivera bokmärkesvyn för alla anteckningstyper, när du redigerar en anteckning",
   "MonksEnhancedJournal.distribute-conversion.name": "Konvertering vid fördelning",
   "MonksEnhancedJournal.distribute-conversion.hint": "Konvertera återstående valuta tillö mindre enheter, när den ska fördelas",
-   "MonksEnhancedJournal.purchase-conversion.name": "Konvertering vid inköp",
-  "MonksEnhancedJournal.purchase-conversion.hint": "Tillåt konvertering mellan valutor vid inköp", 
- 
-  "MonsEnhancedJournal.SlideConfiguration": "Inställning för bildspel",
-  "MonsEnhancedJournal.DCConfiguration": "Inställning för svårighetsnivå",
-  "MonsEnhancedJournal.TrapConfiguration": "Inställning för fällor",
+  "MonksEnhancedJournal.purchase-conversion.name": "Konvertering vid inköp",
+  "MonksEnhancedJournal.purchase-conversion.hint": "Tillåt konvertering mellan valutor vid inköp",
+
+  "MonksEnhancedJournal.SlideConfiguration": "Inställning för bildspel",
+  "MonksEnhancedJournal.DCConfiguration": "Inställning för svårighetsnivå",
+  "MonksEnhancedJournal.TrapConfiguration": "Inställning för fällor",
   "MonksEnhancedJournal.Update": "Uppdatera",
   "MonksEnhancedJournal.Ability": "Förmåga",
   "MonksEnhancedJournal.Skill": "Färdighet",
@@ -63,7 +63,7 @@
   "MonksEnhancedJournal.MsgOnlyOneBookmark": "Kan inte bokmärka samma sak två gånger",
 
   "MonksEnhancedJournal.DistributeCurrency": "Fördela pengar",
-  "MonksEnhancedJournal.Distribute": "Fördela",  
+  "MonksEnhancedJournal.Distribute": "Fördela",
   "MonksEnhancedJournal.NewTab": "Ny flik",
   "MonksEnhancedJournal.OpenEntry": "Öppna en anteckning",
   "MonksEnhancedJournal.CannotFindEntity": "Kan inte hitta anteckningen",
@@ -258,7 +258,7 @@
   "MonksEnhancedJournal.Audio": "Audio",
   "MonksEnhancedJournal.Slides": "Bilder",
   "MonksEnhancedJournal.CanvasColour": "Spelduk",
-  
+
   "MonksEnhancedJournal.LifeStatus": "Livsstatus",
   "MonksEnhancedJournal.EditAttributes": "Redigera attribut",
 
@@ -295,12 +295,13 @@
   "MonksEnhancedJournal.purchasing.free": "Alla",
   "MonksEnhancedJournal.purchasing.request": "Begär att få köpa",
 
-  "MonksEnhancedJournal.inactive": "Inaktiv",
-  "MonksEnhancedJournal.unavailable": "Inte tillgängligt",
-  "MonksEnhancedJournal.available": "Tillgängligt",
-  "MonksEnhancedJournal.inprogress": "Pågår",
-  "MonksEnhancedJournal.completed": "Slutfört",
-  "MonksEnhancedJournal.failed": "Misslyckat",
+  "MonksEnhancedJournal.queststatus.notactive": "Inaktiv",
+  "MonksEnhancedJournal.queststatus.unavailable": "Inte tillgängligt",
+  "MonksEnhancedJournal.queststatus.available": "Tillgängligt",
+  "MonksEnhancedJournal.queststatus.inprogress": "Pågår",
+  "MonksEnhancedJournal.queststatus.completed": "Slutfört",
+  "MonksEnhancedJournal.queststatus.failed": "Misslyckat",
+
   "MonksEnhancedJournal.purchasing.hidden": "Dold",
   "MonksEnhancedJournal.purchasing.visible": "Synlig"
 }

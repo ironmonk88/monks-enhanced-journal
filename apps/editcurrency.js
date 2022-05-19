@@ -10,7 +10,7 @@ export class EditCurrency extends FormApplication {
     static get defaultOptions() {
         return mergeObject(super.defaultOptions, {
             id: "journal-editcurrency",
-            title: 'Edit Currency',
+            title: i18n("MonksEnhancedJournal.EditCurrency"),
             classes: ["edit-currency"],
             template: "./modules/monks-enhanced-journal/templates/edit-currency.html",
             width: 400,

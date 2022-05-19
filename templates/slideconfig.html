@@ -34,6 +34,13 @@
             <input class="image" style="border-color:#7a7971;" type="text" name="audiofile" placeholder="path/audio.mp3" value="{{object.audiofile}}">
         </div>
     </div>
+    <div class="form-group">
+        <label for="volume">{{localize 'MonksEnhancedJournal.Volume'}}</label>
+        <div class="form-fields">
+            <input type="range" name="volume" min="0" max="1" step="0.1" value="{{ volume }}">
+            <span class="range-value">{{ volume }}</span>
+        </div>
+    </div>
     <header class="form-header">
         <h3><i class="fas fa-running"></i> {{localize 'MonksEnhancedJournal.Transition'}}</h3>
     </header>
@@ -51,14 +58,14 @@
             <input type="number" name="transition.duration" placeholder="seconds" value="{{object.transition.duration}}" style="flex: 0 0 60px; text-align:right;">
         </div>
     </div>
-    <p class="notes">Set duration to 0 to click for the next slide</p>
+    <p class="notes">{{localize 'MonksEnhancedJournal.msg.SetDurationToZero'}}</p>
     <header class="form-header">
         <h3><i class="fas fa-book-open"></i> {{localize 'MonksEnhancedJournal.Text'}}</h3>
     </header>
     <div class="slide">
         <div class="slide-inner">
             <div class="slide-background"><div style="{{background}}"></div></div>
-            <img class="slide-image" {{#if thumbnail}}src="{{thumbnail}}"{{/if}} style="object-fit:{{object.sizing}}" />
+            <img class="slide-image" {{#if thumbnail}} src="{{thumbnail}}" {{/if}} style="object-fit:{{object.sizing}}" />
             <div class="slide-textarea">
                 {{#each this.texts}}
                 <textarea class="slide-text" data-id="{{this.id}}" style="{{this.style}}">{{this.text}}</textarea>

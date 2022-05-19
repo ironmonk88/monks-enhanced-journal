@@ -11,7 +11,7 @@ export class DCConfig extends FormApplication {
         return mergeObject(super.defaultOptions, {
             id: "dc-config",
             classes: ["form", "dc-sheet"],
-            title: i18n("MonsEnhancedJournal.DCConfiguration"),
+            title: i18n("MonksEnhancedJournal.DCConfiguration"),
             template: "modules/monks-enhanced-journal/templates/dc-config.html",
             width: 400
         });

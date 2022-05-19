@@ -11,7 +11,7 @@ export class TrapConfig extends FormApplication {
         return mergeObject(super.defaultOptions, {
             id: "trap-config",
             classes: ["form", "trap-sheet"],
-            title: i18n("MonsEnhancedJournal.TrapConfiguration"),
+            title: i18n("MonksEnhancedJournal.TrapConfiguration"),
             template: "modules/monks-enhanced-journal/templates/trap-config.html",
             width: 400
         });

@@ -15,9 +15,9 @@
   "MonksEnhancedJournal.show-permissions.name": "Mostra i permessi del giocatore",
   "MonksEnhancedJournal.show-permissions.hint": "Mostra i permessi del giocatore sulla voce del diario",
 
-  "MonsEnhancedJournal.SlideConfiguration": "Configurazione Slide",
-  "MonsEnhancedJournal.DCConfiguration": "Configurazione Prova",
-  "MonsEnhancedJournal.TrapConfiguration": "Configurazione Trappola",
+  "MonksEnhancedJournal.SlideConfiguration": "Configurazione Slide",
+  "MonksEnhancedJournal.DCConfiguration": "Configurazione Prova",
+  "MonksEnhancedJournal.TrapConfiguration": "Configurazione Trappola",
   "MonksEnhancedJournal.Update": "Aggiorna",
   "MonksEnhancedJournal.Ability": "Caratteristiche",
   "MonksEnhancedJournal.Skill": "Abilità",
@@ -186,9 +186,9 @@
   "MonksEnhancedJournal.purchasing.confirm": "Conferma GM",
   "MonksEnhancedJournal.purchasing.free": "GM o Giocatore",
 
-  "MonksEnhancedJournal.inactive": "Inattiva",
-  "MonksEnhancedJournal.available": "Disponibile",
-  "MonksEnhancedJournal.inprogress": "In Corso",
-  "MonksEnhancedJournal.completed": "Completata",
-  "MonksEnhancedJournal.failed": "Fallita"
+  "MonksEnhancedJournal.queststatus.notactive": "Inattiva",
+  "MonksEnhancedJournal.queststatus.available": "Disponibile",
+  "MonksEnhancedJournal.queststatus.inprogress": "In Corso",
+  "MonksEnhancedJournal.queststatus.completed": "Completata",
+  "MonksEnhancedJournal.queststatus.failed": "Fallita"
 }

@@ -42,7 +42,7 @@ export class SlideshowSheet extends EnhancedJournalSheet {
             data.data.flags["monks-enhanced-journal"] = {};
             flags = (data.data.flags["monks-enhanced-journal"]);
         }
-        data.showasOptions = { canvas: "Canvas", fullscreen: "Full Screen", window: "Window" };
+        data.showasOptions = { canvas: i18n("MonksEnhancedJournal.Canvas"), fullscreen: i18n("MonksEnhancedJournal.FullScreen"), window: i18n("MonksEnhancedJournal.Window") };
         if (flags.state == undefined)
             flags.state = 'stopped';
         data.playing = (flags.state != 'stopped') || !this.object.isOwner;
@@ -123,6 +123,10 @@ export class SlideshowSheet extends EnhancedJournalSheet {
         }
 
         return data;
+    }
+
+    get canPlaySound() {
+        return false;
     }
 
     async _render(force, options = {}) {
@@ -356,16 +360,19 @@ export class SlideshowSheet extends EnhancedJournalSheet {
                 this.object.data.flags['monks-enhanced-journal'].slideAt = 0;
             this.object.sound = undefined;
 
-            if (flags.audiofile != undefined && flags.audiofile != '')
+            if (flags.audiofile != undefined && flags.audiofile != '') {
+                let volume = flags.volume ?? 1;
                 AudioHelper.play({
                     src: flags.audiofile,
                     loop: flags.loopaudio,
-                    volume: game.settings.get("core", "globalAmbientVolume")
+                    volume: volume //game.settings.get("core", "globalInterfaceVolume")
                 }).then((sound) => {
                     this.object.sound = sound;
                     MonksEnhancedJournal.sounds.push(sound);
+                    sound._mejvolume = volume;
                     return sound;
                 });
+            }
         } else {
             if (this.object.sound && this.object.sound.paused)
                 this.object.sound.play();
@@ -526,13 +533,15 @@ export class SlideshowSheet extends EnhancedJournalSheet {
                             that.object.slidesound = undefined;
                         }
                         if (slide.audiofile != undefined && slide.audiofile != '') {
+                            let volume = slide.volume ?? 1;
                             AudioHelper.play({
                                 src: slide.audiofile,
                                 loop: false,
-                                volume: game.settings.get("core", "globalAmbientVolume")
+                                volume: volume //game.settings.get("core", "globalInterfaceVolume")
                             }).then((sound) => {
                                 that.object.slidesound = sound;
                                 MonksEnhancedJournal.sounds.push(sound);
+                                sound._mejvolume = volume;
                                 return sound;
                             });
                         }
@@ -548,13 +557,15 @@ export class SlideshowSheet extends EnhancedJournalSheet {
                     that.object.slidesound = undefined;
                 }
                 if (slide.audiofile != undefined && slide.audiofile != '') {
+                    let volume = slide.volume ?? 1;
                     AudioHelper.play({
                         src: slide.audiofile,
                         loop: false,
-                        volume: game.settings.get("core", "globalAmbientVolume")
+                        volume: volume //game.settings.get("core", "globalInterfaceVolume")
                     }).then((sound) => {
                         that.object.slidesound = sound;
                         MonksEnhancedJournal.sounds.push(sound);
+                        sound._mejvolume = volume;
                         return sound;
                     });
                 }

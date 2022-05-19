@@ -48,9 +48,9 @@
   "MonksEnhancedJournal.distribute-conversion.hint": "When distributing coins, convert remainder to lesser currency to split",
   "MonksEnhancedJournal.purchase-conversion.name": "Purchase Conversion",
   "MonksEnhancedJournal.purchase-conversion.hint": "When purchasing items allow converting between currencies",
-  "MonsEnhancedJournal.SlideConfiguration": "Diakonfiguration",
-  "MonsEnhancedJournal.DCConfiguration": "DC Configuration",
-  "MonsEnhancedJournal.TrapConfiguration": "Fallenkonfiguration",
+  "MonksEnhancedJournal.SlideConfiguration": "Diakonfiguration",
+  "MonksEnhancedJournal.DCConfiguration": "DC Configuration",
+  "MonksEnhancedJournal.TrapConfiguration": "Fallenkonfiguration",
   "MonksEnhancedJournal.Update": "Update",
   "MonksEnhancedJournal.Ability": "Fähigkeit",
   "MonksEnhancedJournal.Skill": "Fertigkeit",
@@ -291,12 +291,13 @@
   "MonksEnhancedJournal.purchasing.free": "Jeder",
   "MonksEnhancedJournal.purchasing.request": "Kauf anfordern",
 
-  "MonksEnhancedJournal.inactive": "Inaktiv",
-  "MonksEnhancedJournal.unavailable": "Nicht verfügbar",
-  "MonksEnhancedJournal.available": "Verfügbar",
-  "MonksEnhancedJournal.inprogress": "Im Gange",
-  "MonksEnhancedJournal.completed": "Abgeschlossen",
-  "MonksEnhancedJournal.failed": "Fehlgeschlagen",
+  "MonksEnhancedJournal.queststatus.notactive": "Inaktiv",
+  "MonksEnhancedJournal.queststatus.unavailable": "Nicht verfügbar",
+  "MonksEnhancedJournal.queststatus.available": "Verfügbar",
+  "MonksEnhancedJournal.queststatus.inprogress": "Im Gange",
+  "MonksEnhancedJournal.queststatus.completed": "Abgeschlossen",
+  "MonksEnhancedJournal.queststatus.failed": "Fehlgeschlagen",
+
   "MonksEnhancedJournal.purchasing.hidden": "Versteckt",
   "MonksEnhancedJournal.purchasing.visible": "Sichtbar"
 }

@@ -1,6 +1,6 @@
 import { DCConfig } from "../apps/dc-config.js";
 import { TrapConfig } from "../apps/trap-config.js";
-import { setting, i18n, log, makeid, MonksEnhancedJournal, quantityname, pricename, currencyname } from "../monks-enhanced-journal.js";
+import { setting, i18n, format, log, makeid, MonksEnhancedJournal, quantityname, pricename, currencyname } from "../monks-enhanced-journal.js";
 import { EnhancedJournalSheet } from "../sheets/EnhancedJournalSheet.js";
 
 export class EncounterSheet extends EnhancedJournalSheet {
@@ -84,6 +84,7 @@ export class EncounterSheet extends EnhancedJournalSheet {
             { id: 'search', type: 'input', text: i18n("MonksEnhancedJournal.SearchDescription"), callback: this.enhancedjournal.searchText },
             { id: 'show', text: i18n("MonksEnhancedJournal.ShowToPlayers"), icon: 'fa-eye', conditional: game.user.isGM, callback: this.enhancedjournal.doShowPlayers },
             { id: 'edit', text: i18n("MonksEnhancedJournal.EditDescription"), icon: 'fa-pencil-alt', conditional: this.isEditable, callback: () => { this.onEditDescription(); } },
+            { id: 'sound', text: i18n("MonksEnhancedJournal.AddSound"), icon: 'fa-music', conditional: this.isEditable, callback: () => { this.onAddSound(); } },
             { id: 'convert', text: i18n("MonksEnhancedJournal.Convert"), icon: 'fa-clipboard-list', conditional: (game.user.isGM && this.isEditable), callback: () => { } }
         ];
         //this.addPolyglotButton(ctrls);
@@ -248,7 +249,7 @@ export class EncounterSheet extends EnhancedJournalSheet {
                 items.push(mergeObject(itemData, update));
                 this.object.setFlag('monks-enhanced-journal', 'items', items);
             } else {
-                ui.notifications.warn("Cannot add item of this type");
+                ui.notifications.warn(i18n("MonksEnhancedJournal.msg.CannotAddItemType"));
             }
         }
     }
@@ -326,7 +327,7 @@ export class EncounterSheet extends EnhancedJournalSheet {
             let actor = await EnhancedJournalSheet.getDocument(ea);//Actor.implementation.fromDropData(ea);
             if (actor) {
                 if (!actor.isOwner) {
-                    return ui.notifications.warn(`You do not have permission to create a new Token for the ${actor.name} Actor.`);
+                    return ui.notifications.warn(format("MonksEnhancedJournal.msg.YouDontHaveTokenPermissions", { actorname: actor.name }));
                 }
                 //if (actor.compendium) {
                 //    const actorData = game.actors.fromCompendium(actor);
@@ -391,7 +392,7 @@ export class EncounterSheet extends EnhancedJournalSheet {
             let result = await EncounterSheet.confirmQuantity(item, max, "transfer", false);
             if ((result?.quantity ?? 0) > 0) {
                 if (item.data.remaining < result?.quantity) {
-                    ui.notifications.warn("Cannot transfer this item, not enough of this item remains.");
+                    ui.notifications.warn(i18n("MonksEnhancedJournal.msg.CannotTransferItemQuantity"));
                     return false;
                 }
 

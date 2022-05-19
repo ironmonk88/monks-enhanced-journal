@@ -1,3 +1,29 @@
+# Version 1.0.57
+
+Fixed a whole bunch of issues withthe language files, and went through the code to put strings in the language file.  Apologies to those people who are maintaining other languages, as there's now a whole bunch more translations.
+
+Updated the currency distribution to only calculate those currencies that can be converted.
+
+Added the ability to add background sounds to a Journal Entry.  So if you have a blacksmith shop you can now auto play black smith sounds when you open the entry.
+
+Fixed issues with rpg-styled-ui locking the drop down on some of the entries.
+
+Added the option to follow a Journal Link to an anchor on the Journal Entry page.  Add `#AnchorName` to the end of the Journal Entry id and clicking the link will scroll to that anchor when the entry is opened.
+
+Added the option to select a custom image for a Note Icon.
+
+Fixed issue with default currency in PF1E
+
+Rewrote the function that calculates conversions when trying to buy things and you don't have enough money of the exact currency to pay for it.
+
+Fixed an issue with PF2E and the new way they're handling currency prices.
+
+Fixed an issue when trying to find the default currency, it was using old code and wasn't updated to use the custom currency data.
+
+Fixed an issue with displaying item information for systems that don't implement the getChatData function
+
+Fixed slideshow so that changing the volume will affect the currently playing slideshow
+
 # Version 1.0.56
 
 Changed the icon list for the Notes Config so that it shows the actual image, making it a little easier to pick something that represents what you want.

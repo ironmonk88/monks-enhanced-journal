@@ -15,24 +15,24 @@ export const registerSettings = function () {
 	let lootfolder = {};
 
 	game.settings.registerMenu(modulename, 'editCurrency', {
-		label: 'Edit Currency',
-		hint: 'Edit the currency that this worls will use',
+		label: i18n("MonksEnhancedJournal.editcurrency.name"),
+		hint: i18n("MonksEnhancedJournal.editcurrency.hint"),
 		icon: 'fas fa-coins',
 		restricted: true,
 		type: EditCurrency
 	});
 
 	game.settings.registerMenu(modulename, 'editPersonAttributes', {
-		label: 'Edit Person Attributes',
-		hint: 'Edit the attributes shown on the Person sheet',
+		label: i18n("MonksEnhancedJournal.editpersonattribute.name"),
+		hint: i18n("MonksEnhancedJournal.editpersonattribute.hint"),
 		icon: 'fas fa-user',
 		restricted: true,
 		type: EditPersonAttributes
 	});
 
 	game.settings.registerMenu(modulename, 'editPlaceAttributes', {
-		label: 'Edit Place Attributes',
-		hint: 'Edit the attributes shown on the Place sheet',
+		label: i18n("MonksEnhancedJournal.editplaceattribute.name"),
+		hint: i18n("MonksEnhancedJournal.editplaceattribute.hint"),
 		icon: 'fas fa-place-of-worship',
 		restricted: true,
 		type: EditPlaceAttributes

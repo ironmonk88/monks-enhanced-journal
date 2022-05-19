@@ -9,6 +9,11 @@
                 <h1 class="shopname flexrow">
                     <i class="fas fa-dolly-flatbed sheet-icon"></i>
                     <input name="name" type="text" value="{{data.name}}" placeholder="{{localize 'MonksEnhancedJournal.ShopName'}}">
+                    {{#if sound.audiofile}}
+                    <button type="button" class="play-journal-sound">
+                        <i class="fas {{#if sound.playing}}fa-volume-up{{else}}fa-volume-off{{/if}}"></i>
+                    </button>
+                    {{/if}}
                 </h1>
                 <div class="form-group">
                     <label style="background: none; border: none;">{{localize 'MonksEnhancedJournal.ShopType'}}</label>
@@ -62,9 +67,9 @@
                             <div class="item-controls item-cost owner-only">{{localize 'MonksEnhancedJournal.Cost'}}</div>
                             {{#if showrequest}}<div class="item-controls flexrow"></div>{{/if}}
                             <div class="item-controls flexrow owner-only">
-                                <a class="item-control roll-table" title="Populate from Rolltable"><i class="fas fa-th-list"></i></a>
-                                <a class="item-control adjust-price" title="Adjust all prices"><i class="fas fa-donate"></i></a>
-                                <a class="item-control clear-items" title="Clear all items"><i class="fas fa-trash"></i></a>
+                                <a class="item-control roll-table" title="{{localize 'MonksEnhancedJournal.PopulateFromRollTable'}}"><i class="fas fa-th-list"></i></a>
+                                <a class="item-control adjust-price" title="{{localize 'MonksEnhancedJournal.AdjustAllPrices'}}"><i class="fas fa-donate"></i></a>
+                                <a class="item-control clear-items" title="{{localize 'MonksEnhancedJournal.ClearAllItems'}}"><i class="fas fa-trash"></i></a>
                             </div>
                         </li>
 
@@ -102,9 +107,9 @@
 
                                     <div class="item-controls flexrow owner-only">
                                         <input type="checkbox" name="items.{{this.id}}.lock" {{checked this.lock}} style="display: none;" />
-                                        <a class="item-control item-action" data-action="lock" title="Lock Item"><i class="fas fa-lock"></i></a>
+                                        <a class="item-control item-action" data-action="lock" title="{{localize 'MonksEnhancedJournal.LockItem'}}"><i class="fas fa-lock"></i></a>
                                         <input type="checkbox" name="items.{{this.id}}.hide" {{checked this.hide}} style="display:none;" />
-                                        <a class="item-control item-action" data-action="hide" title="Hide/Show Item"><i class="fas fa-eye-slash"></i></a>
+                                        <a class="item-control item-action" data-action="hide" title="{{localize 'MonksEnhancedJournal.HideShowItem'}}"><i class="fas fa-eye-slash"></i></a>
                                         <a class="item-control item-edit" title="{{localize 'MonksEnhancedJournal.EditItem'}}"><i class="fas fa-edit"></i></a>
                                         <a class="item-control item-delete" title="{{localize 'MonksEnhancedJournal.DeleteItem'}}"><i class="fas fa-trash"></i></a>
                                     </div>
@@ -113,13 +118,13 @@
                             </ul>
                             {{else}}
                             {{#if owner}}
-                            <li class="instruction">Drag Items here to add them to the shop</li>
+                            <li class="instruction">{{localize 'MonksEnhancedJournal.msg.DragItemsToAddToShop'}}</li>
                             {{else}}
-                            <li class="instruction">No items at the moment</li>
+                            <li class="instruction">{{localize 'MonksEnhancedJournal.msg.NoItemsAtTheMoment'}}</li>
                             {{/if}}
                             {{/each}}
                             {{else}}
-                            <li class="instruction">This shop is currently closed</li>
+                            <li class="instruction">{{localize 'MonksEnhancedJournal.msg.ShopCurrentlyClosed'}}</li>
                             {{/unless}}
                         </ol>
                     </ol>
@@ -139,7 +144,7 @@
                             <li class="item flexrow" data-id="{{this.id}}" data-pack="{{this.pack}}" data-container="relationships" data-document="JournalEntry" draggable="false">
                                 <div class="item-name flexrow">
                                     <img class="item-image actor-icon" src="{{this.img}}" onerror="this.src='modules/monks-enhanced-journal/assets/person.png'" />
-                                    <h4>{{#if this.pack}}<i class="fas fa-atlas" title="From Compendium"></i> {{/if}}{{this.name}}</h4>
+                                    <h4>{{#if this.pack}}<i class="fas fa-atlas" title="{{localize 'MonksEnhancedJournal.FromCompendium'}}"></i> {{/if}}{{this.name}}</h4>
                                 </div>
 
                                 <div class="item-name item-relationship flexrow">
@@ -149,7 +154,7 @@
                                 {{#if @root.owner}}
                                 <div class="item-controls flexrow owner">
                                     <input type="checkbox" name="relationships.{{this.id}}.hidden" {{checked this.hidden}} style="display:none;" />
-                                    <a class="item-control item-hide" title="Hide/Show Relationship"><i class="fas fa-eye-slash"></i></a>
+                                    <a class="item-control item-hide" title="{{localize 'MonksEnhancedJournal.HideShowRelationship'}}"><i class="fas fa-eye-slash"></i></a>
                                     <a class="item-control item-delete" title="{{localize 'MonksEnhancedJournal.RemoveRelationship'}}"><i class="fas fa-trash"></i></a>
                                 </div>
                                 {{/if}}
@@ -157,9 +162,9 @@
                             {{/each}}
                             {{else}}
                             {{#if owner}}
-                            <li class="instruction">Drag a Person, Place, or Organization here to make a relationship</li>
+                            <li class="instruction">{{localize 'MonksEnhancedJournal.msg.DragPersonPlaceOrganizationToMakeRelationship'}}</li>
                             {{else}}
-                            <li class="instruction">No relationships at the moment</li>
+                            <li class="instruction">{{localize 'MonksEnhancedJournal.msg.NoRelationshipsAtTheMoment'}}</li>
                             {{/if}}
                             {{/each}}
                         </ul>
@@ -168,7 +173,7 @@
             </div>
             <div class="tab notes" data-group="primary" data-tab="notes">
                 <div class="tab-inner flexcol">
-                    <div style="flex-grow: 0;">{{localize 'MonksEnhancedJournal.OnlyViewable'}}{{#unless hasGM}}<span style="color:darkred;font-weight:bold;"> Cannot edit notes if there's no GM present</span>{{/unless}}</div>
+                    <div style="flex-grow: 0;">{{localize 'MonksEnhancedJournal.OnlyViewable'}}{{#unless hasGM}}<span style="color:darkred;font-weight:bold;"> {{localize 'MonksEnhancedJournal.msg.CannotEditNotesWithoutGM'}}</span>{{/unless}}</div>
                     <div>
                         <textarea name="flags.monks-enhanced-journal.{{userid}}.notes" class="trim-textarea">{{userdata.notes}}</textarea>
                     </div>

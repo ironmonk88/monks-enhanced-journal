@@ -35,14 +35,14 @@ export class ShopSheet extends EnhancedJournalSheet {
 
         data.purchaseOptions = [
             {
-                text: "Closed",
+                text: i18n("MonksEnhancedJournal.Closed"),
                 groups: {
                     hidden: "MonksEnhancedJournal.purchasing.hidden",
                     visible: "MonksEnhancedJournal.purchasing.visible"
                 }
             },
             {
-                text: "Open",
+                text: i18n("MonksEnhancedJournal.Open"),
                 groups: {
                     locked: "MonksEnhancedJournal.purchasing.locked",
                     free: "MonksEnhancedJournal.purchasing.free",
@@ -111,6 +111,7 @@ export class ShopSheet extends EnhancedJournalSheet {
             { id: 'search', type: 'input', text: i18n("MonksEnhancedJournal.SearchDescription"), callback: this.enhancedjournal.searchText },
             { id: 'show', text: i18n("MonksEnhancedJournal.ShowToPlayers"), icon: 'fa-eye', conditional: game.user.isGM, callback: this.enhancedjournal.doShowPlayers },
             { id: 'edit', text: i18n("MonksEnhancedJournal.EditDescription"), icon: 'fa-pencil-alt', conditional: this.isEditable, callback: () => { this.onEditDescription(); } },
+            { id: 'sound', text: i18n("MonksEnhancedJournal.AddSound"), icon: 'fa-music', conditional: this.isEditable, callback: () => { this.onAddSound(); } },
             { id: 'convert', text: i18n("MonksEnhancedJournal.Convert"), icon: 'fa-clipboard-list', conditional: (game.user.isGM && this.isEditable), callback: () => { } }
         ];
         //this.addPolyglotButton(ctrls);
@@ -207,18 +208,18 @@ export class ShopSheet extends EnhancedJournalSheet {
 
             let item = this.object.data.flags["monks-enhanced-journal"].items.find(i => i._id == id);
             if (item == undefined) {
-                ui.notifications.warn("Cannot find that item.");
+                ui.notifications.warn(i18n("MonksEnhancedJournal.CannotFindItem"));
                 return;
             }
 
             if (!game.user.isGM && item?.lock === true) {
-                ui.notifications.warn("That item is locked from purchasing");
+                ui.notifications.warn(i18n("MonksEnhancedJournal.ItemIsLocked"));
                 return;
             }
 
             let qty = this.getValue(item, quantityname(), null);
             if (!game.user.isGM && (qty != null && qty <= 0)) {
-                ui.notifications.warn("Not enough of that item remains to be transferred to an Actor");
+                ui.notifications.warn(i18n("MonksEnhancedJournal.msg.NotEnoughRemainsToBeTransferred"));
                 return;
             }
 
@@ -286,7 +287,7 @@ export class ShopSheet extends EnhancedJournalSheet {
                 } else {
                     let hasGM = (game.users.find(u => u.isGM && u.active) != undefined);
                     if (!hasGM) {
-                        ui.notifications.warn("Cannot sell to shop without the GM present.");
+                        ui.notifications.warn(i18n("MonksEnhancedJournal.msg.CannotSellItemWithoutGM"));
                         return false;
                     }
                     //request to sell
@@ -351,7 +352,7 @@ export class ShopSheet extends EnhancedJournalSheet {
     async adjustPrice(event) {
         let html = await renderTemplate("modules/monks-enhanced-journal/templates/adjust-price.html", { adjustment: this.object.getFlag('monks-enhanced-journal', 'sell') ?? 1});
         await Dialog.confirm({
-            title: `Adjust Prices`,
+            title: i18n("MonksEnhancedJournal.AdjustPrices"),
             content: html,
             yes: async (html) => {
                 let adjustment = parseFloat($('[name="adjustment"]', html).val());
@@ -381,27 +382,27 @@ export class ShopSheet extends EnhancedJournalSheet {
 
         const actor = game.user.character;
         if (!actor) {
-            ui.notifications.warn("You don't have a character associated with your user");
+            ui.notifications.warn(i18n("MonksEnhancedJournal.msg.YouDontHaveCharacter"));
             return;
         }
 
         if (item.data.cost && item.data.cost != '') {
             //check if the player can afford it
             if (!this.constructor.canAfford(item, actor)) {
-                ui.notifications.warn(`Cannot transfer this item, ${actor.name} cannot afford it.`);
+                ui.notifications.warn(format("MonksEnhancedJournal.msg.CannotTransferCannotAffordIt", { name: actor.name } ));
                 return false;
             }
         }
 
         let max = this.getValue(item, quantityname(), null);
         if (!game.user.isGM && (max != null && max <= 0)) {
-            ui.notifications.warn("Cannot transfer this item, not enough of this item remains.");
+            ui.notifications.warn(i18n("MonksEnhancedJournal.msg.CannotTransferItemQuantity"));
             return false;
         }
 
         let hasGM = (game.users.find(u => u.isGM && u.active) != undefined);
         if (!hasGM) {
-            ui.notifications.warn("Cannot make purchases without the GM present.");
+            ui.notifications.warn(i18n("MonksEnhancedJournal.msg.CannotPurchaseItemWithoutGM"));
             return false;
         }
 
@@ -415,7 +416,7 @@ export class ShopSheet extends EnhancedJournalSheet {
                 item.maxquantity = (max != "" ? parseInt(max) : null);
 
                 if (!ShopSheet.canAfford((item.quantity * price.value) + " " + price.currency, actor))
-                    ui.notifications.error(`${actor.name} cannot afford ${item.quantity} ${item.name}`);
+                    ui.notifications.error(format("MonksEnhancedJournal.msg.ActorCannotAffordItem", { name: actor.name, quantity: item.quantity, itemname: item.name}));
                 else {
                     this.constructor.createRequestMessage.call(this, this.object, item, actor);
                     MonksEnhancedJournal.emit("notify", { actor: actor.name, item: item.name });
@@ -423,7 +424,7 @@ export class ShopSheet extends EnhancedJournalSheet {
             } else if (this.object.data.flags['monks-enhanced-journal'].purchasing == 'free') {
                 // Create the owned item
                 if (!ShopSheet.canAfford((result.quantity * price.value) + " " + price.currency, actor))
-                    ui.notifications.error(`${actor.name} cannot afford ${result.quantity} ${item.name}`);
+                    ui.notifications.error(format("MonksEnhancedJournal.msg.ActorCannotAffordItem", { name: actor.name, quantity: result.quantity, itemname: item.name }));
                 else {
                     let itemData = duplicate(item);
                     delete itemData._id;
@@ -470,7 +471,7 @@ export class ShopSheet extends EnhancedJournalSheet {
             speaker: speaker,
             type: CONST.CHAT_MESSAGE_TYPES.OTHER,
             content: content,
-            flavor: (speaker.alias ? speaker.alias + " wants to <b>sell</b> an item" : null),
+            flavor: (speaker.alias ? format("MonksEnhancedJournal.ActorWantsToPurchase", { alias: speaker.alias, verb: i18n("MonksEnhancedJournal.Sell").toLowerCase() }) : null),
             whisper: whisper,
             flags: {
                 'monks-enhanced-journal': messageContent
@@ -565,21 +566,21 @@ export class ShopSheet extends EnhancedJournalSheet {
         if (item) {
             let max = this.getValue(item, quantityname(), null);
             if (!game.user.isGM && (max != null && max <= 0)) {
-                ui.notifications.warn("Cannot transfer this item, not enough of this item remains.");
+                ui.notifications.warn(i18n("MonksEnhancedJournal.msg.CannotTransferItemQuantity"));
                 return false;
             }
 
             if (item.data.cost && item.data.cost != '') {
                 //check if the player can afford it
                 if (!this.canAfford(item, actor)) {
-                    ui.notifications.warn(`Cannot transfer this item, ${actor.name} cannot afford it.`);
+                    ui.notifications.warn(format("MonksEnhancedJournal.msg.CannotTransferCannotAffordIt", { name: actor.name }));
                     return false;
                 }
             }
 
             let hasGM = (game.users.find(u => u.isGM && u.active) != undefined);
             if (!hasGM) {
-                ui.notifications.warn("Cannot make purchases without the GM present.");
+                ui.notifications.warn(i18n("MonksEnhancedJournal.msg.CannotPurchaseItemWithoutGM"));
                 return false;
             }
 
@@ -599,14 +600,14 @@ export class ShopSheet extends EnhancedJournalSheet {
                         item.maxquantity = (max != "" ? parseInt(max) : null);
 
                         if (!ShopSheet.canAfford((item.quantity * price.value) + " " + price.currency, actor))
-                            ui.notifications.error(`${actor.name} cannot afford ${item.quantity} ${item.name}`);
+                            ui.notifications.error(format("MonksEnhancedJournal.msg.ActorCannotAffordItem", { name: actor.name, quantity: item.quantity, itemname: item.name}));
                         else {
                             ShopSheet.createRequestMessage.call(this, entry, item, actor);
                             MonksEnhancedJournal.emit("notify", { actor: actor.name, item: item.name });
                         }
                     } else {
                         if (!ShopSheet.canAfford((result.quantity * price.value) + " " + price.currency, actor)) {
-                            ui.notifications.error(`${actor.name} cannot afford ${result.quantity} ${item.name}`);
+                            ui.notifications.error(format("MonksEnhancedJournal.msg.ActorCannotAffordItem", { name: actor.name, quantity: result.quantity, itemname: item.name }));
                             result = false;
                         } else {
                             if (result.quantity > 0) {
@@ -624,9 +625,9 @@ export class ShopSheet extends EnhancedJournalSheet {
                         return result;
                     }
                 }
-            } else if (result !== false) {
+            } else if (result !== false && result != null) {
                 log("result", result);
-                ui.notifications.warn("Cannot add less than 1 item");
+                ui.notifications.warn(i18n("MonksEnhancedJournal.msg.CannotAddLessThanOne"));
             }
         }
         return false;
@@ -698,27 +699,27 @@ export class ShopSheet extends EnhancedJournalSheet {
                 callback: li => {
                     const id = li.data("id");
                     Dialog.confirm({
-                        title: `${game.i18n.localize("SIDEBAR.Delete")} Actor Link`,
+                        title: `${game.i18n.localize("SIDEBAR.Delete")} ${i18n("MonksEnhancedJournal.ActorLink")}`,
                         content: i18n("MonksEnhancedJournal.ConfirmRemoveLink"),
                         yes: this.removeActor.bind(this)
                     });
                 }
             },
             {
-                name: "Import Items",
+                name: i18n("MonksEnhancedJournal.ImportItems"),
                 icon: '<i class="fas fa-download fa-fw"></i>',
                 condition: () => game.user.isGM,
                 callback: li => {
                     const id = li.data("id");
                     Dialog.confirm({
-                        title: `Import all actor items`,
-                        content: "Confirm that you'd like to import all items from this actor into this shop?",
+                        title: i18n("MonksEnhancedJournal.ImportAllActorItems"),
+                        content: i18n("MonksEnhancedJournal.msg.ConfirmImportAllItemsToShop"),
                         yes: this.importActorItems.bind(this)
                     });
                 }
             },
             {
-                name: "Open Actor Sheet",
+                name: i18n("MonksEnhancedJournal.OpenActorSheet"),
                 icon: '<i class="fas fa-user fa-fw"></i>',
                 condition: () => game.user.isGM,
                 callback: li => {

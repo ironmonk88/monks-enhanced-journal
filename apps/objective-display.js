@@ -10,7 +10,7 @@ export class ObjectiveDisplay extends Application {
         let pos = game.user.getFlag("monks-enhanced-journal", "objectivePos");
         return mergeObject(super.defaultOptions, {
             id: "objective-display",
-            title: "Quests",
+            title: i18n("MonksEnhancedJournal.Quests"),
             template: "modules/monks-enhanced-journal/templates/objective-display.html",
             width: pos?.width || 500,
             height: "auto",

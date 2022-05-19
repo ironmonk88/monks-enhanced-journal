@@ -2,20 +2,20 @@
     <div class="col left" style="justify-content: center;">
         {{#if (eq type "encounter")}}
         <div class="control-icon" data-action="start-encounter">
-            <i class="fas fa-fist-raised" title="Start Encounter"></i>
+            <i class="fas fa-fist-raised" title="{{localize 'MonksEnhancedJournal.StartEncounter'}}"></i>
         </div>
 
         <div class="control-icon" data-action="select-encounter">
-            <i class="fas fa-expand" title="Select Encounter"></i>
+            <i class="fas fa-expand" title="{{localize 'MonksEnhancedJournal.SelectEncounter'}}"></i>
         </div>
 
         <div class="control-icon" data-action="assign-items">
-            <i class="fas fa-suitcase" title="Assign Items"></i>
+            <i class="fas fa-suitcase" title="{{localize 'MonksEnhancedJournal.AssignItems'}}"></i>
         </div>
         {{/if}}
         {{#if (eq type "quest")}}
         <div class="control-icon" data-action="assign-items">
-            <i class="fas fa-suitcase" title="Assign Items"></i>
+            <i class="fas fa-suitcase" title="{{localize 'MonksEnhancedJournal.AssignItems'}}"></i>
         </div>
         {{/if}}
     </div>

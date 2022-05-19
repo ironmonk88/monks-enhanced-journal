@@ -31,10 +31,10 @@ export class QuestSheet extends EnhancedJournalSheet {
         data.showtoplayers = this.object.data.permission["default"] >= CONST.ENTITY_PERMISSIONS.OBSERVER;
 
         data.statusOptions = {
-            inactive: "MonksEnhancedJournal.unavailable",
-            available: "MonksEnhancedJournal.available",
-            completed: "MonksEnhancedJournal.completed",
-            failed: "MonksEnhancedJournal.failed"
+            inactive: "MonksEnhancedJournal.quest.unavailable",
+            available: "MonksEnhancedJournal.quest.available",
+            completed: "MonksEnhancedJournal.quest.completed",
+            failed: "MonksEnhancedJournal.quest.failed"
         };
 
         data.objectives = duplicate(this.object.data.flags["monks-enhanced-journal"].objectives || [])?.filter(o => {
@@ -117,7 +117,7 @@ export class QuestSheet extends EnhancedJournalSheet {
         let currency = MonksEnhancedJournal.currencies.reduce((a, v) => ({ ...a, [v.id]: this.object.data.flags["monks-enhanced-journal"][v.id] }), {});
         return [{
             id: makeid(),
-            name: "Rewards",
+            name: i18n("MonksEnhancedJournal.Rewards"),
             active: true,
             items: this.object.data.flags["monks-enhanced-journal"].items,
             xp: this.object.data.flags["monks-enhanced-journal"].xp,
@@ -162,6 +162,7 @@ export class QuestSheet extends EnhancedJournalSheet {
             { id: 'search', type: 'input', text: i18n("MonksEnhancedJournal.SearchDescription"), callback: this.enhancedjournal.searchText },
             { id: 'show', text: i18n("MonksEnhancedJournal.ShowToPlayers"), icon: 'fa-eye', conditional: game.user.isGM, callback: this.enhancedjournal.doShowPlayers },
             { id: 'edit', text: i18n("MonksEnhancedJournal.EditDescription"), icon: 'fa-pencil-alt', conditional: this.isEditable, callback: () => { this.onEditDescription(); } },
+            { id: 'sound', text: i18n("MonksEnhancedJournal.AddSound"), icon: 'fa-music', conditional: this.isEditable, callback: () => { this.onAddSound(); } },
             { id: 'convert', text: i18n("MonksEnhancedJournal.Convert"), icon: 'fa-clipboard-list', conditional: (game.user.isGM && this.isEditable), callback: () => { } }
         ];
         //this.addPolyglotButton(ctrls);
@@ -349,7 +350,7 @@ export class QuestSheet extends EnhancedJournalSheet {
         let currency = MonksEnhancedJournal.currencies.reduce((a, v) => ({ ...a, [v.id]: 0 }), {});
         let reward = {
             id: makeid(),
-            name: "Rewards",
+            name: i18n("MonksEnhancedJournal.Rewards"),
             xp: "",
             additional: "",
             currency: currency,
@@ -562,7 +563,7 @@ export class QuestSheet extends EnhancedJournalSheet {
                     let result = await QuestSheet.confirmQuantity(item, max, "transfer", false);
                     if ((result?.quantity ?? 0) > 0) {
                         if (item.data.remaining < result?.quantity) {
-                            ui.notifications.warn("Cannot transfer this item, not enough of this item remains.");
+                            ui.notifications.warn(i18n("MonksEnhancedJournal.msg.CannotTransferItemQuantity"));
                             return false;
                         }
 
@@ -617,7 +618,7 @@ export class QuestSheet extends EnhancedJournalSheet {
                 callback: li => {
                     const id = li.data("id");
                     Dialog.confirm({
-                        title: `${game.i18n.localize("SIDEBAR.Delete")} Actor Link`,
+                        title: `${game.i18n.localize("SIDEBAR.Delete")} ${i18n("MonksEnhancedJournal.ActorLink")}`,
                         content: i18n("MonksEnhancedJournal.ConfirmRemoveLink"),
                         yes: this.removeActor.bind(this)
                     });
