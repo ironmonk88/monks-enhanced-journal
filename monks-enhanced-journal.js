@@ -2280,6 +2280,7 @@ Hooks.on("updateJournalEntry", (document, data, options, userId) => {
                     data?.flags['monks-enhanced-journal']?.folders != undefined ||
                     data?.flags['monks-enhanced-journal']?.reward != undefined ||
                     data?.flags['monks-enhanced-journal']?.rewards != undefined ||
+                    data?.flags['monks-enhanced-journal']?.sound != undefined ||
                     data?.flags['core']?.sheetClass != undefined)))) {
             //if (data?.flags['core']?.sheetClass != undefined)
             //    MonksEnhancedJournal.journal.object._sheet = null;

@@ -147,6 +147,15 @@ export const registerSettings = function () {
 		type: Boolean,
 	});
 
+	game.settings.register(modulename, "loot-inactive-players", {
+		name: i18n("MonksEnhancedJournal.loot-inactive-players.name"),
+		hint: i18n("MonksEnhancedJournal.loot-inactive-players.hint"),
+		scope: "world",
+		config: true,
+		default: true,
+		type: Boolean,
+	});
+
 	game.settings.register(modulename, "chat-message", {
 		name: i18n("MonksEnhancedJournal.chat-message.name"),
 		hint: i18n("MonksEnhancedJournal.chat-message.hint"),

@@ -29,7 +29,7 @@ export class LootSheet extends EnhancedJournalSheet {
         let actors = [];
         let players = [];
         for (let user of game.users) {
-            if (!user.isGM && this.object.testUserPermission(user, "OBSERVER")) {
+            if (!user.isGM && this.object.testUserPermission(user, "OBSERVER") && (user.active || setting("loot-inactive-players"))) {
                 players.push(user.name);
                 if(user.character)
                     actors.push(user.character.id); //, name: user.character.name, img: user.character.img });
@@ -38,7 +38,7 @@ export class LootSheet extends EnhancedJournalSheet {
         if (this.object.getFlag('monks-enhanced-journal', 'actors') == undefined && game.user.isGM) {
             if (actors.length == 0) {
                 for (let user of game.users) {
-                    if (user.character) {
+                    if (user.character && (user.active || setting("loot-inactive-players"))) {
                         actors.push(user.character.id); //, name: user.character.name, img: user.character.img });
                     }
                 }

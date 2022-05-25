@@ -40,10 +40,14 @@ export class EditSound extends FormApplication {
                 this.soundfile.loop = data.sound.loop;
             if (oldData.audiofile != data.sound.audiofile) {
                 let isPlaying = this.soundfile.playing;
-                this.soundfile.container.stop();
-                this.soundfile.container = new AudioContainer(data.sound.audiofile);
-                this.soundfile.src = data.sound.audiofile;
-                this.soundfile.load({ autoplay: isPlaying, autoplayOptions: { loop: data.sound.loop, volume: data.sound.volume }});
+                if (this.soundfile?.container?.playing)
+                    this.soundfile.container.stop();
+                if (data.sound.audiofile) {
+                    this.soundfile.container = new AudioContainer(data.sound.audiofile);
+                    this.soundfile.src = data.sound.audiofile;
+                    this.soundfile.load({ autoplay: isPlaying, autoplayOptions: { loop: data.sound.loop, volume: data.sound.volume } });
+                } else
+                    this.soundfile = null;
             }
         }
 

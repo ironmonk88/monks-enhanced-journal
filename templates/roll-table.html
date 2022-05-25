@@ -2,12 +2,12 @@
     <div class="form-group">
         <label>{{localize 'MonksEnhancedJournal.RollableTable'}}</label>
         <select name="rollable-table">
-            {{ selectGroups rollTables }}
+            {{ selectGroups rollTables selected=lastrolltable }}
         </select>
     </div>
     <div class="form-group">
         <label>{{localize 'MonksEnhancedJournal.NumberOfItems'}}</label>
-        <input name="count" type="number" min="1" value="1" style="text-align:right;flex: 0 0 50px;" />
+        <input name="quantity" type="text" value="1" style="text-align:right;flex: 0 0 50px;" />
     </div>
     {{#if useFrom}}
     <div class="form-group">

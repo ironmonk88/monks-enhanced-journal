@@ -54,6 +54,8 @@
   "MonksEnhancedJournal.editpersonattribute.hint": "Edit the attributes shown on the Person sheet",
   "MonksEnhancedJournal.editplaceattribute.name": "Edit Place Attributes",
   "MonksEnhancedJournal.editplaceattribute.hint": "Edit the attributes shown on the Place sheet",
+  "MonksEnhancedJournal.loot-inactive-players.name": "Inactive Players Loot",
+  "MonksEnhancedJournal.loot-inactive-players.hint": "Add inactive players to a Loot Entry for loot distribution",
 
   "MonksEnhancedJournal.SlideConfiguration": "Slide Configuration",
   "MonksEnhancedJournal.DCConfiguration": "DC Configuration",

@@ -1,3 +1,13 @@
+# Version 1.0.58
+
+Fixing some issues with the background sound of journal entries.  Clearing the value had some issues, and initially setting it wasn't showing the play sound control.
+
+Added the option to use a dice roll for quantity to roll from a roll table when populating a shop or loot entry.
+
+Updated the loot entry and shop so that it would remember the last roll table used for that shop or loot entry.
+
+Added a new setting to only add characters to a loot sheet from players that are currently logged in.
+
 # Version 1.0.57
 
 Fixed a whole bunch of issues withthe language files, and went through the code to put strings in the language file.  Apologies to those people who are maintaining other languages, as there's now a whole bunch more translations.

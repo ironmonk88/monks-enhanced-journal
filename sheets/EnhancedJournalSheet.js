@@ -1221,23 +1221,38 @@ export class EnhancedJournalSheet extends JournalSheet {
 
         let that = this;
 
-        let html = await renderTemplate("modules/monks-enhanced-journal/templates/roll-table.html", { rollTables: rolltables, useFrom: useFrom});
+        let lastrolltable = that.object.getFlag('monks-enhanced-journal', "lastrolltable") || game.user.getFlag('monks-enhanced-journal', "lastrolltable");
+
+        let html = await renderTemplate("modules/monks-enhanced-journal/templates/roll-table.html", { rollTables: rolltables, useFrom: useFrom, lastrolltable: lastrolltable });
         Dialog.confirm({
             title: i18n("MonksEnhancedJournal.PopulateFromRollTable"),
             content: html,
             yes: async (html) => {
                 let rolltable = $('[name="rollable-table"]').val();
-                let count = $('[name="count"]').val();
+                let quantity = $('[name="quantity"]').val();
                 let clear = $('[name="clear"]').prop("checked");
                 let duplicate = $('[name="duplicate"]').val();
 
                 let table = await fromUuid(rolltable);
                 if (table) {
+                    await that.object.setFlag('monks-enhanced-journal', "lastrolltable", rolltable);
+                    await game.user.setFlag('monks-enhanced-journal', "lastrolltable", rolltable);
+
+                    if (quantity.indexOf("d") != -1) {
+                        let r = new Roll(quantity);
+                        await r.evaluate({ async: true });
+                        r.toMessage({ whisper: ChatMessage.getWhisperRecipients("GM").map(u => u.id), speaker: null}, { rollMode: "self" });
+                        quantity = r.total;
+                    } else {
+                        quantity = parseInt(quantity);
+                        if (isNaN(quantity)) quantity = 1;
+                    }
+
                     let items = (clear ? [] : that.object.getFlag('monks-enhanced-journal', itemtype) || []);
                     let currency = that.object.getFlag('monks-enhanced-journal', "currency");
                     let currChanged = false;
 
-                    for (let i = 0; i < count; i++) {
+                    for (let i = 0; i < quantity; i++) {
                         let result = await table.draw({ rollMode: "selfroll", displayChat: false });
 
                         if (!result.results.length)
