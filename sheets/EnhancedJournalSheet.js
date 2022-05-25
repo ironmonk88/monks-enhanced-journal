@@ -296,7 +296,7 @@ export class EnhancedJournalSheet extends JournalSheet {
             return defvalue;
         let value = (item.data != undefined ? getProperty(item?.data, name) : getProperty(item, name));
         value = (value?.hasOwnProperty("value") ? value.value : value);
-        if (value && typeof value === 'object') {
+        if (value && typeof value === 'object' && game.system.id == "pf2e") {
             value = Object.values(value)[0];
         }
         return value ?? defvalue;
@@ -476,7 +476,9 @@ export class EnhancedJournalSheet extends JournalSheet {
             return (parts[1].length || 0);
         }
 
-        let cost = (typeof item == "string" ? item : (item.data?.denomination != undefined && name != "cost" ? item.data?.value.value + " " + item.data?.denomination.value : this.getValue(item, name)));
+        let cost = (typeof item == "string" ? item : (item.data?.denomination != undefined && name != "cost" ? item.data?.value.value + " " + item.data?.denomination.value : this.getValue(item, name, null)));
+        if (name == "cost" && cost == undefined && typeof item !== "string" )
+            cost = (item.data?.denomination != undefined ? item.data?.value.value + " " + item.data?.denomination.value : this.getValue(item, "price"));
 
         cost = "" + cost;
         let price = parseFloat(cost.replace(',', ''));

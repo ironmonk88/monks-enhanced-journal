@@ -15,7 +15,7 @@
             {{#if total }}
             <div class="flexrow">
                 <span><b>{{localize 'MonksEnhancedJournal.Price'}}:</b></span>
-                {{#if isGM}}<input type="text" name="price" style="flex: 0 0 75px; text-align: right;" value="{{price}}" />{{else}}{{price}}{{/if}}
+                {{#if isGM}}<input type="text" name="price" style="flex: 0 0 75px; text-align: right;" value="{{price}}" />{{else}}<span style="text-align: right; margin-right: 4px; ">{{price}}</span>{{/if}}
             </div>
             <div class="flexrow" style="border-top: 1px solid #C0C0C0;">
                 <span><b>{{localize 'MonksEnhancedJournal.Total'}}:</b></span>

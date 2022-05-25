@@ -2622,10 +2622,10 @@ Hooks.on("setupTileActions", (app) => {
         group: 'monks-enhanced-journal',
         values: {
             'status': {
-                "inactive": "MonksEnhancedJournal.quest.unavailable",
-                "available": "MonksEnhancedJournal.quest.available",
-                "completed": "MonksEnhancedJournal.quest.completed",
-                "failed": "MonksEnhancedJournal.quest.failed"
+                "inactive": "MonksEnhancedJournal.queststatus.unavailable",
+                "available": "MonksEnhancedJournal.queststatus.available",
+                "completed": "MonksEnhancedJournal.queststatus.completed",
+                "failed": "MonksEnhancedJournal.queststatus.failed"
             }
         },
         fn: async (args = {}) => {

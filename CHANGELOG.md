@@ -1,3 +1,9 @@
+# Version 1.0.59
+
+Fixed issue with getting the correct cost of an item.
+
+Fixed issue displaying Qust sheet.
+
 # Version 1.0.58
 
 Fixing some issues with the background sound of journal entries.  Clearing the value had some issues, and initially setting it wasn't showing the play sound control.

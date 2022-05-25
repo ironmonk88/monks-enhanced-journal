@@ -31,10 +31,10 @@ export class QuestSheet extends EnhancedJournalSheet {
         data.showtoplayers = this.object.data.permission["default"] >= CONST.ENTITY_PERMISSIONS.OBSERVER;
 
         data.statusOptions = {
-            inactive: "MonksEnhancedJournal.quest.unavailable",
-            available: "MonksEnhancedJournal.quest.available",
-            completed: "MonksEnhancedJournal.quest.completed",
-            failed: "MonksEnhancedJournal.quest.failed"
+            inactive: "MonksEnhancedJournal.queststatus.unavailable",
+            available: "MonksEnhancedJournal.queststatus.available",
+            completed: "MonksEnhancedJournal.queststatus.completed",
+            failed: "MonksEnhancedJournal.queststatus.failed"
         };
 
         data.objectives = duplicate(this.object.data.flags["monks-enhanced-journal"].objectives || [])?.filter(o => {
