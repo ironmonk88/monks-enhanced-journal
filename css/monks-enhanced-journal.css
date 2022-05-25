@@ -2919,3 +2919,7 @@ button.play-journal-sound.active {
     border: 1px solid #111;
     box-shadow: 0 0 8px red;
 }
+
+.alienrpg.monks-enhanced-journal footer {
+    flex: 0 0 20px;
+}

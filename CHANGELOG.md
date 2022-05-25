@@ -24,6 +24,8 @@ Fixed an issue with displaying item information for systems that don't implement
 
 Fixed slideshow so that changing the volume will affect the currently playing slideshow
 
+Fixed Aliens RPG footer
+
 # Version 1.0.56
 
 Changed the icon list for the Notes Config so that it shows the actual image, making it a little easier to pick something that represents what you want.

@@ -116,7 +116,7 @@ export class EnhancedJournalSheet extends JournalSheet {
         if (this.canPlaySound) {
             data.sound = (data.data.flags['monks-enhanced-journal']?.sound || {});
             if (this.enhancedjournal)
-                data.sound.playing = this.enhancedjournal._backgroundsound[this.object.id]?.playing;
+                data.sound.playing = (this.enhancedjournal._backgroundsound || {})[this.object.id]?.playing;
             else
                 data.sound.playing = this._backgroundsound?.playing;
         }
@@ -1466,7 +1466,7 @@ export class EnhancedJournalSheet extends JournalSheet {
 
             MonksEnhancedJournal.emit("showEntry", args);
 
-            ui.notifications.info(game.i18n.format("MonksEnhancedJournal.MsgShowPlayers", {
+            ui.notifications.info(format("MonksEnhancedJournal.MsgShowPlayers", {
                 title: object.name,
                 which: (users == undefined ? 'all players' : users.map(u => u.name).join(', '))
             }) + (options?.showpic || object.data?.flags["monks-enhanced-journal"]?.type == 'picture' ? ', click <a onclick="game.MonksEnhancedJournal.journal.cancelSend(\'' + args.showid + '\', ' + options?.showpic + ');event.preventDefault();">here</a> to cancel' : ''));

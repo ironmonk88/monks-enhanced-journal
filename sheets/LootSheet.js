@@ -1,4 +1,4 @@
-import { setting, i18n, log, makeid, MonksEnhancedJournal, quantityname, pricename, currencyname } from "../monks-enhanced-journal.js";
+import { setting, i18n, format, log, makeid, MonksEnhancedJournal, quantityname, pricename, currencyname } from "../monks-enhanced-journal.js";
 import { EnhancedJournalSheet } from "../sheets/EnhancedJournalSheet.js";
 import { DistributeCurrency } from "../apps/distribute-currency.js";
 
