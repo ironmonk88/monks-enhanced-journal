@@ -2923,3 +2923,19 @@ button.play-journal-sound.active {
 .alienrpg.monks-enhanced-journal footer {
     flex: 0 0 20px;
 }
+
+.forbidden-lands.monks-enhanced-journal h1 input[name="name"] {
+    text-align: left;
+}
+
+.forbidden-lands.monks-enhanced-journal .directory-list .directory-item h3 {
+    text-align: left;
+}
+
+.forbidden-lands.monks-enhanced-journal .monks-journal-sheet.sheet .sheet-navigation .item.active {
+    color: #44191A;
+}
+
+.forbidden-lands.monks-enhanced-journal .monks-journal-sheet .header-name input {
+    font-size: 28px !important;
+}

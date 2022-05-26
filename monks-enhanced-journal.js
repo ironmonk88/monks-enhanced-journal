@@ -2388,7 +2388,7 @@ Hooks.on("renderFolderConfig", (app, html, options) => {
 Hooks.on('renderNoteConfig', (app, html, data) => {
     let ctrl = $('select[name="entryId"]', html);
 
-    MonksEnhancedJournal.journalListing(ctrl, html, app.object.data.entryId, data.entry.name).insertAfter(ctrl);
+    MonksEnhancedJournal.journalListing(ctrl, html, app.object.data.entryId, data.entry.name, "entryId").insertAfter(ctrl);
     ctrl.hide();
 
     ctrl = $('select[name="icon"]', html);

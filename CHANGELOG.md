@@ -1,3 +1,11 @@
+# Version 1.0.60
+
+Fixing an issue with conversions
+
+Adding styling updates for Forbidden Lands
+
+Fixing issue not being able to change the journal a Note was pointing to.
+
 # Version 1.0.59
 
 Fixed issue with getting the correct cost of an item.

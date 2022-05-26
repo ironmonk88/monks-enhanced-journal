@@ -367,6 +367,8 @@ export class EnhancedJournalSheet extends JournalSheet {
 
             changes = currencies.reduce((a, v) => ({ ...a, [v.id]: v.value }), {});
             let denomIdx = currencies.findIndex(c => c.id == denomination);
+            if (denomIdx == -1)
+                return;
 
             let remainder = -value;
             // pull from the actual currency first
@@ -408,7 +410,7 @@ export class EnhancedJournalSheet extends JournalSheet {
                                 changes[currencies[jdx].id] += Math.floor(disperse);
                                 unused -= Math.floor(disperse) * r;
 
-                                jdx--;
+                                jdx++;
                             }
                         }
                     }
