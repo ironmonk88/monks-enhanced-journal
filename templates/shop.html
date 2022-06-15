@@ -1,6 +1,6 @@
 <form class="flexcol journal-subsheet {{entrytype}}{{#if isGM}} gm{{/if}}{{#if owner}} owner{{/if}}" editable="{{editable}}">
     <div class="shop-container">
-        <img class="fullscreen-image" src="{{data.img}}" />
+        <div class="fullscreen-image"><img src="{{data.img}}" /></div>
         <header class="sheet-header journal-header flexrow">
             <div class="sheet-image">
                 <img class="profile" src="{{data.img}}" data-edit="img" onerror="this.src='modules/monks-enhanced-journal/assets/shop.png'">
@@ -10,7 +10,7 @@
                     <i class="fas fa-dolly-flatbed sheet-icon"></i>
                     <input name="name" type="text" value="{{data.name}}" placeholder="{{localize 'MonksEnhancedJournal.ShopName'}}">
                     {{#if sound.audiofile}}
-                    <button type="button" class="play-journal-sound">
+                    <button type="button" class="play-journal-sound{{#if sound.playing}} active{{/if}}">
                         <i class="fas {{#if sound.playing}}fa-volume-up{{else}}fa-volume-off{{/if}}"></i>
                     </button>
                     {{/if}}
@@ -27,6 +27,12 @@
                     <label style="background: none; border: none;">{{localize 'MonksEnhancedJournal.PlayerPurchasing'}}</label>
                     <select class="shop-state" name="flags.monks-enhanced-journal.purchasing" style="font-size: inherit; font-family: inherit; height: 26px; margin: 0px; ">
                         {{ selectGroups purchaseOptions selected=data.flags.monks-enhanced-journal.purchasing localize=true }}
+                    </select>
+                </div>
+                <div class="form-group owner-only">
+                    <label style="background: none; border: none;">{{localize 'MonksEnhancedJournal.PlayerSelling'}}</label>
+                    <select class="shop-state" name="flags.monks-enhanced-journal.selling" style="font-size: inherit; font-family: inherit; height: 26px; margin: 0px; ">
+                        {{ selectOptions sellingOptions selected=data.flags.monks-enhanced-journal.selling localize=true }}
                     </select>
                 </div>
                 {{#unless owner}}
@@ -61,10 +67,10 @@
 
                     <ol class="items-list shop-items">
                         <li class="items-header flexrow">
-                            <h3 class="item-name flexrow">{{localize 'MonksEnhancedJournal.Items'}}</h3>
-                            <div class="item-controls item-quantity">{{localize 'MonksEnhancedJournal.Qty'}}</div>
-                            <div class="item-controls item-price">{{localize 'MonksEnhancedJournal.Price'}}</div>
-                            <div class="item-controls item-cost owner-only">{{localize 'MonksEnhancedJournal.Cost'}}</div>
+                            <h3 class="item-name flexrow" sort="name">{{localize 'MonksEnhancedJournal.Items'}}</h3>
+                            <div class="item-controls item-quantity" sort="quantity">{{localize 'MonksEnhancedJournal.Qty'}}</div>
+                            <div class="item-controls item-price" sort="price">{{localize 'MonksEnhancedJournal.Price'}}</div>
+                            <div class="item-controls item-cost owner-only" sort="cost">{{localize 'MonksEnhancedJournal.Cost'}}</div>
                             {{#if showrequest}}<div class="item-controls flexrow"></div>{{/if}}
                             <div class="item-controls flexrow owner-only">
                                 <a class="item-control roll-table" title="{{localize 'MonksEnhancedJournal.PopulateFromRollTable'}}"><i class="fas fa-th-list"></i></a>
@@ -76,9 +82,11 @@
                         <ol class="items-list">
                             {{#unless hideitems}}
                             {{#each groups}}
+                            {{#if this.id}}
                             <li class="items-header flexrow{{#if this.collapsed}} collapsed{{/if}}" data-id="{{this.id}}">
                                 <h3 class="item-name flexrow">{{localize this.name}} <span class="item-count">({{this.items.length}} items)</span></h3>
                             </li>
+                            {{/if}}
                             <ul class="item-list" {{#if this.collapsed}}style="display: none;"{{/if}}>
                                 {{#each this.items}}
                                 <li class="item flexrow{{#if (eq this.quantity 0)}} empty{{/if}}" data-id="{{this.id}}" data-container="items" data-document="Item" draggable="false">

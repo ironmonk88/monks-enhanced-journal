@@ -11,7 +11,10 @@ export class PointOfInterestSheet extends EnhancedJournalSheet {
             title: i18n("MonksEnhancedJournal.PointOfInterest"),
             template: "modules/monks-enhanced-journal/templates/poi.html",
             tabs: [{ navSelector: ".tabs", contentSelector: ".sheet-body", initial: "description" }],
-            dragDrop: [{ dropSelector: ".poi-container" }],
+            dragDrop: [
+                { dropSelector: ".poi-container" },
+                { dragSelector: ".sheet-icon", dropSelector: "#board" }
+            ],
             scrollY: [".tab.description .tab-inner"]
         });
     }

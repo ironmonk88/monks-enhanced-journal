@@ -859,9 +859,17 @@ height: fit-content;*/
     position: absolute;
     float: left;
     display: none;
-    object-fit: contain;
     z-index: 900;
     background: url(../../../ui/parchment.jpg) repeat;
+}
+
+.monks-journal-sheet.sheet .fullscreen-image img {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    float: left;
+    object-fit: contain;
+    border: none;
 }
 
 .monks-journal-sheet.sheet .person-container .sheet-header .header-details .form-group label,
@@ -895,7 +903,8 @@ height: fit-content;*/
 
 .monks-journal-sheet.sheet .tab.rewards .currency-group .form-group,
 .monks-journal-sheet.sheet .tab.entry-details .details-section .form-group,
-.monks-journal-sheet.sheet .tab.items .currency-group {
+.monks-journal-sheet.sheet .tab.items .currency-group,
+.monks-journal-sheet.sheet .tab.offerings .currency-group {
     flex-grow: 0 !important;
 }
 
@@ -1693,6 +1702,10 @@ height: fit-content;*/
     justify-content: space-between;
 }
 
+.monks-journal-sheet.sheet .offering-list .items-list .item-controls {
+    flex: 0 0 45px;
+}
+
 .monks-journal-sheet.sheet.editattributes .items-list .item-controls {
     flex: 0 0 45px;
     text-align: center;
@@ -1719,7 +1732,8 @@ height: fit-content;*/
 
 .monks-journal-sheet.sheet .items-list .item-controls a.active,
 .monks-journal-sheet.sheet .items-list .item-controls input[type="checkbox"]:checked + .item-action,
-.monks-journal-sheet.sheet .items-list .item-controls input[type="checkbox"]:checked + .item-hide{
+.monks-journal-sheet.sheet .items-list .item-controls input[type="checkbox"]:checked + .item-hide,
+.monks-journal-sheet.sheet .items-list .item-controls input[type="checkbox"]:checked + .item-private {
     color: #ff6400;
 }
 
@@ -1756,6 +1770,13 @@ height: fit-content;*/
     width: 70px;
     object-fit: contain;
     cursor: pointer;
+}
+
+.monks-journal-sheet.sheet .organization-container .items-list .item .item-name .item-image.actor-icon,
+.monks-journal-sheet.sheet .person-container .items-list .item .item-name .item-image.actor-icon {
+    height: 32px;
+    width: 32px;
+    flex: 0 0 32px;
 }
 
 .monks-journal-sheet.sheet .items-list .item.received.empty .item-name .item-image {
@@ -2041,7 +2062,7 @@ height: fit-content;*/
 
 .journal-list {
     display: none;
-    max-height: 300px;
+    max-height: 250px;
     overflow-y: auto;
     margin: 0px 5px;
     color: black;
@@ -2673,7 +2694,8 @@ a.picture-link.broken {
     text-align: center;
 }
 
-.monks-journal-sheet .item-properties .tag {
+.monks-journal-sheet .item-properties .tag,
+.monks-journal-sheet .offering-items .tag {
     display: inline-block;
     margin: 0 2px 0 0;
     padding: 0 3px;
@@ -2938,4 +2960,109 @@ button.play-journal-sound.active {
 
 .forbidden-lands.monks-enhanced-journal .monks-journal-sheet .header-name input {
     font-size: 28px !important;
+}
+
+.mta.monks-enhanced-journal .tab-bar .journal-tab .tab-content {
+    color: #000;
+}
+
+.mta.monks-enhanced-journal .monks-journal-sheet .header-name input {
+    color: #fff;
+}
+
+.mta.monks-enhanced-journal .mainbar .navigation .nav-button {
+    color: #808080;
+}
+
+.mta.monks-enhanced-journal .directory-sidebar {
+    color: #000;
+}
+
+.mta.monks-enhanced-journal .monks-enhanced-journal .sidebar-toggle {
+    color: #000;
+}
+
+.mta.monks-enhanced-journal .monks-enhanced-journal.collapse .sidebar-toggle {
+    color: #C0C0C0;
+}
+
+.mta.monks-enhanced-journal .header-name button {
+    background: rgba(255, 255, 240, 0.8);
+}
+
+.mta.monks-enhanced-journal .items-list .items-header {
+    background: rgba(255, 255, 240, 0.8);
+}
+
+.mta.monks-enhanced-journal .monks-journal-sheet.journal-sheet form select {
+    color: darkslategray;
+}
+
+.mta.monks-enhanced-journal .monks-journal-sheet.sheet .fullscreen-image {
+    margin-top: -4px;
+    margin-left: -4px;
+    background: var(--background-sheet-0);
+}
+
+.mta.monks-enhanced-journal .monks-journal-sheet .slideshow-container .add-slide {
+    border-color: rgba(255, 255, 255, 0.2);
+    color: rgba(255, 255, 255, 0.2);
+}
+
+#make-offering .actor-icon {
+    width: 60px;
+    height: 60px;
+    flex: 0 0 60px;
+    object-fit: contain;
+}
+
+#make-offering  .instruction {
+    text-align: center;
+    line-height: 60px;
+    color: #808080;
+}
+
+#make-offering .currency-group {
+    flex: 0 0 30px;
+}
+
+#make-offering .currency-group > input {
+    max-width: 80px;
+}
+
+#make-offering .currency-group > label {
+    max-width: 100px;
+}
+
+#make-offering .offering-items {
+    min-height: 60px;
+    flex-grow: 0;
+    margin-bottom: 8px;
+}
+
+#make-offering .offering-item {
+    position: relative;
+    flex-grow: 0;
+    height: 60px;
+    width: 60px;
+    flex: 0 0 60px;
+    margin-right: 4px;
+}
+
+#make-offering .offering-item img {
+    height: 100%;
+    width: 60px;
+    object-fit: contain;
+}
+
+#make-offering .offering-item .offering-qty {
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    border: 1px solid #000;
+    border-radius: 4px;
+    text-align: center;
+    background: rgba(0, 0, 0, 0.8);
+    color: #fff;
+    padding: 2px 8px;
 }

@@ -13,7 +13,8 @@ export class PersonSheet extends EnhancedJournalSheet {
             tabs: [{ navSelector: ".tabs", contentSelector: ".sheet-body", initial: "description" }],
             dragDrop: [
                 { dragSelector: ".document.actor", dropSelector: ".person-container" },
-                { dragSelector: ".actor-img img", dropSelector: "null" }
+                { dragSelector: ".actor-img img", dropSelector: "null" },
+                { dragSelector: ".sheet-icon", dropSelector: "#board" }
             ],
             scrollY: [".tab.entry-details .tab-inner", ".tab.description .tab-inner", ".relationships .items-list"]
         });
@@ -86,6 +87,13 @@ export class PersonSheet extends EnhancedJournalSheet {
 
         data.fields = this.fieldlist();
 
+        let currency = (data.data.flags['monks-enhanced-journal'].currency || []);
+        data.currency = MonksEnhancedJournal.currencies.map(c => {
+            return { id: c.id, name: c.name, value: currency[c.id] ?? 0 };
+        });
+
+        data.offerings = this.getOfferings();
+
         return data;
     }
 
@@ -136,6 +144,12 @@ export class PersonSheet extends EnhancedJournalSheet {
         $('.items-list .actor-icon', html).click(this.openRelationship.bind(this));
 
         $('.item-relationship .item-field', html).on('change', this.alterRelationship.bind(this));
+
+        $('.item-private', html).on('click', this.alterItem.bind(this));
+        $('.make-offering', html).on('click', this.makeOffer.bind(this));
+        $('.item-cancel', html).on('click', this.cancelOffer.bind(this));
+        $('.item-accept', html).on('click', this.acceptOffer.bind(this));
+        $('.item-reject', html).on('click', this.rejectOffer.bind(this));
     }
 
     _getSubmitData(updateData = {}) {
@@ -159,6 +173,9 @@ export class PersonSheet extends EnhancedJournalSheet {
     }
 
     _onDragStart(event) {
+        if ($(event.currentTarget).hasClass("sheet-icon"))
+            return super._onDragStart(event);
+
         const target = event.currentTarget;
 
         if (target.dataset.document == "Actor") {

@@ -1,3 +1,47 @@
+# Version 1.0.61
+
+Fixed issues with displaying creature sheet in 3.5E
+
+Added the option to make an offering or bride a person.  The Offering tab is now available on Orgaization and Person sheets.
+
+Added styling fixes for Chronicles of Darkness
+
+Fixed issues with DC attribute names and how they were being displayed.
+
+Fixed issues with internationalization and the TinyMCE menus
+
+Fixed issues with preventing sharing Loot journals with players.
+
+Fixed issue when creating a new Quest in Forien's Quest Log opening up and Enhanced Journal page aswell.
+
+Updated the inline links to only be hidden if the player has less than limited permissions on the entity in question.
+
+Added currency support for SFRPG.
+
+Changed electrum to have a convert value of null.  Seriously... who uses Electrum.
+
+Fixed issue with the placeholder value of the Journal Listing dropdown.
+
+Added Start Encounter and Select Encounter as to new actions to be used by Monk's Active Tiles.
+
+Added the option to drag and drop the Journal Type icon to the canvas to create a note.
+
+Fixed issue with getting the default currency
+
+Fixed issue with playing sound that wasn't set to autoplay
+
+Added the option to sort items in Shop and Loot sheet by price or quantity rather than just name
+
+Fixed Item description in SWADE
+
+Change the Reward "Active" check box to "Selected" to hopefully remove some confusion.  And updated the code so that only one can be active at a time.
+
+Added buy back options for the Shop.  You can not set it so the player can't sell back, has to confirm, and can do so without needing GM intervention.
+
+Added the option to set the buy back rate for the shop.
+
+Fixed localization issue with Slideshow effects list.
+
 # Version 1.0.60
 
 Fixing an issue with conversions

@@ -2,6 +2,7 @@
 import { EditFields } from "../apps/editfields.js";
 import { SelectPlayer } from "../apps/selectplayer.js";
 import { EditSound } from "../apps/editsound.js";
+import { MakeOffering } from "../apps/make-offering.js";
 
 export class EnhancedJournalSheet extends JournalSheet {
     constructor(object, options = {}) {
@@ -34,7 +35,7 @@ export class EnhancedJournalSheet extends JournalSheet {
             title: i18n("MonksEnhancedJournal.NewTab"),
             template: "modules/monks-enhanced-journal/templates/blank.html",
             classes: classes,
-            dragDrop: [{ dragSelector: "null", dropSelector: ".blank-body" }],
+            dragDrop: [ { dragSelector: "null", dropSelector: ".blank-body" } ],
             popOut: true,
             width: 1025,
             height: 700,
@@ -179,11 +180,28 @@ export class EnhancedJournalSheet extends JournalSheet {
     }
 
     _canDragStart(selector) {
+        if (selector == ".sheet-icon") return game.user.isGM;
         return game.user.isGM;
     }
 
     _canDragDrop(selector) {
         return game.user.isGM;
+    }
+
+    async _onDragStart(event) {
+        const target = event.currentTarget;
+
+        if ($(target).hasClass("sheet-icon")) {
+            const dragData = {
+                id: this.object.id,
+                type: this.object.documentName,
+                QEBypass: true
+            };
+            if (this.object.compendium)
+                dragData.pack = this.object.compendium;
+
+            event.dataTransfer.setData("text/plain", JSON.stringify(dragData));
+        }
     }
 
     _onDrop(event) {
@@ -215,6 +233,8 @@ export class EnhancedJournalSheet extends JournalSheet {
         $('.fullscreen-image', html).click(() => { $('.fullscreen-image', html).hide(); });
 
         html.find('img[data-edit],div.picture-img').click(this._onEditImage.bind(this));
+
+        $('.fullscreen-image,.picture-img', html).on("wheel", this.scaleImage.bind(this));
 
         $('.play-journal-sound', html).prop("disabled", false).click(this.toggleSound.bind(this));
 
@@ -326,8 +346,8 @@ export class EnhancedJournalSheet extends JournalSheet {
         switch (game.system.id) {
             case 'pf2e':
                 {
-                    let coin = actor.data.items.find(i => { return i.isCoinage && i.data.data.denomination.value == denomination });
-                    coinage = (coin && this.getValue(coin.data, quantityname(), 0));
+                    let coin = actor.data.items.find(i => { return i.isCoinage && i.data.data.price.value[denomination] == 1 });
+                    coinage = (coin && coin.data.data.quantity); //price.value[denomination]);
                 }
                 break;
             case 'age-system':
@@ -341,6 +361,9 @@ export class EnhancedJournalSheet extends JournalSheet {
                 break;
             case 'starwarsffg':
                 coinage = parseInt(actor.data.data.stats.credits.value);
+                break;
+            case 'sfrpg':
+                coinage = parseInt(actor.data.data.currency[(denomination == "cr" ? "credit" : denomination)]);
                 break;
             default:
                 {
@@ -433,7 +456,7 @@ export class EnhancedJournalSheet extends JournalSheet {
         if (game.system.id == 'pf2e') {
             let promises = [];
             for (let [k, v] of Object.entries(changes)) {
-                let coinage = actor.data.items.find(i => { return i.isCoinage && i.data.data.denomination.value == k });
+                let coinage = actor.data.items.find(i => { return i.isCoinage && i.data.data.price.value[k] == 1 });
                 updates[`data.quantity`] = v;
                 promises.push(coinage.update(updates));
             }
@@ -446,6 +469,9 @@ export class EnhancedJournalSheet extends JournalSheet {
                         break;
                     case 'swade':
                         updates[`data.details.currency`] = v;
+                        break;
+                    case 'sfrpg':
+                        updates[`data.currency.${k == "cr" ? "credit" : k}`] = v;
                         break;
                     case 'shadowrun5e':
                         updates[`data.nuyen`] = v;
@@ -500,14 +526,26 @@ export class EnhancedJournalSheet extends JournalSheet {
         if (parseInt(price) != price) {
             if (MonksEnhancedJournal.currencies.length) {
                 let numDecimal = price.toString().split(".")[1].length || 0;
-                let curr = MonksEnhancedJournal.currencies.find(c => {
+                let currs = MonksEnhancedJournal.currencies.filter(c => {
                     if (!c.convert)
                         return false;
                     return countDecimals(c.convert) >= numDecimal;
                 });
-                if (!curr)
+                let curr = null;
+
+                let adjust = numDecimal * 10;
+                for (let tcurr of currs) {
+                    let val = (price * adjust) / (tcurr.convert * adjust);
+                    if (val == Math.floor(val)) {
+                        curr = tcurr;
+                        currency = tcurr.id;
+                        price = Math.floor(val);
+                        break;
+                    }
+                }
+
+                if (!curr) {
                     curr = MonksEnhancedJournal.currencies[MonksEnhancedJournal.currencies.length - 1];
-                if (curr) {
                     currency = curr.id;
                     price = Math.floor(price / curr.convert);
                 }
@@ -533,10 +571,7 @@ export class EnhancedJournalSheet extends JournalSheet {
     toggleSound() {
         let sound = (this.enhancedjournal ? this.enhancedjournal._backgroundsound[this.object.id] : this._backgroundsound);
 
-        if (!sound)
-            return;
-
-        if (sound.playing) {
+        if (sound?.playing) {
             // stop sound playing
             this._stopSound(sound);
         } else {
@@ -544,12 +579,19 @@ export class EnhancedJournalSheet extends JournalSheet {
             if (!sound) {
                 sound = this.object.getFlag("monks-enhanced-journal", "sound");
             }
-            this._playSound(sound);
+            this._playSound(sound).then((sound) => {
+                if (!sound)
+                    return;
+
+                if (this.enhancedjournal)
+                    this.enhancedjournal._backgroundsound[this.object.id] = sound;
+                else
+                    this._backgroundsound = sound;
+            });
         }
     }
 
     _playSound(sound) {
-        $('.play-journal-sound', this.element).addClass("active").find("i").addClass('fa-volume-up').removeClass('fa-volume-off');
         if (sound.audiofile) {
             let volume = sound.volume ?? 1;
             return AudioHelper.play({
@@ -557,6 +599,7 @@ export class EnhancedJournalSheet extends JournalSheet {
                 loop: sound.loop,
                 volume: 0
             }).then((soundfile) => {
+                $('.play-journal-sound', this.element).addClass("active").find("i").addClass('fa-volume-up').removeClass('fa-volume-off');
                 soundfile.fade(volume * game.settings.get("core", "globalInterfaceVolume"), { duration: 500 });
                 soundfile.on("end", () => {
                     $('.play-journal-sound', this.element).removeClass("active").find("i").removeClass('fa-volume-up').addClass('fa-volume-off');
@@ -566,8 +609,15 @@ export class EnhancedJournalSheet extends JournalSheet {
             });
         } else {
             let soundData = this.object.getFlag("monks-enhanced-journal", "sound");
-            sound.play({ volume: (soundData.volume ?? 1), fade: 500, loop: soundData.loop });
+            let options = { volume: (soundData.volume ?? 1), fade: 500, loop: soundData.loop };
+            if (!sound.loaded)
+                sound.load({ autoplay: true, autoplayOptions: options });
+            else
+                sound.play(options);
+            $('.play-journal-sound', this.element).addClass("active").find("i").addClass('fa-volume-up').removeClass('fa-volume-off');
         }
+
+        return new Promise((resolve) => { });
     }
 
     _stopSound(sound) {
@@ -835,7 +885,7 @@ export class EnhancedJournalSheet extends JournalSheet {
         return str;
     }
 
-    getItemGroups(data) {
+    getItemGroups(data, sort = "name") {
         let type = data?.data?.flags['monks-enhanced-journal'].type;
         let purchasing = data?.data?.flags['monks-enhanced-journal'].purchasing;
 
@@ -885,17 +935,36 @@ export class EnhancedJournalSheet extends JournalSheet {
             };
 
             if (game.user.isGM || this.object.isOwner || (item.hide !== true && (quantity !== 0 || setting('show-zero-quantity')))) {
-                let groupId = this.slugify(item.type);
+                let groupId = (!sort || sort == "name" ? this.slugify(item.type) : "");
                 if (groups[groupId] == undefined)
                     groups[groupId] = { id: groupId, name: item.type, items: [] };
                 groups[groupId].items.push(itemData);
             }
         }
 
+        let currencies = (MonksEnhancedJournal.currencies || []).reduce((a, v) => ({ ...a, [v.id]: v.convert }), {});
+        let defCurr = this.constructor.defaultCurrency();
+        sort = sort || "name";
         for (let [k, v] of Object.entries(groups)) {
             groups[k].items = groups[k].items.sort((a, b) => {
-                if (a.name < b.name) return -1;
-                return a.name > b.name ? 1 : 0;
+                let aVal = a[sort];
+                let bVal = b[sort];
+                let aName = a.name;
+                let bName = b.name;
+
+                if (sort == "price" || sort == "cost") {
+                    let aCurr = this.getPrice(aVal);
+                    let bCurr = this.getPrice(bVal);
+
+                    aVal = aCurr.value * (currencies[aCurr.currency] || 1) / (currencies[defCurr] || 1);
+                    bVal = bCurr.value * (currencies[bCurr.currency] || 1) / (currencies[defCurr] || 1);
+                }
+
+                let sortVal = (aVal < bVal ? -1 : (aVal > bVal ? 1 : 0));
+                if (sortVal == 0) {
+                    return (aName < bName ? -1 : (aName > bName ? 1 : 0));
+                } else
+                    return sortVal;
             });
         }
 
@@ -909,6 +978,49 @@ export class EnhancedJournalSheet extends JournalSheet {
         }
 
         return groups;
+    }
+
+    getOfferings() {
+        let currencies = MonksEnhancedJournal.currencies;
+
+        return (this.object.data.flags['monks-enhanced-journal']?.offerings || []).map(o => {
+            if (o.hidden && !(game.user.isGM || this.object.isOwner || (o.userid == game.user.id && o.state != "cancelled")))
+                return null;
+
+            let actor = game.actors.get(o.actorId);
+            let items = [];
+            for (let [k, v] of Object.entries(o.currency)) {
+                if (v) {
+                    let curr = currencies.find(c => c.id == k);
+                    items.push(`${curr?.name || "Unknown Currency"}: ${v}`);
+                }
+            }
+            items = items.concat(
+                o.items.map(i => {
+                    let itemActor = actor;
+                    if (itemActor.id != i.actorId) {
+                        itemActor = game.actors.get(i.actorId);
+                    }
+
+                    let item = {};
+                    if (itemActor) {
+                        item = itemActor.items.get(i.id);
+                    }
+
+                    return `${itemActor.id != actor.id ? (itemActor.name || i.actorName) + ", " : ''}${i.qty > 1 ? i.qty + " " : ""}${item?.name || i.itemName}`;
+                })
+            );
+            return {
+                id: o.id,
+                name: actor?.name || o.actor?.name,
+                img: actor?.img || o.actor?.img,
+                items: items,
+                hidden: o.hidden,
+                owner: o.userid == game.user.id,
+                state: o.state,
+                stateName: i18n(`MonksEnhancedJournal.offer.${o.state}`)
+            }
+        }).filter(o => !!o);
     }
 
     static async getDocument(data, type, notify = true) {
@@ -1389,6 +1501,13 @@ export class EnhancedJournalSheet extends JournalSheet {
                 relationship.hidden = $(event.currentTarget).prev().prop('checked');
                 journal.setFlag('monks-enhanced-journal', "relationships", relationships);
             }
+        } else if ($(event.currentTarget).hasClass('item-private')) {
+            let li = $(event.currentTarget).closest('li.item');
+            const id = li.data("id");
+            let offerings = duplicate(this.object.getFlag("monks-enhanced-journal", "offerings"));
+            let offering = offerings.find(r => r.id == id);
+            offering.hidden = $(event.currentTarget).prev().prop('checked');
+            await this.object.setFlag('monks-enhanced-journal', "offerings", offerings);
         }
     }
 
@@ -1480,7 +1599,7 @@ export class EnhancedJournalSheet extends JournalSheet {
             if (options?.showpic || object.data?.flags["monks-enhanced-journal"]?.type == 'picture')
                 args.image = object.data.img;
 
-            if (!object.data.img && !object.data.content)
+            if (!object.data.img && !object.data.content && ["base", "journalentry"].includes(object.type))
                 return ui.notifications.warn(i18n("MonksEnhancedJournal.msg.CannotShowNoContent"));
 
             MonksEnhancedJournal.emit("showEntry", args);
@@ -1661,10 +1780,10 @@ export class EnhancedJournalSheet extends JournalSheet {
             let summary = li.children(".item-summary");
             summary.slideUp(200, () => summary.remove());
         } else {
-            let div = $(`<div class="item-summary">${(typeof chatData == "string" ? chatData : chatData.description.value)}</div>`);
+            let div = $(`<div class="item-summary">${(typeof chatData == "string" ? chatData : chatData.description.value || chatData.description)}</div>`);
             if (typeof chatData !== "string") {
                 let props = $('<div class="item-properties"></div>');
-                chatData.properties.forEach(p => props.append(`<span class="tag">${p}</span>`));
+                chatData.properties.forEach(p => props.append(`<span class="tag">${p.name || p}</span>`));
                 div.append(props);
             }
             li.append(div.hide());
@@ -1777,5 +1896,110 @@ export class EnhancedJournalSheet extends JournalSheet {
                 });
             }
         }
+    }
+
+    makeOffer() {
+        new MakeOffering(this.object, this).render(true);
+    }
+
+    cancelOffer(event) {
+        let li = $(event.currentTarget).closest('li.item');
+        const id = li.data("id");
+
+        if (game.user.isGM || this.object.isOwner) {
+            let offerings = duplicate(this.object.getFlag("monks-enhanced-journal", "offerings"));
+            let offering = offerings.find(r => r.id == id);
+            offering.hidden = true;
+            offering.state = "cancelled";
+            this.object.setFlag('monks-enhanced-journal', "offerings", offerings);
+        } else
+            MonksEnhancedJournal.emit("cancelOffer", { id: id, entryid: this.object.id });
+    }
+
+    async acceptOffer(event) {
+        let li = $(event.currentTarget).closest('li.item');
+        const id = li.data("id");
+
+        let offerings = duplicate(this.object.getFlag("monks-enhanced-journal", "offerings"));
+        let offer = offerings.find(r => r.id == id);
+        if (!offer)
+            return;
+
+        offer.state = "accepted";
+
+        let offering = duplicate(offer);
+
+        let actor = game.actors.get(offering.actorId);
+        if (!actor) {
+            ui.notifications.error("Actor no longer exists, cannot accept this offering");
+            return;
+        }
+
+        //confirm that there's enough currency and that the items still exist
+        for (let item of offering.items) {
+            item.actor = actor;
+            if (item.actorId != offering.actorId) {
+                item.actor = game.actors.get(item.actorId);
+
+                if (!item.actor) {
+                    ui.notifications.error(`Actor ${item.actorName} no longer exists, cannot accept this offering`);
+                    return;
+                }
+            }
+
+            item.item = item.actor.items.get(item.id);
+            if (!item.item) {
+                ui.notifications.error(`Item ${item.itemName} no longer exists, cannot accept this offering`);
+                return;
+            }
+
+            item.max = this.getValue(item.item.data, quantityname());
+            if (item.qty > item.max) {
+                ui.notifications.error(`Not enough of ${item.name} exists, cannot accept this offering`);
+                return;
+            }
+        }
+
+        // If we've made it here then we're good to process this offer
+        for (let [k, v] of Object.entries(offering.currency)) {
+            this.addCurrency(actor, k, -v);
+        }
+
+        for (let item of offering.items) {
+            if (item.qty == item.max) {
+                await item.item.delete();
+            } else {
+                let qty = item.max - item.qty;
+                let update = { data: {} };
+                update.data[quantityname()] = item.item.data.data[quantityname()];
+                this.setValue(update, quantityname(), qty);
+                await item.item.update(update);
+            }
+        }
+
+        this.object.setFlag('monks-enhanced-journal', "offerings", offerings);
+    }
+
+    rejectOffer(event) {
+        let li = $(event.currentTarget).closest('li.item');
+        const id = li.data("id");
+
+        let offerings = duplicate(this.object.getFlag("monks-enhanced-journal", "offerings"));
+        let offering = offerings.find(r => r.id == id);
+        offering.state = "rejected";
+        this.object.setFlag('monks-enhanced-journal', "offerings", offerings);
+    }
+
+    scaleImage(event) {
+        let wheel = (-event.originalEvent.wheelDelta || event.originalEvent.deltaY || event.originalEvent.detail);
+
+        let size = parseInt($(event.currentTarget).data("size") ?? 100);
+        size += (wheel < 0 ? -5 : 5);
+        size = Math.max(100, size);
+
+        console.log(size);
+
+        $(event.currentTarget).data("size", size);
+        $("img", event.currentTarget).css({ "transform": `scale(${size / 100})` });
     }
 }

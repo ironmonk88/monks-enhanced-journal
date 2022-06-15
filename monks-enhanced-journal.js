@@ -136,6 +136,10 @@ export class MonksEnhancedJournal {
         log('Initializing Monks Enhanced Journal');
         registerSettings();
 
+        MonksEnhancedJournal.system = CONFIG[game.system.id.toUpperCase()];
+        if (game.system.id == "tormenta20")
+            MonksEnhancedJournal.system = CONFIG["T20"];
+
         if (game.system.id == "tormenta20") {
             MonksEnhancedJournal.pricename = "preco";
             MonksEnhancedJournal.quantityname = "qtd";
@@ -158,9 +162,9 @@ export class MonksEnhancedJournal {
             CONFIG.TinyMCE.content_css.push('modules/polyglot/css/polyglot.css');
 
         CONFIG.TinyMCE.style_formats.push({
-            title: i18n("MonksEnhancedJournal.EnhancedJournal"), items: [
-                { block: "section", classes: "readaloud", title: i18n("MonksEnhancedJournal.ReadAloud"), wrapper: true },
-                { inline: "span", classes: "drop-cap", title: i18n("MonksEnhancedJournal.DropCap") }]
+            title: "Enhanced Journal", items: [
+                { block: "section", classes: "readaloud", title: "Read Aloud", wrapper: true },
+                { inline: "span", classes: "drop-cap", title: "Drop Cap" }]
         });
 
         const moreNoteIcons = {
@@ -279,7 +283,7 @@ export class MonksEnhancedJournal {
             let entry = await fromUuid(entryId);
             if (entry.documentName !== "JournalEntry") return;
             if (!force && !entry.visible) return;
-            if (!entry.data.img && !entry.data.content) return; // Don't show an entry that has no content
+            if (!entry.data.img && !entry.data.content && ["base", "journalentry"].includes(entry.type)) return; // Don't show an entry that has no content
 
             // Show the sheet with the appropriate mode
             if (!MonksEnhancedJournal.openJournalEntry(entry)) {
@@ -425,7 +429,7 @@ export class MonksEnhancedJournal {
 
             MonksEnhancedJournal.fixType(this);
 
-            if (MonksEnhancedJournal.compendium !== true && !MonksEnhancedJournal.openJournalEntry(this, options))
+            if (!!getProperty(this, "data.flags.forien-quest-log") || (MonksEnhancedJournal.compendium !== true && !MonksEnhancedJournal.openJournalEntry(this, options)))
                 return wrapped(...args);
         }
 
@@ -694,7 +698,7 @@ export class MonksEnhancedJournal {
                     
                     const doc = /^[a-zA-Z0-9]{16}$/.test(parts[0]) ? collection.get(parts[0]) : collection.getName(parts[0]);
 
-                    if (doc && !doc.testUserPermission(game.user, "OBSERVER"))
+                    if (doc && !doc.testUserPermission(game.user, "LIMITED"))
                         return document.createElement('span');
                 }
             }
@@ -1949,7 +1953,32 @@ export class MonksEnhancedJournal {
             document.sheet.render(true);
     }
 
-    static journalListing(ctrl, html, id, name, documentId = 'documentId') {
+    static async makeOffering(data) {
+        if (game.user.isGM) {
+            let entry = game.journal.get(data.entryid);
+            if (entry) {
+                let offerings = duplicate(entry.getFlag("monks-enhanced-journal", "offerings") || []);
+                data.offering.id = makeid();
+                offerings.unshift(data.offering);
+                await entry.setFlag("monks-enhanced-journal", "offerings", offerings);
+            }
+        }
+    }
+
+    static async cancelOffer(data) {
+        if (game.user.isGM) {
+            let entry = game.journal.get(data.entryid);
+            if (entry) {
+                let offerings = duplicate(entry.getFlag("monks-enhanced-journal", "offerings"));
+                let offering = offerings.find(r => r.id == data.id);
+                offering.hidden = true;
+                offering.state = "cancelled";
+                await entry.setFlag('monks-enhanced-journal', "offerings", offerings);
+            }
+        }
+    }
+
+    static journalListing(ctrl, html, id, name, documentId = 'documentId', fn) {
         function selectItem(event) {
             event.preventDefault();
             event.stopPropagation();
@@ -1957,6 +1986,7 @@ export class MonksEnhancedJournal {
             $('> div > span', ctrl.next()).html(this.name);
             $('.journal-list.open').removeClass('open');
             $(event.currentTarget).addClass('selected').siblings('.selected').removeClass('selected');
+            if (fn) fn(this.name);
         }
 
         function getFolders(folders) {
@@ -2113,6 +2143,8 @@ export class MonksEnhancedJournal {
         switch (game.system.id) {
             case "sw5e":
                 return [{ id: "gc", name: i18n("MonksEnhancedJournal.currency.galacticcredit"), convert: 0 }, { id: "cr", name: "Credit", convert: 0 }];
+            case "sfrpg":
+                return [{ id: "upb", name: i18n("MonksEnhancedJournal.currency.upb"), convert: 1 }, { id: "cr", name: "Credit", convert: 0 }];
             case "swade":
                 return [{ id: "gp", name: i18n("MonksEnhancedJournal.currency.gold"), convert: 0 }];
             case "age-system":
@@ -2130,7 +2162,7 @@ export class MonksEnhancedJournal {
             case "pf1e":
             case "pf1":
             case "a5e":
-                return [{ id: "pp", name: i18n("MonksEnhancedJournal.currency.platinum"), convert: 10 }, { id: "gp", name: i18n("MonksEnhancedJournal.currency.gold"), convert: 0 }, { id: "ep", name: i18n("MonksEnhancedJournal.currency.electrum"), convert: 0.5 }, { id: "sp", name: i18n("MonksEnhancedJournal.currency.silver"), convert: 0.1 }, { id: "cp", name: i18n("MonksEnhancedJournal.currency.copper"), convert: 0.01 }];
+                return [{ id: "pp", name: i18n("MonksEnhancedJournal.currency.platinum"), convert: 10 }, { id: "gp", name: i18n("MonksEnhancedJournal.currency.gold"), convert: 0 }, { id: "ep", name: i18n("MonksEnhancedJournal.currency.electrum"), convert: null }, { id: "sp", name: i18n("MonksEnhancedJournal.currency.silver"), convert: 0.1 }, { id: "cp", name: i18n("MonksEnhancedJournal.currency.copper"), convert: 0.01 }];
             case "pf1e":
             case "pf1":
                 return [{ id: "pp", name: i18n("MonksEnhancedJournal.currency.platinum"), convert: 10 }, { id: "gp", name: i18n("MonksEnhancedJournal.currency.gold"), convert: 0 }, { id: "sp", name: i18n("MonksEnhancedJournal.currency.silver"), convert: 0.1 }, { id: "cp", name: i18n("MonksEnhancedJournal.currency.copper"), convert: 0.01 }];
@@ -2281,6 +2313,7 @@ Hooks.on("updateJournalEntry", (document, data, options, userId) => {
                     data?.flags['monks-enhanced-journal']?.reward != undefined ||
                     data?.flags['monks-enhanced-journal']?.rewards != undefined ||
                     data?.flags['monks-enhanced-journal']?.sound != undefined ||
+                    data?.flags['monks-enhanced-journal']?.offerings != undefined ||
                     data?.flags['core']?.sheetClass != undefined)))) {
             //if (data?.flags['core']?.sheetClass != undefined)
             //    MonksEnhancedJournal.journal.object._sheet = null;
@@ -2388,7 +2421,9 @@ Hooks.on("renderFolderConfig", (app, html, options) => {
 Hooks.on('renderNoteConfig', (app, html, data) => {
     let ctrl = $('select[name="entryId"]', html);
 
-    MonksEnhancedJournal.journalListing(ctrl, html, app.object.data.entryId, data.entry.name, "entryId").insertAfter(ctrl);
+    MonksEnhancedJournal.journalListing(ctrl, html, app.object.data.entryId, data.entry.name, "entryId", (name) => {
+        $('[name="text"]', html).attr("placeholder", name);
+    }).insertAfter(ctrl);
     ctrl.hide();
 
     ctrl = $('select[name="icon"]', html);
@@ -2639,6 +2674,90 @@ Hooks.on("setupTileActions", (app) => {
         content: async (trigger, action) => {
             let entityName = await game.MonksActiveTiles.entityName(action.data?.entity, "journal");
             return `<span class="action-style">${trigger.name}</span> of <span class="entity-style">${entityName}</span> to <span class="details-style">"${i18n(trigger.values.status[action.data?.status])}"</span>`;
+        }
+    });
+    app.registerTileAction('monks-enhanced-journal', 'startencounter', {
+        name: i18n("MonksEnhancedJournal.StartEncounter"),
+        ctrls: [
+            {
+                id: "entity",
+                name: i18n("MonksEnhancedJournal.SelectEntity"),
+                type: "select",
+                subtype: "entity",
+                options: { showPrevious: true },
+                restrict: (entity) => { return (entity instanceof JournalEntry); },
+                required: true,
+                defaultType: 'journal',
+                placeholder: "MonksEnhancedJournal.msg.PleaseSelectJournal"
+            },
+            {
+                id: "location",
+                name: i18n("MonksEnhancedJournal.SelectCoordinates"),
+                type: "select",
+                subtype: "either",
+                options: { showTagger: true, showPrevious: true },
+                restrict: (entity) => { return (entity instanceof Tile && this.scene.id == entity.parent.id) || this.scene.id == entity.id; },
+                required: true
+            },
+            {
+                id: "startcombat",
+                name: i18n("MonksEnhancedJournal.StartCombat"),
+                type: "checkbox"
+            }
+        ],
+        group: 'monks-enhanced-journal',
+        fn: async (args = {}) => {
+            const { tile, action, value } = args;
+
+            let dests = await game.MonksActiveTiles.getLocation.call(tile, action.data.location, value);
+            dests = (dests instanceof Array ? dests : [dests]);
+
+            if (!dests.length)
+                return;
+
+            let entities = await game.MonksActiveTiles.getEntities(args, null, 'journal');
+            for (let entity of entities) {
+                const cls = (entity._getSheetClass ? entity._getSheetClass() : null);
+                if (cls && cls.createEncounter) {
+                    cls.createEncounter.call(entity, dests[0].x, dests[0].y, action.data.startcombat);
+                }
+            }
+        },
+        content: async (trigger, action) => {
+            let entityName = await game.MonksActiveTiles.entityName(action.data?.entity, "journal");
+            return `<span class="action-style">${i18n(trigger.name)}</span> of <span class="entity-style">${entityName}</span> ${(action.data.startcombat ? ' <i class="fas fa-fist-raised" title="Start Combat"></i>' : '')}`;
+        }
+    });
+    app.registerTileAction('monks-enhanced-journal', 'selectencounter', {
+        name: i18n("MonksEnhancedJournal.SelectEncounter"),
+        ctrls: [
+            {
+                id: "entity",
+                name: i18n("MonksEnhancedJournal.SelectEntity"),
+                type: "select",
+                subtype: "entity",
+                options: { showPrevious: true },
+                restrict: (entity) => { return (entity instanceof JournalEntry); },
+                required: true,
+                defaultType: 'journal',
+                placeholder: "MonksEnhancedJournal.msg.PleaseSelectJournal"
+            }
+        ],
+        group: 'monks-enhanced-journal',
+        fn: async (args = {}) => {
+            const { action } = args;
+
+            let entities = await game.MonksActiveTiles.getEntities(args, null, 'journal');
+            for (let entity of entities) {
+                const cls = (entity._getSheetClass ? entity._getSheetClass() : null);
+                if (cls && cls.selectEncounter) {
+                    cls.selectEncounter.call(entity);
+                }
+            }
+        },
+        content: async (trigger, action) => {
+            let entityName = await game.MonksActiveTiles.entityName(action.data?.entity, "journal");
+            return `<span class="action-style">${i18n(trigger.name)}</span> of <span class="entity-style">${entityName}</span>`;
         }
     });
 });

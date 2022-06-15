@@ -13,7 +13,9 @@ export class PlaceSheet extends EnhancedJournalSheet {
             tabs: [{ navSelector: ".tabs", contentSelector: ".sheet-body", initial: "description" }],
             dragDrop: [
                 { dragSelector: ".document.actor", dropSelector: ".place-container" },
-                { dragSelector: ".document.item", dropSelector: ".place-container" }],
+                { dragSelector: ".document.item", dropSelector: ".place-container" },
+                { dragSelector: ".sheet-icon", dropSelector: "#board" }
+            ],
             scrollY: [".tab.entry-details .tab-inner", ".tab.townsfolk .tab-inner", ".tab.shops .tab-inner", ".tab.description .tab-inner"]
         });
     }

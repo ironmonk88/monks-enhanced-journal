@@ -1,4 +1,4 @@
-import { setting, i18n, log, makeid, MonksEnhancedJournal } from "../monks-enhanced-journal.js";
+import { setting, i18n, log, makeid, MonksEnhancedJournal, quantityname } from "../monks-enhanced-journal.js";
 import { EnhancedJournalSheet } from "../sheets/EnhancedJournalSheet.js";
 
 export class OrganizationSheet extends EnhancedJournalSheet {
@@ -11,7 +11,10 @@ export class OrganizationSheet extends EnhancedJournalSheet {
             title: i18n("MonksEnhancedJournal.organization"),
             template: "modules/monks-enhanced-journal/templates/organization.html",
             tabs: [{ navSelector: ".tabs", contentSelector: ".sheet-body", initial: "description" }],
-            dragDrop: [{ dropSelector: ".organization-container" }],
+            dragDrop: [
+                { dropSelector: ".organization-container" },
+                { dragSelector: ".sheet-icon", dropSelector: "#board" }
+            ],
             scrollY: [".tab.description .tab-inner"]
         });
     }
@@ -37,6 +40,8 @@ export class OrganizationSheet extends EnhancedJournalSheet {
             v.documents = v.documents.sort((a, b) => a.name.localeCompare(b.name));
         }
 
+        data.offerings = this.getOfferings();
+
         return data;
     }
 
@@ -50,11 +55,17 @@ export class OrganizationSheet extends EnhancedJournalSheet {
 
     activateListeners(html, enhancedjournal) {
         super.activateListeners(html, enhancedjournal);
-        $('.item-action', html).on('click', this.alterItem.bind(this));
+        
         $('.item-hide', html).on('click', this.alterItem.bind(this));
         $('.item-delete', html).on('click', $.proxy(this._deleteItem, this));
         $('.items-list .actor-icon', html).click(this.openRelationship.bind(this));
         $('.item-relationship .item-field', html).on('change', this.alterRelationship.bind(this));
+
+        $('.item-private', html).on('click', this.alterItem.bind(this));
+        $('.make-offering', html).on('click', this.makeOffer.bind(this));
+        $('.item-cancel', html).on('click', this.cancelOffer.bind(this));
+        $('.item-accept', html).on('click', this.acceptOffer.bind(this));
+        $('.item-reject', html).on('click', this.rejectOffer.bind(this));
     }
 
     _documentControls() {
@@ -90,7 +101,7 @@ export class OrganizationSheet extends EnhancedJournalSheet {
         return game.user.isGM || this.object.isOwner;
     }
 
-    _onDrop(event) {
+    async _onDrop(event) {
         let data;
         try {
             data = JSON.parse(event.dataTransfer.getData('text/plain'));

@@ -1,6 +1,6 @@
 <form class="flexcol journal-subsheet {{entrytype}}{{#if isGM}} gm{{/if}}{{#if owner}} owner{{/if}}" editable="{{editable}}">
     <div class="loot-container flexcol">
-        <img class="fullscreen-image" src="{{data.img}}" />
+        <div class="fullscreen-image"><img src="{{data.img}}" /></div>
         <header class="sheet-header journal-header flexrow" style="max-height: 162px; overflow: hidden;">
             <div class="sheet-image">
                 <img class="profile" src="{{data.img}}" data-edit="img" onerror="this.src='modules/monks-enhanced-journal/assets/loot.png'">

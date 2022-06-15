@@ -15,7 +15,8 @@ export class LootSheet extends EnhancedJournalSheet {
                 { dragSelector: ".document.item", dropSelector: ".loot-container" },
                 { dragSelector: ".loot-items .item-list .item .item-name", dropSelector: "null" },
                 { dragSelector: ".loot-items .item-list .item .item-name", dropSelector: ".loot-character" },
-                { dragSelector: ".loot-character", dropSelector: "null" }
+                { dragSelector: ".loot-character", dropSelector: "null" },
+                { dragSelector: ".sheet-icon", dropSelector: "#board" }
             ],
             scrollY: [".loot-items"]
         });
@@ -186,6 +187,7 @@ export class LootSheet extends EnhancedJournalSheet {
     }
 
     _canDragStart(selector) {
+        if (selector == ".sheet-icon") return game.user.isGM;
         let hasGM = (game.users.find(u => u.isGM && u.active) != undefined);
         return game.user.isGM || (['free', 'confirm'].includes(this.object.data.flags["monks-enhanced-journal"].purchasing) && hasGM);
     }
@@ -195,6 +197,9 @@ export class LootSheet extends EnhancedJournalSheet {
     }
 
     async _onDragStart(event) {
+        if ($(event.currentTarget).hasClass("sheet-icon"))
+            return super._onDragStart(event);
+
         const li = $(event.currentTarget).closest("li")[0];
 
         const dragData = { from: this.object.id };
@@ -482,6 +487,7 @@ export class LootSheet extends EnhancedJournalSheet {
             return item.sheet.render(true);
     }
 
+    /*
     async alterItem(event) {
         let target = event.currentTarget;
         let li = target.closest('li');
@@ -495,7 +501,7 @@ export class LootSheet extends EnhancedJournalSheet {
             item[action] = !item[action];
             this.object.setFlag('monks-enhanced-journal', 'items', items);
         }
-    }
+    }*/
 
     static async itemDropped(id, actor, entry) {
         let item = (entry.getFlag('monks-enhanced-journal', 'items') || []).find(i => i._id == id);
@@ -555,17 +561,19 @@ export class LootSheet extends EnhancedJournalSheet {
         let itemData = items.find(i => i._id == id);
 
         const item = new CONFIG.Item.documentClass(itemData);
-        if (item && item.getChatData) {
-            const chatData = item.getChatData({ secrets: false });
+        let chatData = getProperty(item, "data.data.description");
+        if (item.getChatData)
+            chatData = item.getChatData({ secrets: false });
 
+        if (chatData) {
             // Toggle summary
             if (li.hasClass("expanded")) {
                 let summary = li.children(".item-summary");
                 summary.slideUp(200, () => summary.remove());
             } else {
-                let div = $(`<div class="item-summary">${chatData.description.value}</div>`);
+                let div = $(`<div class="item-summary">${(typeof chatData == "string" ? chatData : chatData.description.value || chatData.description)}</div>`);
                 let props = $('<div class="item-properties"></div>');
-                chatData.properties.forEach(p => props.append(`<span class="tag">${p}</span>`));
+                chatData.properties.forEach(p => props.append(`<span class="tag">${p.name || p}</span>`));
                 if (chatData.price != undefined)
                     props.append(`<span class="tag">${i18n("MonksEnhancedJournal.Price")}: ${chatData.price}</span>`)
                 div.append(props);

@@ -19,7 +19,8 @@ export class QuestSheet extends EnhancedJournalSheet {
                 { dragSelector: ".document.actor", dropSelector: ".quest-container" },
                 { dragSelector: ".document.item", dropSelector: ".quest-container" },
                 { dragSelector: ".reward-items .item-list .item .item-name", dropSelector: "null" },
-                { dragSelector: ".objective-items .item-list .item", dropSelector: ".quest-container" }
+                { dragSelector: ".objective-items .item-list .item", dropSelector: ".quest-container" },
+                { dragSelector: ".sheet-icon", dropSelector: "#board" }
             ],
             scrollY: [".objective-items", ".reward-container", ".tab.description .tab-inner"]
         });
@@ -290,6 +291,8 @@ export class QuestSheet extends EnhancedJournalSheet {
     _getSubmitData(updateData = {}) {
         let data = expandObject(super._getSubmitData(updateData));
 
+        let rewardid = Object.keys(data.reward)[0];
+
         if (data.reward) {
             data.flags['monks-enhanced-journal'].rewards = duplicate(this.getRewardData() || []);
             for (let reward of data.flags['monks-enhanced-journal'].rewards) {
@@ -306,6 +309,9 @@ export class QuestSheet extends EnhancedJournalSheet {
                             delete item.received;
                     }
                 }
+
+                if (reward.active && reward.id != rewardid)
+                    reward.active = false;
             }
             delete data.reward;
         }
@@ -436,6 +442,9 @@ export class QuestSheet extends EnhancedJournalSheet {
     }
 
     _onDragStart(event) {
+        if ($(event.currentTarget).hasClass("sheet-icon"))
+            return super._onDragStart(event);
+
         const li = $(event.currentTarget).closest('.item')[0];
         let id = li.dataset.id;
         let uuid = li.dataset.uuid;
@@ -674,16 +683,18 @@ export class QuestSheet extends EnhancedJournalSheet {
             return;
 
         let item = new CONFIG.Item.documentClass(itemData);
-        const chatData = item.getChatData({ secrets: false });
+        let chatData = getProperty(item, "data.data.description");
+        if (item.getChatData)
+            chatData = item.getChatData({ secrets: false });
 
         // Toggle summary
         if (li.hasClass("expanded")) {
             let summary = li.children(".item-summary");
             summary.slideUp(200, () => summary.remove());
         } else {
-            let div = $(`<div class="item-summary">${chatData.description.value}</div>`);
+            let div = $(`<div class="item-summary">${(typeof chatData == "string" ? chatData : chatData.description.value || chatData.description)}</div>`);
             let props = $('<div class="item-properties"></div>');
-            chatData.properties.forEach(p => props.append(`<span class="tag">${p}</span>`));
+            chatData.properties.forEach(p => props.append(`<span class="tag">${p.name || p}</span>`));
             div.append(props);
             li.append(div.hide());
             div.slideDown(200);

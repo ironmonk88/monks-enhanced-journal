@@ -20,7 +20,8 @@ export class ShopSheet extends EnhancedJournalSheet {
                 { dragSelector: ".document.actor", dropSelector: ".shop-container" },
                 { dragSelector: ".document.item", dropSelector: ".shop-container" },
                 { dragSelector: ".shop-items .item-list .item .item-name", dropSelector: "null" },
-                { dragSelector: ".actor-img img", dropSelector: "null" }
+                { dragSelector: ".actor-img img", dropSelector: "null" },
+                { dragSelector: ".sheet-icon", dropSelector: "#board" }
             ],
             scrollY: [".shop-items", ".tab.description .tab-inner"]
         });
@@ -51,8 +52,15 @@ export class ShopSheet extends EnhancedJournalSheet {
             }
         ];
 
+        data.sellingOptions = 
+        {
+            locked: "MonksEnhancedJournal.selling.locked",
+            free: "MonksEnhancedJournal.selling.free",
+            confirm: "MonksEnhancedJournal.selling.request"
+        };
+
         //get shop items
-        data.groups = await this.getItemGroups(data);
+        data.groups = await this.getItemGroups(data, this.object._sort);
 
         data.hideitems = (['hidden', 'visible'].includes(data.data.flags['monks-enhanced-journal'].purchasing) && !this.object.isOwner);
         let purchasing = data.data.flags['monks-enhanced-journal'].purchasing;
@@ -92,7 +100,7 @@ export class ShopSheet extends EnhancedJournalSheet {
     }
 
     static get defaultObject() {
-        return { purchasing: 'confirm', items: [], sell: 1, buy: 0.5 };
+        return { purchasing: 'confirm', selling:'confirm', items: [], sell: 1, buy: 0.5 };
     }
 
     get allowedRelationships() {
@@ -146,6 +154,8 @@ export class ShopSheet extends EnhancedJournalSheet {
 
         $('.items-header', html).on("click", this.collapseItemSection.bind(this));
 
+        $('[sort]', html).on("click", this.alterSort.bind(this));
+
         const actorOptions = this._getPersonActorContextOptions();
         if (actorOptions) new ContextMenu($(html), ".actor-img", actorOptions);
     }
@@ -177,6 +187,7 @@ export class ShopSheet extends EnhancedJournalSheet {
     }
 
     _canDragStart(selector) {
+        if (selector == ".sheet-icon") return game.user.isGM;
         if (selector == ".document.actor") return game.user.isGM;
         if (selector == ".document.item") return true;
         let hasGM = (game.users.find(u => u.isGM && u.active) != undefined);
@@ -188,6 +199,9 @@ export class ShopSheet extends EnhancedJournalSheet {
     }
 
     async _onDragStart(event) {
+        if ($(event.currentTarget).hasClass("sheet-icon"))
+            return super._onDragStart(event);
+
         const target = event.currentTarget;
 
         if (target.dataset.document == "Actor") {
@@ -254,37 +268,44 @@ export class ShopSheet extends EnhancedJournalSheet {
             if (data.from == this.object.id)  //don't drop on yourself
                 return;
             if (data.data && data.actorId) {
+                let actor = game.actors.get(data.actorId);
+                if (!actor)
+                    return;
+
                 if (game.user.isGM) {
-                    let actor = game.actors.get(data.actorId);
-                    if (actor) {
-                        let item = await this.getDocument(data);
-                        let max = this.getValue(item.data, quantityname());
+                    let item = await this.getDocument(data);
+                    let max = this.getValue(item.data, quantityname());
 
-                        let price = this.getPrice(item.data, "price");
-                        let buy = this.object.getFlag('monks-enhanced-journal', 'buy') ?? 0.5;
-                        price.value = Math.floor(price.value * buy);
-                        let result = await this.constructor.confirmQuantity(item, max, "sell", true, price);
-                        if ((result?.quantity ?? 0) > 0) {
-                            this.setValue(item.data, quantityname(), result.quantity);
-                            this.addItem(item);
+                    let price = this.getPrice(item.data, "price");
+                    let buy = this.object.getFlag('monks-enhanced-journal', 'buy') ?? 0.5;
+                    price.value = Math.floor(price.value * buy);
+                    let result = await this.constructor.confirmQuantity(item, max, "sell", true, price);
+                    if ((result?.quantity ?? 0) > 0) {
+                        this.setValue(item.data, quantityname(), result.quantity);
+                        this.addItem(item);
 
-                            await this.constructor.actorPurchase(actor, { value: -(result.price.value * result.quantity), currency: result.price.currency });
+                        await this.constructor.actorPurchase(actor, { value: -(result.price.value * result.quantity), currency: result.price.currency });
 
-                            let actorItem = actor.items.get(data.data._id);
-                            if (actorItem) {
-                                if (result.quantity >= this.getValue(actorItem.data, quantityname()))
-                                    actorItem.delete();
-                                else {
-                                    let newQty = this.getValue(actorItem.data, quantityname()) - result.quantity;
-                                    let update = { data: {} }; 
-                                    update.data[quantityname()] = actorItem.data.data[quantityname()];
-                                    this.setValue(update, quantityname(), newQty);
-                                    actorItem.update(update);
-                                }
+                        let actorItem = actor.items.get(data.data._id);
+                        if (actorItem) {
+                            if (result.quantity >= this.getValue(actorItem.data, quantityname()))
+                                actorItem.delete();
+                            else {
+                                let newQty = this.getValue(actorItem.data, quantityname()) - result.quantity;
+                                let update = { data: {} }; 
+                                update.data[quantityname()] = actorItem.data.data[quantityname()];
+                                this.setValue(update, quantityname(), newQty);
+                                actorItem.update(update);
                             }
                         }
                     }
                 } else {
+                    let selling = this.object.getFlag('monks-enhanced-journal', 'selling');
+                    if (selling == "locked" || !selling) {
+                        ui.notifications.warn(i18n("MonksEnhancedJournal.msg.ShopIsNotReceivingItems"));
+                        return false;
+                    }
+
                     let hasGM = (game.users.find(u => u.isGM && u.active) != undefined);
                     if (!hasGM) {
                         ui.notifications.warn(i18n("MonksEnhancedJournal.msg.CannotSellItemWithoutGM"));
@@ -294,14 +315,45 @@ export class ShopSheet extends EnhancedJournalSheet {
                     let item = await this.getDocument(data);
                     let max = this.getValue(item.data, quantityname());
                     let price = ShopSheet.getPrice(item.data);
+                    let origPrice = price.value;
                     let buy = this.object.getFlag('monks-enhanced-journal', 'buy') ?? 0.5;
                     price.value = Math.floor(price.value * buy);
                     let result = await this.constructor.confirmQuantity(item, max, "sell", true, price);
                     if ((result?.quantity ?? 0) > 0) {
-                        let itemData = item.toObject();
-                        itemData.quantity = result.quantity;
-                        let actor = game.actors.get(data.actorId);
-                        this.createSellMessage(itemData, actor);
+                        if (selling == "free") {
+                            //give the player the money
+                            await this.constructor.actorPurchase(actor, { value: -(price.value * result.quantity), currency: price.currency });
+
+                            //remove the item from the actor
+                            let actoritem = actor.items.get(item.id);
+                            if (result.quantity == max) {
+                                await actoritem.delete();
+                            } else {
+                                let qty = max - result.quantity;
+                                let update = { data: {} };
+                                update.data[quantityname()] = actoritem.data.data[quantityname()];
+                                this.setValue(update, quantityname(), qty);
+                                await actoritem.update(update);
+                            }
+
+                            //add the item to the shop
+                            let itemData = item.toObject();
+                            this.setValue(itemData, quantityname(), result.quantity);
+                            this.setValue(itemData, pricename(), origPrice + " " + price.currency);
+                            itemData.lock = true;
+                            itemData.from = actor.name;
+
+                            if (!game.user.isGM)
+                                MonksEnhancedJournal.emit("sellItem", { shopid: this.object.id, itemdata: itemData });
+                            else {
+                                this.addItem(itemData);
+                            }
+                        } else {
+                            let itemData = item.toObject();
+                            itemData.quantity = result.quantity;
+
+                            this.createSellMessage(itemData, actor);
+                        }
                     }
                 }
             } else
@@ -342,6 +394,14 @@ export class ShopSheet extends EnhancedJournalSheet {
             return super._onSubmit(ev);
     }*/
 
+    alterSort(event) {
+        this.object._sort = $(event.currentTarget).attr("sort");
+        if (this.enhancedjournal)
+            this.enhancedjournal.render();
+        else
+            this.render();
+    }
+
     changeState(event) {
         let show = ($(event.currentTarget).val() != 'hidden');
         let perms = this.object.data.permission;
@@ -350,25 +410,54 @@ export class ShopSheet extends EnhancedJournalSheet {
     }
 
     async adjustPrice(event) {
-        let html = await renderTemplate("modules/monks-enhanced-journal/templates/adjust-price.html", { adjustment: this.object.getFlag('monks-enhanced-journal', 'sell') ?? 1});
-        await Dialog.confirm({
+        let convertItems = async function (html) {
+            let sell = parseFloat($('[name="adjustment.sell"]', html).val());
+
+            let items = this.object.getFlag('monks-enhanced-journal', 'items') || [];
+
+            for (let item of items) {
+                let price = ShopSheet.getPrice(item);
+                let cost = Math.max(Math.ceil((price.value * sell), 1)) + " " + price.currency;
+                item.data.cost = cost;
+            }
+
+            await this.object.setFlag('monks-enhanced-journal', 'items', items);
+        }
+
+        let data = {
+            sell: this.object.getFlag('monks-enhanced-journal', 'sell') ?? 1,
+            buy: this.object.getFlag('monks-enhanced-journal', 'buy') ?? 0.5
+        }
+
+        let content = await renderTemplate("modules/monks-enhanced-journal/templates/adjust-price.html", data);
+
+        const dialog = new Dialog({
             title: i18n("MonksEnhancedJournal.AdjustPrices"),
-            content: html,
-            yes: async (html) => {
-                let adjustment = parseFloat($('[name="adjustment"]', html).val());
-                let items = this.object.getFlag('monks-enhanced-journal', 'items') || [];
+            content: content,
+            buttons: {
+                yes: {
+                    icon: '<i class="fas fa-check"></i>',
+                    label: game.i18n.localize("Yes"),
+                    callback: async (html) => {
+                        let buy = parseFloat($('[name="adjustment.buy"]', html).val());
+                        let sell = parseFloat($('[name="adjustment.sell"]', html).val());
 
-                for (let item of items) {
-                    let price = ShopSheet.getPrice(item);
-                    let cost = Math.max(Math.ceil((price.value * adjustment), 1)) + " " + price.currency;
-                    item.data.cost = cost;
+                        await this.object.setFlag('monks-enhanced-journal', 'buy', buy);
+                        await this.object.setFlag('monks-enhanced-journal', 'sell', sell);
+                    }
+                },
+                no: {
+                    icon: '<i class="fas fa-times"></i>',
+                    label: game.i18n.localize("No"),
                 }
-
-                await this.object.setFlag('monks-enhanced-journal', 'items', items);
-                await this.object.setFlag('monks-enhanced-journal', 'sell', adjustment);
             },
-            render: (html) => { $('input', html).on("change", this._onChangeInput.bind(this)); }
+            default: "yes",
+            render: (html) => {
+                $('input', html).on("change", this._onChangeInput.bind(this));
+                $('.convert-button', html).on("click", convertItems.bind(this, html));
+            },
         });
+        dialog.render(true);
     }
 
     async requestItem(event) {

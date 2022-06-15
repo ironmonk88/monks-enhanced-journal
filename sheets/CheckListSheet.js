@@ -20,7 +20,10 @@ export class CheckListSheet extends EnhancedJournalSheet {
         return mergeObject(super.defaultOptions, {
             title: i18n("MonksEnhancedJournal.checklist"),
             template: "modules/monks-enhanced-journal/templates/checklist.html",
-            dragDrop: [{ dragSelector: ".checklist-item", dropSelector: ".checklist-list" }],
+            dragDrop: [
+                { dragSelector: ".checklist-item", dropSelector: ".checklist-list" },
+                { dragSelector: ".sheet-icon", dropSelector: "#board" }
+            ],
             filters: [{ inputSelector: 'input[name="search"]', contentSelector: ".checklist-list" }],
             contextMenuSelector: ".document",
             scrollY: [".checklist-list"]
@@ -318,16 +321,22 @@ export class CheckListSheet extends EnhancedJournalSheet {
     }
 
     _onDragStart(event) {
+        if ($(event.currentTarget).hasClass("sheet-icon"))
+            return super._onDragStart(event);
+
         let li = event.currentTarget.closest(".checklist-item");
-        const isFolder = li.classList.contains("folder");
-        const dragData = isFolder ?
-            { type: "Folder", id: li.dataset.folderId } :
-            { type: "Item", id: li.dataset.documentId };
-        event.dataTransfer.setData("text/plain", JSON.stringify(dragData));
-        this._dragType = dragData.type;
+        if (li) {
+            const isFolder = li.classList.contains("folder");
+            const dragData = isFolder ?
+                { type: "Folder", id: li.dataset.folderId } :
+                { type: "Item", id: li.dataset.documentId };
+            event.dataTransfer.setData("text/plain", JSON.stringify(dragData));
+            this._dragType = dragData.type;
+        }
     }
 
     _canDragStart(selector) {
+        if (selector == ".sheet-icon") return game.user.isGM;
         return this.object.isOwner;
     }
 

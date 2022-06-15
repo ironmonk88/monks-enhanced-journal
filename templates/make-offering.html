@@ -1,0 +1,37 @@
+<form class="flexcol">
+    <div class="flexcol make-offer-container">
+        <p class="notes" style="flex: 0 0 20px;">Drop an Actor or an Item here to select which character is making the offering</p>
+        <div class="form-group currency-group">
+            <div class="form-fields" style="flex-wrap:nowrap;">
+                <img class="actor-icon" src="{{actor.img}}" />
+                <h3>{{actor.name}}</h3>
+                <label style="white-space:nowrap;">Private Offer</label>
+                <input type="checkbox" class="private" {{checked private}} />
+            </div>
+        </div>
+        {{#if currency}}
+        <div class="form-group currency-group">
+            <div class="form-fields" style="flex-wrap:nowrap;">
+                {{#each currency}}
+                <label>{{localize this.name}}</label>
+                <input type="text" placeholder="0" class="currency-field" name="{{this.id}}" value="{{lookup @root.coins this.id}}" data-dtype="Number" style="text-align:right;" />
+                {{/each}}
+            </div>
+        </div>
+        {{/if}}
+        <div class="offering-items flexrow">
+            {{#each items}}
+            <div class="offering-item" data-id="{{this.id}}">
+                <img src="{{this.img}}" title="{{this.name}}" />
+                {{#if (gt this.qty 1)}}<div class="offering-qty">{{this.qty}}</div>{{/if}}
+            </div>
+            {{else}}
+            <div class="instruction">Drag items here to offer</div>
+            {{/each}}
+        </div>
+    </div>
+    <div class="offering-buttons flexrow" style="flex: 0 0 30px;">
+        <button type="submit" class="submit-offer"><i class="fas fa-hand-holding-usd"></i> Offer</button>
+        <button type="button" class="cancel-offer"><i class="fas fa-times"></i> Cancel</button>
+    </div>
+</form>

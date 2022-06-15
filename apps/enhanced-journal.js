@@ -217,7 +217,9 @@ export class EnhancedJournal extends Application {
             $('.window-title', this.element).html(this.subsheet.title + ' - ' + i18n("MonksEnhancedJournal.Title"));
 
             $('.content', this.element).attr('entity-type', this.object.data.type).attr('entity-id', this.object.id);
-            let classes = this.subsheet.options.classes.join(' ').replace('monks-enhanced-journal', '').replace(game.system.id, '');
+            let classes = this.subsheet.options.classes.join(' ').replace('monks-enhanced-journal', '')
+            if (!(this.subsheet instanceof ActorSheet))
+                classes = classes.replace(game.system.id, '');
             contentform.empty().attr('class', classes).append(this.subdocument); //.concat([`${game.system.id}`]).join(' ')
 
             if (!this.isEditable) {

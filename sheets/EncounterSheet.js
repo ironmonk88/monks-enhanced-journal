@@ -19,7 +19,8 @@ export class EncounterSheet extends EnhancedJournalSheet {
                 { dragSelector: ".encounter-monsters .item-list .item .item-image", dropSelector: "null" },
                 { dragSelector: ".encounter-items .item-list .item .item-name", dropSelector: "null" },
                 { dragSelector: ".create-encounter", dropSelector: "null" },
-                { dragSelector: ".create-combat", dropSelector: "null" }
+                { dragSelector: ".create-combat", dropSelector: "null" },
+                { dragSelector: ".sheet-icon", dropSelector: "#board" }
             ],
             scrollY: [".tab.description .tab-inner", ".encounter-content", ".encounter-items", ".encounter-dcs"]
         });
@@ -48,17 +49,19 @@ export class EncounterSheet extends EnhancedJournalSheet {
             return config[container][value];
         }
 
-        let config = MonksEnhancedJournal.config;
+        let config = MonksEnhancedJournal.system;
 
         if (data.data.flags && data.data.flags["monks-enhanced-journal"].dcs) {
             data.dcs = data.data.flags["monks-enhanced-journal"].dcs.map(dc => {
                 let data = duplicate(dc);
-                if (data.attribute == undefined || data.attribute.indexOf(':') < 0)
-                    data.label = 'Invalid';
-                else {
-                    let [type, value] = dc.attribute.split(':');
-                    data.label = safeGet('abilities', value) || safeGet('skills', value) || safeGet('scores', value) || safeGet('atributos', value) || safeGet('pericias', value) || value;
-                    data.label = i18n(data.label);
+                if (!data.label) {
+                    if (data.attribute == undefined || data.attribute.indexOf(':') < 0)
+                        data.label = 'Invalid';
+                    else {
+                        let [type, value] = dc.attribute.split(':');
+                        data.label = safeGet('abilities', value) || safeGet('skills', value) || safeGet('scores', value) || safeGet('atributos', value) || safeGet('pericias', value) || value;
+                        data.label = i18n(data.label);
+                    }
                 }
                 data.img = (data.img == '' ? false : data.img);
                 return data;
@@ -165,6 +168,9 @@ export class EncounterSheet extends EnhancedJournalSheet {
     }
 
     _onDragStart(event) {
+        if ($(event.currentTarget).hasClass("sheet-icon"))
+            return super._onDragStart(event);
+
         const target = event.currentTarget;
 
         const dragData = { from: this.object.id };

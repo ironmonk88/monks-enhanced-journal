@@ -18,7 +18,8 @@ export class SlideshowSheet extends EnhancedJournalSheet {
             tabs: [{ navSelector: ".tabs", contentSelector: ".sheet-body", initial: "entry-details" }],
             dragDrop: [
                 { dragSelector: ".slide", dropSelector: ".slide" },
-                { dragSelector: ".slide", dropSelector: ".slideshow-body" }
+                { dragSelector: ".slide", dropSelector: ".slideshow-body" },
+                { dragSelector: ".sheet-icon", dropSelector: "#board" }
             ]
         });
     }
@@ -224,6 +225,9 @@ export class SlideshowSheet extends EnhancedJournalSheet {
     }
 
     _onDragStart(event) {
+        if ($(event.currentTarget).hasClass("sheet-icon"))
+            return super._onDragStart(event);
+
         const li = event.currentTarget;
 
         const dragData = { from: this.object.id };
