@@ -291,9 +291,8 @@ export class QuestSheet extends EnhancedJournalSheet {
     _getSubmitData(updateData = {}) {
         let data = expandObject(super._getSubmitData(updateData));
 
-        let rewardid = Object.keys(data.reward)[0];
-
         if (data.reward) {
+            let rewardid = Object.keys(data.reward)[0];
             data.flags['monks-enhanced-journal'].rewards = duplicate(this.getRewardData() || []);
             for (let reward of data.flags['monks-enhanced-journal'].rewards) {
                 let dataReward = data.reward[reward.id];
