@@ -105,6 +105,10 @@ export class EnhancedJournalSheet extends JournalSheet {
             })
         });
 
+        if (game.system.id == "pf2e") {
+            data.data.content = game.pf2e.TextEditor.enrichHTML(data.data.content, { secrets: game.user.isGM });
+        }
+
         data.userid = game.user.id;
 
         if (data.data.flags && data.data.flags["monks-enhanced-journal"] && data.data.flags["monks-enhanced-journal"][game.user.id])
@@ -239,6 +243,14 @@ export class EnhancedJournalSheet extends JournalSheet {
         $('.play-journal-sound', html).prop("disabled", false).click(this.toggleSound.bind(this));
 
         if (enhancedjournal) {
+            html.find('.new-link').click(async (event) => {
+                event.preventDefault();
+                event.stopPropagation();
+                const options = { width: 320 };
+                const cls = getDocumentClass("JournalEntry");
+                return cls.createDialog({}, options);
+            });
+
             html.find('.recent-link').click(async (ev) => {
                 let uuid = ev.currentTarget.dataset.documentUuid;
                 let id = ev.currentTarget.dataset.documentId;
@@ -259,6 +271,12 @@ export class EnhancedJournalSheet extends JournalSheet {
                 enhancedjournal.editors.content.options.save_onsavecallback = async (name) => {
                     await oldSaveCallback.call(enhancedjournal.editors.content, name);
                 }
+            }
+
+            if (game.system.id == "pf2e") {
+                let cls = CONFIG.JournalEntry.sheetClasses.base["pf2e.JournalSheetPF2e"].cls;
+                let sheet = new cls(this.object);
+                sheet.activateListeners(html);
             }
         }
     }
@@ -1344,8 +1362,23 @@ export class EnhancedJournalSheet extends JournalSheet {
             title: i18n("MonksEnhancedJournal.PopulateFromRollTable"),
             content: html,
             yes: async (html) => {
+                let getDiceRoll = async function (value) {
+                    if (value.indexOf("d") != -1) {
+                        let r = new Roll(value);
+                        await r.evaluate({ async: true });
+                        r.toMessage({ whisper: ChatMessage.getWhisperRecipients("GM").map(u => u.id), speaker: null }, { rollMode: "self" });
+                        value = r.total;
+                    } else {
+                        value = parseInt(value);
+                        if (isNaN(value)) value = 1;
+                    }
+
+                    return value;
+                }
+
                 let rolltable = $('[name="rollable-table"]').val();
                 let quantity = $('[name="quantity"]').val();
+                let count = $('[name="count"]').val();
                 let clear = $('[name="clear"]').prop("checked");
                 let duplicate = $('[name="duplicate"]').val();
 
@@ -1354,15 +1387,7 @@ export class EnhancedJournalSheet extends JournalSheet {
                     await that.object.setFlag('monks-enhanced-journal', "lastrolltable", rolltable);
                     await game.user.setFlag('monks-enhanced-journal', "lastrolltable", rolltable);
 
-                    if (quantity.indexOf("d") != -1) {
-                        let r = new Roll(quantity);
-                        await r.evaluate({ async: true });
-                        r.toMessage({ whisper: ChatMessage.getWhisperRecipients("GM").map(u => u.id), speaker: null}, { rollMode: "self" });
-                        quantity = r.total;
-                    } else {
-                        quantity = parseInt(quantity);
-                        if (isNaN(quantity)) quantity = 1;
-                    }
+                    quantity = await getDiceRoll(quantity);
 
                     let items = (clear ? [] : that.object.getFlag('monks-enhanced-journal', itemtype) || []);
                     let currency = that.object.getFlag('monks-enhanced-journal', "currency");
@@ -1433,7 +1458,7 @@ export class EnhancedJournalSheet extends JournalSheet {
                                     if (oldItem && duplicate != "additional") {
                                         if (duplicate == "increase") {
                                             let oldqty = this.getValue(oldItem, quantityname(), 1);
-                                            let newqty = this.getValue(itemData.data, quantityname(), 1);
+                                            let newqty = (count != "" ? await getDiceRoll(count) : this.getValue(itemData.data, quantityname(), 1));
                                             newqty = parseInt(oldqty) + parseInt(newqty);
                                             this.setValue(oldItem, quantityname(), newqty);
                                         }
@@ -1441,6 +1466,8 @@ export class EnhancedJournalSheet extends JournalSheet {
                                         itemData._id = makeid();
                                         itemData.flags['monks-enhanced-journal'] = { parentId: oldId };
                                         itemData.from = table.name;
+                                        if (count != "")
+                                            this.setValue(itemData, quantityname(), await getDiceRoll(count));
                                         items.push(itemData);
                                     }
                                 } else if (itemtype == "actors" && item instanceof Actor) {
@@ -1449,7 +1476,7 @@ export class EnhancedJournalSheet extends JournalSheet {
                                         uuid: item.uuid,
                                         img: item.img,
                                         name: item.name,
-                                        quantity: 1,
+                                        quantity: (count != "" ? await getDiceRoll(count) : 1),
                                         type: "Actor"
                                     }
                                     if (item.pack)

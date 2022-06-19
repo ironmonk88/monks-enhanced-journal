@@ -1,3 +1,35 @@
+# Version 1.0.62
+
+Added the option to add permissions icons to either both directories, just the MEJ directory, or neither.  In case you use a permissions browser other than MEJ.
+
+Removed the simple calendar folder form the MEJ directory.
+
+Fixed an issue where creating a Note from Simple Calendar was opening up MEJ.
+
+Added the option to apply the system tag to the MEJ subsheet, this can either fix styles or break the sheet.
+
+Added styling support for the Kult system.
+
+Added suport for using Dark Mode.
+
+Added the option to turn NPC chat bubbles on or off from the Token menu.  This will allow the GM to trigger the chat bubbles, and also turn them off during combat.
+
+Fixed issues with PF2E and the styling of journal entries.
+
+Fixed an issue with PF2E and inline links.
+
+Fixed issue in PF2E with purchasing items.
+
+Fixed issue in PF2E with dropping items onto an actor.
+
+Fixed issue with PF2E and unequipping the item before adding it to an Actor.
+
+Added a button to create a new journal entry when viewing a blank entry.
+
+Added the option to set the quantity of the item rolled from a roll table.
+
+Fixed an issue with saving a brand new quest.
+
 # Version 1.0.61
 
 Fixed issues with displaying creature sheet in 3.5E

@@ -248,7 +248,10 @@ export class EncounterSheet extends EnhancedJournalSheet {
                     itemData = await EncounterSheet.createScrollFromSpell(itemData);
                 }
 
-                let update = { _id: makeid(), data: { remaining: 1, equipped: false } };
+                let update = { _id: makeid(), data: { remaining: 1 } };
+                if (game.system.id == "dnd5e") {
+                    update.data.equipped = false;
+                }
                 setProperty(data, quantityname(), getProperty(item.data.data, quantityname()));
                 this.setValue(update, quantityname(), 1);
 

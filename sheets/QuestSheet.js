@@ -291,9 +291,9 @@ export class QuestSheet extends EnhancedJournalSheet {
     _getSubmitData(updateData = {}) {
         let data = expandObject(super._getSubmitData(updateData));
 
-        let rewardid = Object.keys(data.reward)[0];
-
         if (data.reward) {
+            let rewardid = Object.keys(data.reward)[0];
+
             data.flags['monks-enhanced-journal'].rewards = duplicate(this.getRewardData() || []);
             for (let reward of data.flags['monks-enhanced-journal'].rewards) {
                 let dataReward = data.reward[reward.id];
@@ -539,7 +539,10 @@ export class QuestSheet extends EnhancedJournalSheet {
 
             let items = reward.items;
 
-            let update = { _id: makeid(), data: { remaining: 1, equipped: false } };
+            let update = { _id: makeid(), data: { remaining: 1 } };
+            if (game.system.id == "dnd5e") {
+                update.data.equipped = false;
+            }
             update[quantityname()] = item.data.data[quantityname()];
             this.setValue(update, quantityname(), 1);
             items.push(mergeObject(itemData, update));

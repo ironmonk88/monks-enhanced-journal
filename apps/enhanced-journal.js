@@ -108,7 +108,7 @@ export class EnhancedJournal extends Application {
 
         if (this.element) {
             this.renderDirectory().then((html) => {
-                MonksEnhancedJournal.updateDirectory(html);
+                MonksEnhancedJournal.updateDirectory(html, false);
             })
 
             this.renderSubSheet().then(() => {
@@ -149,6 +149,12 @@ export class EnhancedJournal extends Application {
         }
         //}
 
+        folder = game.journal.directory.folders.find(f => (f.name == '_simple_calendar_notes_directory' && f.parent == null));
+        if (folder) {
+            let elem = html.find(`.folder[data-folder-id="${folder.id}"]`);
+            elem.remove();
+        }
+
         this.activateDirectoryListeners(html);
 
         this._restoreScrollPositions(html);
@@ -175,8 +181,10 @@ export class EnhancedJournal extends Application {
             const cls = (this.object._getSheetClass ? this.object._getSheetClass() : null);
             if (!cls)
                 this.subsheet = new EnhancedJournalSheet(this.object);
-            else
-                this.subsheet = new cls(this.object, { editable: this.object.isOwner, enhancedjournal: this });
+            else 
+                this.subsheet = new cls(this.object, { editable: this.object.isOwner, enhancedjournal: this });   
+            
+            this.object._sheet = this.subsheet;
 
             this.subsheet._state = this.subsheet.constructor.RENDER_STATES.RENDERING;
 
@@ -218,7 +226,7 @@ export class EnhancedJournal extends Application {
 
             $('.content', this.element).attr('entity-type', this.object.data.type).attr('entity-id', this.object.id);
             let classes = this.subsheet.options.classes.join(' ').replace('monks-enhanced-journal', '')
-            if (!(this.subsheet instanceof ActorSheet))
+            if (!(this.subsheet instanceof ActorSheet) && !setting("use-system-tag"))
                 classes = classes.replace(game.system.id, '');
             contentform.empty().attr('class', classes).append(this.subdocument); //.concat([`${game.system.id}`]).join(' ')
 
@@ -291,8 +299,12 @@ export class EnhancedJournal extends Application {
                 return oldActivateEditor.call(this, ...args);
             }
 
+            this.object._sheet = null;  // Adding this to prevent Quick Encounters from automatically opening
+
             if (this.object.data.type != 'blank')
                 Hooks.callAll('renderJournalSheet', this.subsheet, contentform, templateData); //this.object);
+
+            this.object._sheet = this.subsheet;
 
             //if this entry is different from the last one...
             if (this._lastentry != this.object.id) {
@@ -371,7 +383,7 @@ export class EnhancedJournal extends Application {
             editor.button.style.display = "";
 
         const owner = this.object.isOwner;
-        const content = TextEditor.enrichHTML(this.object.data.content, { secrets: owner, documents: true });
+        const content = (game.system.id == "pf2e" ? game.pf2e.TextEditor : TextEditor).enrichHTML(this.object.data.content, { secrets: owner, documents: true });
         $('.editor-content[data-edit="content"]', this.element).html(content);
     }
 

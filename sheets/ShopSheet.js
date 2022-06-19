@@ -583,12 +583,17 @@ export class ShopSheet extends EnhancedJournalSheet {
 
             let price = ShopSheet.getPrice(item.data);
             let adjustment = this.object.data.flags["monks-enhanced-journal"].sell ?? 1;
-            items.push(mergeObject(itemData, {
+            let update = {
                 _id: makeid(),
                 hide: !!data.data?.hide,
                 lock: !!data.data?.lock,
-                data: { cost: (price.value * adjustment) + " " + price.currency, equipped: false }
-            }));
+                data: { cost: (price.value * adjustment) + " " + price.currency }
+
+            }
+            if (game.system.id == "dnd5e") {
+                update.data.equipped = false;
+            }
+            items.push(mergeObject(itemData, update));
             this.object.setFlag('monks-enhanced-journal', 'items', items);
         }
     }

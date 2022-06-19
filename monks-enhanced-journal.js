@@ -577,7 +577,7 @@ export class MonksEnhancedJournal {
         }
 
         let clickNote = function (wrapped, ...args) {
-            if (!game.user.isGM && this.data.flags['monks-enhanced-journal']?.chatbubble) {
+            if (setting("show-chat-bubbles") && this.data.flags['monks-enhanced-journal']?.chatbubble) {
                 let journal = game.journal.get(this.data.entryId);
                 if (journal && !journal.testUserPermission(game.user, "OBSERVER"))
                     MonksEnhancedJournal.showAsChatBubble(this, journal);
@@ -604,7 +604,7 @@ export class MonksEnhancedJournal {
         }
 
         let onCanControlToken = function (wrapped, ...args) {
-            if (!game.user.isGM && this.data.flags['monks-enhanced-journal']?.chatbubble && !this.isOwner) {
+            if (setting("show-chat-bubbles") && this.data.flags['monks-enhanced-journal']?.chatbubble) {
                 let journal = game.journal.get(this.data.flags['monks-enhanced-journal']?.chatbubble);
                 if (journal)
                     MonksEnhancedJournal.showAsChatBubble(this, journal);
@@ -734,7 +734,7 @@ export class MonksEnhancedJournal {
                     isFix = true;
                     let item = doc.toObject();
                     item.data[MonksEnhancedJournal.quantityname] = (item.data[MonksEnhancedJournal.quantityname]?.hasOwnProperty("value") ? { value: i.qty } : i.qty);
-                    item.data[MonksEnhancedJournal.pricename] = (item.data[MonksEnhancedJournal.pricename].hasOwnProperty("value") ? { value: i.price } : i.price);
+                    item.data[MonksEnhancedJournal.pricename] = (item.data[MonksEnhancedJournal.pricename]?.hasOwnProperty("value") ? { value: i.price } : i.price);
 
                     if (i.cost != undefined)
                         item.data.cost = i.cost;
@@ -963,6 +963,8 @@ export class MonksEnhancedJournal {
             let sheet = (!document?._sheet ? document?._getSheetClass() : document?._sheet);
             if ((sheet?.name || sheet?.constructor?.name) == 'QuestPreviewShim')
                 return false;
+            if ((sheet?.name || sheet?.constructor?.name) == 'NoteSheet')
+                return false;
             if ((sheet?.name || sheet?.constructor?.name) == 'DscrybApp')
                 return false;
             if ((sheet?.name || sheet?.constructor?.name) == 'NearbyApp')
@@ -1121,6 +1123,10 @@ export class MonksEnhancedJournal {
         game.socket.on(MonksEnhancedJournal.SOCKET, MonksEnhancedJournal.onMessage);
 
         MonksEnhancedJournal.registerSheetClasses();
+
+        let setting = game.settings.settings.get("monks-enhanced-journal.show-chat-bubbles");
+        if (setting)
+            setting.default = !game.user.isGM;
 
         for (let entry of game.journal) {
             if (entry.data?.flags['monks-enhanced-journal']?.type) {
@@ -1562,7 +1568,7 @@ export class MonksEnhancedJournal {
         }*/
     }
 
-    static updateDirectory(html) {
+    static updateDirectory(html, main) {
         if (setting("show-folder-sort")) {
             $('.folder', html).each(function () {
                 let id = this.dataset.folderId;
@@ -1592,7 +1598,7 @@ export class MonksEnhancedJournal {
             }
 
             $('.document-name .permissions', this).remove();
-            if (setting('show-permissions') && game.user.isGM && (document.data.permission.default > 0 || Object.keys(document.data.permission).length > 1)) {
+            if ((setting('show-permissions') == 'true' || (setting('show-permissions') == 'mej' && !main)) && game.user.isGM && (document.data.permission.default > 0 || Object.keys(document.data.permission).length > 1)) {
                 let permissions = $('<div>').addClass('permissions');
                 if (document.data.permission.default > 0) {
                     const permission = Object.keys(CONST.ENTITY_PERMISSIONS)[document.data.permission.default];
@@ -1802,7 +1808,7 @@ export class MonksEnhancedJournal {
 
                     if (msgitem.sell > 0) {
                         //check if the player can afford it
-                        if (!cls.canAfford((msgitem.sell * msgitem.quantity) + " " + msgitem.currency, actor)) {
+                        if (!cls.constuctor.canAfford((msgitem.sell * msgitem.quantity) + " " + msgitem.currency, actor)) {
                             ui.notifications.warn(format("MonksEnhancedJournal.msg.CannotTransferCannotAffordIt", { name: actor.name }));
                             msg = `<span class="request-msg"><i class="fas fa-times"></i> ${format("MonksEnhancedJournal.msg.CannotTransferCannotAffordIt", { name: actor.name })}</span>`;
                             continue;
@@ -2190,10 +2196,10 @@ Hooks.on("renderJournalDirectory", async (app, html, options) => {
     log('rendering journal directory', app, html, options);
     if (MonksEnhancedJournal.journal) {
         let jdir = await MonksEnhancedJournal.journal.renderDirectory();
-        MonksEnhancedJournal.updateDirectory(jdir);
+        MonksEnhancedJournal.updateDirectory(jdir, false);
     }
 
-    MonksEnhancedJournal.updateDirectory(html);
+    MonksEnhancedJournal.updateDirectory(html, true);
 });
 
 Hooks.on("renderSettingsConfig", (app, html, data) => {
@@ -2345,7 +2351,7 @@ Hooks.on('dropActorSheetData', (actor, sheet, data) => {
                 cls.itemDropped.call(cls, data.id, actor, entry).then((result) => {
                     if ((result?.quantity ?? 0) > 0) {
                         cls.setValue(data.data, quantityname(), result.quantity);
-                        sheet._onDropItem(null, data);
+                        sheet._onDropItem({ preventDefault: () => { } }, data);
                     }
                 });
 
@@ -2366,7 +2372,7 @@ Hooks.on('dropJournalSheetData', (journal, sheet, data) => {
                 cls.itemDropped.call(cls, data.id, journal, entry).then((result) => {
                     if (!!result) {
                         cls.setValue(data.data, quantityname(), result);
-                        sheet._onDropItem(null, data);
+                        sheet._onDropItem({ preventDefault: () => { }}, data);
                     }
                 });
 
@@ -2584,6 +2590,18 @@ Hooks.on("getSceneControlButtons", (controls) => {
             }
         });
     }
+
+    let tokenControls = controls.find(control => control.name === "token")
+    tokenControls.tools.push({
+        name: "tokendialog",
+        title: "Toggle Token Dialog Chat Bubbles",
+        icon: "fas fa-comment",
+        toggle: true,
+        active: setting('show-chat-bubbles'),
+        onClick: toggled => {
+            game.settings.set('monks-enhanced-journal', 'show-chat-bubbles', toggled);
+        }
+    });
 });
 
 Hooks.on("updateSetting", (setting, data, options, userid) => {

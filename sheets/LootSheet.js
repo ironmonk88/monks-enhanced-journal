@@ -464,7 +464,11 @@ export class LootSheet extends EnhancedJournalSheet {
                 itemData = await LootSheet.createScrollFromSpell(itemData);
             }
 
-            items.push(mergeObject(itemData, { _id: makeid(), data: { equipped: false } }));
+            let update = { _id: makeid(), data: { } }
+            if (game.system.id == "dnd5e") {
+                update.data.equipped = false;
+            }
+            items.push(mergeObject(itemData, update));
             await this.object.setFlag('monks-enhanced-journal', 'items', items);
             return true;
         }

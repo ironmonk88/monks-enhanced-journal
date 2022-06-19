@@ -10,6 +10,12 @@ export const registerSettings = function () {
 		'monks-tokenbar': "Monk's TokenBar"
 	};
 
+	let permissions = {
+		'true': "Sidebar and Enhanced Journal",
+		'mej': "Just Enhanced Journal",
+		'false': "Neither"
+	};
+
 	let lootsheetoptions = MonksEnhancedJournal.getLootSheetOptions();
 	let lootentity = {};
 	let lootfolder = {};
@@ -98,8 +104,9 @@ export const registerSettings = function () {
 		hint: i18n("MonksEnhancedJournal.show-permissions.hint"),
 		scope: "world",
 		config: true,
-		default: true,
-		type: Boolean,
+		default: 'true',
+		type: String,
+		choices: permissions,
 	});
 
 	game.settings.register(modulename, "hud-limited", {
@@ -210,6 +217,15 @@ export const registerSettings = function () {
 		type: Boolean,
 	});
 
+	game.settings.register(modulename, "use-system-tag", {
+		name: i18n("MonksEnhancedJournal.use-system-tag.name"),
+		hint: i18n("MonksEnhancedJournal.use-system-tag.hint"),
+		scope: "world",
+		config: true,
+		default: game.system.id == "pf2e",
+		type: Boolean,
+	});
+
 	game.settings.register(modulename, "distribute-conversion", {
 		name: i18n("MonksEnhancedJournal.distribute-conversion.name"),
 		hint: i18n("MonksEnhancedJournal.distribute-conversion.hint"),
@@ -315,6 +331,13 @@ export const registerSettings = function () {
 	game.settings.register(modulename, "show-dialog", {
 		scope: "client",
 		default: true,
+		type: Boolean,
+		config: false
+	});
+
+	game.settings.register(modulename, "show-chat-bubbles", {
+		scope: "client",
+		default: false,
 		type: Boolean,
 		config: false
 	});
