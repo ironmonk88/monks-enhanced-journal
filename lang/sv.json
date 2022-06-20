@@ -1,6 +1,6 @@
 {
   "I18N.LANGUAGE": "Svenska",
-  "I18N.MAINTAINERS": "@Rangertheman#4927",  
+  "I18N.MAINTAINERS": "@Rangertheman#4927",
 
   "MonksEnhancedJournal.Title": "Monk's Enhanced Journal",
   "MonksEnhancedJournal.BackTooltip": "",
@@ -40,7 +40,7 @@
   "MonksEnhancedJournal.hide-inline.name": "Dölj länkar",
   "MonksEnhancedJournal.hide-inline.hint": "Dölj länkar till dokument som spelarna inte har tillgång till.",
   "MonksEnhancedJournal.hide-rolltables.name": "Dölj tärningsslagstabeller",
-  "MonksEnhancedJournal.hide-rolltables.hint": "Dölj tabeller som ligger i kompendier, när du lägger till byten från en tärningsslagstabell",																			
+  "MonksEnhancedJournal.hide-rolltables.hint": "Dölj tabeller som ligger i kompendier, när du lägger till byten från en tärningsslagstabell",
   "MonksEnhancedJournal.hud-limited.name": "Behörighet för Anteckningsdisplayen",
   "MonksEnhancedJournal.hud-limited.hint": "Använd begränsad behörighet när du ändrar synligheten medan du använder Anteckningsdisplayen (HUD)",
   "MonksEnhancedJournal.show-bookmarkbar.name": "Visa bokmärkesfältet",
@@ -59,29 +59,22 @@
   "MonksEnhancedJournal.editplaceattribute.hint": "Redigera egenskaperna som visas på platsformuläret",
   "MonksEnhancedJournal.loot-inactive-players.name": "Bytesfördelning till inaktiva spelare",
   "MonksEnhancedJournal.loot-inactive-players.hint": "Lägg till en inaktiv spelare till en bytesanteckning för den ska vara med vid fördelningen",
-													   														 														 										  																				
-  "MonsEnhancedJournal.SlideConfiguration": "Inställning för bildspel",
-  "MonsEnhancedJournal.DCConfiguration": "Inställning för svårighetsnivå",
-  "MonsEnhancedJournal.TrapConfiguration": "Inställning för fällor",
+  "MonksEnhancedJournal.use-system-tag.name": "Use system tag",
+  "MonksEnhancedJournal.use-system-tag.hint": "When styling the sub sheet, apply the system tag.  This can either solve some issues or break the sheet",
+
+  "MonksEnhancedJournal.SlideConfiguration": "Inställning för bildspel",
+  "MonksEnhancedJournal.DCConfiguration": "Inställning för svårighetsnivå",
+  "MonksEnhancedJournal.TrapConfiguration": "Inställning för fällor",
   "MonksEnhancedJournal.Update": "Uppdatera",
   "MonksEnhancedJournal.Ability": "Förmåga",
-  "MonksEnhancedJournal.Skill": "Färdighet",														   																  																				
-   
-  "MonksEnhancedJournal.ClickForNext": "Klicka för nästa bild.",  
+  "MonksEnhancedJournal.Skill": "Färdighet",
+    
+  "MonksEnhancedJournal.ClickForNext": "Klicka för nästa bild.",
   "MonksEnhancedJournal.MsgShowPlayers": "Visa {title} för {which}.",
   "MonksEnhancedJournal.MsgOnlyOneBookmark": "Kan inte bokmärka samma sak två gånger",
 
-  
-  
-  
-  
-  
-  
-  
-  
-  
   "MonksEnhancedJournal.DistributeCurrency": "Fördela pengar",
-  "MonksEnhancedJournal.Distribute": "Fördela",  
+  "MonksEnhancedJournal.Distribute": "Fördela",
   "MonksEnhancedJournal.NewTab": "Ny flik",
   "MonksEnhancedJournal.OpenEntry": "Öppna en anteckning",
   "MonksEnhancedJournal.CannotFindEntity": "Kan inte hitta anteckningen",
@@ -199,6 +192,7 @@
   "MonksEnhancedJournal.LootName": "Bytesnamn",
   "MonksEnhancedJournal.PlayerPurchasing": "Köpande spelare",
   "MonksEnhancedJournal.PlayerReceiving": "Mottagande spelare",
+  "MonksEnhancedJournal.PlayerSelling": "Säljande spelare",													 
   "MonksEnhancedJournal.Townsfolk": "Invånare",
   "MonksEnhancedJournal.Shops": "Butiker",
   "MonksEnhancedJournal.Organizations": "Organisationer",
@@ -275,7 +269,7 @@
   "MonksEnhancedJournal.RemoveRelationship": "Ta bort relation",
   "MonksEnhancedJournal.Audio": "Audio",
   "MonksEnhancedJournal.Slides": "Bilder",
-  "MonksEnhancedJournal.CanvasColour": "Färg på spelmattan",  
+  "MonksEnhancedJournal.CanvasColour": "Färg på spelmattan",
   "MonksEnhancedJournal.LifeStatus": "Livsstatus",
   "MonksEnhancedJournal.EditAttributes": "Redigera egenskaper",
   "MonksEnhancedJournal.Volume": "Volym",
@@ -349,6 +343,7 @@
   "MonksEnhancedJournal.ClearAllItems": "Rensa alla föremål",
   "MonksEnhancedJournal.items": "föremål",
   "MonksEnhancedJournal.StartEncounter": "Starta möte",
+  "MonksEnhancedJournal.completed": "avslutat",
   "MonksEnhancedJournal.required": "nödvändig",
   "MonksEnhancedJournal.FromCompendium": "Från kompendium",
   "MonksEnhancedJournal.HideShowRelationship": "Dölj/visa relation",
@@ -375,6 +370,21 @@
   "MonksEnhancedJournal.AssignItemsToThisLootEntry": "Lägg till föremål till den här bytesanteckningen",
   "MonksEnhancedJournal.ChangeQuestStatus": "Ändra uppdragsstatus",
   "MonksEnhancedJournal.SelectEntity": "Välj enhet",
+  "MonksEnhancedJournal.Offerings": "Erbjudanden",
+  "MonksEnhancedJournal.AddSound": "Lägg till bakgrundsljudeffekt",
+  "MonksEnhancedJournal.SelectCoordinates": "Välj koordinater",
+  "MonksEnhancedJournal.StartCombat": "Starta strid",
+  "MonksEnhancedJournal.Buy": "Köp",
+  "MonksEnhancedJournal.Sell": "Sälj",
+  "MonksEnhancedJournal.Trade": "Byt",
+  "MonksEnhancedJournal.ConvertShopItems": "Konvertera föremål i butiken",
+  "MonksEnhancedJournal.MakeOffering": "Kom med ett erbjudande",
+  "MonksEnhancedJournal.CancelOffering": "Avbryt erbjudande",
+  "MonksEnhancedJournal.AcceptOffering": "Acceptera erbjudande",
+  "MonksEnhancedJournal.RejectOffering": "Avvisa erbjudande",
+  "MonksEnhancedJournal.RemoveOffering": "Ta bort erbjudande",
+  "MonksEnhancedJournal.Selected": "Vald",
+  "MonksEnhancedJournal.QuantityOfItems": "Antal föremål",											
 
   "MonksEnhancedJournal.msg.NoPlayersSelected": "Ingen spelare har valts som mottagare av den här antecknigen",
   "MonksEnhancedJournal.msg.CannotAddItemType": "Kan inte lägga till föremål av den här typen",
@@ -388,7 +398,8 @@
   "MonksEnhancedJournal.msg.CannotShowNoContent": "Kan inte visa en anteckning som saknar innehåll eller bild",
   "MonksEnhancedJournal.msg.CouldNotFindLootEntity": "Kan inte visa bytesanteckning",
   "MonksEnhancedJournal.msg.CouldNotFindLootEntityCreating": "Kan inte hitta en bytesanteckning, skapar en ny istället",
-  "MonksEnhancedJournal.msg.ThereAreNoCharactersToDistribute": "Det finns inga karaktärer att fördela ut till",
+  "MonksEnhancedJournal.msg.ThereAreNoCharactersToDistribute": "Det finns inga karaktärer att fördela ut till",  
+  
   "MonksEnhancedJournal.msg.ThereAreNoMoneyToDistribute": "Det finns inga pengar att dela på",
   "MonksEnhancedJournal.msg.YouDontHaveCharacter": "Du har ingen karaktär kopplad till din användare",
   "MonksEnhancedJournal.msg.CannotTakeLootWithoutGM": "Kan inte ta av bytet om inte SL är närvarande.",
@@ -402,15 +413,19 @@
   "MonksEnhancedJournal.msg.ClearTheValueToRemoveCharacterFromSplit": "Ta bort värdet för spelaren för att ange att den spelaren inte ska erhålla en del av bytet",
   "MonksEnhancedJournal.msg.AssignRemainderToCharacter": "Ge resten av pengarna till den här karaktären",
   "MonksEnhancedJournal.msg.SetTheConversionToZero": "Ange omvandlingsfaktorn 0 om den här valutan ska vara standardvaluta. Alla andra valutaomvandlingar utgår från standardvalutan.",
-  "MonksEnhancedJournal.msg.DragAnActorToAddToEncounter": "Dra en person eller varelse hit för att lägga den til mötet",
+  "MonksEnhancedJournal.msg.DragAnActorToAddToEncounter": "Dra en person eller varelse hit för att lägga den til mötet",  
+  
   "MonksEnhancedJournal.msg.NoMonstersAtTheMoment": "Inga monster för tillfället",
   "MonksEnhancedJournal.msg.DragAnItemToAddToRewards": "Dra ett föremål till mötet för att lägga till det som belöning",
+  
   "MonksEnhancedJournal.msg.NoRewardsAtTheMoment": "Inga belöningar för tillfället",
   "MonksEnhancedJournal.msg.NoDCsAddedPressAddButton": "Ingen svårighetsgrad tillagd. Klicka på Lägg till för att skapa en",
+  
   "MonksEnhancedJournal.msg.NoDCsAtTheMoment": "Ingen svårighetsgrad för tilfället",
   "MonksEnhancedJournal.msg.CannotEditNotesWithoutGM": "Kan inte redigera anteckningen om inte SL är närvarande",
   "MonksEnhancedJournal.msg.DragActorsHere": "Dra personer eller varelser hit.",
-  "MonksEnhancedJournal.msg.DragItemsHereToAddToLoot": "Dra föremål hit för att lägga det till bytet",
+  "MonksEnhancedJournal.msg.DragItemsHereToAddToLoot": "Dra föremål hit för att lägga det till bytet",  
+  
   "MonksEnhancedJournal.msg.NoLootAtTheMoment": "Inget plundringsbyte för tillfället",
   "MonksEnhancedJournal.msg.DragPersonPlaceOrganizationToMakeRelationship": "Dra en person, plats eller organisation hit för att skapa en relation",
   "MonksEnhancedJournal.msg.DragPOIPlaceOrganizationToMakeRelationship": "Dra en sevärdhet, plats eller organisation hit för att skapa en relation",
@@ -431,19 +446,24 @@
   "MonksEnhancedJournal.msg.ItemAddedToInventory": "Föremålet har lagts till i din utrustning",
   "MonksEnhancedJournal.msg.ShopMadeOffer": "Butiken gav dig ett erbjudande. Accepterar du det?",
   "MonksEnhancedJournal.msg.ShopConsideringOffer": "Butiken överväger ett erbjudande",
-  "MonksEnhancedJournal.msg.NoteEnoughRemains": "Finns inte tilräcklingt många föremål kvar. Erbjuder bara {quantity}",
+  "MonksEnhancedJournal.msg.NoteEnoughRemains": "Finns inte tilräcklingt många föremål kvar. Erbjuder bara {quantity}",  
+  
   "MonksEnhancedJournal.msg.SoldToShop": "Sälj till butiken",
+  
   "MonksEnhancedJournal.msg.SaleHasBeenAction": "Försäljningen har blivit {verb}",
-  "MonksEnhancedJournal.msg.ClickCustomImage": "... Klicka för att lägga till en anpassad bild",
+  "MonksEnhancedJournal.msg.ClickCustomImage": "... Klicka för att lägga till en anpassad bild", 
+  
   "MonksEnhancedJournal.msg.CreateNew": "-- Skapa ny --",
   "MonksEnhancedJournal.msg.YouDoNotHavePermissionCreateToken": "Du har inte tillåtelse att skapa nya markörer!",
   "MonksEnhancedJournal.msg.PleaseSelectJournal": "Vänligen välj en anteckning",
-
-  "MonksEnhancedJournal.Contain": "Innehåller",
+  "MonksEnhancedJournal.msg.ShopIsNotReceivingItems": "Butiken tar inte emot föremål just nu",
+    
+  "MonksEnhancedJournal.Contain": "Innehåller",  
+   
   "MonksEnhancedJournal.Cover": "Täcker",
   "MonksEnhancedJournal.Stretch": "Sträcker ut",
   "MonksEnhancedJournal.Repeat": "Upprepar",
-  "MonksEnhancedJournal.Left": "Vänster",									  
+  "MonksEnhancedJournal.Left": "Vänster",
   "MonksEnhancedJournal.Center": "Center",
   "MonksEnhancedJournal.Right": "Höger",
   "MonksEnhancedJournal.Top": "Toppen",
@@ -476,6 +496,15 @@
   "MonksEnhancedJournal.purchasing.free": "Alla",
   "MonksEnhancedJournal.purchasing.request": "Begär att få köpa",
 
+  "MonksEnhancedJournal.selling.locked": "Köper inte från spelare",
+  "MonksEnhancedJournal.selling.free": "Alla",
+  "MonksEnhancedJournal.selling.request": "Kom med ett bud",
+
+  "MonksEnhancedJournal.offer.offering": "Erbjudande",
+  "MonksEnhancedJournal.offer.accepted": "Accepterat",
+  "MonksEnhancedJournal.offer.rejected": "Avvisat",
+  "MonksEnhancedJournal.offer.cancelled": "Avbrutet",  
+    
   "MonksEnhancedJournal.effect.none": "Ingen",
   "MonksEnhancedJournal.effect.slide-fade": "Tona in",
   "MonksEnhancedJournal.effect.slide-fade-left": "Tona in från vänster",
@@ -490,12 +519,12 @@
   "MonksEnhancedJournal.effect.slide-flip": "Flippa in",
   "MonksEnhancedJournal.effect.slide-page-turn": "Vänd blad",
 
-  "MonksEnhancedJournal.inactive": "Inaktiv",
-  "MonksEnhancedJournal.unavailable": "Inte tillgängligt",
-  "MonksEnhancedJournal.available": "Tillgängligt",
-  "MonksEnhancedJournal.inprogress": "Pågår",
-  "MonksEnhancedJournal.completed": "Slutfört",
-  "MonksEnhancedJournal.failed": "Misslyckat",
+  "MonksEnhancedJournal.queststatus.notactive": "Inaktiv",
+  "MonksEnhancedJournal.queststatus.unavailable": "Inte tillgängligt",
+  "MonksEnhancedJournal.queststatus.available": "Tillgängligt",
+  "MonksEnhancedJournal.queststatus.inprogress": "Pågår",
+  "MonksEnhancedJournal.queststatus.completed": "Slutfört",
+  "MonksEnhancedJournal.queststatus.failed": "Misslyckat",
 
   "MonksEnhancedJournal.currency.platinum": "Platina",
   "MonksEnhancedJournal.currency.gold": "Guld",
