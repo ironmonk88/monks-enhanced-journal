@@ -1,3 +1,7 @@
+# Version 1.0.63
+
+Fixing issue with PF2E and saving the editor contents.
+
 # Version 1.0.62
 
 Added the option to add permissions icons to either both directories, just the MEJ directory, or neither.  In case you use a permissions browser other than MEJ.

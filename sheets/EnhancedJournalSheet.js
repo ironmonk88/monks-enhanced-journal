@@ -276,7 +276,9 @@ export class EnhancedJournalSheet extends JournalSheet {
             if (game.system.id == "pf2e") {
                 let cls = CONFIG.JournalEntry.sheetClasses.base["pf2e.JournalSheetPF2e"].cls;
                 let sheet = new cls(this.object);
-                sheet.activateListeners(html);
+                this.pf2eActivateEditor = sheet.activateEditor;
+                sheet.activateEditor = this.activateEditor.bind(this);
+                sheet.activateListeners.call(this, html);
             }
         }
     }
@@ -293,7 +295,10 @@ export class EnhancedJournalSheet extends JournalSheet {
                     //font_formats: "Andale Mono=andale mono,times; Arial=arial,helvetica,sans-serif; Arial Black=arial black,avant garde; Book Antiqua=book antiqua,palatino; Comic Sans MS=comic sans ms,sans-serif; Courier New=courier new,courier; Georgia=georgia,palatino; Helvetica=helvetica; Impact=impact,chicago; Oswald=oswald; Symbol=symbol; Tahoma=tahoma,arial,helvetica,sans-serif; Terminal=terminal,monaco; Times New Roman=times new roman,times; Trebuchet MS=trebuchet ms,geneva; Verdana=verdana,geneva; Webdings=webdings; Wingdings=wingdings,zapf dingbats;Anglo Text=anglo_textregular;Lovers Quarrel=lovers_quarrelregular;Play=Play-Regular"
                 });
             }
-            super.activateEditor(name, options, initialContent);
+            if (this.pf2eActivateEditor)
+                this.pf2eActivateEditor.call(this, name, options, initialContent);
+            else
+                super.activateEditor(name, options, initialContent);
             //need this because foundry doesn't allow access to the init of the editor
             if (this.object.type == 'base' || this.object.type == 'journalentry' || this.object.type == 'oldentry' || setting("show-menubar")) {
                 let count = 0;
