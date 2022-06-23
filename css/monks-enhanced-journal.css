@@ -1681,6 +1681,7 @@ height: fit-content;*/
     font-size: 13px;
     text-align: left;
     align-items: center;
+    text-indent: 0;
 }
 
 .monks-journal-sheet.sheet .items-list .item-content{
