@@ -1636,6 +1636,10 @@ height: fit-content;*/
     text-decoration: line-through;
 }
 
+#objective-display .window-resizable-handle {
+    right: -1px;
+}
+
 .monks-journal-sheet.sheet .recent-link,
 .monks-journal-sheet.sheet .new-link {
     cursor: pointer;

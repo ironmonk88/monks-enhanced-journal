@@ -1,3 +1,21 @@
+# Version 1.0.64
+
+Fixed issue with refreshing the Journal Directory when creating a new journal entry.
+
+Fixed the position of the resize handle on the objectives dialog.
+
+Fixed issue with dropping an item from a shop onto an Actor in sfrpg.
+
+Fixed issue accepting an item that a player requests.
+
+Fixed issue where the loot chat message was looking like the shop chat message.
+
+Fixed issue with naming additional Loot Entries.
+
+Added the option to let currencies use dice notation.
+
+Fixed issues with localization on individual slide config screen.
+
 # Version 1.0.63
 
 Fixing issue with PF2E and saving the editor contents.
