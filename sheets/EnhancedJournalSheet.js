@@ -388,6 +388,20 @@ export class EnhancedJournalSheet extends JournalSheet {
             case 'sfrpg':
                 coinage = parseInt(actor.data.data.currency[(denomination == "cr" ? "credit" : denomination)]);
                 break;
+            case 'cyphersystem':
+                let currency = MonksEnhancedJournal.currencies.find(c => c.id == denomination);
+                let coins = actor.data.data.settings.currency;
+                let key = Object.keys(coins).find(key => coins[key] == currency.name);
+                let mapping = {
+                    "name": "quantity",
+                    "name2": "quantity2",
+                    "name3": "quantity3",
+                    "name4": "quantity4",
+                    "name5": "quantity5",
+                    "name6": "quantity6",
+                };
+                coinage = parseInt(coins[mapping[key]]);
+                break;
             default:
                 {
                     let coin = this.getValue(actor.data, currencyname());
@@ -501,6 +515,20 @@ export class EnhancedJournalSheet extends JournalSheet {
                         break;
                     case 'starwarsffg':
                         updates[`data.stats.credits.value`] = v;
+                        break;
+                    case 'cyphersystem':
+                        let currency = MonksEnhancedJournal.currencies.find(c => c.id == k);
+                        let coins = actor.data.data.settings.currency;
+                        let key = Object.keys(coins).find(key => coins[key] == currency.name);
+                        let mapping = {
+                            "name": "quantity",
+                            "name2": "quantity2",
+                            "name3": "quantity3",
+                            "name4": "quantity4",
+                            "name5": "quantity5",
+                            "name6": "quantity6",
+                        };
+                        updates[`data.settings.currency.${mapping[key]}`] = v;
                         break;
                     default:
                         let coin = this.getValue(actor.data, currencyname());
