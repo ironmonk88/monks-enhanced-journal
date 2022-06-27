@@ -941,6 +941,8 @@ export class EnhancedJournal extends Application {
                 //set the content to the extracted text (selectedHTML.html()) and use the title
                 let data = { name: title, type: 'journalentry', content: selectedHTML.html(), folder: this.object.folder };
                 let newentry = await JournalEntry.create(data, { render: false });
+                ui.journal.render();
+                MonksEnhancedJournal.emit("refreshDirectory", { name: "journal" });
 
                 //add a new tab but don't switch to it
                 this.enhancedjournal.addTab(newentry, { activate: false });

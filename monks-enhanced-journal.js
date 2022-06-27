@@ -1124,6 +1124,28 @@ export class MonksEnhancedJournal {
 
         MonksEnhancedJournal.registerSheetClasses();
 
+        if (game.system.id == "sfrpg") {
+            let cls = CONFIG.Actor.sheetClasses.character["sfrpg.ActorSheetSFRPGCharacter"].cls;
+            let oldProcessDroppedData = cls.prototype.processDroppedData;
+            cls.prototype.processDroppedData = async function (event, parsedDragData) {
+                if (parsedDragData.from && parsedDragData.data) {
+                    delete parsedDragData.data._id;
+                    const addedItemResult = await this.actor.createEmbeddedDocuments("Item", [parsedDragData.data], {});
+                    if (addedItemResult) {
+                        const addedItem = this.actor.items.get(addedItemResult.id);
+
+                        if (game.settings.get('sfrpg', 'scalingCantrips') && sidebarItem.type === "spell") {
+                            _onScalingCantripDrop(addedItem, this.actor);
+                        }
+
+                        return addedItem;
+                    }
+                    return null;
+                } else
+                    return oldProcessDroppedData.call(this, event, parsedDragData);
+            }
+        }
+
         let setting = game.settings.settings.get("monks-enhanced-journal.show-chat-bubbles");
         if (setting)
             setting.default = !game.user.isGM;
@@ -1635,6 +1657,10 @@ export class MonksEnhancedJournal {
         });*/
     }
 
+    static refreshDirectory(data) {
+        ui[data.name]?.render();
+    }
+
     static purchaseItem(data) {
         if (game.user.isGM) {
             let entry = game.journal.get(data.shopid);
@@ -1806,9 +1832,9 @@ export class MonksEnhancedJournal {
                         continue;
                     }
 
-                    if (msgitem.sell > 0) {
+                    if (msgitem.sell > 0 && cls.canAfford) {
                         //check if the player can afford it
-                        if (!cls.constuctor.canAfford((msgitem.sell * msgitem.quantity) + " " + msgitem.currency, actor)) {
+                        if (!cls.canAfford((msgitem.sell * msgitem.quantity) + " " + msgitem.currency, actor)) {
                             ui.notifications.warn(format("MonksEnhancedJournal.msg.CannotTransferCannotAffordIt", { name: actor.name }));
                             msg = `<span class="request-msg"><i class="fas fa-times"></i> ${format("MonksEnhancedJournal.msg.CannotTransferCannotAffordIt", { name: actor.name })}</span>`;
                             continue;

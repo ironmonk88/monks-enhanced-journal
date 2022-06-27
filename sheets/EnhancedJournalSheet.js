@@ -516,7 +516,7 @@ export class EnhancedJournalSheet extends JournalSheet {
         return this.constructor.addCurrency(actor, denomination, value);
     }
 
-    static getPrice(item, name) {
+    static getPrice(item, name, ignorePrice = false) {
         let result = {};
 
         name = name || pricename();
@@ -528,7 +528,7 @@ export class EnhancedJournalSheet extends JournalSheet {
         }
 
         let cost = (typeof item == "string" ? item : (item.data?.denomination != undefined && name != "cost" ? item.data?.value.value + " " + item.data?.denomination.value : this.getValue(item, name, null)));
-        if (name == "cost" && cost == undefined && typeof item !== "string" )
+        if (name == "cost" && cost == undefined && typeof item !== "string" && !ignorePrice )
             cost = (item.data?.denomination != undefined ? item.data?.value.value + " " + item.data?.denomination.value : this.getValue(item, "price"));
 
         cost = "" + cost;
@@ -582,8 +582,8 @@ export class EnhancedJournalSheet extends JournalSheet {
         return result;
     }
 
-    getPrice(item, name) {
-        return this.constructor.getPrice(item, name);
+    getPrice(item, name, ignorePrice = false) {
+        return this.constructor.getPrice(item, name, ignorePrice);
     }
 
     onAddSound() {
@@ -1085,8 +1085,8 @@ export class EnhancedJournalSheet extends JournalSheet {
         return this.constructor.getDocument(...args);
     }
 
-    static async createRequestMessage(entry, item, actor) {
-        let price = this.getPrice(item, "cost");
+    static async createRequestMessage(entry, item, actor, shop) {
+        let price = this.getPrice(item, "cost", !shop);
         item.sell = price?.value;
         item.currency = price?.currency;
         item.maxquantity = item.maxquantity ?? this.getValue(item, quantityname());
@@ -1696,7 +1696,7 @@ export class EnhancedJournalSheet extends JournalSheet {
             ).sort((a, b) => { return b - a; });
             let num = (previous.length ? previous[0] + 1 : 1);
 
-            name = `${i18n("MonksEnhancedJournal.LootEntry")}${(num > 1 ? ' (${num})' : '')}`;
+            name = `${i18n("MonksEnhancedJournal.LootEntry")}${(num > 1 ? ` (${num})` : '')}`;
             return name;
         }
 
@@ -1720,11 +1720,13 @@ export class EnhancedJournalSheet extends JournalSheet {
             if (EnhancedJournalSheet.isLootActor(lootSheet)) {
                 entity = await cls.create({ folder: folder, name: name, img: 'icons/svg/chest.svg', type: 'npc', flags: { core: { 'sheetClass': (lootSheet == "lootsheetnpc5e" ? 'dnd5e.LootSheetNPC5e' : 'core.a') } }, permission: { 'default': CONST.ENTITY_PERMISSIONS.OBSERVER } });
                 ui.actors.render();
+                MonksEnhancedJournal.emit("refreshDirectory", { name: "actors" });
             } else {
                 entity = await cls.create({ folder: folder, name: name, permission: { 'default': CONST.ENTITY_PERMISSIONS.OBSERVER } }, { render: false });
                 await entity.setFlag('monks-enhanced-journal', 'type', 'loot');
                 await entity.setFlag('monks-enhanced-journal', 'purchasing', 'confirm');
                 ui.journal.render();
+                MonksEnhancedJournal.emit("refreshDirectory", { name: "journal" });
             }
         }
 
@@ -1753,7 +1755,16 @@ export class EnhancedJournalSheet extends JournalSheet {
             let newcurr = entity.data.data.currency || {};
             for (let curr of MonksEnhancedJournal.currencies) {
                 if (currency[curr.id]) {
-                    newVal = parseInt(this.getValue(newcurr, curr.id) + (currency[curr.id] || 0));
+                    let cv = currency[curr.id];
+                    if (cv.indexOf("d") != -1) {
+                        let r = new Roll(cv);
+                        await r.evaluate({ async: true });
+                        cv = r.total;
+                    } else
+                        cv = parseInt(cv);
+                    if (isNaN(cv))
+                        cv = 0;
+                    newVal = parseInt(this.getValue(newcurr, curr.id) + cv);
                     this.setValue(newcurr, curr.id, newVal);
                 }
             }
@@ -1772,7 +1783,16 @@ export class EnhancedJournalSheet extends JournalSheet {
             let newcurr = entity.getFlag("monks-enhanced-journal", "currency") || {};
             for (let curr of MonksEnhancedJournal.currencies) {
                 if (currency[curr.id]) {
-                    newcurr[curr.id] = parseInt(EnhancedJournalSheet.getValue(newcurr, curr.id) + (currency[curr.id] || 0));
+                    let cv = currency[curr.id];
+                    if (cv.indexOf("d") != -1) {
+                        let r = new Roll(cv);
+                        await r.evaluate({ async: true });
+                        cv = r.total;
+                    } else
+                        cv = parseInt(cv);
+                    if (isNaN(cv))
+                        cv = 0;
+                    newcurr[curr.id] = parseInt(EnhancedJournalSheet.getValue(newcurr, curr.id) + cv);
                 }
             }
             await entity.setFlag('monks-enhanced-journal', 'currency', newcurr);
