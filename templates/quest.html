@@ -184,7 +184,7 @@
                                 <div class="form-fields" style="flex-wrap:nowrap;">
                                     {{#each currency}}
                                     <label>{{localize this.name}}</label>
-                                    <input type="number" min="0" name="reward.{{../reward.id}}.currency.{{this.id}}" placeholder="0" value="{{this.value}}" data-dtype="Number" style="text-align:right;" />
+                                    <input type="text" name="reward.{{../reward.id}}.currency.{{this.id}}" placeholder="0" value="{{this.value}}" style="text-align:right;" />
                                     {{/each}}
                                 </div>
                             </div>

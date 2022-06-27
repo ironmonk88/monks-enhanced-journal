@@ -390,10 +390,12 @@ export class LootSheet extends EnhancedJournalSheet {
             let result = await LootSheet.confirmQuantity(item, max, "take", false);
             if ((result?.quantity ?? 0) > 0) {
                 //create the chat message informaing the GM that player is trying to sell an item.
+                item = duplicate(item);
                 item.quantity = result.quantity;
                 item.maxquantity = max;
+                delete item.cost;
 
-                LootSheet.createRequestMessage.call(this, this.object, item, actor);
+                LootSheet.createRequestMessage.call(this, this.object, item, actor, false);
                 MonksEnhancedJournal.emit("notify", { actor: actor.name, item: item.name });
             }
         } else if (this.object.data.flags['monks-enhanced-journal'].purchasing == 'free') {
@@ -530,10 +532,12 @@ export class LootSheet extends EnhancedJournalSheet {
                 } else {
                     if (entry.data.flags["monks-enhanced-journal"].purchasing == 'confirm') {
                         //create the chat message informaing the GM that player is trying to sell an item.
+                        item = duplicate(item);
                         item.quantity = result.quantity;
                         item.maxquantity = (max != "" ? parseInt(max) : null);
+                        delete item.cost;
 
-                        LootSheet.createRequestMessage.call(this, entry, item, actor);
+                        LootSheet.createRequestMessage.call(this, entry, item, actor, false);
                         MonksEnhancedJournal.emit("notify", { actor: actor.name, item: item.name });
                     } else {
                         if (result.quantity > 0) {
