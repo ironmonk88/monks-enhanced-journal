@@ -1207,7 +1207,10 @@ export class MonksEnhancedJournal {
 
         if (game.modules.get("polyglot")?.active && !isNewerVersion(game.modules.get("polyglot").data.version, "1.7.30")) {
             let root = $('<div>').attr('id', 'enhanced-journal-fonts').appendTo('body');
-            for (let [k, v] of Object.entries(polyglot.polyglot.LanguageProvider.alphabets)) {
+			let alphabets = isNewerVersion(game.modules.get("polyglot").data.version, "1.7.30")
+				? game.polyglot.LanguageProvider.alphabets
+				: polyglot.polyglot.LanguageProvider.alphabets;
+			for (let [k, v] of Object.entries(alphabets)) {
                 $('<span>').attr('lang', k).css({ font: v }).appendTo(root);
             }
         }
