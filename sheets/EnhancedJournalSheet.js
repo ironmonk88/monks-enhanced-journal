@@ -547,7 +547,9 @@ export class EnhancedJournalSheet extends JournalSheet {
             currency = this.defaultCurrency();
 
         if (parseInt(price) != price) {
-            if (MonksEnhancedJournal.currencies.length) {
+            console.log(MonksEnhancedJournal.currencies);
+            if (MonksEnhancedJournal.currencies.length > 1) {
+                console.log(price.toString().split());
                 let numDecimal = price.toString().split(".")[1].length || 0;
                 let currs = MonksEnhancedJournal.currencies.filter(c => {
                     if (!c.convert)
@@ -570,10 +572,9 @@ export class EnhancedJournalSheet extends JournalSheet {
                 if (!curr) {
                     curr = MonksEnhancedJournal.currencies[MonksEnhancedJournal.currencies.length - 1];
                     currency = curr.id;
-                    price = Math.floor(price / curr.convert);
+                    price = Math.floor(price / (curr.convert || 1) );
                 }
-            } else
-                price = Math.floor(price);
+            } 
         }
 
         result.value = price;
