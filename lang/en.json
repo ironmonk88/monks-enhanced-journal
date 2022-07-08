@@ -58,6 +58,8 @@
   "MonksEnhancedJournal.loot-inactive-players.hint": "Add inactive players to a Loot Entry for loot distribution",
   "MonksEnhancedJournal.use-system-tag.name": "Use system tag",
   "MonksEnhancedJournal.use-system-tag.hint": "When styling the sub sheet, apply the system tag.  This can either solve some issues or break the sheet",
+  "MonksEnhancedJournal.show-chatbubble.name": "Show NPC Chat tool button",
+  "MonksEnhancedJournal.show-chatbubble.hint": "Show the button for toggling NPC chat bubbles on the Token toolbar",
 
   "MonksEnhancedJournal.SlideConfiguration": "Slide Configuration",
   "MonksEnhancedJournal.DCConfiguration": "DC Configuration",
@@ -523,6 +525,7 @@
   "MonksEnhancedJournal.currency.galacticcredit": "Galactic Credit",
   "MonksEnhancedJournal.currency.credit": "Credit",
   "MonksEnhancedJournal.currency.nuyen": "Nuyen",
+  "MonksEnhancedJournal.currency.caps": "Caps",
 
   "MonksEnhancedJournal.purchasing.hidden": "Hidden",
   "MonksEnhancedJournal.purchasing.visible": "Visible"

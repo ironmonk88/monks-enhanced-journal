@@ -137,6 +137,8 @@ export class QuestSheet extends EnhancedJournalSheet {
     }
 
     getReward(rewards) {
+        if (!rewards)
+            rewards = this.getRewardData();
         let id = this.object.getFlag('monks-enhanced-journal', 'reward') || 0;
         let reward = rewards.find(r => r.id == id);
         if (reward == undefined && rewards.length > 0) {
@@ -183,7 +185,8 @@ export class QuestSheet extends EnhancedJournalSheet {
 
         $('.assign-xp', html).on('click', function (event) {
             if (game.modules.get("monks-tokenbar")?.active && setting('rolling-module') == 'monks-tokenbar') {
-                game.MonksTokenBar.assignXP(null, { xp: that.object.getFlag('monks-enhanced-journal', 'xp') });
+                let reward = that.getReward();
+                game.MonksTokenBar.assignXP(null, { xp: reward.xp });
             }
         });
 

@@ -626,7 +626,6 @@ export class MonksEnhancedJournal {
 
             let menu = context.find(c => c.name == "SCENES.Notes");
             if (menu) {
-                let oldcallback = 
                 menu.callback = (li) => {
                     const scene = game.scenes.get(li.data("sceneId"));
                     const entry = scene.journal;
@@ -652,19 +651,11 @@ export class MonksEnhancedJournal {
             }
         }
 
-        let notesOnDropData = async function(...args) {
-            let [ event, data ] = args;
+        let notesCreatePreview = async function(wrapped, ...args) {
+            let [ noteData ] = args;
             // Acquire Journal entry
-            let entry = await JournalEntry.fromDropData(data);
-            if (entry.compendium) {
-                const journalData = game.journal.fromCompendium(entry);
-                entry = await JournalEntry.implementation.create(journalData);
-            }
+            let entry = game.journal.get(noteData.entryId);
 
-            // Get the world-transformed drop position
-            const coords = this._canvasCoordinatesFromDrop(event);
-            if (!coords) return false;
-            const noteData = { entryId: entry.id, x: coords[0], y: coords[1] };
             if (entry.type == 'shop')
                 noteData.icon = "icons/svg/hanging-sign.svg";
             else if (entry.type == 'loot')
@@ -674,14 +665,15 @@ export class MonksEnhancedJournal {
             else if (entry.type == 'place')
                 noteData.icon = "icons/svg/village.svg";
 
-            return this._createPreview(noteData, { top: event.clientY - 20, left: event.clientX + 40 });
+            return wrapped(...args);
         }
 
         if (game.modules.get("lib-wrapper")?.active) {
-            libWrapper.register("monks-enhanced-journal", "NotesLayer.prototype._onDropData", notesOnDropData, "OVERRIDE");
+            libWrapper.register("monks-enhanced-journal", "NotesLayer.prototype._createPreview", notesCreatePreview, "WRAPPER");
         } else {
-            NotesLayer.prototype._onDropData = function (event) {
-                return notesOnDropData.call(this, ...arguments);
+            const oldCreatePreview = NotesLayer.prototype._createPreview;
+            NotesLayer.prototype._createPreview = function (event) {
+                return notesCreatePreview.call(this, oldCreatePreview.bind(this), ...arguments);
             }
         }
 
@@ -1129,18 +1121,30 @@ export class MonksEnhancedJournal {
             let oldProcessDroppedData = cls.prototype.processDroppedData;
             cls.prototype.processDroppedData = async function (event, parsedDragData) {
                 if (parsedDragData.from && parsedDragData.data) {
-                    delete parsedDragData.data._id;
-                    const addedItemResult = await this.actor.createEmbeddedDocuments("Item", [parsedDragData.data], {});
-                    if (addedItemResult) {
-                        const addedItem = this.actor.items.get(addedItemResult.id);
 
-                        if (game.settings.get('sfrpg', 'scalingCantrips') && sidebarItem.type === "spell") {
-                            _onScalingCantripDrop(addedItem, this.actor);
+                    let entry = game.journal.get(parsedDragData.journalid);
+                    if (entry) {
+                        const cls = (entry._getSheetClass ? entry._getSheetClass() : null);
+                        if (cls && cls.itemDropped) {
+                            cls.itemDropped.call(cls, parsedDragData.id, this.actor, entry).then(async (result) => {
+                                if ((result?.quantity ?? 0) > 0) {
+                                    cls.setValue(parsedDragData.data, quantityname(), result.quantity);
+
+                                    delete parsedDragData.data._id;
+                                    const addedItemResult = await this.actor.createEmbeddedDocuments("Item", [parsedDragData.data], {});
+                                    if (addedItemResult) {
+                                        const addedItem = this.actor.items.get(addedItemResult.id);
+
+                                        if (game.settings.get('sfrpg', 'scalingCantrips') && sidebarItem.type === "spell") {
+                                            _onScalingCantripDrop(addedItem, this.actor);
+                                        }
+                                    }
+                                }
+                            });
+
+                            return false;
                         }
-
-                        return addedItem;
                     }
-                    return null;
                 } else
                     return oldProcessDroppedData.call(this, event, parsedDragData);
             }
@@ -1205,6 +1209,7 @@ export class MonksEnhancedJournal {
         tinyMCE.PluginManager.add('background', backgroundinit);
         tinyMCE.PluginManager.add('dcconfig', dcconfiginit);
 
+        // Preload fonts for polyglot so there isn't a delay in showing them, and possibly revealing something
         if (game.modules.get("polyglot")?.active && !isNewerVersion(game.modules.get("polyglot").data.version, "1.7.30")) {
             let root = $('<div>').attr('id', 'enhanced-journal-fonts').appendTo('body');
             for (let [k, v] of Object.entries(polyglot.polyglot.LanguageProvider.alphabets)) {
@@ -2111,6 +2116,7 @@ export class MonksEnhancedJournal {
 
         if (value.length && Object.values(CONFIG.JournalEntry.noteIcons).find(i => i == value) == undefined && !name.length) {
             name = i18n("MonksEnhancedJournal.Custom");
+            $(`[name="icon"]`, html).append($("<option>").attr("value", value).html(i18n("MonksEnhancedJournal.Custom"))).val(value);
         }
 
         return $('<div>')
@@ -2181,12 +2187,23 @@ export class MonksEnhancedJournal {
                 return [{ id: "gp", name: i18n("MonksEnhancedJournal.currency.gold"), convert: 0 }];
             case "age-system":
                 return [{ id: "gp", name: i18n("MonksEnhancedJournal.currency.gold"), convert: 0 }, { id: "sp", name: i18n("MonksEnhancedJournal.currency.silver"), convert: 0.1 }, { id: "cp", name: i18n("MonksEnhancedJournal.currency.copper"), convert: 0.01 }];
+            case "cyphersystem":
+                return [
+                    { id: 'am', name: i18n('CYPHERSYSTEM.Adamantine'), convert: 1000 },
+                    { id: 'mt', name: i18n('CYPHERSYSTEM.Mithral'), convert: 100 },
+                    { id: 'pt', name: i18n('CYPHERSYSTEM.Platinum'), convert: 10 },
+                    { id: 'gp', name: i18n('CYPHERSYSTEM.Gold'), convert: 0 },
+                    { id: 'sp', name: i18n('CYPHERSYSTEM.Silver'), convert: 0.1 },
+                    { id: 'cp', name: i18n('CYPHERSYSTEM.Copper'), convert: 0.01 }
+                ];
             case "tormenta20":
                 return [{ id: "to", name: "TO", convert: 1 }, { id: "tp", name: "T$", convert: 0 }, { id: "tc", name: "TC", convert: 1 }];
             case "starwarsffg":
                 return [{ id: "cr", name: i18n("MonksEnhancedJournal.currency.credit"), convert: 0 }];
             case "shadowrun5e":
                 return [{ id: "ny", name: i18n("MonksEnhancedJournal.currency.nuyen"), convert: 0 }];
+            case "fallout":
+                return [{ id: "caps", name: i18n("MonksEnhancedJournal.currency.caps"), convert: 0 }];
             case "dnd5e":
             case "dnd4e":
             case "dnd3e":
@@ -2617,17 +2634,19 @@ Hooks.on("getSceneControlButtons", (controls) => {
         });
     }
 
-    let tokenControls = controls.find(control => control.name === "token")
-    tokenControls.tools.push({
-        name: "tokendialog",
-        title: "Toggle Token Dialog Chat Bubbles",
-        icon: "fas fa-comment",
-        toggle: true,
-        active: setting('show-chat-bubbles'),
-        onClick: toggled => {
-            game.settings.set('monks-enhanced-journal', 'show-chat-bubbles', toggled);
-        }
-    });
+    if (setting("show-chatbubble")) {
+        let tokenControls = controls.find(control => control.name === "token")
+        tokenControls.tools.push({
+            name: "tokendialog",
+            title: "Toggle Token Dialog Chat Bubbles",
+            icon: "fas fa-comment",
+            toggle: true,
+            active: setting('show-chat-bubbles'),
+            onClick: toggled => {
+                game.settings.set('monks-enhanced-journal', 'show-chat-bubbles', toggled);
+            }
+        });
+    }
 });
 
 Hooks.on("updateSetting", (setting, data, options, userid) => {

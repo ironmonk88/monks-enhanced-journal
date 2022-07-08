@@ -916,44 +916,13 @@ export class EnhancedJournal extends Application {
         });
     }
 
-    async splitJournal(event) {
+    splitJournal(event) {
         if ($('.nav-button.split i', this.enhancedjournal.element).hasClass('disabled')) {
             ui.notifications.warn(i18n("MonksEnhancedJournal.CannotSplitJournal"));
             return;
         }
 
-        let ctrl = window.getSelection().baseNode?.parentNode;
-
-        if (ctrl == undefined) {
-            ui.notifications.info(i18n("MonksEnhancedJournal.NoTextSelected"));
-            return;
-        }
-
-        //make sure this is editor content selected
-        if ($(ctrl).closest('div.editor-content').length > 0) {
-            var selection = window.getSelection().getRangeAt(0);
-            var selectedText = selection.extractContents();
-            let selectedHTML = $('<div>').append(selectedText);
-            if (selectedHTML.html() != '') {
-                let title = $('h1,h2,h3,h4', selectedHTML).first().text() || i18n("MonksEnhancedJournal.ExtractedJournalEntry");
-
-                //create a new Journal entry in the same folder as the current object
-                //set the content to the extracted text (selectedHTML.html()) and use the title
-                let data = { name: title, type: 'journalentry', content: selectedHTML.html(), folder: this.object.folder };
-                let newentry = await JournalEntry.create(data, { render: false });
-                ui.journal.render();
-                MonksEnhancedJournal.emit("refreshDirectory", { name: "journal" });
-
-                //add a new tab but don't switch to it
-                this.enhancedjournal.addTab(newentry, { activate: false });
-
-                //save the current entry and refresh to make sure everything is reset
-                await this.object.update({ content: $(ctrl).closest('div.editor-content').html() });
-            } else
-                ui.notifications.warn(i18n("MonksEnhancedJournal.NothingSelected"));
-        } else {
-            ui.notifications.warn(i18n("MonksEnhancedJournal.NoEditorContent"));
-        }
+        this.subsheet.splitJournal();
     }
 
     _canDragStart(selector) {

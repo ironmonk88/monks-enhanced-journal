@@ -70,6 +70,8 @@ export class EncounterSheet extends EnhancedJournalSheet {
 
         data.groups = this.getItemGroups(data);
 
+        data.showLocation = game.modules.get("tagger")?.active && game.modules.get("monks-active-tiles")?.active;
+
         let currency = (data.data.flags['monks-enhanced-journal'].currency || []);
         data.currency = MonksEnhancedJournal.currencies.map(c => {
             return { id: c.id, name: c.name, value: currency[c.id] ?? 0 };

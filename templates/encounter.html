@@ -38,6 +38,9 @@
                                 <h3 class="item-name monster-name flexrow">
                                     {{localize 'MonksEnhancedJournal.Monsters'}}
                                 </h3>
+                                {{#if showLocation}}
+                                <div class="item-controls item-hidden">{{localize 'MonksEnhancedJournal.Location'}}</div>
+                                {{/if}}
                                 <div class="item-controls item-hidden">{{localize 'MonksEnhancedJournal.Hidden'}}</div>
                                 <div class="item-controls item-quantity">{{localize 'MonksEnhancedJournal.Quantity'}}</div>
                                 <div class="item-controls flexrow">
@@ -52,6 +55,12 @@
                                         <div class="item-image monster-icon" data-id="{{this.id}}" data-type="Actor" style="background-image: url('{{this.img}}')" draggable="false"></div>
                                         <h4>{{this.name}}</h4>
                                     </div>
+
+                                    {{#if ../showLocation}}
+                                    <div class="item-controls item-location">
+                                        <input type="text" name="actors.{{this.id}}.location" value="{{this.location}}" />
+                                    </div>
+                                    {{/if}}
 
                                     <div class="item-controls item-hidden" style="text-align:center;">
                                         <input type="checkbox" name="actors.{{this.id}}.hidden" {{checked this.hidden}} data-dtype="Boolean" style="text-align:center;" />

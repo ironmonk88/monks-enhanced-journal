@@ -109,6 +109,15 @@ export const registerSettings = function () {
 		choices: permissions,
 	});
 
+	game.settings.register(modulename, "show-chatbubble", {
+		name: i18n("MonksEnhancedJournal.show-chatbubble.name"),
+		hint: i18n("MonksEnhancedJournal.show-chatbubble.hint"),
+		scope: "world",
+		config: true,
+		default: false,
+		type: Boolean,
+	});
+
 	game.settings.register(modulename, "hud-limited", {
 		name: i18n("MonksEnhancedJournal.hud-limited.name"),
 		hint: i18n("MonksEnhancedJournal.hud-limited.hint"),

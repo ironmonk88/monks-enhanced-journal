@@ -4,6 +4,42 @@ import { SelectPlayer } from "../apps/selectplayer.js";
 import { EditSound } from "../apps/editsound.js";
 import { MakeOffering } from "../apps/make-offering.js";
 
+class EnhancedJournalContextMenu extends ContextMenu {
+    constructor(...args) {
+        super(...args);
+    }
+
+    bind() {
+        this.element.on(this.eventName, this.selector, event => {
+            event.preventDefault();
+            const parent = $(event.currentTarget);
+            const menu = this.menu;
+
+            // Remove existing context UI
+            $('.context').removeClass("context");
+            if ($.contains(parent[0], menu[0])) return this.close();
+
+            // Render a new context menu
+            event.stopPropagation();
+            ui.context = this;
+            this._event = event;
+            return this.render(parent);
+        });
+    }
+
+    _setPosition(html, target) {
+        super._setPosition(html, target);
+
+        let bounds = target[0].getBoundingClientRect();
+        let x = this._event.clientX - bounds.left;
+        let y = this._event.clientY - bounds.top + target.scrollTop();
+
+        log("Set Position", x, y);
+
+        html.css({ "left": `${Math.min(x, bounds.width - 370)}px`, "top": `${Math.min(y, bounds.height + target.scrollTop() - 75)}px` })
+    }
+}
+
 export class EnhancedJournalSheet extends JournalSheet {
     constructor(object, options = {}) {
         super(object, options);
@@ -153,7 +189,7 @@ export class EnhancedJournalSheet extends JournalSheet {
 
         if (this.enhancedjournal)
             this._minimized = oldMinimize;
-        else if (!this.object.isOwner && ["base", "journalentry", "picture"].includes(this.type) && (this.options.sheetMode || this._sheetMode) === "image" && this.object.data.img) {
+        else if (!this.object.isOwner && ["base", "journalentry"].includes(this.type) && (this.options.sheetMode || this._sheetMode) === "image" && this.object.data.img) {
             $(this.element).removeClass('monks-journal-sheet monks-enhanced-journal dnd5e');
         }
 
@@ -227,6 +263,8 @@ export class EnhancedJournalSheet extends JournalSheet {
     activateListeners(html, enhancedjournal) {
         super.activateListeners(html);
         this._contextMenu(html);
+
+        new EnhancedJournalContextMenu($(html), ".tab.description .tab-inner", this._getDescriptionContextOptions());
 
         $("a.inline-request-roll", html).click(this._onClickInlineRequestRoll.bind(this));//.contextmenu(this._onClickInlineRequestRoll);
         html.on("click", "a.picture-link", this._onClickPictureLink.bind(this));
@@ -323,6 +361,28 @@ export class EnhancedJournalSheet extends JournalSheet {
     }
 
     _contextMenu(html) {
+        //EnhancedJournalContextMenu.create(this, html, ".tab.description .tab-inner", this._getEntryContextOptions());
+    }
+
+    _getDescriptionContextOptions() {
+        return [
+            {
+                name: "Show in Chat",
+                icon: '<i class="fas fa-comment"></i>',
+                condition: game.user.isGM,
+                callback: li => {
+                    this.copyToChat();
+                }
+            },
+            {
+                name: "Extract to Journal Entry",
+                icon: '<i class="fas fa-file-export"></i>',
+                condition: game.user.isGM,
+                callback: li => {
+                    this.splitJournal();
+                }
+            }
+        ];
     }
 
     _disableFields(form) {
@@ -373,6 +433,34 @@ export class EnhancedJournalSheet extends JournalSheet {
                     coinage = (coin && coin.data.data.quantity); //price.value[denomination]);
                 }
                 break;
+            case 'mythras':
+                {
+                    let currency = MonksEnhancedJournal.currencies.find(c => c.id == denomination);
+                    let coin = actor.data.items.find(i => { return i.type == "currency" && i.data.name == currency.name });
+                    coinage = parseInt((coin && coin.data.data.quantity) || 0);
+                } break;
+            case 'cyphersystem':
+                {
+                    let currency = MonksEnhancedJournal.currencies.find(c => c.id == denomination);
+
+                    let coins = actor.data.data.settings.currency;
+                    let systemcoins = {
+                        name6: i18n('CYPHERSYSTEM.Adamantine'),
+                        name5: i18n('CYPHERSYSTEM.Mithral'),
+                        name4: i18n('CYPHERSYSTEM.Platinum'),
+                        name3: i18n('CYPHERSYSTEM.Gold'),
+                        name2: i18n('CYPHERSYSTEM.Silver'),
+                        name: (coins.howMany == '1' ? i18n('CYPHERSYSTEM.Shins') : i18n('CYPHERSYSTEM.Copper'))
+                    };
+
+                    let coinname = Object.keys(coins).find(key => coins[key] == currency.name) || Object.keys(systemcoins).find(key => systemcoins[key] == currency.name);
+                    if (!coinname)
+                        return 0;
+
+                    let qtyname = coinname.replace("name", "quantity");
+
+                    coinage = parseInt(coins[qtyname] || 0);
+                } break;
             case 'age-system':
                 coinage = parseInt(actor.data.data[denomination]);
                 break;
@@ -484,6 +572,17 @@ export class EnhancedJournalSheet extends JournalSheet {
                 promises.push(coinage.update(updates));
             }
             return Promise.all(promises);
+        } else if (game.system.id == 'mythras') {
+            let promises = [];
+            for (let [k, v] of Object.entries(changes)) {
+                let currency = MonksEnhancedJournal.currencies.find(c => c.id == k);
+                let coinage = actor.data.items.find(i => { return i.type == "currency" && i.data.name == currency });
+                if (coinage) {
+                    updates[`data.quantity`] = v;
+                    promises.push(coinage.update(updates));
+                }
+            }
+            return Promise.all(promises);
         } else {
             for (let [k, v] of Object.entries(changes)) {
                 switch (game.system.id) {
@@ -502,9 +601,33 @@ export class EnhancedJournalSheet extends JournalSheet {
                     case 'starwarsffg':
                         updates[`data.stats.credits.value`] = v;
                         break;
+                    case 'cyphersystem':
+                        {
+                            let currency = MonksEnhancedJournal.currencies.find(c => c.id == k);
+
+                            let coins = actor.data.data.settings.currency;
+                            let systemcoins = {
+                                name6: i18n('CYPHERSYSTEM.Adamantine'),
+                                name5: i18n('CYPHERSYSTEM.Mithral'),
+                                name4: i18n('CYPHERSYSTEM.Platinum'),
+                                name3: i18n('CYPHERSYSTEM.Gold'),
+                                name2: i18n('CYPHERSYSTEM.Silver'),
+                                name: (coins.howMany == '1' ? i18n('CYPHERSYSTEM.Shins') : i18n('CYPHERSYSTEM.Copper'))
+                            };
+
+                            let coinname = Object.keys(coins).find(key => coins[key] == currency.name) || Object.keys(systemcoins).find(key => systemcoins[key] == currency.name);
+
+                            if (!coinname)
+                                continue;
+                            let qtyname = coinname.replace("name", "quantity");
+
+                            updates[`data.settings.currency.${qtyname}`] = v;
+                        } break;
                     default:
-                        let coin = this.getValue(actor.data, currencyname());
-                        updates[`data.${currencyname()}.${k}`] = (coin[k] && coin[k].hasOwnProperty("value") ? { value: v } : v);
+                        {
+                            let coin = this.getValue(actor.data, currencyname());
+                            updates[`data.${currencyname()}.${k}`] = (coin[k] && coin[k].hasOwnProperty("value") ? { value: v } : v);
+                        }
                         break;
                 }
             }
@@ -556,9 +679,9 @@ export class EnhancedJournalSheet extends JournalSheet {
                 });
                 let curr = null;
 
-                let adjust = numDecimal * 10;
+                let adjust = Math.pow(10, numDecimal);
                 for (let tcurr of currs) {
-                    let val = (price * adjust) / (tcurr.convert * adjust);
+                    let val = (price * adjust) / ((tcurr.convert || 1) * adjust);
                     if (val == Math.floor(val)) {
                         curr = tcurr;
                         currency = tcurr.id;
@@ -570,7 +693,7 @@ export class EnhancedJournalSheet extends JournalSheet {
                 if (!curr) {
                     curr = MonksEnhancedJournal.currencies[MonksEnhancedJournal.currencies.length - 1];
                     currency = curr.id;
-                    price = Math.floor(price / curr.convert);
+                    price = Math.floor(price / (curr.convert || 1));
                 }
             } else
                 price = Math.floor(price);
@@ -2053,5 +2176,68 @@ export class EnhancedJournalSheet extends JournalSheet {
 
         $(event.currentTarget).data("size", size);
         $("img", event.currentTarget).css({ "transform": `scale(${size / 100})` });
+    }
+
+    async splitJournal() {
+        let ctrl = window.getSelection().baseNode?.parentNode;
+
+        if (ctrl == undefined) {
+            ui.notifications.info(i18n("MonksEnhancedJournal.NoTextSelected"));
+            return;
+        }
+
+        //make sure this is editor content selected
+        if ($(ctrl).closest('div.editor-content').length > 0) {
+            var selection = window.getSelection().getRangeAt(0);
+            var selectedText = selection.extractContents();
+            let selectedHTML = $('<div>').append(selectedText);
+            if (selectedHTML.html() != '') {
+                let title = $('h1,h2,h3,h4', selectedHTML).first().text() || i18n("MonksEnhancedJournal.ExtractedJournalEntry");
+
+                //create a new Journal entry in the same folder as the current object
+                //set the content to the extracted text (selectedHTML.html()) and use the title
+                let data = { name: title, type: 'journalentry', content: selectedHTML.html(), folder: this.object.folder };
+                let newentry = await JournalEntry.create(data, { render: false });
+                ui.journal.render();
+                MonksEnhancedJournal.emit("refreshDirectory", { name: "journal" });
+
+                //add a new tab but don't switch to it
+                this.enhancedjournal.addTab(newentry, { activate: false });
+
+                //save the current entry and refresh to make sure everything is reset
+                await this.object.update({ content: $(ctrl).closest('div.editor-content').html() });
+            } else
+                ui.notifications.warn(i18n("MonksEnhancedJournal.NothingSelected"));
+        } else {
+            ui.notifications.warn(i18n("MonksEnhancedJournal.NoEditorContent"));
+        }
+    }
+
+    async copyToChat() {
+        let ctrl = window.getSelection().baseNode?.parentNode;
+
+        if (ctrl == undefined) {
+            ui.notifications.info(i18n("MonksEnhancedJournal.NoTextSelected"));
+            return;
+        }
+
+        //make sure this is editor content selected
+        if ($(ctrl).closest('div.editor-content').length > 0) {
+            var selection = window.getSelection().getRangeAt(0);
+            var selectedText = selection.extractContents();
+            let selectedHTML = $('<div>').append(selectedText);
+            if (selectedHTML.html() != '') {
+                let messageData = {
+                    user: game.user.id,
+                    type: CONST.CHAT_MESSAGE_TYPES.OTHER,
+                    content: selectedHTML.html(),
+                };
+
+                ChatMessage.create(messageData, {});
+            } else
+                ui.notifications.warn(i18n("MonksEnhancedJournal.NothingSelected"));
+        } else {
+            ui.notifications.warn(i18n("MonksEnhancedJournal.NoEditorContent"));
+        }
     }
 }

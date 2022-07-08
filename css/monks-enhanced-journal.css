@@ -7,6 +7,15 @@
     padding: 0px;
 }
 
+.window-app.image-popout.monks-enhanced-journal.sheet .window-content {
+    background: rgba(0, 0, 0, 0.1);
+}
+
+.window-app.image-popout.monks-enhanced-journal.sheet .header-name,
+.window-app.image-popout.monks-enhanced-journal.sheet .header-name button.play-journal-sound:not(.active) {
+    color: #fff;
+}
+
 .monks-enhanced-journal > header a.subsheet {
     background: rgba(255, 255, 255, 0.1);
     margin-left: 0px;
@@ -828,8 +837,8 @@ height: fit-content;*/
     width: 100%;
     height: 100%;
     object-fit: contain;
-    border-right: none;
     max-width: 100%;
+    border: 0px;
 }
 
 /*
@@ -3136,6 +3145,12 @@ button.play-journal-sound.active {
 .kult-divinity-lost.monks-enhanced-journal .monks-journal-sheet.sheet .recent-link,
 .kult-divinity-lost.monks-enhanced-journal .monks-journal-sheet.sheet .new-link {
     color: #968c6a;
+}
+
+.cyphersystem.monks-enhanced-journal .monks-journal-sheet.sheet .items-list .item-name,
+.cyphersystem.monks-enhanced-journal .monks-journal-sheet.sheet .items-list .item-name h3,
+.cyphersystem.monks-enhanced-journal .monks-journal-sheet.sheet .items-list .item-name h4 {
+    text-indent: 0px;
 }
 
 .dark-mode .monks-enhanced-journal .tab-bar .journal-tab .tab-content {

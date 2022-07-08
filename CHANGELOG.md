@@ -1,3 +1,31 @@
+# Version 1.0.65
+
+Fixed issue with Journal Picture showing up strangely to players.
+
+Added the option to turn off the NPC chat button toolbar icon.
+
+Switched from using Notes Drop to Notes Preview for updating the icon image to prevent issues with other modules.
+
+Fixed issue when dragging and dropping an item in starfinder not prompting for quantity.
+
+Fixed issue where a custom note icon default to the acid icon.
+
+Added cypher system currency
+
+Added fallout currency
+
+Added the option to set a tagger location to use for Encounters when created using Monk's Active Tile Triggers.
+
+Added the option to select some text in a journal description, right click, and add that text to a chat message.
+
+Added the option to split the journal from selected text and the right click menu.
+
+Fixed currency issue with Mythras.
+
+Fixed issue when trying to convert lower currencies automatically.
+
+Fixed issues with Quest rewards not assigning XP properly.
+
 # Version 1.0.64
 
 Fixed issue with refreshing the Journal Directory when creating a new journal entry.
