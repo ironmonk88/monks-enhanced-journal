@@ -50,6 +50,11 @@
 		"path": "lang/zh-tw.json"
 	},
 	{
+		"lang": "pt",
+		"name": "Português",
+		"path": "lang/pt.json"
+	},
+	{
 		"lang": "de",
 		"name": "Deutsch",
 		"path": "lang/de.json"
