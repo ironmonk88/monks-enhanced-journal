@@ -33,7 +33,7 @@ export class SlideshowSheet extends EnhancedJournalSheet {
     }
 
     async getData() {
-        let data = super.getData();
+        let data = await super.getData();
 
         if (this.object._thumbnails == undefined && (game.user.isGM || this.object.testUserPermission(game.user, "OBSERVER")))
             this.loadThumbnails();
@@ -92,9 +92,10 @@ export class SlideshowSheet extends EnhancedJournalSheet {
 
                 slide.texts = slide.texts.map(t => {
                     let text = duplicate(t);
+                    let color = Color.from(t.background || '#000000');
                     let style = {
                         color: t.color,
-                        'background-color': hexToRGBAString(colorStringToHex(t.background || '#000000'), (t.opacity != undefined ? t.opacity : 0.5)),
+                        'background-color': color.toRGBA(t.opacity != undefined ? t.opacity : 0.5),
                         'text-align': (t.align == 'middle' ? 'center' : t.align),
                         top: (t.top || 0) + "%",
                         left: (t.left || 0) + "%",
@@ -161,7 +162,7 @@ export class SlideshowSheet extends EnhancedJournalSheet {
 
     async loadThumbnails() {
         this.object._thumbnails = {};
-        for (let slide of this.object.data.flags["monks-enhanced-journal"].slides || []) {
+        for (let slide of this.object.flags["monks-enhanced-journal"].slides || []) {
             this.object._thumbnails[slide.id] = await SlideshowSheet.createSlideThumbnail(slide.img);
             if (this.object._thumbnails[slide.id]) {
                 $(`.slide[data-slide-id="${slide.id}"] .slide-image`).attr('src', this.object._thumbnails[slide.id]);
@@ -182,7 +183,7 @@ export class SlideshowSheet extends EnhancedJournalSheet {
 
     async refresh() {
         super.refresh();
-        if ((this.object.data.flags['monks-enhanced-journal'].state != 'stopped') || !this.object.isOwner) {
+        if ((this.object.flags['monks-enhanced-journal'].state != 'stopped') || !this.object.isOwner) {
             this.playSlide();
         }
     }
@@ -252,10 +253,10 @@ export class SlideshowSheet extends EnhancedJournalSheet {
             return false;
         }
 
-        if (this.object.data.flags["monks-enhanced-journal"].state == 'playing')
+        if (this.object.flags["monks-enhanced-journal"].state == 'playing')
             return;
 
-        let slides = duplicate(this.object.data.flags['monks-enhanced-journal']?.slides || []);
+        let slides = duplicate(this.object.flags['monks-enhanced-journal']?.slides || []);
 
         let from = slides.findIndex(a => a.id == data.slideId);
         let to = slides.length - 1;
@@ -269,7 +270,7 @@ export class SlideshowSheet extends EnhancedJournalSheet {
 
         slides.splice(to, 0, slides.splice(from, 1)[0]);
 
-        this.object.data.flags['monks-enhanced-journal'].slides = slides;
+        this.object.flags['monks-enhanced-journal'].slides = slides;
         this.object.setFlag('monks-enhanced-journal', 'slides', slides);
 
         //$('.slideshow-body .slide[data-slide-id="' + data.slideId + '"]', this.element).insertBefore(target);
@@ -280,8 +281,8 @@ export class SlideshowSheet extends EnhancedJournalSheet {
     }
 
     addSlide(data = {}, options = { showdialog: true }) {
-        if (this.object.data.flags["monks-enhanced-journal"].slides == undefined)
-            this.object.data.flags["monks-enhanced-journal"].slides = [];
+        if (this.object.flags["monks-enhanced-journal"].slides == undefined)
+            this.object.flags["monks-enhanced-journal"].slides = [];
 
         let slide = mergeObject({
             sizing: 'contain',
@@ -294,7 +295,7 @@ export class SlideshowSheet extends EnhancedJournalSheet {
         if (options.showdialog)
             new SlideConfig(slide, this.object).render(true);
         else {
-            let slides = duplicate(this.object.data.flags["monks-enhanced-journal"].slides || []);
+            let slides = duplicate(this.object.flags["monks-enhanced-journal"].slides || []);
             slide.id = makeid();
             slides.push(slide);
             this.object.setFlag("monks-enhanced-journal", 'slides', slides);
@@ -304,7 +305,7 @@ export class SlideshowSheet extends EnhancedJournalSheet {
     }
 
     deleteAll() {
-        if (this.object.data.flags["monks-enhanced-journal"].state == 'stopped') {
+        if (this.object.flags["monks-enhanced-journal"].state == 'stopped') {
             this.object.setFlag("monks-enhanced-journal", 'slides', []);
             //$(`.slideshow-body`, this.element).empty();
             //MonksEnhancedJournal.journal.saveData();
@@ -312,27 +313,27 @@ export class SlideshowSheet extends EnhancedJournalSheet {
     }
 
     deleteSlide(id, html) {
-        let slides = duplicate(this.object.data.flags["monks-enhanced-journal"].slides || []);
+        let slides = duplicate(this.object.flags["monks-enhanced-journal"].slides || []);
         slides.findSplice(s => s.id == id);
         this.object.setFlag("monks-enhanced-journal", 'slides', slides);
     }
 
     cloneSlide(id) {
-        let slide = this.object.data.flags["monks-enhanced-journal"].slides.find(s => s.id == id);
+        let slide = this.object.flags["monks-enhanced-journal"].slides.find(s => s.id == id);
         let data = duplicate(slide);
         this.addSlide(data, { showdialog: false });
     }
 
     editSlide(id, options) {
-        let slide = this.object.data.flags["monks-enhanced-journal"].slides.find(s => s.id == id);
+        let slide = this.object.flags["monks-enhanced-journal"].slides.find(s => s.id == id);
         if (slide != undefined)
             new SlideConfig(slide, this.object, options).render(true);
     }
 
     activateSlide(event) {
-        if (this.object.data.flags["monks-enhanced-journal"].state != 'stopped') {
+        if (this.object.flags["monks-enhanced-journal"].state != 'stopped') {
             let idx = $(event.currentTarget).index();
-            this.object.data.flags["monks-enhanced-journal"].slideAt = idx;
+            this.object.flags["monks-enhanced-journal"].slideAt = idx;
             this.playSlide(idx);
         }
     }
@@ -342,13 +343,13 @@ export class SlideshowSheet extends EnhancedJournalSheet {
     }
 
     updateButtons() {
-        $('.nav-button.play', this.element).toggle(this.object.data.flags["monks-enhanced-journal"].state !== 'playing');
-        $('.nav-button.pause', this.element).toggle(this.object.data.flags["monks-enhanced-journal"].state === 'playing');
-        $('.nav-button.stop', this.element).toggle(this.object.data.flags["monks-enhanced-journal"].state !== 'stopped');
+        $('.nav-button.play', this.element).toggle(this.object.flags["monks-enhanced-journal"].state !== 'playing');
+        $('.nav-button.pause', this.element).toggle(this.object.flags["monks-enhanced-journal"].state === 'playing');
+        $('.nav-button.stop', this.element).toggle(this.object.flags["monks-enhanced-journal"].state !== 'stopped');
     }
 
     async playSlideshow(refresh = true) {
-        let flags = this.object.data.flags["monks-enhanced-journal"];
+        let flags = this.object.flags["monks-enhanced-journal"];
         if (flags.slides.length == 0) {
             ui.notifications.warn(i18n("MonksEnhancedJournal.CannotPlayNoSlides"));
             return;
@@ -361,7 +362,7 @@ export class SlideshowSheet extends EnhancedJournalSheet {
             if (this.object.isOwner)
                 await this.object.setFlag("monks-enhanced-journal", "slideAt", 0);
             else
-                this.object.data.flags['monks-enhanced-journal'].slideAt = 0;
+                this.object.flags['monks-enhanced-journal'].slideAt = 0;
             this.object.sound = undefined;
 
             if (flags.audiofile != undefined && flags.audiofile != '') {
@@ -386,7 +387,7 @@ export class SlideshowSheet extends EnhancedJournalSheet {
         if(this.object.isOwner)
             await this.object.setFlag("monks-enhanced-journal", "state", "playing");
         else
-            this.object.data.flags['monks-enhanced-journal'].state = "playing";
+            this.object.flags['monks-enhanced-journal'].state = "playing";
         $('.slide-showing .duration', this.element).show();
         ($(this.element).hasClass('slideshow-container') ? $(this.element) : $('.slideshow-container', this.element)).addClass('playing');
         this.updateButtons.call(this);
@@ -401,11 +402,11 @@ export class SlideshowSheet extends EnhancedJournalSheet {
         $('<div>').addClass('loading-slide slide').appendTo($('.slide-showing', this.element));
 
         this.playSlide(flags.slideAt, animate);
-        //this.object.update({ 'flags.monks-enhanced-journal': this.object.data.flags["monks-enhanced-journal"] });
+        //this.object.update({ 'flags.monks-enhanced-journal': this.object.flags["monks-enhanced-journal"] });
     }
 
     async pauseSlideshow() {
-        let flags = this.object.data.flags["monks-enhanced-journal"];
+        let flags = this.object.flags["monks-enhanced-journal"];
         let slide = flags.slides[flags.slideAt];
         if (slide.transition.timer)
             window.clearTimeout(slide.transition.timer);
@@ -418,7 +419,7 @@ export class SlideshowSheet extends EnhancedJournalSheet {
         if(this.object.isOwner)
             await this.object.setFlag("monks-enhanced-journal", "state", "paused");
         else
-            this.object.data.flags['monks-enhanced-journal'].state = "paused";
+            this.object.flags['monks-enhanced-journal'].state = "paused";
         this.updateButtons.call(this);
 
         if (this.object.slidesound?.src != undefined) {
@@ -430,7 +431,7 @@ export class SlideshowSheet extends EnhancedJournalSheet {
     }
 
     async stopSlideshow() {
-        let flags = this.object.data.flags["monks-enhanced-journal"];
+        let flags = this.object.flags["monks-enhanced-journal"];
         let slide = flags.slides[flags.slideAt];
         if (slide && slide.transition.timer)
             window.clearTimeout(slide.transition.timer);
@@ -439,8 +440,8 @@ export class SlideshowSheet extends EnhancedJournalSheet {
             await this.object.setFlag("monks-enhanced-journal", "state", "stopped");
             await this.object.setFlag("monks-enhanced-journal", "slideAt", 0);
         } else {
-            this.object.data.flags['monks-enhanced-journal'].state = "stopped";
-            this.object.data.flags['monks-enhanced-journal'].slideAt = 0;
+            this.object.flags['monks-enhanced-journal'].state = "stopped";
+            this.object.flags['monks-enhanced-journal'].slideAt = 0;
         }
 
         $('.slide-showing .duration', this.element).hide().stop();
@@ -468,12 +469,12 @@ export class SlideshowSheet extends EnhancedJournalSheet {
             MonksEnhancedJournal.emit('stopSlideshow', {});
 
         //++++ why am I doing it this way and not using setFlag specifically?
-        //this.object.update({ 'flags.monks-enhanced-journal': this.object.data.flags["monks-enhanced-journal"] });
+        //this.object.update({ 'flags.monks-enhanced-journal': this.object.flags["monks-enhanced-journal"] });
     }
 
     showSlide() {
-        let idx = this.object.data.flags["monks-enhanced-journal"].slideAt;
-        let slide = this.object.data.flags["monks-enhanced-journal"].slides[idx];
+        let idx = this.object.flags["monks-enhanced-journal"].slideAt;
+        let slide = this.object.flags["monks-enhanced-journal"].slides[idx];
         let newSlide = MonksEnhancedJournal.createSlide(slide);
         $('.slide-textarea', newSlide).css({'font-size':'25px'});
         $('.slide-showing', this.element).append(newSlide);
@@ -482,20 +483,20 @@ export class SlideshowSheet extends EnhancedJournalSheet {
     playSlide(idx, animate = true) {
         let that = this;
         if (idx == undefined)
-            idx = this.object.data.flags["monks-enhanced-journal"].slideAt;
-        else { //if (idx != this.object.data.flags["monks-enhanced-journal"].slideAt)
+            idx = this.object.flags["monks-enhanced-journal"].slideAt;
+        else { //if (idx != this.object.flags["monks-enhanced-journal"].slideAt)
             if (this.object.isOwner)
                 this.object.setFlag("monks-enhanced-journal", "slideAt", idx);
             else
-                this.object.data.flags['monks-enhanced-journal'].slideAt = idx;
+                this.object.flags['monks-enhanced-journal'].slideAt = idx;
         }
 
-        let slide = this.object.data.flags["monks-enhanced-journal"].slides[idx];
+        let slide = this.object.flags["monks-enhanced-journal"].slides[idx];
 
         //remove any that are still on the way out
         $('.slide-showing .slide.out', this.element).remove();
 
-        let effect = (slide.transition?.effect == 'fade' ? null : slide.transition?.effect) || this.object.data.flags['monks-enhanced-journal'].transition?.effect || 'none';
+        let effect = (slide.transition?.effect == 'fade' ? null : slide.transition?.effect) || this.object.flags['monks-enhanced-journal'].transition?.effect || 'none';
 
         //remove any old slides
         $('.slide-showing .slide', this.element).addClass('out');
@@ -582,7 +583,7 @@ export class SlideshowSheet extends EnhancedJournalSheet {
             if (this.object?._currentSlide?.transition?.timer)
                 window.clearTimeout(this.object?._currentSlide?.transition?.timer);
 
-            let duration = slide.transition?.duration || this.object.data.flags['monks-enhanced-journal'].transition?.duration || 0;
+            let duration = slide.transition?.duration || this.object.flags['monks-enhanced-journal'].transition?.duration || 0;
             if (duration > 0) {
                 //set up the transition
                 let time = duration * 1000;
@@ -630,7 +631,7 @@ export class SlideshowSheet extends EnhancedJournalSheet {
     }
 
     advanceSlide(dir, event) {
-        let data = this.object.data.flags["monks-enhanced-journal"];
+        let data = this.object.flags["monks-enhanced-journal"];
         data.slideAt = Math.max(data.slideAt + dir, 0);
 
         if (data.slideAt < 0)
@@ -656,7 +657,7 @@ export class SlideshowSheet extends EnhancedJournalSheet {
                 callback: elem => {
                     let li = $(elem).closest('.slide');
                     const id = li.data("slideId");
-                    //const slide = this.object.data.flags["monks-enhanced-journal"].slides.get(li.data("entityId"));
+                    //const slide = this.object.flags["monks-enhanced-journal"].slides.get(li.data("entityId"));
                     //const options = { top: li[0].offsetTop, left: window.innerWidth - SlideConfig.defaultOptions.width };
                     this.editSlide(id); //, options);
                 }
@@ -668,7 +669,7 @@ export class SlideshowSheet extends EnhancedJournalSheet {
                 callback: elem => {
                     let li = $(elem).closest('.slide');
                     const id = li.data("slideId");
-                    //const slide = this.object.data.flags["monks-enhanced-journal"].slides.get(li.data("entityId"));
+                    //const slide = this.object.flags["monks-enhanced-journal"].slides.get(li.data("entityId"));
                     return this.cloneSlide(id);
                 }
             },
@@ -679,7 +680,7 @@ export class SlideshowSheet extends EnhancedJournalSheet {
                 callback: elem => {
                     let li = $(elem).closest('.slide');
                     const id = li.data("slideId");
-                    //const slide = this.object.data.flags["monks-enhanced-journal"].slides.get(li.data("entityId"));
+                    //const slide = this.object.flags["monks-enhanced-journal"].slides.get(li.data("entityId"));
                     Dialog.confirm({
                         title: `${game.i18n.localize("SIDEBAR.Delete")} slide`,
                         content: game.i18n.format("SIDEBAR.DeleteWarning", { type: 'slide' }),
@@ -696,7 +697,7 @@ export class SlideshowSheet extends EnhancedJournalSheet {
 }
 
 Hooks.on("renderSlideshowSheet", (sheet, html, data) => {
-    if (sheet.object.data.flags['monks-enhanced-journal'].state != 'stopped') {
+    if (sheet.object.flags['monks-enhanced-journal'].state != 'stopped') {
         sheet.playSlide();
     } else if (!sheet.object.isOwner) {
         sheet.showSlide();

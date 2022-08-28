@@ -1,3 +1,7 @@
+# Version 1.0.66
+
+Testing v10 compatibility
+
 # Version 1.0.65
 
 Fixed issue with Journal Picture showing up strangely to players.

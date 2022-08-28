@@ -1,5 +1,6 @@
 import { setting, i18n, log, makeid, MonksEnhancedJournal } from "../monks-enhanced-journal.js";
 import { EnhancedJournalSheet } from "../sheets/EnhancedJournalSheet.js";
+import { MakeOffering } from "../apps/make-offering.js";
 
 export class PersonSheet extends EnhancedJournalSheet {
     constructor(data, options) {
@@ -20,9 +21,10 @@ export class PersonSheet extends EnhancedJournalSheet {
         });
     }
 
+    /*
     get allowedRelationships() {
         return ['organization', 'person', 'place', 'shop', 'quest', 'poi'];
-    }
+    }*/
 
     get type() {
         return 'person';
@@ -33,7 +35,7 @@ export class PersonSheet extends EnhancedJournalSheet {
     }
 
     async getData() {
-        let data = super.getData();
+        let data = await super.getData();
 
         let needsAttributes = data?.data?.flags['monks-enhanced-journal']?.attributes == undefined;
         if (!needsAttributes) {
@@ -47,14 +49,15 @@ export class PersonSheet extends EnhancedJournalSheet {
         if (needsAttributes) {
             let fields = data?.data?.flags['monks-enhanced-journal']?.fields || {};
             let attributes = {};
+            let flags = data?.data?.flags['monks-enhanced-journal'] || {};
             for (let attr of ['race','gender','age','eyes','skin','hair', 'life','profession','voice',  'faction','height','weight','traits','ideals','bonds', 'flaws','longterm','shortterm','beliefs','secret']) {
-                attributes[attr] = { value: data?.data?.flags['monks-enhanced-journal'][attr] || ""};
+                attributes[attr] = { value: flags[attr] || ""};
                 if (fields[attr] != undefined)
                     attributes[attr].hidden = !fields[attr]?.value;
                 //delete data?.data?.flags['monks-enhanced-journal'][attr]
             }
             data.data.flags['monks-enhanced-journal'].attributes = attributes;
-            this.object.data.flags['monks-enhanced-journal'].attributes = attributes;
+            this.object.flags['monks-enhanced-journal'].attributes = attributes;
             this.object.setFlag('monks-enhanced-journal', 'attributes', data.data.flags['monks-enhanced-journal'].attributes);
         }
 
@@ -62,13 +65,14 @@ export class PersonSheet extends EnhancedJournalSheet {
         for (let item of (data.data.flags['monks-enhanced-journal']?.relationships || [])) {
             let entity = await this.getDocument(item, "JournalEntry", false);
             if (entity && entity.testUserPermission(game.user, "LIMITED") && (game.user.isGM || !item.hidden)) {
-                if (!data.relationships[entity.type])
-                    data.relationships[entity.type] = { type: entity.type, name: i18n(`MonksEnhancedJournal.${entity.type.toLowerCase()}`), documents: [] };
+                let type = getProperty(entity, "flags.monks-enhanced-journal.type");
+                if (!data.relationships[type])
+                    data.relationships[type] = { type: type, name: i18n(`MonksEnhancedJournal.${type.toLowerCase()}`), documents: [] };
 
                 item.name = entity.name;
-                item.img = entity.data.img;
+                item.img = entity.src;
 
-                data.relationships[entity.type].documents.push(item);
+                data.relationships[type].documents.push(item);
             }
         }
 
@@ -99,7 +103,7 @@ export class PersonSheet extends EnhancedJournalSheet {
 
     fieldlist() {
         let fields = duplicate(setting("person-attributes"));
-        let attributes = this.object.data.flags['monks-enhanced-journal'].attributes;
+        let attributes = this.object.flags['monks-enhanced-journal'].attributes;
         for (let field of fields) {
             if (attributes[field.id]) {
                 field = mergeObject(field, attributes[field.id]);
@@ -143,7 +147,7 @@ export class PersonSheet extends EnhancedJournalSheet {
 
         $('.items-list .actor-icon', html).click(this.openRelationship.bind(this));
 
-        $('.item-relationship .item-field', html).on('change', this.alterRelationship.bind(this));
+        //$('.item-relationship .item-field', html).on('change', this.alterRelationship.bind(this));
 
         $('.item-private', html).on('click', this.alterItem.bind(this));
         $('.make-offering', html).on('click', this.makeOffer.bind(this));
@@ -166,7 +170,7 @@ export class PersonSheet extends EnhancedJournalSheet {
         }
 
         if (data.flags['monks-enhanced-journal']?.attributes) {
-            data.flags['monks-enhanced-journal'].attributes = mergeObject((this.object.data?.flags['monks-enhanced-journal']?.attributes || {}), (data.flags['monks-enhanced-journal']?.attributes || {}));
+            data.flags['monks-enhanced-journal'].attributes = mergeObject((this.object?.flags['monks-enhanced-journal']?.attributes || {}), (data.flags['monks-enhanced-journal']?.attributes || {}));
         }
 
         return flattenObject(data);
@@ -189,7 +193,7 @@ export class PersonSheet extends EnhancedJournalSheet {
         return game.user.isGM || this.object.isOwner;
     }
 
-    _onDrop(event) {
+    async _onDrop(event) {
         let data;
         try {
             data = JSON.parse(event.dataTransfer.getData('text/plain'));
@@ -201,7 +205,33 @@ export class PersonSheet extends EnhancedJournalSheet {
         if (data.type == 'Actor') {
             this.addActor(data);
         } else if (data.type == 'JournalEntry') {
+            let doc = await fromUuid(data.uuid);
+            if (doc.pages.size == 1) {
+                data.id = doc.pages.contents[0].id;
+                data.uuid = doc.pages.contents[0].uuid;
+                data.type = "JournalEntryPage";
+                this.addRelationship(data);
+            }
+        } else if (data.type == 'JournalEntryPage') {
             this.addRelationship(data);
+        } else if (data.type == 'Item') {
+            let item = await fromUuid(data.uuid);
+            new MakeOffering(this.object, this, {
+                offering: {
+                    actor: {
+                        id: item.parent.id,
+                        name: item.parent.name,
+                        img: item.parent.img
+                    },
+                    items: [{
+                        id: item.id,
+                        itemName: item.name,
+                        actorId: item.parent.id,
+                        actorName: item.parent.name,
+                        qty: 1
+                    }]
+                }
+            }).render(true);
         }
 
         log('drop data', event, data);

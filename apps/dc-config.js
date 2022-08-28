@@ -47,7 +47,7 @@ export class DCConfig extends FormApplication {
         log('updating dc', event, formData, this.object);
 
         mergeObject(this.object, formData);
-        let dcs = duplicate(this.journalentry.object.data.flags["monks-enhanced-journal"].dcs || []);
+        let dcs = duplicate(this.journalentry.object.flags["monks-enhanced-journal"].dcs || []);
         if (this.object.id == undefined) {
             this.object.id = makeid();
             dcs.push(this.object);

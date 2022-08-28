@@ -1,13 +1,13 @@
 <form class="flexcol journal-subsheet {{entrytype}}" editable="{{editable}}">
     <div class="place-container">
-        <div class="fullscreen-image"><img src="{{data.img}}" /></div>
+        <div class="fullscreen-image"><img src="{{data.src}}" /></div>
         <header class="sheet-header journal-header flexrow">
             <div class="sheet-image">
-                <img class="profile" src="{{data.img}}" data-edit="img" onerror="this.src='modules/monks-enhanced-journal/assets/place.png'">
+                <img class="profile" src="{{data.src}}" data-edit="img" onerror="this.src='modules/monks-enhanced-journal/assets/place.png'">
             </div>
             <section class="header-details">
                 <h1 class="placename flexrow">
-                    <i class="fas fa-place-of-worship sheet-icon"></i>
+                    <i class="fas {{data.icon}} sheet-icon"></i>
                     <input name="name" type="text" value="{{data.name}}" placeholder="{{localize 'MonksEnhancedJournal.PlaceName'}}" />
                     {{#if sound.audiofile}}
                     <button type="button" class="play-journal-sound">
@@ -67,15 +67,15 @@
                     <div class="townsfolk flexrow">
                         <ul class="items-list">
                             <li class="items-header flexrow">
-                                <h3 class="item-name flexrow">{{localize 'MonksEnhancedJournal.Name'}}</h3>
-                                <h3 class="item-name flexrow">{{localize 'MonksEnhancedJournal.Role'}}</h3>
-                                <h3 class="item-name flexrow">{{localize 'MonksEnhancedJournal.Relationship'}}</h3>
+                                <h3 class="item-name noborder flexrow">{{localize 'MonksEnhancedJournal.Name'}}</h3>
+                                <h3 class="item-name noborder flexrow">{{localize 'MonksEnhancedJournal.Role'}}</h3>
+                                <h3 class="item-name noborder flexrow">{{localize 'MonksEnhancedJournal.Relationship'}}</h3>
                                 {{#if @root.owner}}<div class="item-controls flexrow"></div>{{/if}}
                             </li>
                             {{#each townsfolk}}
-                            <li class="item flexrow" data-id="{{this.id}}" data-pack="{{this.pack}}" data-container="relationships" data-document="Person" draggable="false">
+                            <li class="item flexrow" data-id="{{this.id}}" data-uuid="{{this.uuid}}" data-container="relationships" data-document="Person" draggable="false">
                                 <div class="item-name flexrow">
-                                    <img class="item-image actor-icon" src="{{this.img}}" onerror="this.src='modules/monks-enhanced-journal/assets/person.png'" />
+                                    <img class="item-image actor-icon" src="{{this.img}}" onerror="this.src='modules/monks-enhanced-journal/assets/{{this.type}}.png'" />
                                     <h4>{{#if this.pack}}<i class="fas fa-atlas" title="{{localize 'MonksEnhancedJournal.FromCompendium'}}"></i> {{/if}}{{this.name}}</h4>
                                 </div>
 
@@ -111,13 +111,13 @@
                     <div class="shops flexrow">
                         <ul class="items-list">
                             <li class="items-header flexrow">
-                                <h3 class="item-name flexrow">{{localize 'MonksEnhancedJournal.Name'}}</h3>
-                                <h3 class="item-name item-title">{{localize 'MonksEnhancedJournal.ShopType'}}</h3>
-                                <h3 class="item-name flexrow">{{localize 'MonksEnhancedJournal.Relationship'}}</h3>
+                                <h3 class="item-name noborder flexrow">{{localize 'MonksEnhancedJournal.Name'}}</h3>
+                                <h3 class="item-name noborder item-title">{{localize 'MonksEnhancedJournal.ShopType'}}</h3>
+                                <h3 class="item-name noborder flexrow">{{localize 'MonksEnhancedJournal.Relationship'}}</h3>
                                 {{#if @root.owner}}<div class="item-controls flexrow"></div>{{/if}}
                             </li>
                             {{#each shops}}
-                            <li class="item flexrow" data-id="{{this.id}}" data-pack="{{this.pack}}" data-container="relationships" data-document="Shop" draggable="false">
+                            <li class="item flexrow" data-id="{{this.id}}" data-uuid="{{this.uuid}}" data-container="relationships" data-document="Shop" draggable="false">
                                 <div class="item-name flexrow">
                                     <img class="item-image shop-icon" src="{{this.img}}" onerror="this.src='modules/monks-enhanced-journal/assets/{{this.type}}.png'" />
                                     <h4>{{#if this.pack}}<i class="fas fa-atlas" title="{{localize 'MonksEnhancedJournal.FromCompendium'}}"></i> {{/if}}{{this.name}}</h4>
@@ -156,12 +156,12 @@
                         <ul class="items-list">
                             {{#each relationships}}
                             <li class="items-header flexrow">
-                                <h3 class="item-name flexrow">{{this.name}}</h3>
-                                <h3 class="item-name flexrow">{{localize 'MonksEnhancedJournal.Relationship'}}</h3>
+                                <h3 class="item-name noborder flexrow">{{this.name}}</h3>
+                                <h3 class="item-name noborder flexrow">{{localize 'MonksEnhancedJournal.Relationship'}}</h3>
                                 {{#if @root.owner}}<div class="item-controls flexrow"></div>{{/if}}
                             </li>
                             {{#each documents}}
-                            <li class="item flexrow" data-id="{{this.id}}" data-pack="{{this.pack}}" data-container="relationships" data-document="JournalEntry" draggable="false">
+                            <li class="item flexrow" data-id="{{this.id}}" data-uuid="{{this.uuid}}" data-container="relationships" data-document="JournalEntry" draggable="false">
                                 <div class="item-name flexrow">
                                     <img class="item-image actor-icon" src="{{this.img}}" onerror="this.src='modules/monks-enhanced-journal/assets/{{this.type}}.png'" />
                                     <h4>{{#if this.pack}}<i class="fas fa-atlas" title="{{localize 'MonksEnhancedJournal.FromCompendium'}}"></i> {{/if}}{{this.name}}</h4>
@@ -193,7 +193,7 @@
             </div>
             <div class="tab description" data-group="primary" data-tab="description">
                 <div class="tab-inner flexcol">
-                    {{editor target="content" content=data.content editable=true button=true owner=owner}}
+                    {{editor enrichedText target="text.content" editable=true button=true owner=owner}}
                 </div>
             </div>
             <div class="tab notes" data-group="primary" data-tab="notes">

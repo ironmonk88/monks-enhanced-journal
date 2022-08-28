@@ -118,6 +118,18 @@ export const registerSettings = function () {
 		type: Boolean,
 	});
 
+	game.settings.register(modulename, "inline-roll-styling", {
+		name: i18n("MonksEnhancedJournal.inline-roll-styling.name"),
+		hint: i18n("MonksEnhancedJournal.inline-roll-styling.hint"),
+		scope: "world",
+		config: true,
+		default: true,
+		type: Boolean,
+		onChange: (value) => {
+			$('body').toggleClass("inline-roll-styling", value);
+		},
+	});
+
 	game.settings.register(modulename, "hud-limited", {
 		name: i18n("MonksEnhancedJournal.hud-limited.name"),
 		hint: i18n("MonksEnhancedJournal.hud-limited.hint"),
@@ -268,14 +280,13 @@ export const registerSettings = function () {
 		scope: "world",
 		config: true,
 		default: "",
-		choices: lootentity,
 		type: String,
 	});
 	game.settings.register(modulename, "loot-folder", {
 		name: game.i18n.localize("MonksEnhancedJournal.loot-folder.name"),
 		hint: game.i18n.localize("MonksEnhancedJournal.loot-folder.hint"),
 		scope: "world",
-		config: true,
+		config: false,
 		default: "",
 		choices: lootfolder,
 		type: String,

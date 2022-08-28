@@ -1,11 +1,12 @@
 import { setting, i18n, format, log, makeid, MonksEnhancedJournal, quantityname, pricename, currencyname } from "../monks-enhanced-journal.js";
 import { EnhancedJournalSheet } from "../sheets/EnhancedJournalSheet.js";
+import { getValue, setValue, MEJHelpers } from "../helpers.js";
 
 export class ShopSheet extends EnhancedJournalSheet {
     constructor(data, options) {
         super(data, options);
 
-        if (this.options.tabs[0].initial == 'items' && ['hidden', 'visible'].includes(data.data.flags['monks-enhanced-journal'].purchasing) && !this.object.isOwner) {
+        if (this.options.tabs[0].initial == 'items' && ['hidden', 'visible'].includes(data.flags['monks-enhanced-journal'].purchasing) && !this.object.isOwner) {
             this.options.tabs[0].initial = 'description';
             this._tabs[0].active = 'description';
         }
@@ -32,7 +33,7 @@ export class ShopSheet extends EnhancedJournalSheet {
     }
 
     async getData() {
-        let data = super.getData();
+        let data = await super.getData();
 
         data.purchaseOptions = [
             {
@@ -60,7 +61,10 @@ export class ShopSheet extends EnhancedJournalSheet {
         };
 
         //get shop items
-        data.groups = await this.getItemGroups(data, this.object._sort);
+        data.groups = await this.getItemGroups(
+            getProperty(data, "data.flags.monks-enhanced-journal.items"),
+            getProperty(data, "data.flags.monks-enhanced-journal.type"),
+            getProperty(data, "data.flags.monks-enhanced-journal.purchasing"), this.object._sort);
 
         data.hideitems = (['hidden', 'visible'].includes(data.data.flags['monks-enhanced-journal'].purchasing) && !this.object.isOwner);
         let purchasing = data.data.flags['monks-enhanced-journal'].purchasing;
@@ -74,21 +78,18 @@ export class ShopSheet extends EnhancedJournalSheet {
             data.actor = { id: actor.id, name: actor.name, img: actor.img };
         }
 
-        data.valStr = (['pf2e'].includes(game.system.id) ? ".value" : "");
-        data.quantityname = quantityname();
-        data.pricename = pricename();
-
         data.relationships = {};
         for (let item of (data.data.flags['monks-enhanced-journal']?.relationships || [])) {
             let entity = await this.getDocument(item, "JournalEntry", false);
             if (entity && entity.testUserPermission(game.user, "LIMITED") && (game.user.isGM || !item.hidden)) {
-                if (!data.relationships[entity.type])
-                    data.relationships[entity.type] = { type: entity.type, name: i18n(`MonksEnhancedJournal.${entity.type.toLowerCase()}`), documents: [] };
+                let type = getProperty(entity, "flags.monks-enhanced-journal.type");
+                if (!data.relationships[type])
+                    data.relationships[type] = { type: type, name: i18n(`MonksEnhancedJournal.${type.toLowerCase()}`), documents: [] };
 
                 item.name = entity.name;
-                item.img = entity.data.img;
+                item.img = entity.src;
 
-                data.relationships[entity.type].documents.push(item);
+                data.relationships[type].documents.push(item);
             }
         }
 
@@ -103,12 +104,13 @@ export class ShopSheet extends EnhancedJournalSheet {
         return { purchasing: 'confirm', selling:'confirm', items: [], sell: 1, buy: 0.5 };
     }
 
+    /*
     get allowedRelationships() {
         return ['person', 'place'];
-    }
+    }*/
 
     render(force, options) {
-        if (this._tabs[0].active == 'items' && ['hidden', 'visible'].includes(this.object.data.flags['monks-enhanced-journal'].purchasing) && !this.object.isOwner)
+        if (this._tabs[0].active == 'items' && ['hidden', 'visible'].includes(this.object.flags['monks-enhanced-journal'].purchasing) && !this.object.isOwner)
             this._tabs[0].active = 'description';
         super.render(force, options);
     }
@@ -150,7 +152,7 @@ export class ShopSheet extends EnhancedJournalSheet {
 
         $('.request-item', html).prop('disabled', function () { return $(this).attr('locked') == 'true' }).click(this.requestItem.bind(this));
 
-        $('.item-relationship .item-field', html).on('change', this.alterRelationship.bind(this));
+        //$('.item-relationship .item-field', html).on('change', this.alterRelationship.bind(this));
 
         $('.items-header', html).on("click", this.collapseItemSection.bind(this));
 
@@ -191,7 +193,7 @@ export class ShopSheet extends EnhancedJournalSheet {
         if (selector == ".document.actor") return game.user.isGM;
         if (selector == ".document.item") return true;
         let hasGM = (game.users.find(u => u.isGM && u.active) != undefined);
-        return game.user.isGM || (['free', 'confirm'].includes(this.object.data.flags["monks-enhanced-journal"].purchasing) && hasGM);
+        return game.user.isGM || (['free', 'confirm'].includes(this.object.flags["monks-enhanced-journal"].purchasing) && hasGM);
     }
 
     _canDragDrop(selector) {
@@ -213,14 +215,14 @@ export class ShopSheet extends EnhancedJournalSheet {
 
             const dragData = { from: this.object.id };
 
-            if (!game.user.isGM && !['free', 'confirm'].includes(this.object.data.flags["monks-enhanced-journal"].purchasing)) {
+            if (!game.user.isGM && !['free', 'confirm'].includes(this.object.flags["monks-enhanced-journal"].purchasing)) {
                 event.preventDefault();
                 return;
             }
 
             let id = li.dataset.id;
 
-            let item = this.object.data.flags["monks-enhanced-journal"].items.find(i => i._id == id);
+            let item = this.object.flags["monks-enhanced-journal"].items.find(i => i._id == id);
             if (item == undefined) {
                 ui.notifications.warn(i18n("MonksEnhancedJournal.CannotFindItem"));
                 return;
@@ -231,17 +233,19 @@ export class ShopSheet extends EnhancedJournalSheet {
                 return;
             }
 
-            let qty = this.getValue(item, quantityname(), null);
+            let qty = getValue(item, quantityname(), null);
             if (!game.user.isGM && (qty != null && qty <= 0)) {
                 ui.notifications.warn(i18n("MonksEnhancedJournal.msg.NotEnoughRemainsToBeTransferred"));
                 return;
             }
 
             item = duplicate(item);
-            //this.setValue(item, quantityname(), 1);
+            //setValue(item, quantityname(), 1);
 
             dragData.id = id;
-            dragData.journalid = this.object.id;
+            dragData.journalId = this.object.parent.id;
+            dragData.pageId = this.object.id;
+            dragData.pageUuid = this.object.uuid;
             dragData.type = "Item";
             dragData.data = item;
 
@@ -264,6 +268,19 @@ export class ShopSheet extends EnhancedJournalSheet {
 
         if (data.type == 'Actor') {
             this.addActor(data);
+        } else if (data.type == 'Folder' && data.documentName == "Item") {
+            if (!this.object.isOwner)
+                return false;
+            // Import items from the folder
+            let folder = await fromUuid(data.uuid);
+            if (folder) {
+                for (let item of folder.contents) {
+                    if (item instanceof Item) {
+                        let itemData = item.toObject();
+                        await this.addItem({ data: itemData });
+                    }
+                }
+            }
         } else if (data.type == 'Item') {
             if (data.from == this.object.id)  //don't drop on yourself
                 return;
@@ -274,27 +291,28 @@ export class ShopSheet extends EnhancedJournalSheet {
 
                 if (game.user.isGM) {
                     let item = await this.getDocument(data);
-                    let max = this.getValue(item.data, quantityname());
+                    let max = getValue(item.data, quantityname());
 
-                    let price = this.getPrice(item.data, "price");
+                    let sysPrice = MEJHelpers.getSystemPrice(item.data, pricename());
+                    let price = MEJHelpers.getPrice(sysPrice);
                     let buy = this.object.getFlag('monks-enhanced-journal', 'buy') ?? 0.5;
                     price.value = Math.floor(price.value * buy);
                     let result = await this.constructor.confirmQuantity(item, max, "sell", true, price);
                     if ((result?.quantity ?? 0) > 0) {
-                        this.setValue(item.data, quantityname(), result.quantity);
+                        setValue(item.data, quantityname(), result.quantity);
                         this.addItem(item);
 
                         await this.constructor.actorPurchase(actor, { value: -(result.price.value * result.quantity), currency: result.price.currency });
 
                         let actorItem = actor.items.get(data.data._id);
                         if (actorItem) {
-                            if (result.quantity >= this.getValue(actorItem.data, quantityname()))
+                            if (result.quantity >= getValue(actorItem.data, quantityname()))
                                 actorItem.delete();
                             else {
-                                let newQty = this.getValue(actorItem.data, quantityname()) - result.quantity;
-                                let update = { data: {} }; 
-                                update.data[quantityname()] = actorItem.data.data[quantityname()];
-                                this.setValue(update, quantityname(), newQty);
+                                let newQty = getValue(actorItem.data, quantityname()) - result.quantity;
+                                let update = { system: {} }; 
+                                update.system[quantityname()] = actorItem.system[quantityname()];
+                                setValue(update, quantityname(), newQty);
                                 actorItem.update(update);
                             }
                         }
@@ -313,8 +331,8 @@ export class ShopSheet extends EnhancedJournalSheet {
                     }
                     //request to sell
                     let item = await this.getDocument(data);
-                    let max = this.getValue(item.data, quantityname());
-                    let price = ShopSheet.getPrice(item.data);
+                    let max = getValue(item.data, quantityname());
+                    let price = MEJHelpers.getPrice(getProperty(item, "flags.monks-enhanced-journal.price"));
                     let origPrice = price.value;
                     let buy = this.object.getFlag('monks-enhanced-journal', 'buy') ?? 0.5;
                     price.value = Math.floor(price.value * buy);
@@ -330,16 +348,16 @@ export class ShopSheet extends EnhancedJournalSheet {
                                 await actoritem.delete();
                             } else {
                                 let qty = max - result.quantity;
-                                let update = { data: {} };
-                                update.data[quantityname()] = actoritem.data.data[quantityname()];
-                                this.setValue(update, quantityname(), qty);
+                                let update = { system: {} };
+                                update.system[quantityname()] = actoritem.system[quantityname()];
+                                setValue(update, quantityname(), qty);
                                 await actoritem.update(update);
                             }
 
                             //add the item to the shop
                             let itemData = item.toObject();
-                            this.setValue(itemData, quantityname(), result.quantity);
-                            this.setValue(itemData, pricename(), origPrice + " " + price.currency);
+                            setValue(itemData, quantityname(), result.quantity);
+                            setValue(itemData, pricename(), origPrice + " " + price.currency);
                             itemData.lock = true;
                             itemData.from = actor.name;
 
@@ -359,6 +377,14 @@ export class ShopSheet extends EnhancedJournalSheet {
             } else
                 this.addItem(data);
         } else if (data.type == 'JournalEntry') {
+            let doc = await fromUuid(data.uuid);
+            if (doc.pages.size == 1) {
+                data.id = doc.pages.contents[0].id;
+                data.uuid = doc.pages.contents[0].uuid;
+                data.type = "JournalEntryPage";
+                this.addRelationship(data);
+            }
+        } else if (data.type == 'JournalEntryPage') {
             this.addRelationship(data);
         }
 
@@ -383,11 +409,11 @@ export class ShopSheet extends EnhancedJournalSheet {
                 }
             } else {
                 let id = ev.currentTarget.closest('li').dataset.id;
-                let item = this.object.data.flags['monks-enhanced-journal'].items.find(o => o.id == id);
+                let item = this.object.flags['monks-enhanced-journal'].items.find(o => o.id == id);
 
                 if (item) {
                     item[prop] = value;
-                    return this.object.update({ 'flags.monks-enhanced-journal': this.object.data.flags['monks-enhanced-journal'] });
+                    return this.object.update({ 'flags.monks-enhanced-journal': this.object.flags['monks-enhanced-journal'] });
                 }
             }
         } else
@@ -404,9 +430,9 @@ export class ShopSheet extends EnhancedJournalSheet {
 
     changeState(event) {
         let show = ($(event.currentTarget).val() != 'hidden');
-        let perms = this.object.data.permission;
-        perms['default'] = (show ? CONST.ENTITY_PERMISSIONS.OBSERVER : CONST.ENTITY_PERMISSIONS.NONE);
-        this.object.update({ permission: perms });
+        let owns = this.object.ownership;
+        owns['default'] = (show ? CONST.DOCUMENT_OWNERSHIP_LEVELS.OBSERVER : CONST.DOCUMENT_OWNERSHIP_LEVELS.NONE);
+        this.object.update({ ownership: owns });
     }
 
     async adjustPrice(event) {
@@ -416,9 +442,9 @@ export class ShopSheet extends EnhancedJournalSheet {
             let items = this.object.getFlag('monks-enhanced-journal', 'items') || [];
 
             for (let item of items) {
-                let price = ShopSheet.getPrice(item);
+                let price = MEJHelpers.getPrice(getProperty(item, "flags.monks-enhanced-journal.price"));
                 let cost = Math.max(Math.ceil((price.value * sell), 1)) + " " + price.currency;
-                item.data.cost = cost;
+                setProperty(item, "flags.monks-enhanced-journal.cost", cost);
             }
 
             await this.object.setFlag('monks-enhanced-journal', 'items', items);
@@ -464,7 +490,7 @@ export class ShopSheet extends EnhancedJournalSheet {
         let li = $(event.currentTarget).closest("li")[0];
 
         let id = li.dataset.id;
-        let item = this.object.data.flags['monks-enhanced-journal'].items.find(o => o._id == id);
+        let item = this.object.flags['monks-enhanced-journal'].items.find(o => o._id == id);
 
         if (!item)
             return;
@@ -483,7 +509,7 @@ export class ShopSheet extends EnhancedJournalSheet {
             }
         }
 
-        let max = this.getValue(item, quantityname(), null);
+        let max = getValue(item, quantityname(), null);
         if (!game.user.isGM && (max != null && max <= 0)) {
             ui.notifications.warn(i18n("MonksEnhancedJournal.msg.CannotTransferItemQuantity"));
             return false;
@@ -495,11 +521,11 @@ export class ShopSheet extends EnhancedJournalSheet {
             return false;
         }
 
-        let price = ShopSheet.getPrice(item, "cost");
+        let price = MEJHelpers.getPrice(getProperty(item, "flags.monks-enhanced-journal.cost"));
 
         let result = await ShopSheet.confirmQuantity(item, max, "purchase");
         if ((result?.quantity ?? 0) > 0) {
-            if (this.object.data.flags['monks-enhanced-journal'].purchasing == 'confirm') {
+            if (this.object.flags['monks-enhanced-journal'].purchasing == 'confirm') {
                 //create the chat message informaing the GM that player is trying to sell an item.
                 item.quantity = result.quantity;
                 item.maxquantity = (max != "" ? parseInt(max) : null);
@@ -510,14 +536,14 @@ export class ShopSheet extends EnhancedJournalSheet {
                     this.constructor.createRequestMessage.call(this, this.object, item, actor, true);
                     MonksEnhancedJournal.emit("notify", { actor: actor.name, item: item.name });
                 }
-            } else if (this.object.data.flags['monks-enhanced-journal'].purchasing == 'free') {
+            } else if (this.object.flags['monks-enhanced-journal'].purchasing == 'free') {
                 // Create the owned item
                 if (!ShopSheet.canAfford((result.quantity * price.value) + " " + price.currency, actor))
                     ui.notifications.error(format("MonksEnhancedJournal.msg.ActorCannotAffordItem", { name: actor.name, quantity: result.quantity, itemname: item.name }));
                 else {
                     let itemData = duplicate(item);
                     delete itemData._id;
-                    this.setValue(itemData, quantityname(), result.quantity);
+                    setValue(itemData, quantityname(), result.quantity);
                     await actor.createEmbeddedDocuments("Item", [itemData]);
 
                     MonksEnhancedJournal.emit("purchaseItem",
@@ -535,18 +561,18 @@ export class ShopSheet extends EnhancedJournalSheet {
     }
 
     async createSellMessage(item, actor) {
-        let price = ShopSheet.getPrice(item);
+        let price = MEJHelpers.getPrice(getProperty(item, "flags.monks-enhanced-journal.price"));
         let buy = this.object.getFlag('monks-enhanced-journal', 'buy') ?? 0.5;
         item.sell = Math.floor(price.value * buy);
         item.currency = price.currency;
-        item.maxquantity = this.getValue(item, quantityname());
+        item.maxquantity = getValue(item, quantityname());
         item.quantity = Math.max(Math.min(item.maxquantity, item.quantity), 1);
         item.total = item.quantity * item.sell;
         let messageContent = {
             action: 'sell',
             actor: { id: actor.id, name: actor.name, img: actor.img },
             items: [item],
-            shop: { id: this.object.id, name: this.object.name, img: this.object.data.img }
+            shop: { id: this.object.id, name: this.object.name, img: this.object.img }
         }
 
         //create a chat message
@@ -574,24 +600,30 @@ export class ShopSheet extends EnhancedJournalSheet {
         let item = await this.getDocument(data);
 
         if (item) {
-            let items = duplicate(this.object.data.flags["monks-enhanced-journal"].items || []);
+            let items = duplicate(this.object.flags["monks-enhanced-journal"].items || []);
 
             let itemData = item.toObject();
             if ((itemData.type === "spell") && game.system.id == 'dnd5e') {
                 itemData = await ShopSheet.createScrollFromSpell(itemData);
             }
 
-            let price = ShopSheet.getPrice(item.data);
-            let adjustment = this.object.data.flags["monks-enhanced-journal"].sell ?? 1;
+            let price = MEJHelpers.getPrice(getProperty(item, "flags.monks-enhanced-journal.price"));
+            let adjustment = this.object.flags["monks-enhanced-journal"].sell ?? 1;
             let update = {
                 _id: makeid(),
-                hide: !!data.data?.hide,
-                lock: !!data.data?.lock,
-                data: { cost: (price.value * adjustment) + " " + price.currency }
-
+                flags: {
+                    'monks-enhanced-journal': {
+                        parentId: item.id,
+                        quantity: 1,
+                        hide: !!data.data?.hide,
+                        lock: !!data.data?.lock,
+                        price: `${price.value} ${price.currency}`,
+                        cost: (price.value * adjustment) + " " + price.currency
+                    }
+                }
             }
             if (game.system.id == "dnd5e") {
-                update.data.equipped = false;
+                setProperty(update, "system.equipped", false);
             }
             items.push(mergeObject(itemData, update));
             this.object.setFlag('monks-enhanced-journal', 'items', items);
@@ -604,8 +636,8 @@ export class ShopSheet extends EnhancedJournalSheet {
         event.currentTarget = li;
 
         let item = game.items.find(i => i.id == li.dataset.id)
-        if (item == undefined && this.object.data.flags["monks-enhanced-journal"].actor) {
-            let actorid = this.object.data.flags["monks-enhanced-journal"].actor.id;
+        if (item == undefined && this.object.flags["monks-enhanced-journal"].actor) {
+            let actorid = this.object.flags["monks-enhanced-journal"].actor.id;
             let actor = game.actors.get(actorid);
             if (actor)
                 item = actor.items.get(li.dataset.id);
@@ -617,7 +649,7 @@ export class ShopSheet extends EnhancedJournalSheet {
 
     static canAfford(item, actor) {
         //find the currency
-        let price = ShopSheet.getPrice(item, "cost");
+        let price = MEJHelpers.getPrice(getProperty(item, "flags.monks-enhanced-journal.cost"));
         if (price.value == 0)
             return true;
 
@@ -658,13 +690,14 @@ export class ShopSheet extends EnhancedJournalSheet {
     static async itemDropped(id, actor, entry) {
         let item = (entry.getFlag('monks-enhanced-journal', 'items') || []).find(i => i._id == id);
         if (item) {
-            let max = this.getValue(item, quantityname(), null);
+            let max = getValue(item, quantityname(), null);
             if (!game.user.isGM && (max != null && max <= 0)) {
                 ui.notifications.warn(i18n("MonksEnhancedJournal.msg.CannotTransferItemQuantity"));
                 return false;
             }
 
-            if (item.data.cost && item.data.cost != '') {
+            let cost = getProperty(item, "flags.monks-enhanced-journal.cost");
+            if (cost && cost != '') {
                 //check if the player can afford it
                 if (!this.canAfford(item, actor)) {
                     ui.notifications.warn(format("MonksEnhancedJournal.msg.CannotTransferCannotAffordIt", { name: actor.name }));
@@ -678,7 +711,7 @@ export class ShopSheet extends EnhancedJournalSheet {
                 return false;
             }
 
-            let price = ShopSheet.getPrice(item, "cost");
+            let price = MEJHelpers.getPrice(getProperty(item, "flags.monks-enhanced-journal.cost"));
 
             let result = await ShopSheet.confirmQuantity(item, max, "purchase");
             if ((result?.quantity ?? 0) > 0) {
@@ -688,7 +721,7 @@ export class ShopSheet extends EnhancedJournalSheet {
                     ShopSheet.purchaseItem.call(this, entry, id, result.quantity, { actor, purchased: true });
                     return result;
                 } else {
-                    if (entry.data.flags["monks-enhanced-journal"].purchasing == 'confirm') {
+                    if (getProperty(entry.data, "flags.monks-enhanced-journal.purchasing") == 'confirm') {
                         //create the chat message informaing the GM that player is trying to sell an item.
                         item.quantity = result.quantity;
                         item.maxquantity = (max != "" ? parseInt(max) : null);
@@ -759,20 +792,20 @@ export class ShopSheet extends EnhancedJournalSheet {
                         // Weapons are fine, unless they're natural
                         let result = false;
                         if (item.type == 'weapon') {
-                            result = item.data.data.weaponType != 'natural';
+                            result = item.system.weaponType != 'natural';
                         }
                         // Equipment's fine, unless it's natural armor
                         else if (item.type == 'equipment') {
-                            if (!item.data.data.armor)
+                            if (!item.system.armor)
                                 result = true;
                             else
-                                result = item.data.data.armor.type != 'natural';
+                                result = item.system.armor.type != 'natural';
                         } else
                             result = !(['class', 'spell', 'feat', 'action', 'lore'].includes(item.type));
 
                         return result;
                     }).map(i => {
-                        return mergeObject(i.toObject(), { cost: this.getValue(i.data, pricename(), "") });
+                        return mergeObject(i.toObject(), { cost: getValue(i.data, pricename(), "") });
                     });
 
                 if (items.length > 0) {

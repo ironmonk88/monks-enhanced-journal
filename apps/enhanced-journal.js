@@ -36,6 +36,7 @@ export class EnhancedJournal extends Application {
         this._backgroundsound = {};
 
         //load up the last entry being shown
+        this.object = object;
         if (object != undefined)
             this.open(object, null, { anchor: options?.anchor });
 
@@ -68,7 +69,7 @@ export class EnhancedJournal extends Application {
             closeOnSubmit: false,
             submitOnClose: false,
             submitOnChange: true,
-            viewPermission: CONST.ENTITY_PERMISSIONS.NONE,
+            viewPermission: CONST.DOCUMENT_OWNERSHIP_LEVELS.NONE,
             scrollY: ["ol.directory-list"]
         });
     }
@@ -111,7 +112,7 @@ export class EnhancedJournal extends Application {
                 MonksEnhancedJournal.updateDirectory(html, false);
             })
 
-            this.renderSubSheet().then(() => {
+            this.renderSubSheet(options).then(() => {
                 if (options?.anchor) {
                     const anchor = $(`#${options?.anchor}`, this.element);
                     if (anchor.length) {
@@ -162,7 +163,7 @@ export class EnhancedJournal extends Application {
         return html;
     }
 
-    async renderSubSheet() {
+    async renderSubSheet(options) {
         try {
             let currentTab = this.tabs.active();
             if (!currentTab.entity)
@@ -174,11 +175,22 @@ export class EnhancedJournal extends Application {
             if (this.object instanceof Promise)
                 this.object = await this.object;
 
-            MonksEnhancedJournal.fixType(this.object);
-
             let contentform = $('.content > section', this.element);
 
-            const cls = (this.object._getSheetClass ? this.object._getSheetClass() : null);
+            if (this.object instanceof JournalEntry && this.object.pages.size == 1 && options.autoPage) {
+                this.object = this.object.pages.contents[0];
+                let tab = this.tabs.active();
+                tab.entityId = this.object.uuid;
+                tab.entity = this.object;
+                this.saveTabs();
+            }
+
+            MonksEnhancedJournal.fixType(this.object);
+
+            this.activateFooterListeners(this.element);
+
+            //const cls = (this.object._getSheetClass ? this.object._getSheetClass() : null);
+            const cls = (this.object instanceof JournalEntry ? JournalEntrySheet : (this.object._getSheetClass ? this.object._getSheetClass() : null));
             if (!cls)
                 this.subsheet = new EnhancedJournalSheet(this.object);
             else 
@@ -186,9 +198,10 @@ export class EnhancedJournal extends Application {
             
             this.object._sheet = this.subsheet;
 
+            this.subsheet.options.popOut = false;
             this.subsheet._state = this.subsheet.constructor.RENDER_STATES.RENDERING;
 
-            if (this.subsheet._getHeaderButtons && this.object.id) {
+            if (this.subsheet._getHeaderButtons && this.object.id && !(this.object instanceof JournalEntry)) {
                 let buttons = this.subsheet._getHeaderButtons();
                 buttons.findSplice(b => b.class == "share-image");
                 Hooks.call(`getDocumentSheetHeaderButtons`, this.subsheet, buttons);
@@ -214,17 +227,22 @@ export class EnhancedJournal extends Application {
 
             let templateData = await this.subsheet.getData();
             //let defaultOptions = this.subsheet.constructor.defaultOptions;
+            await loadTemplates({
+                journalEntryPageHeader: "templates/journal/parts/page-header.html",
+                journalEntryPageFooter: "templates/journal/parts/page-footer.html"
+            });
             let html = await renderTemplate(this.subsheet.template, templateData);
+
             this.subdocument = $(html).get(0);
             this.subsheet.form = (this.subdocument.tagName == 'FORM' ? this.subdocument : $('form:first', this.subdocument));
             this.subsheet._element = $(this.subdocument);
-            //this.subsheet.enhancedjournal = this;
+            this.subsheet.enhancedjournal = this;
             if(this.subsheet.refresh)
                 this.subsheet.refresh();
 
             $('.window-title', this.element).html(this.subsheet.title + ' - ' + i18n("MonksEnhancedJournal.Title"));
 
-            $('.content', this.element).attr('entity-type', this.object.data.type).attr('entity-id', this.object.id);
+            $('.content', this.element).attr('entity-type', this.object.type).attr('entity-id', this.object.id);
             let classes = this.subsheet.options.classes.join(' ').replace('monks-enhanced-journal', '')
             if (!(this.subsheet instanceof ActorSheet) && !setting("use-system-tag"))
                 classes = classes.replace(game.system.id, '');
@@ -279,7 +297,7 @@ export class EnhancedJournal extends Application {
 
             $('button[type="submit"]', $(this.subdocument)).attr('type', 'button').on("click", this.subsheet._onSubmit.bind(this.subsheet))
 
-            if (this.subsheet.updateStyle && this.object.data.type != 'blank')
+            if (this.subsheet.updateStyle && this.object.type != 'blank')
                 this.subsheet.updateStyle(null, this.subdocument);
 
             if (game.modules.get("polyglot")?.active && this.subsheet.renderPolyglot)
@@ -301,7 +319,7 @@ export class EnhancedJournal extends Application {
 
             this.object._sheet = null;  // Adding this to prevent Quick Encounters from automatically opening
 
-            if (this.object.data.type != 'blank')
+            if (this.object.type != 'blank')
                 Hooks.callAll('renderJournalSheet', this.subsheet, contentform, templateData); //this.object);
 
             this.object._sheet = this.subsheet;
@@ -316,7 +334,7 @@ export class EnhancedJournal extends Application {
                     });
                 }
                 // if the new entry has a sound file, that autoplays, then start the sound file playing
-                if (this.object.data.type != "blank") {
+                if (this.object.type != "blank") {
                     let sound = this.object.getFlag("monks-enhanced-journal", "sound");
                     if (sound?.audiofile && sound?.autoplay && this.subsheet?.canPlaySound) {
                         this.subsheet._playSound(sound).then((soundfile) => {
@@ -329,18 +347,7 @@ export class EnhancedJournal extends Application {
             this._lastentry = this.object.id;
 
             this.activateControls($('#journal-buttons', this.element).empty());
-
-            $('.navigate-prev', this.element).html('').attr('data-entity-id', '');
-            $('.navigate-next', this.element).html('').attr('data-entity-id', '');
-            if (this.object.folder) {
-                let idx = this.object.folder.content.findIndex(e => e.id == this.object.id);
-                if (idx != -1) {
-                    $('.navigate-prev', this.element).html(idx == 0 ? '' : '&laquo; ' + this.object.folder.content[idx - 1].name).attr('data-entity-id', idx == 0 ? '' : this.object.folder.content[idx - 1].id);
-                    $('.navigate-next', this.element).html(idx >= this.object.folder.content.length - 1 ? '' : this.object.folder.content[idx + 1].name + ' &raquo;').attr('data-entity-id', idx >= this.object.folder.content.length - 1 ? '' : this.object.folder.content[idx + 1].id);
-                } else
-                    $('footer', this.element).hide();
-            } else
-                $('footer', this.element).hide();
+            
 
             this.object._sheet = null; //set this to null so that other things can open the sheet
             this.subsheet._state = this.subsheet.constructor.RENDER_STATES.RENDERED;
@@ -383,8 +390,10 @@ export class EnhancedJournal extends Application {
             editor.button.style.display = "";
 
         const owner = this.object.isOwner;
-        const content = (game.system.id == "pf2e" ? game.pf2e.TextEditor : TextEditor).enrichHTML(this.object.data.content, { secrets: owner, documents: true });
-        $('.editor-content[data-edit="content"]', this.element).html(content);
+        (game.system.id == "pf2e" ? game.pf2e.TextEditor : TextEditor).enrichHTML(this.object.content, { secrets: owner, documents: true, async: true }).then((content) => {
+            $(`.editor-content[data-edit="${name}"]`, this.element).html(content);
+        });
+        
     }
 
     activateControls(html) {
@@ -446,7 +455,7 @@ export class EnhancedJournal extends Application {
         if (this.object instanceof Actor)
             return 'actor';
 
-        let flags = this.object.data?.flags;
+        let flags = this.object?.flags;
         let type = (flags != undefined ? flags['monks-enhanced-journal']?.type : null) || 'oldentry';
 
         if (this.object?.folder?.name == '_fql_quests')
@@ -493,7 +502,7 @@ export class EnhancedJournal extends Application {
 
     async findEntity(entityId, text) {
         if (entityId == undefined)
-            return { data: { flags: { 'monks-enhanced-journal': { type: 'blank' } }, content: "" } };
+            return { flags: { 'monks-enhanced-journal': { type: 'blank' } }, text: { content: "" } };
         else {
             let entity;
             if (entityId.indexOf('.') >= 0) {
@@ -507,7 +516,7 @@ export class EnhancedJournal extends Application {
                     entity = game.actors.get(entityId);
             }
             if (entity == undefined)
-                entity = { data: { name: text, flags: { 'monks-enhanced-journal': { type: 'blank' } }, content: `${i18n("MonksEnhancedJournal.CannotFindEntity")}: ${text}` } };
+                entity = { name: text, flags: { 'monks-enhanced-journal': { type: 'blank' }, content: `${i18n("MonksEnhancedJournal.CannotFindEntity")}: ${text}` } };
 
             return entity;
         }
@@ -535,10 +544,10 @@ export class EnhancedJournal extends Application {
 
         let tab = {
             id: makeid(),
-            text: entity?.data.name || i18n("MonksEnhancedJournal.NewTab"),
+            text: entity?.name || i18n("MonksEnhancedJournal.NewTab"),
             active: false,
             entityId: entity?.uuid,
-            entity: entity || { data: { flags: { 'monks-enhanced-journal': { type: 'blank' } }, content: i18n("MonksEnhancedJournal.NewTab") } },
+            entity: entity || { flags: { 'monks-enhanced-journal': { type: 'blank' }, content: i18n("MonksEnhancedJournal.NewTab") } },
             history: []
         };
         if (tab.entityId != undefined)
@@ -613,13 +622,13 @@ export class EnhancedJournal extends Application {
         return true;
     }
 
-    updateTab(tab, entity, options) {
+    updateTab(tab, entity, options = {}) {
         if (!entity)
             return;
 
         if (tab != undefined) {
             if (tab.entityId != entity.uuid) {
-                tab.text = entity.data.name;
+                tab.text = entity.name;
                 tab.entityId = entity.uuid;
                 tab.entity = entity;
 
@@ -652,7 +661,7 @@ export class EnhancedJournal extends Application {
         if (!this.rendered)
             return;
 
-        this.render(true, { focus: true, anchor: options?.anchor });
+        this.render(true, mergeObject({ focus: true }, options));
     }
 
     removeTab(tab, event) {
@@ -692,7 +701,9 @@ export class EnhancedJournal extends Application {
             delete tab.userdata;
             return tab;
         });
-        game.user.setFlag('monks-enhanced-journal', 'tabs', update);
+        game.user.update({
+            flags: { 'monks-enhanced-journal': { 'tabs': update } }
+        }, { render: false });
     }
 
     updateTabNames(uuid, name) {
@@ -873,7 +884,9 @@ export class EnhancedJournal extends Application {
             recent.unshift({ id: entity.id, uuid: entity.uuid, name: entity.name, type: entity.getFlag("monks-enhanced-journal", "type") });
             if (recent.length > 5)
                 recent = recent.slice(0, 5);
-            await game.user.setFlag("monks-enhanced-journal", "_recentlyViewed", recent);
+            await game.user.update({
+                flags: { 'monks-enhanced-journal': { '_recentlyViewed': recent } }
+            }, { render: false });
         }
     }
 
@@ -922,7 +935,7 @@ export class EnhancedJournal extends Application {
             return;
         }
 
-        this.subsheet.splitJournal();
+        this.splitJournal();
     }
 
     _canDragStart(selector) {
@@ -1020,12 +1033,12 @@ export class EnhancedJournal extends Application {
         let id = $(content).attr('entity-id');
         //find this id on the map
 
-        let note = canvas.scene.data.notes.find(n => {
-            return n.data.entryId == id;
+        let note = canvas.scene.notes.find(n => {
+            return n.entryId == id;
         });
         if (note) {
             //if (note.visible && !canvas.notes._active) canvas.notes.activate();
-            canvas.animatePan({ x: note.data.x, y: note.data.y, scale: 1, duration: 250 });
+            canvas.animatePan({ x: note.x, y: note.y, scale: 1, duration: 250 });
         }
     }
 
@@ -1035,8 +1048,9 @@ export class EnhancedJournal extends Application {
         else if (event.ctrlKey)
             this._onShowPlayers({ data: { users: null, object: this.object, options: { showpic: true } } });
         else {
-            let type = this.entitytype;
-            new SelectPlayer(this, { showpic: $('.fullscreen-image', this.element).is(':visible') || ((type == 'journalentry' || type == 'oldentry') && $('.tab.picture', this.element).hasClass('active') )}).render(true);
+            //let type = this.entitytype;
+            //new SelectPlayer(this, { showpic: $('.fullscreen-image', this.element).is(':visible') || ((type == 'journalentry' || type == 'oldentry') && $('.tab.picture', this.element).hasClass('active') )}).render(true);
+            this._onShowPlayers(event);
         }
     }
 
@@ -1235,9 +1249,6 @@ export class EnhancedJournal extends Application {
         html.find('.tab-add').click(this.addTab.bind(this));
         html.find('.journal-tab').click(this.activateTab.bind(this));
 
-        html.find('.navigate-prev').click(this.navigateFolder.bind(this));
-        html.find('.navigate-next').click(this.navigateFolder.bind(this));
-
         let that = this;
         $('.journal-tab .close').each(function () {
             let tabid = $(this).closest('.journal-tab')[0].dataset.tabid;
@@ -1248,10 +1259,38 @@ export class EnhancedJournal extends Application {
         $('.back-button, .forward-button', html).toggle(game.user.isGM || setting('allow-player')).on('click', this.navigateHistory.bind(this));
     }
 
-    /*addResizeObserver(html) {
-        new ResizeObserver(function (obs) {
-            log('resize observer', obs);
-            $(obs[0].target).toggleClass('flexcol', obs[0].contentRect.width < 900).toggleClass('flexrow', obs[0].contentRect.width >= 900);
-        }).observe($('.encounter-content', html).get(0));
-    }*/
+    activateFooterListeners(html) {
+        let folder = (this.object.folder || this.object.parent?.folder);
+        let content = folder ? folder.contents : ui.journal.tree.documents;
+        let idx = content.findIndex(e => e.id == this.object.id || e.id == this.object.parent?.id);
+
+        let prev = (idx > 0 ? content[idx - 1] : null);
+        let next = (idx < content.length - 1 ? content[idx + 1] : null);
+        $('.navigate-prev', html).toggle(this.object.type !== "blank").toggleClass('disabled', !prev).attr("title", prev?.name).on("click", this.open.bind(this, prev));
+        $('.navigate-next', html).toggle(this.object.type !== "blank").toggleClass('disabled', !next).attr("title", next?.name).on("click", this.open.bind(this, next));
+
+        if (this.object instanceof JournalEntry) {
+            $('.page-prev', html).addClass("disabled").toggle(this.object.pages?.contents?.length > 0);
+            $('.page-next', html).toggleClass("disabled", this.object.pages?.contents?.length == 0).toggle(this.object.pages?.contents?.length > 0).attr("title", this.object.pages.contents[0]?.name).on("click", this.open.bind(this, this.object.pages.contents[0]));
+        } else if (this.object instanceof JournalEntryPage) {
+            let pageIdx = this.object.parent.pages.contents.findIndex(p => p.id == this.object.id);
+            let prevPage = (pageIdx > 0 ? this.object.parent.pages.contents[pageIdx - 1] : null);
+            let nextPage = (pageIdx < this.object.parent.pages?.contents.length - 1 ? this.object.parent.pages.contents[pageIdx + 1] : null);
+            $('.page-prev', html).toggleClass('disabled', !prevPage).toggle(this.object.parent.pages?.contents?.length > 1).attr("title", prevPage?.name).on("click", this.open.bind(this, prevPage));
+            $('.page-next', html).toggleClass('disabled', !nextPage).toggle(this.object.parent.pages?.contents?.length > 1).attr("title", nextPage?.name).on("click", this.open.bind(this, nextPage));
+        } else {
+            $('.page-prev', html).hide();
+            $('.page-next', html).hide();
+        }
+
+        $('.add-page', html).on("click", this.addPage.bind(this));
+        $('.goto-journal-entry', html).toggleClass('disabled', !(this.object instanceof JournalEntryPage)).on("click", this.open.bind(this, this.object.parent, false));
+    }
+
+    addPage() {
+        let journal = this.object.parent || this.object;
+
+        const options = { parent: journal };
+        return JournalEntryPage.implementation.createDialog({}, options);
+    }
 }

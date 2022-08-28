@@ -1,13 +1,13 @@
-<form class="flexcol journal-subsheet {{entrytype}}{{#if isGM}} gm{{/if}}{{#if owner}} owner{{/if}}" editable="{{editable}}">
+<form class="flexcol journal-subsheet sheet-body {{entrytype}}{{#if isGM}} gm{{/if}}{{#if owner}} owner{{/if}}" editable="{{editable}}">
     <div class="loot-container flexcol">
-        <div class="fullscreen-image"><img src="{{data.img}}" /></div>
+        <div class="fullscreen-image"><img src="{{data.src}}" /></div>
         <header class="sheet-header journal-header flexrow" style="max-height: 162px; overflow: hidden;">
             <div class="sheet-image">
-                <img class="profile" src="{{data.img}}" data-edit="img" onerror="this.src='modules/monks-enhanced-journal/assets/loot.png'">
+                <img class="profile" src="{{data.src}}" data-edit="img" onerror="this.src='modules/monks-enhanced-journal/assets/loot.png'">
             </div>
             <section class="header-details">
                 <h1 class="lootname flexrow">
-                    <i class="fas fa-donate sheet-icon"></i>
+                    <i class="fas {{data.icon}} sheet-icon"></i>
                     <input name="name" type="text" value="{{data.name}}" placeholder="{{localize 'MonksEnhancedJournal.LootName'}}">
                     {{#if sound.audiofile}}
                     <button type="button" class="play-journal-sound">
@@ -44,17 +44,15 @@
             {{#if isGM }}
             <ol class="items-list loot-characters" style="flex: 0 0 138px; overflow-y: hidden; ">
                 <li class="items-header flexrow">
-                    <h3 class="item-name flexrow">{{localize 'MonksEnhancedJournal.Characters'}}</h3>
+                    <h3 class="item-name noborder flexrow">{{localize 'MonksEnhancedJournal.Characters'}}</h3>
 
                     <div class="item-controls flexrow owner-only" style="flex: 0 0 160px;">
                         <a class="item-control add-players" title="{{localize 'MonksEnhancedJournal.ReplaceWithPlayerCharacters'}}">
                             <i class="fas fa-user"></i> {{localize 'MonksEnhancedJournal.Players'}}
                         </a>
-                        {{#if (and currency canSplit)}}
                         <a class="item-control split-money" title="{{localize 'MonksEnhancedJournal.SplitBetweenPlayers'}}">
                             <i class="fas fa-dollar-sign"></i> {{localize 'MonksEnhancedJournal.Distribute'}}
                         </a>
-                        {{/if}}
                     </div>
                 </li>
                 <ol class="items-list flexrow">
@@ -75,7 +73,7 @@
 
             <ol class="items-list loot-items">
                 <li class="items-header flexrow">
-                    <h3 class="item-name flexrow">{{localize 'MonksEnhancedJournal.Items'}}</h3>
+                    <h3 class="item-name noborder flexrow">{{localize 'MonksEnhancedJournal.Items'}}</h3>
                     <div class="item-controls item-from">{{localize 'MonksEnhancedJournal.From'}}</div>
                     {{#if canRequest}}
                     <div class="item-controls item-requests">{{localize 'MonksEnhancedJournal.Requests'}}</div>
@@ -89,10 +87,10 @@
                     </div>
                 </li>
 
-                <ol class="items-list">
+                <ol class="item-list">
                     {{#each groups}}
                     <li class="items-header flexrow{{#if this.collapsed}} collapsed{{/if}}" data-id="{{this.id}}">
-                        <h3 class="item-name flexrow">{{localize this.name}} <span class="item-count">({{this.items.length}} {{localize 'MonksEnhancedJournal.items'}})</span></h3>
+                        <h3 class="item-name noborder flexrow">{{localize this.name}} <span class="item-count">({{this.items.length}} {{localize 'MonksEnhancedJournal.items'}})</span></h3>
                     </li>
                     <ul class="item-list" {{#if this.collapsed}}style="display: none;"{{/if}}>
                         {{#each this.items}}
@@ -103,7 +101,7 @@
                             </div>
 
                             <div class="item-from flexrow">
-                                <input type="text" name="items.{{this.id}}.from" value="{{this.from}}" />
+                                <input type="text" name="items.{{this.id}}.flags.monks-enhanced-journal.from" value="{{this.from}}" />
                             </div>
 
                             {{#if @root.canRequest}}
@@ -125,7 +123,7 @@
                             {{/if}}
 
                             <div class="item-controls item-quantity">
-                                <input type="number" min="0" name="items.{{this.id}}.data.{{@root.quantityname}}{{@root.valStr}}" value="{{this.quantity}}" style="text-align:center;" />
+                                <input type="number" min="0" name="items.{{this.id}}.flags.monks-enhanced-journal.quantity" value="{{this.quantity}}" style="text-align:center;" />
                             </div>
 
                             {{#if @root.showrequest}}
