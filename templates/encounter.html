@@ -1,7 +1,7 @@
 <form class="flexcol journal-subsheet sheet-body {{entrytype}}" editable="{{editable}}">
     <div class="encounter-body">
         <div class="header-name flexrow">
-            <i class="fas fa-toolbox sheet-icon"></i>
+            <i class="fas {{data.icon}} sheet-icon"></i>
             <input name="name" type="text" value="{{data.name}}" placeholder="{{localize 'MonksEnhancedJournal.EncounterName'}}">
             {{#if sound.audiofile}}
             <button type="button" class="play-journal-sound">
@@ -21,12 +21,12 @@
         <section class="sheet-body">
             <div class="tab description active" data-group="primary" data-tab="description">
                 <div class="tab-inner flexcol">
-                {{editor target="content" content=data.content editable=true button=true owner=owner}}
+                    {{editor enrichedText target="text.content" editable=true button=true owner=owner}}
                 </div>
             </div>
             {{#if owner}}
             <div class="tab monsters" data-group="primary" data-tab="monsters">
-                <div class="encounter-content flexcol">
+                <div class="encounter-content">
                     <div style="height:100%;">
                         <ol class="items-list encounter-monsters">
                             <li class="items-header flexrow" style="position: relative;">
@@ -35,9 +35,12 @@
                                     <div class="create-encounter" title="{{localize 'MonksEnhancedJournal.DragMonsters'}}"><i class="fas fa-user-plus"></i></div>
                                     <div class="select-encounter" title="{{localize 'MonksEnhancedJournal.SelectEncounter'}}"><i class="fas fa-expand"></i></div>
                                 </div>
-                                <h3 class="item-name monster-name flexrow">
+                                <h3 class="item-name noborder monster-name flexrow">
                                     {{localize 'MonksEnhancedJournal.Monsters'}}
                                 </h3>
+                                {{#if showLocation}}
+                                <div class="item-controls item-hidden">{{localize 'MonksEnhancedJournal.Location'}}</div>
+                                {{/if}}
                                 <div class="item-controls item-hidden">{{localize 'MonksEnhancedJournal.Hidden'}}</div>
                                 <div class="item-controls item-quantity">{{localize 'MonksEnhancedJournal.Quantity'}}</div>
                                 <div class="item-controls flexrow">
@@ -52,6 +55,12 @@
                                         <div class="item-image monster-icon" data-id="{{this.id}}" data-type="Actor" style="background-image: url('{{this.img}}')" draggable="false"></div>
                                         <h4>{{this.name}}</h4>
                                     </div>
+
+                                    {{#if ../showLocation}}
+                                    <div class="item-controls item-location">
+                                        <input type="text" name="actors.{{this.id}}.location" value="{{this.location}}" />
+                                    </div>
+                                    {{/if}}
 
                                     <div class="item-controls item-hidden" style="text-align:center;">
                                         <input type="checkbox" name="actors.{{this.id}}.hidden" {{checked this.hidden}} data-dtype="Boolean" style="text-align:center;" />
@@ -95,7 +104,7 @@
                             <div class="encounter-buttons flexrow">
                                 <div class="assign-items" title="{{localize 'MonksEnhancedJournal.AssignItems'}}"><i class="fas fa-suitcase"></i></div>
                             </div>
-                            <h3 class="item-name flexrow">{{localize 'MonksEnhancedJournal.Items'}}</h3>
+                            <h3 class="item-name noborder flexrow">{{localize 'MonksEnhancedJournal.Items'}}</h3>
                             <div class="item-controls item-assigned">{{localize 'MonksEnhancedJournal.Assigned'}}</div>
                             <div class="item-controls item-quantity">{{localize 'MonksEnhancedJournal.Qty'}}</div>
                             <div class="item-controls item-quantity">{{localize 'MonksEnhancedJournal.Remaining'}}</div>
@@ -107,14 +116,14 @@
                         <ol class="item-list">
                             {{#each groups}}
                             <li class="items-header flexrow{{#if this.collapsed}} collapsed{{/if}}" data-id="{{this.id}}">
-                                <h3 class="item-name flexrow">{{localize this.name}} <span class="item-count">({{this.items.length}} items)</span></h3>
+                                <h3 class="item-name noborder flexrow">{{localize this.name}} <span class="item-count">({{this.items.length}} items)</span></h3>
                             </li>
                             <ul class="item-list" {{#if this.collapsed}}style="display: none;"{{/if}}>
                                 {{#each this.items}}
                                 <li class="item flexrow{{#if this.received}} received{{/if}}{{#if (eq this.remaining 0)}} empty{{/if}}" data-id="{{this.id}}" data-container="items" data-document="Item" draggable="false">
                                     <div class="item-name flexrow">
                                         <div class="item-image item-icon" style="background-image: url('{{this.img}}')"></div>
-                                        <h4>{{this.name}}</h4>
+                                        <h4>{{this.name}}{{#if (gt this.qtyof 1)}} <span class="groups-of">(in groups of {{this.qtyof}})</span>{{/if}}</h4>
                                     </div>
 
                                     <div class="item-name item-received">
@@ -122,15 +131,15 @@
                                     </div>
 
                                     <div class="item-controls item-assigned">
-                                        <input type="checkbox" name="items.{{this.id}}.assigned" {{checked this.assigned}} style="text-align:center;" />
+                                        <input type="checkbox" name="items.{{this.id}}.flags.monks-enhanced-journal.assigned" {{checked this.assigned}} style="text-align:center;" />
                                     </div>
 
                                     <div class="item-controls item-quantity">
-                                        <input type="number" min="0" name="items.{{this.id}}.data.{{@root.quantityname}}{{@root.valStr}}" value="{{this.quantity}}" style="text-align:center;" />
+                                        <input type="number" min="0" name="items.{{this.id}}.flags.monks-enhanced-journal.quantity" value="{{this.quantity}}" style="text-align:center;" />
                                     </div>
 
                                     <div class="item-controls item-remaining">
-                                        <input type="number" name="items.{{this.id}}.data.remaining" value="{{this.remaining}}" style="text-align:center;" />
+                                        <input type="number" name="items.{{this.id}}.flags.monks-enhanced-journal.remaining" value="{{this.remaining}}" style="text-align:center;" />
                                     </div>
 
                                     <div class="item-controls flexrow">
@@ -156,7 +165,7 @@
                 <div class="tab-inner flexcol">
                     <ol class="items-list encounter-dcs">
                         <li class="items-header flexrow">
-                            <h3 class="item-name flexrow">{{localize 'MonksEnhancedJournal.DCs'}}</h3>
+                            <h3 class="item-name noborder flexrow">{{localize 'MonksEnhancedJournal.DCs'}}</h3>
 
                             <div class="item-detail item-attribute">{{localize 'MonksEnhancedJournal.Attribute'}}</div>
                             <div class="item-detail item-dc">{{localize 'MonksEnhancedJournal.DC'}}</div>
@@ -203,7 +212,7 @@
                 <div class="tab-inner flexcol">
                     <ol class="items-list encounter-traps">
                         <li class="items-header flexrow">
-                            <h3 class="item-name flexrow">{{localize 'MonksEnhancedJournal.Traps'}}</h3>
+                            <h3 class="item-name noborder flexrow">{{localize 'MonksEnhancedJournal.Traps'}}</h3>
 
                             <div class="item-detail item-find">{{localize 'MonksEnhancedJournal.Find'}}</div>
                             <div class="item-detail item-disarm">{{localize 'MonksEnhancedJournal.Disarm'}}</div>

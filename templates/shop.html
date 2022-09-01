@@ -1,13 +1,13 @@
 <form class="flexcol journal-subsheet {{entrytype}}{{#if isGM}} gm{{/if}}{{#if owner}} owner{{/if}}" editable="{{editable}}">
     <div class="shop-container">
-        <div class="fullscreen-image"><img src="{{data.img}}" /></div>
+        <div class="fullscreen-image"><img src="{{data.src}}" /></div>
         <header class="sheet-header journal-header flexrow">
             <div class="sheet-image">
-                <img class="profile" src="{{data.img}}" data-edit="img" onerror="this.src='modules/monks-enhanced-journal/assets/shop.png'">
+                <img class="profile" src="{{data.src}}" data-edit="img" onerror="if (!this.imgerr) { this.imgerr = true; this.src = 'modules/monks-enhanced-journal/assets/shop.png' }">
             </div>
             <section class="header-details">
                 <h1 class="shopname flexrow">
-                    <i class="fas fa-dolly-flatbed sheet-icon"></i>
+                    <i class="fas {{data.icon}} sheet-icon"></i>
                     <input name="name" type="text" value="{{data.name}}" placeholder="{{localize 'MonksEnhancedJournal.ShopName'}}">
                     {{#if sound.audiofile}}
                     <button type="button" class="play-journal-sound{{#if sound.playing}} active{{/if}}">
@@ -59,7 +59,7 @@
         <section class="sheet-body half-size">
             <div class="tab description active" data-group="primary" data-tab="description">
                 <div class="tab-inner flexcol">
-                    {{editor target="content" content=data.content editable=true button=true owner=owner}}
+                    {{editor enrichedText target="text.content" editable=true button=true owner=owner}}
                 </div>
             </div>
             <div class="tab items active" data-group="primary" data-tab="items">
@@ -67,7 +67,7 @@
 
                     <ol class="items-list shop-items">
                         <li class="items-header flexrow">
-                            <h3 class="item-name flexrow" sort="name">{{localize 'MonksEnhancedJournal.Items'}}</h3>
+                            <h3 class="item-name noborder flexrow" sort="name">{{localize 'MonksEnhancedJournal.Items'}}</h3>
                             <div class="item-controls item-quantity" sort="quantity">{{localize 'MonksEnhancedJournal.Qty'}}</div>
                             <div class="item-controls item-price" sort="price">{{localize 'MonksEnhancedJournal.Price'}}</div>
                             <div class="item-controls item-cost owner-only" sort="cost">{{localize 'MonksEnhancedJournal.Cost'}}</div>
@@ -79,12 +79,12 @@
                             </div>
                         </li>
 
-                        <ol class="items-list">
+                        <ol class="item-list">
                             {{#unless hideitems}}
                             {{#each groups}}
                             {{#if this.id}}
                             <li class="items-header flexrow{{#if this.collapsed}} collapsed{{/if}}" data-id="{{this.id}}">
-                                <h3 class="item-name flexrow">{{localize this.name}} <span class="item-count">({{this.items.length}} items)</span></h3>
+                                <h3 class="item-name noborder flexrow">{{localize this.name}} <span class="item-count">({{this.items.length}} items)</span></h3>
                             </li>
                             {{/if}}
                             <ul class="item-list" {{#if this.collapsed}}style="display: none;"{{/if}}>
@@ -96,15 +96,15 @@
                                     </div>
 
                                     <div class="item-controls item-quantity">
-                                        <input type="number" min="0" name="items.{{this.id}}.data.{{@root.quantityname}}{{@root.valStr}}" placeholder="&infin;" value="{{this.quantity}}" style="text-align:center;" />
+                                        <input type="number" min="0" name="items.{{this.id}}.flags.monks-enhanced-journal.quantity" placeholder="&infin;" value="{{this.quantity}}" style="text-align:center;" />
                                     </div>
 
                                     <div class="item-controls item-price owner-only" style="text-align:center;">
-                                        <input type="text" name="items.{{this.id}}.data.{{@root.pricename}}{{@root.valStr}}" value="{{this.price}}" style="text-align:center;" />
+                                        <input type="text" name="items.{{this.id}}.flags.monks-enhanced-journal.price" value="{{this.price}}" style="text-align:center;" />
                                     </div>
 
                                     <div class="item-controls item-cost">
-                                        <input type="text" name="items.{{this.id}}.data.cost" value="{{this.cost}}" style="text-align:center;" />
+                                        <input type="text" name="items.{{this.id}}.flags.monks-enhanced-journal.cost" value="{{this.cost}}" style="text-align:center;" />
                                     </div>
 
                                     {{#if @root.showrequest}}
@@ -114,9 +114,9 @@
                                     {{/if}}
 
                                     <div class="item-controls flexrow owner-only">
-                                        <input type="checkbox" name="items.{{this.id}}.lock" {{checked this.lock}} style="display: none;" />
+                                        <input type="checkbox" name="items.{{this.id}}.flags.monks-enhanced-journal.lock" {{checked this.lock}} style="display: none;" />
                                         <a class="item-control item-action" data-action="lock" title="{{localize 'MonksEnhancedJournal.LockItem'}}"><i class="fas fa-lock"></i></a>
-                                        <input type="checkbox" name="items.{{this.id}}.hide" {{checked this.hide}} style="display:none;" />
+                                        <input type="checkbox" name="items.{{this.id}}.flags.monks-enhanced-journal.hide" {{checked this.hide}} style="display:none;" />
                                         <a class="item-control item-action" data-action="hide" title="{{localize 'MonksEnhancedJournal.HideShowItem'}}"><i class="fas fa-eye-slash"></i></a>
                                         <a class="item-control item-edit" title="{{localize 'MonksEnhancedJournal.EditItem'}}"><i class="fas fa-edit"></i></a>
                                         <a class="item-control item-delete" title="{{localize 'MonksEnhancedJournal.DeleteItem'}}"><i class="fas fa-trash"></i></a>
@@ -144,14 +144,14 @@
                         <ul class="items-list">
                             {{#each relationships}}
                             <li class="items-header flexrow">
-                                <h3 class="item-name flexrow">{{this.name}}</h3>
-                                <h3 class="item-name flexrow">{{localize 'MonksEnhancedJournal.Relationship'}}</h3>
+                                <h3 class="item-name noborder flexrow">{{this.name}}</h3>
+                                <h3 class="item-name noborder flexrow">{{localize 'MonksEnhancedJournal.Relationship'}}</h3>
                                 {{#if @root.owner}}<div class="item-controls flexrow"></div>{{/if}}
                             </li>
                             {{#each documents}}
-                            <li class="item flexrow" data-id="{{this.id}}" data-pack="{{this.pack}}" data-container="relationships" data-document="JournalEntry" draggable="false">
+                            <li class="item flexrow" data-id="{{this.id}}" data-uuid="{{this.uuid}}" data-container="relationships" data-document="JournalEntry" draggable="false">
                                 <div class="item-name flexrow">
-                                    <img class="item-image actor-icon" src="{{this.img}}" onerror="this.src='modules/monks-enhanced-journal/assets/person.png'" />
+                                    <img class="item-image actor-icon" src="{{this.img}}" onerror="if (!this.imgerr) { this.imgerr = true; this.src = 'modules/monks-enhanced-journal/assets/{{this.type}}.png' }" />
                                     <h4>{{#if this.pack}}<i class="fas fa-atlas" title="{{localize 'MonksEnhancedJournal.FromCompendium'}}"></i> {{/if}}{{this.name}}</h4>
                                 </div>
 

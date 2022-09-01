@@ -1,33 +1,77 @@
-<form class="flexcol journal-subsheet journal-body {{entrytype}}" editable="{{editable}}">
-    <header class="header-name flexrow">
-        <i class="fas fa-book-open sheet-icon"></i>
-        <input name="name" type="text" value="{{data.name}}" placeholder="{{localize 'MonksEnhancedJournal.JournalEntryName'}}">
-        {{#if sound.audiofile}}
-        <button type="button" class="play-journal-sound">
-            <i class="fas {{#if sound.playing}}fa-volume-up{{else}}fa-volume-off{{/if}}"></i>
-        </button>
-        {{/if}}
-        <input type="text" style="display:none;" /><!--I can't figure out what's going on, but to avoid Enter causing a page submit a second text needs to be on the page-->
-    </header>
-    <nav class="sheet-navigation tabs" data-group="primary" {{#if hideTabs}}style="display:none;"{{/if}}>
-        <a class="item active" data-tab="description">{{localize 'MonksEnhancedJournal.Description'}}</a>
-        <a class="item" data-tab="picture">{{localize 'MonksEnhancedJournal.Picture'}}</a>
-    </nav>
-    <section class="sheet-body">
-        <div class="tab description active" data-group="primary" data-tab="description">
-            <div class="tab-inner flexcol">
-            {{editor target="content" content=data.content editable=true button=true owner=owner}}
-            </div>
-        </div>
-        <div class="tab picture active" data-group="primary" data-tab="picture" style="position:relative;">
-            <div class="tab-inner flexrow">
-                <div class="picture-img lightbox-image" name="img" src="{{data.img}}" style="background-image: url('{{data.img}}')" data-edit="img" onerror="$(this).css({opacity:0});"></div>
-                {{#unless data.img }}
-                {{#if owner}}
-                <div class="instruction">{{localize 'MonksEnhancedJournal.ClickToAddPicture'}}</div>
+<form class="flexrow journal-subsheet {{entrytype}}" style="height: 100%; overflow: hidden;" editable="{{editable}}">
+    <div class="flexcol journal-body">
+        <header class="header-name flexrow">
+            <a class="toggle-toc" title="Show Table of Contents"><i class="fas fa-list-dots"></i></a>
+            <input name="name" type="text" value="{{data.name}}" placeholder="{{localize 'MonksEnhancedJournal.JournalEntryName'}}">
+            <input type="text" style="display:none;" /><!--I can't figure out what's going on, but to avoid Enter causing a page submit a second text needs to be on the page-->
+        </header>
+        <div class="journal-pages">
+            {{#each journalpages}}
+            <article class="journal-entry-page {{page.type}}" data-page-id="{{this.id}}">
+                <header class="flexrow">
+                    <i class="fas {{this.icon}} sheet-icon"></i>
+                    <h1 class="page-link flexrow"><span>{{this.name}}</span>{{#if ../editable}}<div class="page-delete" title="Delete Page"><i class="fas fa-trash"></i></div>{{/if}}</h1>
+                </header>
+                {{#if (eq this.type "image")}}
+                <img class="journal-image" src="{{this.img}}" />
+                {{#if this.caption}}<div class="image-caption">{{this.caption}}</div>{{/if}}
+                {{else}}
+                <h2>Description</h2>
+                {{#if this.img}}
+                <img src="{{this.img}}" class="portrait-image" />
                 {{/if}}
-                {{/unless}}
-            </div>
+                {{{this.content}}}
+                {{#if this.groups}}
+                <h2>Items</h2>
+                <ol class="items-list loot-items">
+                    <li class="items-header flexrow">
+                        <h3 class="item-name noborder flexrow">{{localize 'MonksEnhancedJournal.Items'}}</h3>
+                        <div class="item-controls item-quantity">{{localize 'MonksEnhancedJournal.Qty'}}</div>
+                        <div class="item-controls item-price" sort="price">{{localize 'MonksEnhancedJournal.Price'}}</div>
+                        <div class="item-controls item-cost owner-only" sort="cost">{{localize 'MonksEnhancedJournal.Cost'}}</div>
+                    </li>
+
+                    <ol class="items-list">
+                        {{#unless hideitems}}
+                        {{#each groups}}
+                        {{#if this.id}}
+                        <li class="items-header flexrow{{#if this.collapsed}} collapsed{{/if}}" data-id="{{this.id}}">
+                            <h3 class="item-name noborder flexrow">{{localize this.name}} <span class="item-count">({{this.items.length}} items)</span></h3>
+                        </li>
+                        {{/if}}
+                        <ul class="item-list" {{#if this.collapsed}} style="display: none;" {{/if}}>
+                            {{#each this.items}}
+                            <li class="item flexrow{{#if (eq this.quantity 0)}} empty{{/if}}" data-id="{{this.id}}" data-container="items" data-document="Item" draggable="false">
+                                <div class="item-name flexrow">
+                                    <div class="item-image item-icon" style="background-image: url('{{this.img}}')"></div>
+                                    <h4>{{this.name}}</h4>
+                                </div>
+
+                                <div class="item-controls item-quantity">
+                                    <div style="text-align: center;">{{this.quantity}}</div>
+                                </div>
+
+                                <div class="item-controls item-price owner-only" style="text-align:center;">
+                                    <div style="text-align: center;">{{this.price}}</div>
+                                </div>
+
+                                <div class="item-controls item-cost">
+                                    <div style="text-align: center;">{{this.cost}}</div>
+                                </div>
+                            </li>
+                            {{/each}}
+                        </ul>
+                        {{/each}}
+                        {{else}}
+                        <li class="instruction">{{localize 'MonksEnhancedJournal.msg.ShopCurrentlyClosed'}}</li>
+                        {{/unless}}
+                    </ol>
+                </ol>
+                {{/if}}
+                {{/if}}
+            </article>
+            <hr />
+            {{/each}}
         </div>
-    </section>
+    </div>
 </form>

@@ -14,13 +14,13 @@ export class PictureSheet extends EnhancedJournalSheet {
     }
 
     async getData() {
-        let data = super.getData();
+        let data = await super.getData();
 
         return data;
     }
 
     get type() {
-        return 'picture';
+        return 'image';
     }
 
     _inferDefaultMode() {
@@ -28,7 +28,7 @@ export class PictureSheet extends EnhancedJournalSheet {
     }
 
     get template() {
-        if (!this.object.isOwner && !setting("allow-player")) return ImagePopout.defaultOptions.template;
+        //if (!this.object.isOwner && !setting("allow-player")) return ImagePopout.defaultOptions.template;
         return this.options.template;
     }
 
@@ -44,7 +44,7 @@ export class PictureSheet extends EnhancedJournalSheet {
     _getSubmitData() {
         let data = expandObject(super._getSubmitData());
 
-        data.img = $('.picture-img', this.element).attr('src');
+        data.src = $('.picture-img', this.element).attr('src');
 
         return flattenObject(data);
     }

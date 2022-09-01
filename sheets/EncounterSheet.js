@@ -2,6 +2,7 @@ import { DCConfig } from "../apps/dc-config.js";
 import { TrapConfig } from "../apps/trap-config.js";
 import { setting, i18n, format, log, makeid, MonksEnhancedJournal, quantityname, pricename, currencyname } from "../monks-enhanced-journal.js";
 import { EnhancedJournalSheet } from "../sheets/EnhancedJournalSheet.js";
+import { getValue, setValue, MEJHelpers } from "../helpers.js";
 
 export class EncounterSheet extends EnhancedJournalSheet {
     constructor(data, options) {
@@ -35,7 +36,7 @@ export class EncounterSheet extends EnhancedJournalSheet {
     }
 
     async getData() {
-        let data = super.getData();
+        let data = await super.getData();
 
         if (data.data.flags["monks-enhanced-journal"].monsters) {
             data.data.flags["monks-enhanced-journal"].actors = data.data.flags["monks-enhanced-journal"].monsters;
@@ -46,13 +47,15 @@ export class EncounterSheet extends EnhancedJournalSheet {
         let safeGet = function (container, value) {
             if (config == undefined) return;
             if (config[container] == undefined) return;
-            return config[container][value];
+            let label = config[container][value];
+            return label?.label || label;
         }
 
         let config = MonksEnhancedJournal.system;
 
-        if (data.data.flags && data.data.flags["monks-enhanced-journal"].dcs) {
-            data.dcs = data.data.flags["monks-enhanced-journal"].dcs.map(dc => {
+        let dcs = getProperty(data, "data.flags.monks-enhanced-journal.dcs");
+        if (dcs) {
+            data.dcs = dcs.map(dc => {
                 let data = duplicate(dc);
                 if (!data.label) {
                     if (data.attribute == undefined || data.attribute.indexOf(':') < 0)
@@ -68,15 +71,16 @@ export class EncounterSheet extends EnhancedJournalSheet {
             });
         }
 
-        data.groups = this.getItemGroups(data);
+        data.groups = this.getItemGroups(
+            getProperty(data, "data.flags.monks-enhanced-journal.items"),
+            getProperty(data, "data.flags.monks-enhanced-journal.type"));
+
+        data.showLocation = game.modules.get("tagger")?.active && game.modules.get("monks-active-tiles")?.active;
 
         let currency = (data.data.flags['monks-enhanced-journal'].currency || []);
         data.currency = MonksEnhancedJournal.currencies.map(c => {
             return { id: c.id, name: c.name, value: currency[c.id] ?? 0 };
         });
-
-        data.valStr = (['pf2e'].includes(game.system.id) ? ".value" : "");
-        data.quantityname = quantityname();
 
         return data;
     }
@@ -178,21 +182,25 @@ export class EncounterSheet extends EnhancedJournalSheet {
         if ($(target).hasClass('create-encounter')) {
             dragData.type = "CreateEncounter";
             dragData.id = this.object.id;
+            dragData.uuid = this.object.uuid;
         } else if ($(target).hasClass('create-combat')) {
             dragData.type = "CreateCombat";
             dragData.id = this.object.id;
+            dragData.uuid = this.object.uuid;
         } else {
             let li = $(event.currentTarget).closest('li')[0];
             let id = li.dataset.id;
             let container = li.dataset.container;
-            let item = this.object.data.flags["monks-enhanced-journal"][container].find(i => i._id == id || i.id == id);
-            if (container == "items" && !game.user.isGM && (this.object.data.flags["monks-enhanced-journal"].purchasing == 'locked' || item?.lock === true)) {
+            let item = this.object.flags["monks-enhanced-journal"][container].find(i => i._id == id || i.id == id);
+            if (container == "items" && !game.user.isGM && (this.object.flags["monks-enhanced-journal"].purchasing == 'locked' || item?.lock === true)) {
                 event.preventDefault();
                 return;
             }
 
             dragData.id = id;
-            dragData.journalid = this.object.id;
+            dragData.journalId = this.object.parent.id;
+            dragData.pageId = this.object.id;
+            dragData.pageUuid = this.object.uuid;
             dragData.pack = li.dataset.pack;
             dragData.type = li.dataset.document || li.dataset.type;
             if (container == "items")
@@ -205,7 +213,7 @@ export class EncounterSheet extends EnhancedJournalSheet {
         event.dataTransfer.setData("text/plain", JSON.stringify(dragData));
     }
 
-    _onDrop(event) {
+    async _onDrop(event) {
         let data;
         try {
             data = JSON.parse(event.dataTransfer.getData('text/plain'));
@@ -217,7 +225,22 @@ export class EncounterSheet extends EnhancedJournalSheet {
         if (data.type == 'Actor') {
             //let scrollTop = $('.encounter-content', this.element).scrollTop();
             this.addActor(data);
-        } else if (data.type == 'Item') {
+        }
+        else if (data.type == 'Folder' && data.documentName == "Item") {
+            if (!this.object.isOwner)
+                return false;
+            // Import items from the folder
+            let folder = await fromUuid(data.uuid);
+            if (folder) {
+                for (let item of folder.contents) {
+                    if (item instanceof Item) {
+                        let itemData = item.toObject();
+                        await this.addItem({ data: itemData });
+                    }
+                }
+            }
+        }
+        else if (data.type == 'Item') {
             if (data.from == this.object.id)  //don't drop on yourself
                 return;
             this.addItem(data);
@@ -237,23 +260,33 @@ export class EncounterSheet extends EnhancedJournalSheet {
     }
 
     async addItem(data) {
-        let item = await this.getDocument(data);
+        let item = await fromUuid(data.uuid);
 
         if (item) {
-            if (this.getValue(item.data, quantityname()) || (item.data.type == "spell" && game.system.id == 'dnd5e')) {
-                let items = duplicate(this.object.data.flags["monks-enhanced-journal"].items || []);
+            if (getValue(item.system, quantityname()) || (item.type == "spell" && game.system.id == 'dnd5e')) {
+                let items = duplicate(this.object.flags["monks-enhanced-journal"].items || []);
 
                 let itemData = item.toObject();
                 if ((itemData.type === "spell") && game.system.id == 'dnd5e') {
                     itemData = await EncounterSheet.createScrollFromSpell(itemData);
                 }
 
-                let update = { _id: makeid(), data: { remaining: 1 } };
+                let sysPrice = MEJHelpers.getSystemPrice(item, pricename()); //MEJHelpers.getPrice(getProperty(item, "flags.monks-enhanced-journal.price"));
+                let price = MEJHelpers.getPrice(sysPrice);
+                let update = {
+                    _id: makeid(),
+                    flags: {
+                        'monks-enhanced-journal': {
+                            parentId: item.uuid,
+                            quantity: 1,
+                            remaining: 1,
+                            price: `${price.value} ${price.currency}`
+                        }
+                    }
+                };
                 if (game.system.id == "dnd5e") {
-                    update.data.equipped = false;
+                    setProperty(update, "system.equipped", false);
                 }
-                setProperty(data, quantityname(), getProperty(item.data.data, quantityname()));
-                this.setValue(update, quantityname(), 1);
 
                 items.push(mergeObject(itemData, update));
                 this.object.setFlag('monks-enhanced-journal', 'items', items);
@@ -277,14 +310,14 @@ export class EncounterSheet extends EnhancedJournalSheet {
 
     editDC(event) {
         let item = event.currentTarget.closest('.item');
-        let dc = this.object.data.flags["monks-enhanced-journal"].dcs.find(dc => dc.id == item.dataset.id);
+        let dc = this.object.flags["monks-enhanced-journal"].dcs.find(dc => dc.id == item.dataset.id);
         if (dc != undefined)
             new DCConfig(dc, this).render(true);
     }
 
     rollDC(event) {
         let item = event.currentTarget.closest('.item');
-        let dc = this.object.data.flags["monks-enhanced-journal"].dcs.find(dc => dc.id == item.dataset.id);
+        let dc = this.object.flags["monks-enhanced-journal"].dcs.find(dc => dc.id == item.dataset.id);
 
         /*
         let config = (game.system.id == "tormenta20" ? CONFIG.T20 : CONFIG[game.system.id.toUpperCase()]);
@@ -305,7 +338,7 @@ export class EncounterSheet extends EnhancedJournalSheet {
 
     editTrap(event) {
         let item = event.currentTarget.closest('.item');
-        let trap = this.object.data.flags["monks-enhanced-journal"].traps.find(dc => dc.id == item.dataset.id);
+        let trap = this.object.flags["monks-enhanced-journal"].traps.find(dc => dc.id == item.dataset.id);
         if (trap != undefined)
             new TrapConfig(trap, this).render(true);
     }
@@ -315,7 +348,7 @@ export class EncounterSheet extends EnhancedJournalSheet {
     }
 
     static selectEncounter() {
-        let tokens = (this.data.flags['monks-enhanced-journal']?.tokens || []);
+        let tokens = (this.flags['monks-enhanced-journal']?.tokens || []);
 
         canvas.tokens.activate();
         canvas.hud.note.clear();
@@ -330,9 +363,8 @@ export class EncounterSheet extends EnhancedJournalSheet {
     static async createEncounter(x, y, combat) {
         canvas.tokens.releaseAll();
 
-        const cls = getDocumentClass("Token");
-        let tokenids = (this.data.flags['monks-enhanced-journal']?.tokens || []);
-        for (let ea of (this.data.flags['monks-enhanced-journal']?.actors || [])) {
+        let tokens = [];
+        for (let ea of (this.flags['monks-enhanced-journal']?.actors || [])) {
             let actor = await EnhancedJournalSheet.getDocument(ea);//Actor.implementation.fromDropData(ea);
             if (actor) {
                 if (!actor.isOwner) {
@@ -355,36 +387,43 @@ export class EncounterSheet extends EnhancedJournalSheet {
                 }
 
                 for (let i = 0; i < (quantity || 1); i++) {
-                    let td = await actor.getTokenData({ x: x, y: y });
-                    if (ea.hidden)
-                        td.hidden = true;
-                    let newSpot = MonksEnhancedJournal.findVacantSpot({ x: x, y: y }, { width: td.width, height: td.height });
-                    td.update(newSpot);
+                    let newSpot = MonksEnhancedJournal.findVacantSpot({ x: x, y: y }, { width: actor.prototypeToken.width, height: actor.prototypeToken.height }, tokens);
+                    let td = await actor.getTokenDocument({ x: newSpot.x, y: newSpot.y, hidden: ea.hidden });
+                    //if (ea.hidden)
+                    //    td.hidden = true;
 
-                    let token = await cls.create(td, { parent: canvas.scene });
-                    if (ea.hidden)
-                        token.update({ hidden: true });
+                    tokens.push(td);
 
-                    tokenids.push(token.id);
+                    //let token = await cls.createDocuments([td], { parent: canvas.scene });
+                    //if (ea.hidden)
+                    //    token.update({ hidden: true });
+
+                    //tokenids.push(token.id);
                 }
             }
         }
 
-        this.setFlag('monks-enhanced-journal', 'tokens', tokenids);
+        if (tokens.length) {
+            let cls = getDocumentClass("Token");
+            let results = await cls.createDocuments(tokens, { parent: canvas.scene });
 
-        let that = this;
-        window.setTimeout(function () {
-            EncounterSheet.selectEncounter.call(that);
-            if (combat) {
-                canvas.tokens.toggleCombat();
-                ui.sidebar.activateTab("combat");
-            }
-        }, 200);
+            let tokenids = (this.flags['monks-enhanced-journal']?.tokens || []).concat(results.map(t => t.id));
+            this.setFlag('monks-enhanced-journal', 'tokens', tokenids);
+
+            let that = this;
+            window.setTimeout(function () {
+                EncounterSheet.selectEncounter.call(that);
+                if (combat) {
+                    canvas.tokens.toggleCombat();
+                    ui.sidebar.activateTab("combat");
+                }
+            }, 500);
+        }
     }
 
     static async assignItems() {
-        let items = duplicate(this.data.flags["monks-enhanced-journal"].items || []);
-        let currency = this.data.flags["monks-enhanced-journal"].currency;
+        let items = duplicate(this.flags["monks-enhanced-journal"].items || []);
+        let currency = this.flags["monks-enhanced-journal"].currency || {};
         items = await super.assignItems(items, currency);
         await this.setFlag('monks-enhanced-journal', 'items', items);
 
@@ -397,15 +436,16 @@ export class EncounterSheet extends EnhancedJournalSheet {
     static async itemDropped(id, actor, entry) {
         let item = (entry.getFlag('monks-enhanced-journal', 'items') || []).find(i => i._id == id);
         if (item) {
-            let max = this.getValue(item, "remaining", null);
+            let max = getProperty(item, "flags.monks-enhanced-journal.remaining");
             let result = await EncounterSheet.confirmQuantity(item, max, "transfer", false);
             if ((result?.quantity ?? 0) > 0) {
-                if (item.data.remaining < result?.quantity) {
+                if (getProperty(item, "flags.monks-enhanced-journal.remaining") < result?.quantity) {
                     ui.notifications.warn(i18n("MonksEnhancedJournal.msg.CannotTransferItemQuantity"));
                     return false;
                 }
 
                 this.purchaseItem.call(this, entry, id, result.quantity, { actor, remaining: true });
+                result.quantity *= (getValue(item, quantityname()) || 1);   // set the quantity if we're selling quantities of.
                 return result;
             }
         }
@@ -413,18 +453,18 @@ export class EncounterSheet extends EnhancedJournalSheet {
     }
 
     refillItems(event) {
-        let items = duplicate(this.object.data.flags["monks-enhanced-journal"].items || []);
+        let items = duplicate(this.object.flags["monks-enhanced-journal"].items || []);
 
         if (event == 'all') {
             for (let item of items) {
-                item.data.remaining = this.getValue(item, quantityname());
+                setProperty(item, "flags.monks-enhanced-journal.remaining", getProperty(item, "flags.monks-enhanced-journal.quantity"));
             }
             this.object.setFlag('monks-enhanced-journal', 'items', items);
         } else {
             let li = $(event.currentTarget).closest('li')[0];
             let item = items.find(i => i._id == li.dataset.id);
             if (item) {
-                item.data.remaining = this.getValue(item, quantityname());
+                setProperty(item, "flags.monks-enhanced-journal.remaining", getProperty(item, "flags.monks-enhanced-journal.quantity"));
                 this.object.setFlag('monks-enhanced-journal', 'items', items);
             }
         }

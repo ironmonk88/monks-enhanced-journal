@@ -37,13 +37,14 @@ export class SlideConfig extends FormApplication {
 
         data.texts = this.object.texts.map(t => {
             let text = duplicate(t);
-            let x = (((t.left || 0) / 100) * 600);
-            let y = (((t.top || 0) / 100) * 400);
-            let x2 = (((t.right || 0) / 100) * 600);
-            let y2 = (((t.bottom || 0) / 100) * 400);
+            let x = (((t.left || 0) / 100) * 600).toFixed(2);
+            let y = (((t.top || 0) / 100) * 400).toFixed(2);
+            let x2 = (((t.right || 0) / 100) * 600).toFixed(2);
+            let y2 = (((t.bottom || 0) / 100) * 400).toFixed(2);
+            let color = Color.from(t.background || '#000000');
             let style = {
                 color: t.color,
-                'background-color': hexToRGBAString(colorStringToHex(t.background || '#000000'), (t.opacity != undefined ? t.opacity : 0.5)),
+                'background-color': color.toRGBA(t.opacity != undefined ? t.opacity : 0.5),
                 'text-align': (t.align == 'middle' ? 'center' : t.align),
                 top: y + "px",
                 left: x + "px",
@@ -92,7 +93,7 @@ export class SlideConfig extends FormApplication {
 
     async _updateObject(event, formData) {
         log('updating slide', event, formData, this.object);
-        let slides = duplicate(this.journalentry.data.flags["monks-enhanced-journal"].slides || []);
+        let slides = duplicate(this.journalentry.flags["monks-enhanced-journal"].slides || []);
 
         if (this.object.id == undefined) {
             this.object.id = makeid();
@@ -231,17 +232,19 @@ export class SlideConfig extends FormApplication {
             right: data.right,
             bottom: data.bottom,
             color: '#FFFFFF',
-            background: '#000000'
+            background: '#000000',
+            opacity: 0.5
         };
         this.object.texts.push(text);
 
-        let x = (((text.left || 0) / 100) * 600);
-        let y = (((text.top || 0) / 100) * 400);
-        let x2 = (((text.right || 0) / 100) * 600);
-        let y2 = (((text.bottom || 0) / 100) * 400);
+        let x = (((text.left || 0) / 100) * 600).toFixed(2);
+        let y = (((text.top || 0) / 100) * 400).toFixed(2);
+        let x2 = (((text.right || 0) / 100) * 600).toFixed(2);
+        let y2 = (((text.bottom || 0) / 100) * 400).toFixed(2);
+        let color = Color.from(text.background || '#000000');
         let style = {
             color: text.color,
-            'background-color': hexToRGBAString(colorStringToHex(text.background || '#000000'), (text.opacity != undefined ? text.opacity : 0.5)),
+            'background-color': color.toRGBA(text.opacity != undefined ? text.opacity : 0.5),
             'text-align': (text.align == 'middle' ? 'center' : text.align),
             top: y + "px",
             left: x + "px",
@@ -271,9 +274,10 @@ export class SlideConfig extends FormApplication {
             let y = (((t.top || 0) / 100) * 400);
             let x2 = (((t.right || 0) / 100) * 600);
             let y2 = (((t.bottom || 0) / 100) * 400);
+            let color = Color.from(t.background || '#000000');
             let style = {
                 color: t.color,
-                'background-color': hexToRGBAString(colorStringToHex(t.background || '#000000'), (t.opacity != undefined ? t.opacity : 0.5)),
+                'background-color': color.toRGBA(t.opacity != undefined ? t.opacity : 0.5),
                 'text-align': (t.align == 'middle' ? 'center' : t.align),
                 top: y + "px",
                 left: x + "px",

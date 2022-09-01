@@ -1,6 +1,6 @@
 <form class="slideshow-container flexcol{{#if playing}} playing{{/if}} {{entrytype}}">
     <div class="header-name flexrow">
-        <i class="fas fa-photo-video sheet-icon"></i>
+        <i class="fas {{data.icon}} sheet-icon"></i>
         <input name="name" type="text" value="{{data.name}}" placeholder="{{localize 'MonksEnhancedJournal.SlideshowName'}}">
         <div class="slideshow-buttons flexrow">
             <div class="nav-button play" title="Play" {{#if (eq data.flags.monks-enhanced-journal.state "playing")}} style="display:none;" {{/if}}><i class="fas fa-play"></i></div>
@@ -37,7 +37,7 @@
                     </div>
                 </div>
                 <header class="form-header" style="font-size:16px;">
-                    <h3><i class="fas fa-music"></i> {{localize 'MonksEnhancedJournal.Audio'}}</h3>
+                    <h3 class="noborder"><i class="fas fa-music"></i> {{localize 'MonksEnhancedJournal.Audio'}}</h3>
                 </header>
                 <div class="form-group">
                     <label for="audiofile">{{localize 'MonksEnhancedJournal.AudioFile'}}</label>
@@ -60,7 +60,7 @@
                     </div>
                 </div>
                 <header class="form-header" style="font-size:16px;">
-                    <h3><i class="fas fa-running"></i> {{localize 'MonksEnhancedJournal.Transition'}}</h3>
+                    <h3 class="noborder"><i class="fas fa-running"></i> {{localize 'MonksEnhancedJournal.Transition'}}</h3>
                 </header>
                 <div class="form-group">
                     <label for="transition.effect">{{localize 'MonksEnhancedJournal.Effect'}}</label>

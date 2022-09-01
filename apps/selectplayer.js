@@ -47,8 +47,8 @@ export class SelectPlayer extends FormApplication {
     }
 
     canShowPic() {
-        let type = this.journalsheet.object.data?.flags["monks-enhanced-journal"]?.type || 'oldentry';
-        return ((["person", "place", "poi", "quest", "oldentry", "organization", "shop", "oldentry", "journalentry", "base"].includes(type) || this.object.documentName == 'Actor') && this.object.data.img);
+        let type = this.journalsheet.object?.flags["monks-enhanced-journal"]?.type || 'oldentry';
+        return ((["person", "place", "poi", "quest", "oldentry", "organization", "shop", "oldentry", "journalentry", "base"].includes(type) || this.object.documentName == 'Actor') && this.object.img);
     }
 
     /* -------------------------------------------- */
