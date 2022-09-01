@@ -394,7 +394,7 @@ export class SlideshowSheet extends EnhancedJournalSheet {
 
         //inform players
         if(game.user.isGM)
-            MonksEnhancedJournal.emit('playSlideshow', { id: this.object.id, idx: flags.slideAt });
+            MonksEnhancedJournal.emit('playSlideshow', { uuid: this.object.uuid, idx: flags.slideAt });
 
         if (refresh && flags.state == 'stopped')
             $('.slide-showing .slide', this.element).remove();
@@ -617,7 +617,7 @@ export class SlideshowSheet extends EnhancedJournalSheet {
             this.object._currentSlide = slide;
 
             if (game.user.isGM)
-                MonksEnhancedJournal.emit('playSlide', { id: this.object.id, idx: idx });
+                MonksEnhancedJournal.emit('playSlide', { uuid: this.object.uuid, idx: idx });
         }
 
         if (img[0].complete) {

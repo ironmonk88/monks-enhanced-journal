@@ -137,7 +137,7 @@ export class MakeOffering extends FormApplication {
             offerings.unshift(this.offering);
             await this.object.setFlag("monks-enhanced-journal", "offerings", offerings);
         } else {
-            MonksEnhancedJournal.emit("makeOffering", { offering: this.offering, entryid: this.object.id });
+            MonksEnhancedJournal.emit("makeOffering", { offering: this.offering, uuid: this.object.uuid });
         }
     }
 

@@ -3,7 +3,7 @@
         <div class="fullscreen-image"><img src="{{data.src}}" /></div>
         <header class="sheet-header journal-header flexrow" style="max-height: 162px; overflow: hidden;">
             <div class="sheet-image">
-                <img class="profile" src="{{data.src}}" data-edit="img" onerror="this.src='modules/monks-enhanced-journal/assets/loot.png'">
+                <img class="profile" src="{{data.src}}" data-edit="img" onerror="if (!this.imgerr) { this.imgerr = true; this.src = 'modules/monks-enhanced-journal/assets/loot.png' }">
             </div>
             <section class="header-details">
                 <h1 class="lootname flexrow">

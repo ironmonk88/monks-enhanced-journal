@@ -161,7 +161,7 @@ export class CheckListSheet extends EnhancedJournalSheet {
 
             // Entities
             if (el.classList.contains("document")) {
-                el.style.display = (!isSearch || documentIds.has(el.dataset.entityId)) ? "flex" : "none";
+                el.style.display = (!isSearch || documentIds.has(el.dataset.documentId)) ? "flex" : "none";
             }
 
             // Folders

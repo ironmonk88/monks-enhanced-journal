@@ -61,7 +61,8 @@ export class OrganizationSheet extends EnhancedJournalSheet {
         
         $('.item-hide', html).on('click', this.alterItem.bind(this));
         $('.item-delete', html).on('click', $.proxy(this._deleteItem, this));
-        $('.items-list .actor-icon', html).click(this.openRelationship.bind(this));
+        $('.relationships .items-list .actor-icon', html).click(this.openRelationship.bind(this));
+        $('.offerings .items-list .actor-icon', html).click(this.openOfferingActor.bind(this));
         //$('.item-relationship .item-field', html).on('change', this.alterRelationship.bind(this));
 
         $('.item-private', html).on('click', this.alterItem.bind(this));

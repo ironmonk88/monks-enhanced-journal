@@ -267,7 +267,7 @@ export class LootSheet extends EnhancedJournalSheet {
             } else {
                 let entry = game.journal.get(data.from);
                 let item = await this.getDocument(data);
-                let max = getValue(item.data, quantityname(), null);
+                let max = getValue(item, quantityname(), null);
                 if (!entry && !data.actorId)
                     max = null;
 
@@ -468,10 +468,10 @@ export class LootSheet extends EnhancedJournalSheet {
                 itemData = await LootSheet.createScrollFromSpell(itemData);
             }
 
-            let price = MEJHelpers.getPrice(getProperty(item, "flags.monks-enhanced-journal.price"));
+            let sysPrice = MEJHelpers.getSystemPrice(item, pricename()); //MEJHelpers.getPrice(getProperty(item, "flags.monks-enhanced-journal.price"));
+            let price = MEJHelpers.getPrice(sysPrice);
             let update = {
                 _id: makeid(),
-                data: {},
                 flags: {
                     'monks-enhanced-journal': {
                         parentId: item.id,

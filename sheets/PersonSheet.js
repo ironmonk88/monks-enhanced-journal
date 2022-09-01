@@ -145,7 +145,8 @@ export class PersonSheet extends EnhancedJournalSheet {
         const actorOptions = this._getPersonActorContextOptions();
         if (actorOptions) new ContextMenu($(html), ".actor-img", actorOptions);
 
-        $('.items-list .actor-icon', html).click(this.openRelationship.bind(this));
+        $('.relationships .items-list .actor-icon', html).click(this.openRelationship.bind(this));
+        $('.offerings .items-list .actor-icon', html).click(this.openOfferingActor.bind(this));
 
         //$('.item-relationship .item-field', html).on('change', this.alterRelationship.bind(this));
 

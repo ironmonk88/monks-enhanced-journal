@@ -82,21 +82,21 @@ export class MonksEnhancedJournal {
             encounter: EncounterSheet,
             organization: OrganizationSheet,
             person: PersonSheet,
-            image: PictureSheet,
+            picture: PictureSheet,
             place: PlaceSheet,
             poi: PointOfInterestSheet,
             quest: QuestSheet,
             shop: ShopSheet,
             loot: LootSheet,
             slideshow: SlideshowSheet,
-            text: TextEntrySheet
+            journalentry: TextEntrySheet
         };
     }
 
     static getTypeLabels() {
         return {
             slideshow: "MonksEnhancedJournal.slideshow",
-            image: "MonksEnhancedJournal.picture",
+            picture: "MonksEnhancedJournal.picture",
             person: "MonksEnhancedJournal.person",
             place: "MonksEnhancedJournal.place",
             poi: "MonksEnhancedJournal.poi",
@@ -106,7 +106,7 @@ export class MonksEnhancedJournal {
             shop: "MonksEnhancedJournal.shop",
             loot: "MonksEnhancedJournal.loot",
             checklist: "MonksEnhancedJournal.checklist",
-            text: "MonksEnhancedJournal.journalentry"
+            journalentry: "MonksEnhancedJournal.journalentry"
         };
     }
 
@@ -567,6 +567,7 @@ export class MonksEnhancedJournal {
             }
         }
 
+        /*
         let createJournalEntryPage = async function (wrapped, ...args) {
             let [data, options, userid] = args;
             if (game.user.id !== userid)
@@ -583,7 +584,7 @@ export class MonksEnhancedJournal {
             JournalEntryPage.prototype._onCreate = function (event) {
                 return createJournalEntryPage.call(this, oldOnCreate.bind(this), ...arguments);
             }
-        }
+        }*/
 
         let sceneActivate = function (wrapped, ...args) {
             if (this.journal && this.journal.type == 'slideshow') {
@@ -871,6 +872,21 @@ export class MonksEnhancedJournal {
             const oldCreateDialog = JournalEntry.prototype.constructor.createDialog;
             JournalEntry.prototype.constructor.createDialog = function (event) {
                 return onCreateDialog.call(this, oldCreateDialog.bind(this), ...arguments);
+            }
+        }
+
+        let onCreatePageDialog = async function (wrapped, ...args) {
+            let [data, options] = args;
+            options.journalentrypage = true;
+            return wrapped(...args);
+        }
+
+        if (game.modules.get("lib-wrapper")?.active) {
+            libWrapper.register("monks-enhanced-journal", "JournalEntryPage.prototype.constructor.createDialog", onCreatePageDialog, "WRAPPER");
+        } else {
+            const oldCreateDialog = JournalEntryPage.prototype.constructor.createDialog;
+            JournalEntryPage.prototype.constructor.createDialog = function (event) {
+                return onCreatePageDialog.call(this, oldCreateDialog.bind(this), ...arguments);
             }
         }
 
@@ -1638,7 +1654,7 @@ export class MonksEnhancedJournal {
             if (MonksEnhancedJournal.slideshow != undefined && MonksEnhancedJournal.slideshow.id != data.id)
                 MonksEnhancedJournal.stopSlideshow();
 
-            let slideshow = game.journal.find(e => e.id == data.id);
+            let slideshow = await fromUuid(data.uuid);
             if (slideshow) {
                 MonksEnhancedJournal.slideshow = {
                     id: data.id,
@@ -1939,9 +1955,9 @@ export class MonksEnhancedJournal {
 
             let canShow = (game.user.isGM || setting('allow-player'));
 
-            let docIcon = canShow && document.pages.contents.length > 0 ? (document.getFlag('monks-enhanced-journal', 'collapsed') ? 'fa-angle-right' : 'fa-angle-down') : "fa-book";
-            let type = "journalfolder";
-            if (document.pages.contents.length == 1) {
+            let docIcon = "fa-book";
+            let type = "journalbook";
+            if (document.pages.size == 1) {
                 type = document.pages.contents[0].getFlag('monks-enhanced-journal', 'type');
                 docIcon = MonksEnhancedJournal.getIcon(type);
             }
@@ -1950,6 +1966,7 @@ export class MonksEnhancedJournal {
                 $('.document-name .journal-type', this).attr('class', 'journal-type fas fa-fw ' + docIcon);
             else {
                 let icon = $('<i>').addClass('fas fa-fw ' + docIcon);
+                /*
                 if (type == "journalfolder" && document.pages.contents.length > 1 && canShow) {
                     icon.on("click", (event) => {
                         event.preventDefault();
@@ -1961,10 +1978,12 @@ export class MonksEnhancedJournal {
                         $(`.document.journalentry.folder[data-document-id="${document.id}"] .document-name i`).toggleClass('fa-angle-down', !collapsed).toggleClass('fa-angle-right', collapsed);
                     });
                 } else
+                */
                     icon.addClass("journal-type");
                 $('.document-name', this).prepend(icon);
             }
 
+            /*
             if (type == "journalfolder" && !$('.subdirectory', this).length && document.pages.contents.length > 1 && canShow) {
                 $(this).addClass("folder flexcol").removeClass("flexrow").attr('data-folder-id', document.id);
                 if (!document.getFlag('monks-enhanced-journal', 'collapsed'))
@@ -2001,7 +2020,7 @@ export class MonksEnhancedJournal {
                     }
                 }
                 ui.journal._dragDrop.forEach(d => d.bind(pageList[0]));
-            }
+            }*/
 
             if (type == 'quest') {
                 //let ownership = entry.ownership.default;
@@ -2382,7 +2401,7 @@ export class MonksEnhancedJournal {
 
     static async makeOffering(data) {
         if (game.user.isGM) {
-            let entry = game.journal.get(data.entryid);
+            let entry = await fromUuid(data.uuid);
             if (entry) {
                 let offerings = duplicate(entry.getFlag("monks-enhanced-journal", "offerings") || []);
                 data.offering.id = makeid();
@@ -2623,7 +2642,7 @@ export class MonksEnhancedJournal {
             if (!type && object.parent.documentName == 'JournalEntry') {
                 type = object.parent?.flags['monks-enhanced-journal']?.type;
             }
-            type = (type == 'journalentry' || type == 'oldentry' ? 'text' : (type == 'picture' ? 'image' : type));
+            type = (type == 'base' || type == 'oldentry' ? 'journalentry' : type);
 
             /*
             if (game.modules.get('_document-sheet-registrar')?.active) {
@@ -2777,6 +2796,10 @@ Hooks.on("updateJournalEntryPage", (document, data, options, userId) => {
     let type = document.flags['monks-enhanced-journal']?.type;
     if (type == 'quest')
         MonksEnhancedJournal.refreshObjectives(true);
+
+    if (data.name && type && document.parent.pages.size == 1) {
+        document.parent.update({name: data.name});
+    }
 
     if (MonksEnhancedJournal.journal) {
         if (data.name) {
@@ -3149,24 +3172,37 @@ Hooks.on('dragEndObjectiveDisplay', (app) => {
 
 Hooks.on("renderDialog", (dialog, html, data) => {
     if (dialog.options.journalentry) {
-        const types = game.documentTypes.JournalEntryPage.map(t => {
-            const label = CONFIG.JournalEntryPage?.typeLabels?.[t] ?? t;
-            const name = game.i18n.has(label) ? game.i18n.localize(label) : t;
-            return { id: t, name: name };
+        const original = Object.entries(CONFIG.JournalEntryPage.typeLabels).map(([k, v]) => {
+            if (v.startsWith("MonksEnhancedJournal"))
+                return null;
+            const name = game.i18n.has(v) ? game.i18n.localize(v) : v;
+            return { id: k, name: name };
+        })
+            .filter(t => !!t)
+            .sort((a, b) => { return a.name.localeCompare(b.name); });
+
+        const types = Object.entries(MonksEnhancedJournal.getTypeLabels()).map(([k, v]) => {
+            const name = game.i18n.has(v) ? game.i18n.localize(v) : v;
+            return { id: k, name: name };
         })
             .filter((t, index, self) => { return self.findIndex(i => i.id == t.id) == index })
             .sort((a, b) => { return a.name.localeCompare(b.name); });
-        types.unshift({ id: "", name: "" });
 
         $('<div>')
             .addClass("form-group")
             .append($('<label>').html(i18n("Type")))
             .append($('<div>')
                 .addClass("form-fields")
-                .append($("<select>").attr("name", "flags.monks-enhanced-journal.type").append(types.map((t) => { return $('<option>').attr('value', t.id).html(t.name) }))))
+                .append($("<select>").attr("name", "flags.monks-enhanced-journal.type").append($('<optgroup>').attr("label", "Adventure Book").append(original.map((t) => { return $('<option>').attr('value', t.id).prop("selected", t.id == "text").html(t.name) }))).append($('<optgroup>').attr("label", "Single Sheet").append(types.map((t) => { return $('<option>').attr('value', t.id).html(t.name) })))))
             .insertAfter($('[name="name"]', html).closest('.form-group'));
 
         dialog.setPosition({ height: "auto" });
+    } else if (dialog.options.journalentrypage) {
+        const types = MonksEnhancedJournal.getTypeLabels();
+        $('select[name="type"] option').each((index, opt) => {
+            if (types[$(opt).attr("value")] != undefined)
+                $(opt).remove();
+        })
     }
 });
 

@@ -1,28 +1,4 @@
 <form class="flexrow journal-subsheet {{entrytype}}" style="height: 100%; overflow: hidden;" editable="{{editable}}">
-    <div class="journal-menu {{#unless pinned}}collapsed{{/unless}}">
-        <div class="journal-menu-content flexcol">
-            <header class="flexrow">
-                <a class="toggle-toc" title="Hide Table of Contents"><i class="fas fa-list-dots"></i></a>
-                <div>Table of Contents</div>
-                <a class="pin-toc {{#if pinned}}active{{/if}}"><i class="fas fa-thumbtack"></i></a>
-            </header>
-            <div class="pages-list">
-                <ol class="directory-list scrollable">
-                    {{#each toc as |page|}}
-                    <li class="directory-item {{page.cssClass}}" data-page-id="{{page._id}}">
-                        <div class="page-heading">
-                            <i class="page-icon fas {{page.typeIcon}}"></i>
-                            <a class="journal-entry-page-link">{{page.name}}</a>
-                            {{#if page.icon}}
-                            <span class="page-ownership {{page.ownershipCls}}"><i class="{{page.icon}}"></i></span>
-                            {{/if}}
-                        </div>
-                    </li>
-                    {{/each}}
-                </ol>
-            </div>
-        </div>
-    </div>
     <div class="flexcol journal-body">
         <header class="header-name flexrow">
             <a class="toggle-toc" title="Show Table of Contents"><i class="fas fa-list-dots"></i></a>

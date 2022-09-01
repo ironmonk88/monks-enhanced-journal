@@ -3,7 +3,7 @@
         <div class="fullscreen-image"><img src="{{data.src}}" /></div>
         <header class="sheet-header journal-header flexrow">
             <div class="sheet-image">
-                <img class="profile" src="{{data.src}}" data-edit="img" onerror="this.src='modules/monks-enhanced-journal/assets/place.png'">
+                <img class="profile" src="{{data.src}}" data-edit="img" onerror="if (!this.imgerr) { this.imgerr = true; this.src = 'modules/monks-enhanced-journal/assets/place.png' }">
             </div>
             <section class="header-details">
                 <h1 class="placename flexrow">
@@ -75,7 +75,7 @@
                             {{#each townsfolk}}
                             <li class="item flexrow" data-id="{{this.id}}" data-uuid="{{this.uuid}}" data-container="relationships" data-document="Person" draggable="false">
                                 <div class="item-name flexrow">
-                                    <img class="item-image actor-icon" src="{{this.img}}" onerror="this.src='modules/monks-enhanced-journal/assets/{{this.type}}.png'" />
+                                    <img class="item-image actor-icon" src="{{this.img}}" onerror="if (!this.imgerr) { this.imgerr = true; this.src = 'modules/monks-enhanced-journal/assets/{{this.type}}.png' }" />
                                     <h4>{{#if this.pack}}<i class="fas fa-atlas" title="{{localize 'MonksEnhancedJournal.FromCompendium'}}"></i> {{/if}}{{this.name}}</h4>
                                 </div>
 
@@ -119,7 +119,7 @@
                             {{#each shops}}
                             <li class="item flexrow" data-id="{{this.id}}" data-uuid="{{this.uuid}}" data-container="relationships" data-document="Shop" draggable="false">
                                 <div class="item-name flexrow">
-                                    <img class="item-image shop-icon" src="{{this.img}}" onerror="this.src='modules/monks-enhanced-journal/assets/{{this.type}}.png'" />
+                                    <img class="item-image shop-icon" src="{{this.img}}" onerror="if (!this.imgerr) { this.imgerr = true; this.src = 'modules/monks-enhanced-journal/assets/{{this.type}}.png' }" />
                                     <h4>{{#if this.pack}}<i class="fas fa-atlas" title="{{localize 'MonksEnhancedJournal.FromCompendium'}}"></i> {{/if}}{{this.name}}</h4>
                                 </div>
 
@@ -163,7 +163,7 @@
                             {{#each documents}}
                             <li class="item flexrow" data-id="{{this.id}}" data-uuid="{{this.uuid}}" data-container="relationships" data-document="JournalEntry" draggable="false">
                                 <div class="item-name flexrow">
-                                    <img class="item-image actor-icon" src="{{this.img}}" onerror="this.src='modules/monks-enhanced-journal/assets/{{this.type}}.png'" />
+                                    <img class="item-image actor-icon" src="{{this.img}}" onerror="if (!this.imgerr) { this.imgerr = true; this.src = 'modules/monks-enhanced-journal/assets/{{this.type}}.png' }" />
                                     <h4>{{#if this.pack}}<i class="fas fa-atlas" title="{{localize 'MonksEnhancedJournal.FromCompendium'}}"></i> {{/if}}{{this.name}}</h4>
                                 </div>
 

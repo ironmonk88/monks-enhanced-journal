@@ -132,7 +132,7 @@ export class ShopSheet extends EnhancedJournalSheet {
         super.activateListeners(html, enhancedjournal);
 
         $('.actor-img img', html).click(this.openActor.bind(this));
-        $('.items-list .actor-icon', html).click(this.openRelationship.bind(this));
+        $('.relationships .items-list .actor-icon', html).click(this.openRelationship.bind(this));
 
         //item
         $('.item-icon', html).click(this.clickItem.bind(this));
@@ -572,7 +572,7 @@ export class ShopSheet extends EnhancedJournalSheet {
             action: 'sell',
             actor: { id: actor.id, name: actor.name, img: actor.img },
             items: [item],
-            shop: { id: this.object.id, name: this.object.name, img: this.object.img }
+            shop: { id: this.object.id, uuid: this.object.uuid, name: this.object.name, img: this.object.img }
         }
 
         //create a chat message
@@ -607,7 +607,8 @@ export class ShopSheet extends EnhancedJournalSheet {
                 itemData = await ShopSheet.createScrollFromSpell(itemData);
             }
 
-            let price = MEJHelpers.getPrice(getProperty(item, "flags.monks-enhanced-journal.price"));
+            let sysPrice = MEJHelpers.getSystemPrice(item, pricename()); //MEJHelpers.getPrice(getProperty(item, "flags.monks-enhanced-journal.price"));
+            let price = MEJHelpers.getPrice(sysPrice);
             let adjustment = this.object.flags["monks-enhanced-journal"].sell ?? 1;
             let update = {
                 _id: makeid(),

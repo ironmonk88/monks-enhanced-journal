@@ -177,7 +177,7 @@ export class EnhancedJournal extends Application {
 
             let contentform = $('.content > section', this.element);
 
-            if (this.object instanceof JournalEntry && this.object.pages.size == 1 && options.autoPage) {
+            if (this.object instanceof JournalEntry && this.object.pages.size == 1 && !!getProperty(this.object, "flags.monks-enhanced-journal.type")) {
                 this.object = this.object.pages.contents[0];
                 let tab = this.tabs.active();
                 tab.entityId = this.object.uuid;
@@ -187,10 +187,8 @@ export class EnhancedJournal extends Application {
 
             MonksEnhancedJournal.fixType(this.object);
 
-            this.activateFooterListeners(this.element);
-
             //const cls = (this.object._getSheetClass ? this.object._getSheetClass() : null);
-            const cls = (this.object instanceof JournalEntry ? JournalEntrySheet : (this.object._getSheetClass ? this.object._getSheetClass() : null));
+            const cls = (this.object._getSheetClass ? this.object._getSheetClass() : null);
             if (!cls)
                 this.subsheet = new EnhancedJournalSheet(this.object);
             else 
@@ -200,6 +198,8 @@ export class EnhancedJournal extends Application {
 
             this.subsheet.options.popOut = false;
             this.subsheet._state = this.subsheet.constructor.RENDER_STATES.RENDERING;
+
+            this.activateFooterListeners(this.element);
 
             if (this.subsheet._getHeaderButtons && this.object.id && !(this.object instanceof JournalEntry)) {
                 let buttons = this.subsheet._getHeaderButtons();
@@ -234,11 +234,13 @@ export class EnhancedJournal extends Application {
             let html = await renderTemplate(this.subsheet.template, templateData);
 
             this.subdocument = $(html).get(0);
-            this.subsheet.form = (this.subdocument.tagName == 'FORM' ? this.subdocument : $('form:first', this.subdocument));
+            this.subsheet.form = (this.subdocument.tagName == 'FORM' ? this.subdocument : $('form:first', this.subdocument).get(0));
             this.subsheet._element = $(this.subdocument);
             this.subsheet.enhancedjournal = this;
-            if(this.subsheet.refresh)
+            if (this.subsheet.refresh)
                 this.subsheet.refresh();
+            else if (this.object instanceof JournalEntry)
+                this.subsheet.render();
 
             $('.window-title', this.element).html(this.subsheet.title + ' - ' + i18n("MonksEnhancedJournal.Title"));
 
@@ -400,6 +402,9 @@ export class EnhancedJournal extends Application {
         let ctrls = [];
         if (this.subsheet._documentControls)
             ctrls = this.subsheet._documentControls();
+        else if (this.object instanceof JournalEntry) {
+            ctrls = this.journalEntryDocumentControls();
+         }
 
         let that = this;
 
@@ -442,6 +447,12 @@ export class EnhancedJournal extends Application {
                     html.append(div);
                 }
             }
+        }
+
+        if (this.object instanceof JournalEntry) {
+            const modes = JournalSheet.VIEW_MODES;
+            $('.viewmode', html).attr("data-action", "toggleView").attr("title", this.subsheet?.mode === modes.SINGLE ? "View Multiple Pages" : "View Single Page").find("i").toggleClass("fa-notes", this.subsheet?.mode === modes.SINGLE).toggleClass("fa-note", this.subsheet?.mode !== modes.SINGLE);
+
         }
     }
 
@@ -754,7 +765,7 @@ export class EnhancedJournal extends Application {
 
         this.saveTabs();
 
-        this.render(true);
+        this.render(true, { autoPage: true } );
 
         this.updateRecent(tab.entity);
 
@@ -1204,6 +1215,7 @@ export class EnhancedJournal extends Application {
             else
                 this.collapseSidebar();
         });
+        //_onClickPageLink
 
         ui.journal._contextMenu.call(ui.journal, html);
 
@@ -1262,29 +1274,80 @@ export class EnhancedJournal extends Application {
     activateFooterListeners(html) {
         let folder = (this.object.folder || this.object.parent?.folder);
         let content = folder ? folder.contents : ui.journal.tree.documents;
-        let idx = content.findIndex(e => e.id == this.object.id || e.id == this.object.parent?.id);
+        let sorting = folder?.sorting || "m";
+        let documents = content
+            .map(c => {
+                if (!c.testUserPermission(game.user, "OBSERVER"))
+                    return null;
+                return {
+                    id: c.id,
+                    name: c.name || "",
+                    sort: c.sort
+                }
+            })
+            .filter(d => !!d)
+            .sort((a, b) => {
+                return sorting == "m" ? a.sort - b.sort : a.name.localeCompare(b.name);
+            })
+        let idx = documents.findIndex(e => e.id == this.object.id || e.id == this.object.parent?.id);
 
-        let prev = (idx > 0 ? content[idx - 1] : null);
-        let next = (idx < content.length - 1 ? content[idx + 1] : null);
-        $('.navigate-prev', html).toggle(this.object.type !== "blank").toggleClass('disabled', !prev).attr("title", prev?.name).on("click", this.open.bind(this, prev));
-        $('.navigate-next', html).toggle(this.object.type !== "blank").toggleClass('disabled', !next).attr("title", next?.name).on("click", this.open.bind(this, next));
+        let prev = (idx > 0 ? documents[idx - 1] : null);
+        let next = (idx < documents.length - 1 ? documents[idx + 1] : null);
+        $('.navigate-prev', html).toggle(this.object.type !== "blank").toggleClass('disabled', !prev).attr("title", prev?.name).on("click", this.openPage.bind(this, prev));
+        $('.navigate-next', html).toggle(this.object.type !== "blank").toggleClass('disabled', !next).attr("title", next?.name).on("click", this.openPage.bind(this, next));
 
         if (this.object instanceof JournalEntry) {
-            $('.page-prev', html).addClass("disabled").toggle(this.object.pages?.contents?.length > 0);
-            $('.page-next', html).toggleClass("disabled", this.object.pages?.contents?.length == 0).toggle(this.object.pages?.contents?.length > 0).attr("title", this.object.pages.contents[0]?.name).on("click", this.open.bind(this, this.object.pages.contents[0]));
-        } else if (this.object instanceof JournalEntryPage) {
+            $('.page-prev', html).toggleClass("disabled", !this.subsheet || this.subsheet?.pageIndex < 1).show().on("click", this.previousPage.bind(this));
+            $('.page-next', html).toggleClass("disabled", !this.subsheet || this.subsheet?.pageIndex >= this.subsheet?._pages.length - 1).show().on("click", this.nextPage.bind(this));
+        /*} else if (this.object instanceof JournalEntryPage) {
             let pageIdx = this.object.parent.pages.contents.findIndex(p => p.id == this.object.id);
             let prevPage = (pageIdx > 0 ? this.object.parent.pages.contents[pageIdx - 1] : null);
             let nextPage = (pageIdx < this.object.parent.pages?.contents.length - 1 ? this.object.parent.pages.contents[pageIdx + 1] : null);
-            $('.page-prev', html).toggleClass('disabled', !prevPage).toggle(this.object.parent.pages?.contents?.length > 1).attr("title", prevPage?.name).on("click", this.open.bind(this, prevPage));
-            $('.page-next', html).toggleClass('disabled', !nextPage).toggle(this.object.parent.pages?.contents?.length > 1).attr("title", nextPage?.name).on("click", this.open.bind(this, nextPage));
+            $('.page-prev', html).toggleClass('disabled', !prevPage).toggle(this.object.parent.pages?.contents?.length > 1).attr("title", prevPage?.name).on("click", this.previousPage.bind(this, prevPage));
+            $('.page-next', html).toggleClass('disabled', !nextPage).toggle(this.object.parent.pages?.contents?.length > 1).attr("title", nextPage?.name).on("click", this.nextPage.bind(this, nextPage));
+        */
         } else {
             $('.page-prev', html).hide();
             $('.page-next', html).hide();
         }
 
         $('.add-page', html).on("click", this.addPage.bind(this));
-        $('.goto-journal-entry', html).toggleClass('disabled', !(this.object instanceof JournalEntryPage)).on("click", this.open.bind(this, this.object.parent, false));
+        $('.toggle-menu', html).toggle(!(this.object instanceof JournalEntryPage)).on("click", this.toggleMenu.bind(this));
+     }
+
+    journalEntryDocumentControls() {
+        let ctrls = [
+            { text: '<i class="fas fa-search"></i>', type: 'text' },
+            { id: 'search', type: 'input', text: "Search Journal", callback: this.searchText },
+            { id: 'viewmode', text: "View Single Page", icon: 'fa-notes', callback: this.toggleViewMode },
+            { id: 'add', text: "Add a Page", icon: 'fa-file-plus', conditional: game.user.isGM, callback: this.addPage },
+            { id: 'show', text: i18n("MonksEnhancedJournal.ShowToPlayers"), icon: 'fa-eye', conditional: game.user.isGM, callback: this.doShowPlayers },
+            { id: 'settings', text: "Change Settings", icon: 'fa-cog', conditional: game.user.isGM, callback: this.journalSettings },
+        ];
+
+        return ctrls;
+    }
+
+    openPage(page) {
+        let journal = game.journal.get(page.id);
+        if (journal) this.open(journal);
+    }
+
+    toggleMenu() {
+        if (this.subsheet.toggleSidebar) this.subsheet.toggleSidebar(event);
+    }
+
+    toggleViewMode(event) {
+        this._onAction(event);
+        const modes = JournalSheet.VIEW_MODES;
+        $('.viewmode', this.enhancedjournal.element).attr("title", this.mode !== modes.SINGLE ? "View Multiple Pages" : "View Single Page")
+            .find("i")
+            .toggleClass("fa-notes", this.mode !== modes.SINGLE)
+            .toggleClass("fa-note", this.mode === modes.SINGLE);
+    }
+
+    journalSettings() {
+
     }
 
     addPage() {
@@ -1292,5 +1355,21 @@ export class EnhancedJournal extends Application {
 
         const options = { parent: journal };
         return JournalEntryPage.implementation.createDialog({}, options);
+    }
+
+    previousPage() {
+        if (this.subsheet) {
+            if (this.subsheet.previousPage) this.subsheet.previousPage(event);
+            $('.page-prev', this.element).toggleClass("disabled", !this.subsheet || this.subsheet?.pageIndex < 1);
+            $('.page-next', this.element).toggleClass("disabled", !this.subsheet || this.subsheet?.pageIndex >= this.subsheet?._pages.length - 1);
+        }
+    }
+
+    nextPage() {
+        if (this.subsheet) {
+            if (this.subsheet.nextPage) this.subsheet.nextPage(event);
+            $('.page-prev', this.element).toggleClass("disabled", !this.subsheet || this.subsheet?.pageIndex < 1);
+            $('.page-next', this.element).toggleClass("disabled", !this.subsheet || this.subsheet?.pageIndex >= this.subsheet?._pages.length - 1);
+        }
     }
 }

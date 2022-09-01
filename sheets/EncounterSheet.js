@@ -47,7 +47,8 @@ export class EncounterSheet extends EnhancedJournalSheet {
         let safeGet = function (container, value) {
             if (config == undefined) return;
             if (config[container] == undefined) return;
-            return config[container][value];
+            let label = config[container][value];
+            return label?.label || label;
         }
 
         let config = MonksEnhancedJournal.system;
@@ -270,7 +271,8 @@ export class EncounterSheet extends EnhancedJournalSheet {
                     itemData = await EncounterSheet.createScrollFromSpell(itemData);
                 }
 
-                let price = MEJHelpers.getPrice(getProperty(itemData, "flags.monks-enhanced-journal.price"));
+                let sysPrice = MEJHelpers.getSystemPrice(item, pricename()); //MEJHelpers.getPrice(getProperty(item, "flags.monks-enhanced-journal.price"));
+                let price = MEJHelpers.getPrice(sysPrice);
                 let update = {
                     _id: makeid(),
                     flags: {
@@ -386,7 +388,7 @@ export class EncounterSheet extends EnhancedJournalSheet {
 
                 for (let i = 0; i < (quantity || 1); i++) {
                     let newSpot = MonksEnhancedJournal.findVacantSpot({ x: x, y: y }, { width: actor.prototypeToken.width, height: actor.prototypeToken.height }, tokens);
-                    let td = await actor.getTokenData({ x: newSpot.x, y: newSpot.y, hidden: ea.hidden });
+                    let td = await actor.getTokenDocument({ x: newSpot.x, y: newSpot.y, hidden: ea.hidden });
                     //if (ea.hidden)
                     //    td.hidden = true;
 
@@ -421,7 +423,7 @@ export class EncounterSheet extends EnhancedJournalSheet {
 
     static async assignItems() {
         let items = duplicate(this.flags["monks-enhanced-journal"].items || []);
-        let currency = this.flags["monks-enhanced-journal"].currency;
+        let currency = this.flags["monks-enhanced-journal"].currency || {};
         items = await super.assignItems(items, currency);
         await this.setFlag('monks-enhanced-journal', 'items', items);
 

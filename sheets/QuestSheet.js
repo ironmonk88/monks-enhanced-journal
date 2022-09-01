@@ -208,7 +208,7 @@ export class QuestSheet extends EnhancedJournalSheet {
         $('.roll-table', html).click(this.rollTable.bind(this, "items", false));
         $('.item-name h4', html).click(this._onItemSummary.bind(this));
 
-        $('.items-list .actor-icon', html).click(this.openRelationship.bind(this));
+        $('.relationships .items-list .actor-icon', html).click(this.openRelationship.bind(this));
 
         //$('.item-relationship .item-field', html).on('change', this.alterRelationship.bind(this));
 
@@ -568,7 +568,8 @@ export class QuestSheet extends EnhancedJournalSheet {
 
             let items = reward.items;
 
-            let price = MEJHelpers.getPrice(getProperty(item, "flags.monks-enhanced-journal.price"));
+            let sysPrice = MEJHelpers.getSystemPrice(item, pricename()); //MEJHelpers.getPrice(getProperty(item, "flags.monks-enhanced-journal.price"));
+            let price = MEJHelpers.getPrice(sysPrice);
             let update = {
                 _id: makeid(),
                 flags: {

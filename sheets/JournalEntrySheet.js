@@ -95,7 +95,7 @@ export class JournalEntrySheet extends JournalSheet {
         let ctrls = [
             { text: '<i class="fas fa-search"></i>', type: 'text' },
             { id: 'search', type: 'input', text: i18n("MonksEnhancedJournal.SearchDescription"), callback: this.enhancedjournal.searchText },
-            { id: 'edit', text: "Edit Journal Entry", icon: 'fa-edit', conditional: game.user.isGM, callback: () => { this.object._editing = !this.object._editing; this.enhancedjournal.render(); } },
+            { id: 'viewmode', text: "View Single Page", icon: 'fa-notes', callback: this.enhancedjournal.addPage },
             { id: 'add', text: "Add a Page", icon: 'fa-file-plus', conditional: game.user.isGM, callback: this.enhancedjournal.addPage },
             { id: 'show', text: i18n("MonksEnhancedJournal.ShowToPlayers"), icon: 'fa-eye', conditional: game.user.isGM, callback: this.enhancedjournal.doShowPlayers },
         ];
@@ -125,12 +125,6 @@ export class JournalEntrySheet extends JournalSheet {
         // add the toggalable TOC
         // add the delete buttons
         $('.page-delete', html).on("click", this.deletePage.bind(this));
-
-        $(".toggle-toc", html).on("click", this.toggleTOC.bind(this));
-
-        $(".pin-toc", html).on("click", this.togglePinTOC.bind(this));
-
-        html.find(".journal-entry-page-link").click(this._onClickHeading.bind(this));
     }
 
     clickLink(event) {

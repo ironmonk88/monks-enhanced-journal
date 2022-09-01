@@ -2336,6 +2336,7 @@ a.journal-link:hover {
 .monks-journal-sheet .header-name .sheet-icon {
     flex: 0 0 30px;
     line-height: 32px;
+    margin-top: 0px;
 }
 
 .monks-journal-sheet .header-details .sheet-icon {
@@ -3261,6 +3262,7 @@ span.unknown-link {
     background: #eee;
 }
 
+/*
 .journal-body .header-name .toggle-toc {
     flex: 0 0 30px;
     transition: flex 1s;
@@ -3270,6 +3272,7 @@ span.unknown-link {
 .journal-menu:not(.collapsed) + .journal-body .header-name .toggle-toc {
     flex: 0 0 0px;
 }
+    */
 
 .journal-menu header {
     flex: 0 0 30px;
@@ -3284,12 +3287,13 @@ span.unknown-link {
     flex: 0 0 30px;
 }
 
+/*
 .journal-body .sheet-icon {
     flex: 0 0 25px;
     height: 20px;
     margin-top: 8px;
     font-size: 18px;
-}
+}*/
 
 .page-link:not(.disabled):hover {
     text-shadow: 0 0 8px red;
@@ -3435,4 +3439,25 @@ span.unknown-link {
 .groups-of {
     font-size: 12px;
     font-style: italic;
+}
+
+#MonksEnhancedJournal .journal-sheet-container .sidebar .directory-header,
+#MonksEnhancedJournal .journal-sheet-container .sidebar .action-buttons,
+#MonksEnhancedJournal .journal-sheet-container .window-resizable-handle {
+    display: none;
+}
+
+#MonksEnhancedJournal .journal-sheet-container .sidebar.directory {
+    background: url(../../../ui/denim075.png) repeat;
+}
+
+#MonksEnhancedJournal .sheet.journal-entry .journal-sheet-container {
+    width: unset !important;
+    height: unset !important;
+    left: unset !important;
+    pointer-events: all !important;
+}
+
+#MonksEnhancedJournal .sheet.journal-entry .journal-entry-content {
+    border: 0px;
 }
