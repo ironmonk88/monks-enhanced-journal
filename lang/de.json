@@ -58,7 +58,10 @@
   "MonksEnhancedJournal.loot-inactive-players.hint": "Füge inaktive Spieler zu einem Beuteeintrag hinzu, um Beute zu verteilen",
   "MonksEnhancedJournal.use-system-tag.name": "System-Tag verwenden",
   "MonksEnhancedJournal.use-system-tag.hint": "Wenden Sie beim Gestalten des Unterblatts das System-Tag an. Dies kann entweder einige Probleme lösen oder das Blatt beschädigen",
-
+  "MonksEnhancedJournal.show-chatbubble.name": "Zeige das NPC-Chat-Tool an",
+  "MonksEnhancedJournal.show-chatbubble.hint": "Zeige die Schaltfläche zum Umschalten von NPC-Chatblasen in der Token-Symbolleiste an",
+  "MonksEnhancedJournal.inline-roll-styling.name": "Inline-Wurf-Styling",
+  "MonksEnhancedJournal.inline-roll-styling.hint": "Ändern Sie das Inline-Wurf-Styling, um es ein wenig mehr wie Links zu machen",
   "MonksEnhancedJournal.SlideConfiguration": "Diakonfiguration",
   "MonksEnhancedJournal.DCConfiguration": "DC Configuration",
   "MonksEnhancedJournal.TrapConfiguration": "Fallenkonfiguration",
@@ -152,6 +155,7 @@
   "MonksEnhancedJournal.VAlign": "V-Align",
   "MonksEnhancedJournal.Transition": "Übergang",
   "MonksEnhancedJournal.Duration": "Dia dauer",
+  "MonksEnhancedJournal.TextDuration": "Text dauer",
   "MonksEnhancedJournal.SlideshowName": "Diashow Name",
   "MonksEnhancedJournal.ShowAs": "Anzeigen als",
   "MonksEnhancedJournal.AudioFile": "Audio Datei",
@@ -261,6 +265,7 @@
   "MonksEnhancedJournal.From": "Von",
   "MonksEnhancedJournal.Grant": "Gewähren",
   "MonksEnhancedJournal.Hidden": "Versteckt",
+  "MonksEnhancedJournal.Shown": "Gezeigt",
   "MonksEnhancedJournal.Players": "Spieler",
   "MonksEnhancedJournal.Offer": "Angebot",
   "MonksEnhancedJournal.RemoveRelationship": "Beziehung entfernen",
@@ -447,7 +452,7 @@
   "MonksEnhancedJournal.msg.YouDoNotHavePermissionCreateToken": "Sie haben keine Berechtigung, neue Token zu erstellen!",
   "MonksEnhancedJournal.msg.PleaseSelectJournal": "Bitte wählen Sie ein Journal",
   "MonksEnhancedJournal.msg.ShopIsNotReceivingItems": "Das Geschäft kann derzeit keine Gegenstände erhalten",
-
+  "MonksEnhancedJournal.msg.NoItemsToAssign": "Kein Gegenstand, das einem Ziel zugewiesen werden könnte",
   "MonksEnhancedJournal.Contain": "Enthalten",
   "MonksEnhancedJournal.Cover": "Cover",
   "MonksEnhancedJournal.Stretch": "Stretch",
@@ -462,7 +467,6 @@
 
   "MonksEnhancedJournal.base": "Enhanced Journal Eintrag",
   "MonksEnhancedJournal.journalentry": "Journal Eintrag",
-  "MonksEnhancedJournal.journalentrytextonly": "Enhanced Journal Entry (Nur Text)",
   "MonksEnhancedJournal.actor": "Akteur",
   "MonksEnhancedJournal.slideshow": "Diashow",
   "MonksEnhancedJournal.organization": "Organisation",
@@ -523,7 +527,10 @@
   "MonksEnhancedJournal.currency.galacticcredit": "Galactic Credit",
   "MonksEnhancedJournal.currency.credit": "Credit",
   "MonksEnhancedJournal.currency.nuyen": "Nuyen",
-
+  "MonksEnhancedJournal.currency.caps": "Caps",
+  "MonksEnhancedJournal.currency.merchants": "Händler",
+  "MonksEnhancedJournal.currency.tavs": "Tavs",
+  "MonksEnhancedJournal.currency.hammer": "Hammer",
   "MonksEnhancedJournal.purchasing.hidden": "Versteckt",
   "MonksEnhancedJournal.purchasing.visible": "Sichtbar"
 }
