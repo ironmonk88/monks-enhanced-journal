@@ -166,9 +166,11 @@
                                 <label>{{localize 'MonksEnhancedJournal.Experience'}}</label>
                                 <div class="form-fields">
                                     <div class="flexrow" style="justify-content:flex-end;flex:0 0 300px;">
+                                        {{#if canxp}}
                                         <button type="button" class="assign-xp" title="{{localize 'MonksEnhancedJournal.AssignExperience'}}" tabindex="-1" style="flex: 0 0 35px; width: 35px;">
                                             <i class="fas fa-book-medical fa-fw"></i>
                                         </button>
+                                        {{/if}}
                                         <input type="number" min="0" style="text-align: right; border-top-right-radius: 0px; border-bottom-right-radius: 0px;" name="reward.{{reward.id}}.xp" placeholder="{{localize 'MonksEnhancedJournal.Experience'}}" value="{{reward.xp}}" />
                                     </div>
                                 </div>

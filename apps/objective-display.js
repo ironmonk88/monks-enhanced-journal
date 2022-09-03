@@ -22,19 +22,23 @@ export class ObjectiveDisplay extends Application {
 
     getData(options) {
         let quests = game.journal.filter(j => {
-            return j.getFlag('monks-enhanced-journal', 'type') == 'quest' &&
+            if (j.pages.size != 1)
+                return false;
+            let page = j.pages.contents[0];
+            return getProperty(page, 'flags.monks-enhanced-journal.type') == 'quest' &&
                 j.testUserPermission(game.user, "OBSERVER") &&
-                j.getFlag('monks-enhanced-journal', 'display') &&
-                j.getFlag('monks-enhanced-journal', 'display');
+                page.getFlag('monks-enhanced-journal', 'display');
         }).map(q => {
+            let page = q.pages.contents[0];
             let data = {
-                id: q.id,
-                completed: q.getFlag('monks-enhanced-journal', 'completed'),
-                name: q.name
+                id: page.id,
+                uuid: page.uuid,
+                completed: page.getFlag('monks-enhanced-journal', 'completed'),
+                name: page.name
             };
 
             if (setting('use-objectives')) {
-                data.objectives = (q.getFlag('monks-enhanced-journal', 'objectives') || [])
+                data.objectives = (page.getFlag('monks-enhanced-journal', 'objectives') || [])
                     .filter(o => o.available)
                     .map(o => {
                         return {
@@ -49,11 +53,7 @@ export class ObjectiveDisplay extends Application {
             return data;
         });
 
-        return mergeObject(super.getData(options),
-            {
-                quests: quests
-            }
-        );
+        return mergeObject(super.getData(options), { quests: quests } );
     }
 
     async _render(force, options) {
@@ -62,6 +62,18 @@ export class ObjectiveDisplay extends Application {
             $('h4', this.element).addClass('flexrow')
             delete ui.windows[that.appId];
         });
+    }
+
+    activateListeners(html) {
+        super.activateListeners(html);
+
+        $('li[data-document-id]', html).on("click", this.openQuest.bind(this));
+    }
+
+    async openQuest(event) {
+        let id = event.currentTarget.dataset.documentId;
+        let page = await fromUuid(id);
+        MonksEnhancedJournal.openJournalEntry(page);
     }
 
     async close(options) {

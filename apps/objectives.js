@@ -18,6 +18,19 @@ export class Objectives extends FormApplication {
         });
     }
 
+    async getData() {
+        let data = await super.getData();
+
+        //this._convertFormats(data);
+        data.enrichedText = await TextEditor.enrichHTML(data.object.content, {
+            relativeTo: this.object,
+            secrets: this.object.isOwner,
+            async: true
+        });
+
+        return data;
+    }
+
     /* -------------------------------------------- */
 
     /** @override */

@@ -66,13 +66,13 @@ export class ShopSheet extends EnhancedJournalSheet {
             getProperty(data, "data.flags.monks-enhanced-journal.type"),
             getProperty(data, "data.flags.monks-enhanced-journal.purchasing"), this.object._sort);
 
-        data.hideitems = (['hidden', 'visible'].includes(data.data.flags['monks-enhanced-journal'].purchasing) && !this.object.isOwner);
-        let purchasing = data.data.flags['monks-enhanced-journal'].purchasing;
+        data.hideitems = (['hidden', 'visible'].includes(data.data.flags['monks-enhanced-journal']?.purchasing) && !this.object.isOwner);
+        let purchasing = data.data.flags['monks-enhanced-journal']?.purchasing || 'confirm';
         let hasGM = (game.users.find(u => u.isGM && u.active) != undefined);
         data.showrequest = (['confirm', 'free'].includes(purchasing) && !this.object.isOwner && game.user.character && hasGM);
 
-        let actorData = data.data.flags['monks-enhanced-journal'].actor;
-        let actor = game.actors.get(actorData);
+        let actorData = data.data.flags['monks-enhanced-journal']?.actor;
+        let actor = (actorData ? game.actors.get(actorData) : null);
 
         if (actor) {
             data.actor = { id: actor.id, name: actor.name, img: actor.img };
@@ -82,12 +82,14 @@ export class ShopSheet extends EnhancedJournalSheet {
         for (let item of (data.data.flags['monks-enhanced-journal']?.relationships || [])) {
             let entity = await this.getDocument(item, "JournalEntry", false);
             if (entity && entity.testUserPermission(game.user, "LIMITED") && (game.user.isGM || !item.hidden)) {
-                let type = getProperty(entity, "flags.monks-enhanced-journal.type");
+                let page = (entity instanceof JournalEntryPage ? entity : entity.pages.contents[0]);
+                let type = getProperty(page, "flags.monks-enhanced-journal.type");
                 if (!data.relationships[type])
                     data.relationships[type] = { type: type, name: i18n(`MonksEnhancedJournal.${type.toLowerCase()}`), documents: [] };
 
-                item.name = entity.name;
-                item.img = entity.src;
+                item.name = page.name;
+                item.img = page.src;
+                item.type = type;
 
                 data.relationships[type].documents.push(item);
             }
@@ -377,14 +379,12 @@ export class ShopSheet extends EnhancedJournalSheet {
             } else
                 this.addItem(data);
         } else if (data.type == 'JournalEntry') {
-            let doc = await fromUuid(data.uuid);
-            if (doc.pages.size == 1) {
-                data.id = doc.pages.contents[0].id;
-                data.uuid = doc.pages.contents[0].uuid;
-                data.type = "JournalEntryPage";
-                this.addRelationship(data);
-            }
+            this.addRelationship(data);
         } else if (data.type == 'JournalEntryPage') {
+            let doc = await fromUuid(data.uuid);
+            data.id = doc?.parent.id;
+            data.uuid = doc?.parent.uuid;
+            data.type = "JournalEntry";
             this.addRelationship(data);
         }
 

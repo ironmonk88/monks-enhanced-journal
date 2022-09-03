@@ -30,7 +30,7 @@ export class QuestSheet extends EnhancedJournalSheet {
     async getData() {
         let data = await super.getData();
 
-        data.showtoplayers = this.object.ownership["default"] >= CONST.DOCUMENT_OWNERSHIP_LEVELS.OBSERVER;
+        data.showtoplayers = this.object.parent.ownership["default"] >= CONST.DOCUMENT_OWNERSHIP_LEVELS.OBSERVER;
 
         data.statusOptions = {
             inactive: "MonksEnhancedJournal.queststatus.unavailable",
@@ -53,6 +53,7 @@ export class QuestSheet extends EnhancedJournalSheet {
         });
 
         data.useobjectives = setting('use-objectives');
+        data.canxp = game.modules.get("monks-tokenbar")?.active;
 
         data.rewards = this.getRewardData();
         if (data.rewards.length) {
@@ -67,12 +68,14 @@ export class QuestSheet extends EnhancedJournalSheet {
         for (let item of (data.data.flags['monks-enhanced-journal']?.relationships || [])) {
             let entity = await this.getDocument(item, "JournalEntry", false);
             if (entity && entity.testUserPermission(game.user, "LIMITED") && (game.user.isGM || !item.hidden)) {
-                let type = getProperty(entity, "flags.monks-enhanced-journal.type");
+                let page = (entity instanceof JournalEntryPage ? entity : entity.pages.contents[0]);
+                let type = getProperty(page, "flags.monks-enhanced-journal.type");
                 if (!data.relationships[type])
                     data.relationships[type] = { type: type, name: i18n(`MonksEnhancedJournal.${type.toLowerCase()}`), documents: [] };
 
-                item.name = entity.name;
-                item.img = entity.src;
+                item.name = page.name;
+                item.img = page.src;
+                item.type = type;
 
                 data.relationships[type].documents.push(item);
             }
@@ -520,14 +523,12 @@ export class QuestSheet extends EnhancedJournalSheet {
             this.object.flags['monks-enhanced-journal'].objectives = objectives;
             this.object.setFlag('monks-enhanced-journal', 'objectives', objectives);
         } else if (data.type == 'JournalEntry') {
-            let doc = await fromUuid(data.uuid);
-            if (doc.pages.size == 1) {
-                data.id = doc.pages.contents[0].id;
-                data.uuid = doc.pages.contents[0].uuid;
-                data.type = "JournalEntryPage";
-                this.addRelationship(data);
-            }
+            this.addRelationship(data);
         } else if (data.type == 'JournalEntryPage') {
+            let doc = await fromUuid(data.uuid);
+            data.id = doc?.parent.id;
+            data.uuid = doc?.parent.uuid;
+            data.type = "JournalEntry";
             this.addRelationship(data);
         } else if (data.type == 'Folder' && data.documentName == "Item") {
             if (!this.object.isOwner)
@@ -592,9 +593,9 @@ export class QuestSheet extends EnhancedJournalSheet {
 
     changePermissions(event) {
         let show = $(event.currentTarget).prop('checked');
-        let owns = this.object.ownership;
+        let owns = this.object.parent.ownership;
         owns['default'] = (show ? CONST.DOCUMENT_OWNERSHIP_LEVELS.OBSERVER : CONST.DOCUMENT_OWNERSHIP_LEVELS.NONE);
-        this.object.update({ ownership: owns});
+        this.object.parent.update({ ownership: owns});
     }
 
     clickItem(event) {

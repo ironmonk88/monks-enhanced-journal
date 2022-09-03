@@ -77,7 +77,7 @@ export const registerSettings = function () {
 		hint: i18n("MonksEnhancedJournal.use-objectives.hint"),
 		scope: "world",
 		config: true,
-		default: false,
+		default: true,
 		type: Boolean,
 	});
 
@@ -363,6 +363,13 @@ export const registerSettings = function () {
 	});
 
 	game.settings.register(modulename, "fix-relationships", {
+		scope: "world",
+		default: true,
+		type: Boolean,
+		config: false
+	});
+
+	game.settings.register(modulename, "fix-journals", {
 		scope: "world",
 		default: true,
 		type: Boolean,

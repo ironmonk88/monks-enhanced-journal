@@ -177,12 +177,17 @@ export class EnhancedJournal extends Application {
 
             let contentform = $('.content > section', this.element);
 
-            if (this.object instanceof JournalEntry && this.object.pages.size == 1 && !!getProperty(this.object, "flags.monks-enhanced-journal.type")) {
-                this.object = this.object.pages.contents[0];
-                let tab = this.tabs.active();
-                tab.entityId = this.object.uuid;
-                tab.entity = this.object;
-                this.saveTabs();
+            
+            if (this.object instanceof JournalEntry && this.object.pages.size == 1 && (!!getProperty(this.object.pages.contents[0], "flags.monks-enhanced-journal.type") || !!getProperty(this.object, "flags.monks-enhanced-journal.type"))) {
+                let type = getProperty(this.object.pages.contents[0], "flags.monks-enhanced-journal.type") || getProperty(this.object, "flags.monks-enhanced-journal.type");
+                let types = MonksEnhancedJournal.getDocumentTypes();
+                if (types[type]) {
+                    this.object = this.object.pages.contents[0];
+                    let tab = this.tabs.active();
+                    tab.entityId = this.object.uuid;
+                    tab.entity = this.object;
+                    this.saveTabs();
+                }
             }
 
             MonksEnhancedJournal.fixType(this.object);
@@ -536,8 +541,11 @@ export class EnhancedJournal extends Application {
     async deleteEntity(entityId){
         //an entity has been deleted, what do we do?
         for (let tab of this.tabs) {
-            if (tab.entityId == entityId)
+            if (tab.entityId.startsWith(entityId)) {
                 tab.entity = await this.findEntity('', tab.text); //I know this will return a blank one, just want to maintain consistency
+                tab.text = i18n("MonksEnhancedJournal.NewTab");
+                $('.journal-tab[data-tabid="${tab.id}"] .tab-content', this.element).html(tab.text);
+            }
 
             //remove it from the history
             tab.history = tab.history.filter(h => h != entityId);
@@ -1321,8 +1329,7 @@ export class EnhancedJournal extends Application {
             { id: 'search', type: 'input', text: "Search Journal", callback: this.searchText },
             { id: 'viewmode', text: "View Single Page", icon: 'fa-notes', callback: this.toggleViewMode },
             { id: 'add', text: "Add a Page", icon: 'fa-file-plus', conditional: game.user.isGM, callback: this.addPage },
-            { id: 'show', text: i18n("MonksEnhancedJournal.ShowToPlayers"), icon: 'fa-eye', conditional: game.user.isGM, callback: this.doShowPlayers },
-            { id: 'settings', text: "Change Settings", icon: 'fa-cog', conditional: game.user.isGM, callback: this.journalSettings },
+            { id: 'show', text: i18n("MonksEnhancedJournal.ShowToPlayers"), icon: 'fa-eye', conditional: game.user.isGM, callback: this.doShowPlayers }
         ];
 
         return ctrls;

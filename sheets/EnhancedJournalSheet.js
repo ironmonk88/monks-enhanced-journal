@@ -817,11 +817,25 @@ export class EnhancedJournalSheet extends JournalPageSheet {
 
     open(document) {
         if (document) {
-            //if (game.user.isGM || actor.testUserPermission(game.user, "OBSERVER")) {
             if (this.enhancedjournal)
                 this.enhancedjournal.open(document, event.shiftKey);
-            else
+            else {
+                let page = document;
+                if (document instanceof JournalEntry && document.pages.size == 1) {
+                    page = document.pages.contents[0];
+                }
+
+                if (page instanceof JournalEntryPage) {
+                    MonksEnhancedJournal.fixType(page);
+                    let type = getProperty(page, "flags.monks-enhanced-journal.type");
+                    let types = MonksEnhancedJournal.getDocumentTypes();
+                    if (types[type]) {
+                        return page.sheet.render(true);
+                    }
+                }
+
                 document.sheet.render(true);
+            }
         }
     }
 
@@ -1007,7 +1021,7 @@ export class EnhancedJournalSheet extends JournalPageSheet {
                 requests: requests
             };
 
-            if (game.user.isGM || this.object.isOwner || (item.hide !== true && (quantity !== 0 || setting('show-zero-quantity')))) {
+            if (game.user.isGM || this.object.isOwner || (item.hide !== true && (flags.quantity !== 0 || setting('show-zero-quantity')))) {
                 let groupId = (!sort || sort == "name" ? this.slugify(item.type) : "");
                 if (groups[groupId] == undefined)
                     groups[groupId] = { id: groupId, name: item.type, items: [] };
@@ -1928,13 +1942,7 @@ export class EnhancedJournalSheet extends JournalPageSheet {
     }
 
     async addRelationship(relationship, cascade = true) {
-        let entity;
-        if (relationship.pack) {
-            const pack = game.packs.get(relationship.pack);
-            entity = await pack.getDocument(relationship.id);
-            cascade = false;
-        } else
-            entity = await fromUuid(relationship.uuid);
+        let entity = await fromUuid(relationship.uuid);
 
         if (!entity)
             return;
@@ -1942,8 +1950,9 @@ export class EnhancedJournalSheet extends JournalPageSheet {
         if (!relationship.id)
             relationship.id = entity.id;
 
-        relationship.type = getProperty(entity, "flags.monks-enhanced-journal.type");
-        if (this.allowedRelationships.includes(relationship.type)) {
+        let page = entity.pages.contents[0];
+        let type = getProperty(page, "flags.monks-enhanced-journal.type");
+        if (this.allowedRelationships.includes(type)) {
             let relationships = duplicate(this.object.flags["monks-enhanced-journal"].relationships || []);
 
             //only add one item
@@ -1956,9 +1965,10 @@ export class EnhancedJournalSheet extends JournalPageSheet {
             //add the reverse relationship
             if (cascade) {
                 let original = await fromUuid(relationship.uuid);
-                MonksEnhancedJournal.fixType(original);
-                let sheet = original.sheet;
-                sheet.addRelationship({ id: this.object.id, uuid: this.object.uuid, type: original.type, hidden: false }, false);
+                let orgPage = original.pages.contents[0];
+                MonksEnhancedJournal.fixType(orgPage);
+                let sheet = orgPage.sheet;
+                sheet.addRelationship({ id: this.object.parent.id, uuid: this.object.parent.uuid, hidden: false }, false);
             }
         }
     }
@@ -1966,7 +1976,10 @@ export class EnhancedJournalSheet extends JournalPageSheet {
     async openRelationship(event) {
         let item = event.currentTarget.closest('.item');
         let journal = await fromUuid(item.dataset.uuid);
-        this.open(game.user.isGM || setting("allow-player") ? journal : journal.parent);
+        if (!journal.testUserPermission(game.user, "LIMITED"))
+            return ui.notifications.error("You don't have permissions to view this document");
+
+        this.open(journal);
     }
 
     static async createScrollFromSpell(itemData) {
@@ -2155,16 +2168,22 @@ export class EnhancedJournalSheet extends JournalPageSheet {
 
                 //create a new Journal entry in the same folder as the current object
                 //set the content to the extracted text (selectedHTML.html()) and use the title
-                let data = { name: title, type: 'journalentry', content: selectedHTML.html(), folder: this.object.folder };
-                let newentry = await JournalEntry.create(data, { render: false });
-                ui.journal.render();
-                MonksEnhancedJournal.emit("refreshDirectory", { name: "journal" });
+                let type = getProperty(this.object, "flags.monks-enhanced-journal.type");
+                let types = MonksEnhancedJournal.getDocumentTypes();
+                if (types[type]) {
+                    let newentry = await JournalEntry.create({ name: title, folder: this.object.parent.folder }, { render: false });
+                    let data = { name: title, type: 'journalentry', text: { content: selectedHTML.html() } };
+                    await JournalEntryPage.create(data, { parent: newentry });
+                    ui.journal.render();
+                    MonksEnhancedJournal.emit("refreshDirectory", { name: "journal" });
 
-                //add a new tab but don't switch to it
-                this.enhancedjournal.addTab(newentry, { activate: false });
+                    //add a new tab but don't switch to it
+                    this.enhancedjournal.addTab(newentry, { activate: false });
+                    this.enhancedjournal.render();
 
-                //save the current entry and refresh to make sure everything is reset
-                await this.object.update({ content: $(ctrl).closest('div.editor-content').html() });
+                    //save the current entry and refresh to make sure everything is reset
+                    await this.object.update({ text: { content: $(ctrl).closest('div.editor-content').html() } });
+                }
             } else
                 ui.notifications.warn(i18n("MonksEnhancedJournal.NothingSelected"));
         } else {

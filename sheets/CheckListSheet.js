@@ -48,6 +48,14 @@ export class CheckListSheet extends EnhancedJournalSheet {
         return data;
     }
 
+    _documentControls() {
+        let ctrls = [
+            { id: 'show', text: i18n("MonksEnhancedJournal.ShowToPlayers"), icon: 'fa-eye', conditional: game.user.isGM, callback: this.enhancedjournal.doShowPlayers }
+        ];
+        //this.addPolyglotButton(ctrls);
+        return ctrls.concat(super._documentControls());
+    }
+
     get canPlaySound() {
         return false;
     }
