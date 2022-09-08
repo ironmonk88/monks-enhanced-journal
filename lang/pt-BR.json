@@ -27,7 +27,7 @@
   "MonksEnhancedJournal.chat-message.name": "Mostrar no chat",
   "MonksEnhancedJournal.chat-message.hint": "Exibir uma mensagem de chat quando um jogador recebe um item",
   "MonksEnhancedJournal.loot-sheet.name": "Ficha de Pilhagem",
-  "MonksEnhancedJournal.loot-sheet.hint": "Qual módulo deve ser usado para alocar pilhagens de missões/encontros",
+  "MonksEnhancedJournal.loot-sheet.hint": "Qual módulo deve ser usado para alocar pilhagens",
   "MonksEnhancedJournal.loot-entity.name": "Entidade de Pilhage",
   "MonksEnhancedJournal.loot-entity.hint": "Onde armazenar pilhagens se alocado a uma entidade",
   "MonksEnhancedJournal.loot-folder.name": "Pasta de Pilhagens",
@@ -60,6 +60,8 @@
   "MonksEnhancedJournal.use-system-tag.hint": "Ao estilizar a subficha, aplique as tags do sistema. Isso pode resolver alguns problemas ou quebrar a ficha",
   "MonksEnhancedJournal.show-chatbubble.name": "Mostrar botão da ferramenta de chat de NPC",
   "MonksEnhancedJournal.show-chatbubble.hint": "Mostrar o botão para alternar os balões de chat do NPC na barra de ferramentas do Token",
+  "MonksEnhancedJournal.inline-roll-styling.name": "Estilo de Rolagem Embutida",
+  "MonksEnhancedJournal.inline-roll-styling.hint": "Altere o estilo de rolagem embutida para torná-la um pouco mais parecida com links",
 
   "MonksEnhancedJournal.SlideConfiguration": "Configuração de slides",
   "MonksEnhancedJournal.DCConfiguration": "Configuração de CD",
@@ -153,8 +155,9 @@
   "MonksEnhancedJournal.Justification": "Justificação",
   "MonksEnhancedJournal.VAlign": "Alinhamento-V",
   "MonksEnhancedJournal.Transition": "Transição",
-  "MonksEnhancedJournal.Duration": "Duração",
-  "MonksEnhancedJournal.SlideshowName": "Nome do slide",
+  "MonksEnhancedJournal.Duration": "Duração do Slide",
+  "MonksEnhancedJournal.TextDuration": "Duração do Texto",
+  "MonksEnhancedJournal.SlideshowName": "Nome da Apresentação de Slides",
   "MonksEnhancedJournal.ShowAs": "Mostrar como",
   "MonksEnhancedJournal.AudioFile": "Arquivo de áudio",
   "MonksEnhancedJournal.Convert": "Converter",
@@ -263,6 +266,7 @@
   "MonksEnhancedJournal.From": "De",
   "MonksEnhancedJournal.Grant": "Garantir",
   "MonksEnhancedJournal.Hidden": "Oculto",
+  "MonksEnhancedJournal.Shown": "Mostrando",
   "MonksEnhancedJournal.Players": "Jogadores",
   "MonksEnhancedJournal.Offer": "Oferecer",
   "MonksEnhancedJournal.RemoveRelationship": "Remover relação",
@@ -385,6 +389,7 @@
   "MonksEnhancedJournal.HideShowOffering": "Ocultar/Mostrar Proposta",
   "MonksEnhancedJournal.Selected": "Selecionado",
   "MonksEnhancedJournal.QuantityOfItems": "Quantidade de itens",
+  
   "MonksEnhancedJournal.msg.NoPlayersSelected": "Nenhum jogador selecionado para enviar esta Resgistro",
   "MonksEnhancedJournal.msg.CannotAddItemType": "Não é possível adicionar item deste tipo",
   "MonksEnhancedJournal.msg.YouDontHaveTokenPermissions": "Você não tem permissão para criar um novo Token para o ator {actorname}.",
@@ -448,6 +453,7 @@
   "MonksEnhancedJournal.msg.YouDoNotHavePermissionCreateToken": "Você não tem permissão para criar novos Tokens!",
   "MonksEnhancedJournal.msg.PleaseSelectJournal": "Por favor, selecione um diário",
   "MonksEnhancedJournal.msg.ShopIsNotReceivingItems": "A loja não está recebendo itens no momento",
+  "MonksEnhancedJournal.msg.NoItemsToAssign": "Nenhum item para atribuir ao alvo",
 
   "MonksEnhancedJournal.Contain": "Conter",
   "MonksEnhancedJournal.Cover": "Capa",
@@ -463,7 +469,6 @@
 
   "MonksEnhancedJournal.base": "Registro de Enhanced Journal",
   "MonksEnhancedJournal.journalentry": "Registro de Diário",
-  "MonksEnhancedJournal.journalentrytextonly": "Registro de Enhanced Journal (somente texto)",
   "MonksEnhancedJournal.actor": "Ator",
   "MonksEnhancedJournal.slideshow": "Apresentação de slides",
   "MonksEnhancedJournal.organization": "Organização",
@@ -525,6 +530,9 @@
   "MonksEnhancedJournal.currency.credit": "Crédito",
   "MonksEnhancedJournal.currency.nuyen": "Nuyen",
   "MonksEnhancedJournal.currency.caps": "Caps",
+  "MonksEnhancedJournal.currency.merchants": "Merchants",
+  "MonksEnhancedJournal.currency.tavs": "Tavs",
+  "MonksEnhancedJournal.currency.hammer": "Hammer",
 
   "MonksEnhancedJournal.purchasing.hidden": "Oculto",
   "MonksEnhancedJournal.purchasing.visible": "Visível"
