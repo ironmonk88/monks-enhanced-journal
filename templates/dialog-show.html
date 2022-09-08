@@ -1,0 +1,61 @@
+<form class="journal-show-dialog">
+    <div class="form-group-stacked">
+        <div class="checkbox-label">
+            <span>{{localize "JOURNAL.ShowTo"}}</span>
+            <div style="text-align:right">
+                <a href="javascript:void(0)" class="select-all" name="selectAll">Select All</a>
+                /
+                <a href="javascript:void(0)" class="deselect-all" name="deselectAll">Deselect All</a>
+            </div>
+        </div>
+        <div class="show-to-players">
+            {{#each users}}
+            <label class="checkbox">
+                <input type="checkbox" name="players" value="{{id}}" checked />
+                {{name}}
+            </label>
+            {{/each}}
+        </div>
+    </div>
+
+    <hr>
+
+    <div class="form-group-stacked">
+        <div class="checkbox-label">
+            <span>Show As</span>
+        </div>
+        <div class="form-fields flexrow" style="text-align:center;">
+            <div class="radio">
+                <input type="radio" id="show-as-journal" value="journal" name="showAs" {{checked (eq showAs "journal")}}>
+                <label for="show-as-journal"><i class="fas fa-book-open"></i> Journal</label>
+            </div>
+            <div class="radio">
+                <input type="radio" id="show-as-image" value="image" name="showAs" {{#unless hasImage}} disabled{{/unless}} {{checked (eq showAs "image")}}>
+                <label for="show-as-image"><i class="fas fa-image"></i> Image</label>
+            </div>
+            <div class="radio">
+                <input type="radio" id="show-as-notitle" value="notitle" name="showAs" {{#unless hasImage}} disabled{{/unless}} {{checked (eq showAs "notitle")}}>
+                <label for="show-as-notitle"><i class="fas fa-image-slash"></i> Image <span style="font-size: 10px">/no title</span></label>
+            </div>
+        </div>
+    </div>
+
+    <hr>
+
+    <p class="notes">Optionally update the ownership of this document for the players that it is being shown to.</p>
+
+    <div class="form-group">
+        <label>{{localize "OWNERSHIP.Configure"}}</label>
+        <div class="form-fields">
+            <select name="ownership" data-dtype="Number">
+                {{selectOptions levels nameAttr="level" labelAttr="label" localize=true}}
+            </select>
+        </div>
+    </div>
+    <div class="form-group">
+        <label>Force Downgrade</label>
+        <div class="form-fields">
+            <input type="checkbox" name="forceDowngrade" />
+        </div>
+    </div>
+</form>

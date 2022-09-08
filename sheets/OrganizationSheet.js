@@ -1,5 +1,6 @@
 import { setting, i18n, log, makeid, MonksEnhancedJournal, quantityname } from "../monks-enhanced-journal.js";
 import { EnhancedJournalSheet } from "../sheets/EnhancedJournalSheet.js";
+import { MakeOffering } from "../apps/make-offering.js";
 
 export class OrganizationSheet extends EnhancedJournalSheet {
     constructor(data, options) {
@@ -20,19 +21,22 @@ export class OrganizationSheet extends EnhancedJournalSheet {
     }
 
     async getData() {
-        let data = super.getData();
+        let data = await super.getData();
 
         data.relationships = {};
         for (let item of (data.data.flags['monks-enhanced-journal']?.relationships || [])) {
             let entity = await this.getDocument(item, "JournalEntry", false);
             if (entity && entity.testUserPermission(game.user, "LIMITED") && (game.user.isGM || !item.hidden)) {
-                if (!data.relationships[entity.type])
-                    data.relationships[entity.type] = { type: entity.type, name: i18n(`MonksEnhancedJournal.${entity.type.toLowerCase()}`), documents: [] };
+                let page = (entity instanceof JournalEntryPage ? entity : entity.pages.contents[0]);
+                let type = getProperty(page, "flags.monks-enhanced-journal.type");
+                if (!data.relationships[type])
+                    data.relationships[type] = { type: type, name: i18n(`MonksEnhancedJournal.${type.toLowerCase()}`), documents: [] };
 
-                item.name = entity.name;
-                item.img = entity.data.img;
+                item.name = page.name;
+                item.img = page.src;
+                item.type = type;
 
-                data.relationships[entity.type].documents.push(item);
+                data.relationships[type].documents.push(item);
             }
         }
 
@@ -49,17 +53,19 @@ export class OrganizationSheet extends EnhancedJournalSheet {
         return 'organization';
     }
 
+    /*
     get allowedRelationships() {
         return ['person', 'place', 'organization'];
-    }
+    }*/
 
     activateListeners(html, enhancedjournal) {
         super.activateListeners(html, enhancedjournal);
         
         $('.item-hide', html).on('click', this.alterItem.bind(this));
         $('.item-delete', html).on('click', $.proxy(this._deleteItem, this));
-        $('.items-list .actor-icon', html).click(this.openRelationship.bind(this));
-        $('.item-relationship .item-field', html).on('change', this.alterRelationship.bind(this));
+        $('.relationships .items-list .actor-icon', html).click(this.openRelationship.bind(this));
+        $('.offerings .items-list .actor-icon', html).click(this.openOfferingActor.bind(this));
+        //$('.item-relationship .item-field', html).on('change', this.alterRelationship.bind(this));
 
         $('.item-private', html).on('click', this.alterItem.bind(this));
         $('.make-offering', html).on('click', this.makeOffer.bind(this));
@@ -112,6 +118,30 @@ export class OrganizationSheet extends EnhancedJournalSheet {
 
         if (data.type == 'JournalEntry') {
             this.addRelationship(data);
+        } else if (data.type == 'JournalEntryPage') {
+            let doc = await fromUuid(data.uuid);
+            data.id = doc?.parent.id;
+            data.uuid = doc?.parent.uuid;
+            data.type = "JournalEntry";
+            this.addRelationship(data);
+        } else if (data.type == 'Item') {
+            let item = await fromUuid(data.uuid);
+            new MakeOffering(this.object, this, {
+                offering: {
+                    actor: {
+                        id: item.parent.id,
+                        name: item.parent.name,
+                        img: item.parent.img
+                    },
+                    items: [{
+                        id: item.id,
+                        itemName: item.name,
+                        actorId: item.parent.id,
+                        actorName: item.parent.name,
+                        qty: 1
+                    }]
+                }
+            }).render(true);
         }
 
         log('drop data', event, data);

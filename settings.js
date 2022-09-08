@@ -77,7 +77,7 @@ export const registerSettings = function () {
 		hint: i18n("MonksEnhancedJournal.use-objectives.hint"),
 		scope: "world",
 		config: true,
-		default: false,
+		default: true,
 		type: Boolean,
 	});
 
@@ -116,6 +116,18 @@ export const registerSettings = function () {
 		config: true,
 		default: false,
 		type: Boolean,
+	});
+
+	game.settings.register(modulename, "inline-roll-styling", {
+		name: i18n("MonksEnhancedJournal.inline-roll-styling.name"),
+		hint: i18n("MonksEnhancedJournal.inline-roll-styling.hint"),
+		scope: "world",
+		config: true,
+		default: true,
+		type: Boolean,
+		onChange: (value) => {
+			$('body').toggleClass("inline-roll-styling", value);
+		},
 	});
 
 	game.settings.register(modulename, "hud-limited", {
@@ -268,14 +280,13 @@ export const registerSettings = function () {
 		scope: "world",
 		config: true,
 		default: "",
-		choices: lootentity,
 		type: String,
 	});
 	game.settings.register(modulename, "loot-folder", {
 		name: game.i18n.localize("MonksEnhancedJournal.loot-folder.name"),
 		hint: game.i18n.localize("MonksEnhancedJournal.loot-folder.hint"),
 		scope: "world",
-		config: true,
+		config: false,
 		default: "",
 		choices: lootfolder,
 		type: String,
@@ -352,6 +363,13 @@ export const registerSettings = function () {
 	});
 
 	game.settings.register(modulename, "fix-relationships", {
+		scope: "world",
+		default: true,
+		type: Boolean,
+		config: false
+	});
+
+	game.settings.register(modulename, "fix-journals", {
 		scope: "world",
 		default: true,
 		type: Boolean,

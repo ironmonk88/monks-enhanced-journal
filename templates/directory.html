@@ -1,19 +1,19 @@
 {{#*inline "folderPartial"}}
 <li class="directory-item folder flexcol {{#unless folder.expanded}}collapsed{{/unless}}"
-    data-folder-id="{{folder.id}}" data-folder-depth="{{folder.depth}}">
-    <header class="folder-header flexrow{{#if folder.data.color}} customcolor{{/if}}" {{#if folder.data.color}} style="background-color: {{folder.data.color}}" {{/if}}>
-        <h3><i class="fas fa-folder-open fa-fw"></i>{{folder.name}}</h3>
+    data-folder-id="{{folder.id}}" data-folder-depth="{{node.depth}}">
+    <header class="folder-header flexrow" {{#if folder.color}} style="background-color: {{folder.color}}" {{/if}}>
+        <h3 class="noborder"><i class="fas fa-folder-open fa-fw"></i>{{folder.name}}</h3>
         {{#if user.isGM}}
         <a class="create-button create-folder" data-parent-folder="{{folder.id}}"><i class="fas fa-folder fa-fw"></i><i class="fas fa-plus"></i></a>
         <a class="create-button create-document" data-folder="{{folder.id}}"><i class="fas fa-book-open fa-fw"></i><i class="fas fa-plus"></i></a>
         {{/if}}
     </header>
 
-    <ol class="subdirectory" {{#if folder.data.color}} style="border-left-color: {{folder.data.color}};border-bottom-color: {{folder.data.color}}" {{/if}}>
-        {{~#each folder.children as |child i|}}
-        {{> folderPartial folder=child user=../user}}
+    <ol class="subdirectory" {{#if folder.color}} style="border-left-color: {{folder.color}};border-bottom-color: {{folder.color}}" {{/if}}>
+        {{~#each node.children}}
+        {{> folderPartial node=this folder=this.folder user=../user}}
         {{/each}}
-        {{#each folder.content}}
+        {{#each node.documents}}
         {{> documentPartial}}
         {{/each~}}
     </ol>
@@ -26,7 +26,7 @@
 </li>
 {{/inline}}
 
-<section class="sidebar-tab sidebar-directory directory tab flexcol" id="journal-directory" data-tab="journal">
+<section class="sidebar-tab sidebar-directory directory tab flexcol journal-directory" id="journal-directory" data-tab="journal">
     <!-- Directory Header -->
     <header class="directory-header">
         <div class="header-actions action-buttons flexrow">
@@ -46,14 +46,11 @@
 
     <!-- Directories List -->
     <ol class="directory-list">
-        {{~#each tree.children as |f fi|}}
-        {{> folderPartial folder=f user=../user}}
+        {{~#each tree.children}}
+        {{> folderPartial node=this folder=this.folder user=../user}}
         {{/each}}
-        {{#each tree.content}}
+        {{#each tree.documents}}
         {{> documentPartial}}
         {{/each~}}
     </ol>
-
-    <!-- Directory Footer -->
-    <footer class="directory-footer action-buttons"></footer>
 </section>

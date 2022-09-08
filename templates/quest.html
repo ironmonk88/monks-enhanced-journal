@@ -1,13 +1,13 @@
 <form class="flexcol journal-subsheet {{entrytype}}" editable="{{editable}}">
     <div class="quest-container">
-        <div class="fullscreen-image"><img src="{{data.img}}" /></div>
+        <div class="fullscreen-image"><img src="{{data.src}}" /></div>
         <header class="sheet-header journal-header flexrow">
             <div class="sheet-image">
-                <img class="profile" src="{{data.img}}" data-edit="img" onerror="this.src='modules/monks-enhanced-journal/assets/quest.png'">
+                <img class="profile" src="{{data.src}}" data-edit="img" onerror="if (!this.imgerr) { this.imgerr = true; this.src = 'modules/monks-enhanced-journal/assets/quest.png' }">
             </div>
             <section class="header-details">
                 <h1 class="questname flexrow">
-                    <i class="fas fa-map-signs sheet-icon"></i>
+                    <i class="fas {{data.icon}} sheet-icon"></i>
                     <input name="name" type="text" value="{{data.name}}" placeholder="{{localize 'MonksEnhancedJournal.QuestName'}}">
                     {{#if sound.audiofile}}
                     <button type="button" class="play-journal-sound">
@@ -56,7 +56,7 @@
         <section class="sheet-body half-size">
             <div class="tab description  active" data-group="primary" data-tab="description">
                 <div class="tab-inner flexcol">
-                    {{editor target="content" content=data.content editable=true button=true owner=owner}}
+                    {{editor enrichedText target="text.content" editable=true button=true owner=owner}}
                 </div>
             </div>
             {{#if useobjectives}}
@@ -64,7 +64,7 @@
                 <div class="tab-inner flexcol">
                     <ol class="items-list objective-items">
                         <li class="items-header flexrow">
-                            <h3 class="item-name flexrow">{{localize 'MonksEnhancedJournal.Objectives'}}</h3>
+                            <h3 class="item-name noborder flexrow">{{localize 'MonksEnhancedJournal.Objectives'}}</h3>
 
                             {{#if owner}}
                             <div class="item-name flexrow" style="flex:0 0 100px;justify-content:center;">
@@ -150,15 +150,13 @@
                     </div>
                     <div class="reward-container" data-id="{{reward.id}}">
                         {{#if reward}}
-                        <div class="details-section" style="flex-grow:0;">
-                            <div class="flexrow">
-                                <div class="form-group">
-                                    <label>{{localize 'MonksEnhancedJournal.Name'}}</label>
+                        <div class="details-section" style="height: 170px;">
+                            <div class="form-group">
+                                <label>{{localize 'MonksEnhancedJournal.Name'}}</label>
+                                <div class="form-fields">
                                     <input type="text" name="reward.{{reward.id}}.name" value="{{reward.name}}" />
-                                </div>
-                                <div class="form-group" style="flex:0 0 200px;">
-                                    <label>{{localize 'MonksEnhancedJournal.Selected'}}</label>
-                                    <div class="form-fields" style="justify-content:flex-end;">
+                                    <label style="margin-left: 12px;">{{localize 'MonksEnhancedJournal.Selected'}}</label>
+                                    <div class="form-fields" style="justify-content: flex-end; flex: 0 0 30px;">
                                         <input type="checkbox" class="select-reward" name="reward.{{reward.id}}.active" {{checked reward.active}} />
                                     </div>
                                 </div>
@@ -166,11 +164,15 @@
 
                             <div class="form-group">
                                 <label>{{localize 'MonksEnhancedJournal.Experience'}}</label>
-                                <div class="form-fields" style="justify-content:flex-end;flex:0 0 300px;">
-                                    <button type="button" class="assign-xp" title="{{localize 'MonksEnhancedJournal.AssignExperience'}}" tabindex="-1" style="flex: 0 0 35px; width: 35px;">
-                                        <i class="fas fa-book-medical fa-fw"></i>
-                                    </button>
-                                    <input type="number" min="0" style="text-align: right; border-top-right-radius: 0px; border-bottom-right-radius: 0px;" name="reward.{{reward.id}}.xp" placeholder="{{localize 'MonksEnhancedJournal.Experience'}}" value="{{reward.xp}}" />
+                                <div class="form-fields">
+                                    <div class="flexrow" style="justify-content:flex-end;flex:0 0 300px;">
+                                        {{#if canxp}}
+                                        <button type="button" class="assign-xp" title="{{localize 'MonksEnhancedJournal.AssignExperience'}}" tabindex="-1" style="flex: 0 0 35px; width: 35px;">
+                                            <i class="fas fa-book-medical fa-fw"></i>
+                                        </button>
+                                        {{/if}}
+                                        <input type="number" min="0" style="text-align: right; border-top-right-radius: 0px; border-bottom-right-radius: 0px;" name="reward.{{reward.id}}.xp" placeholder="{{localize 'MonksEnhancedJournal.Experience'}}" value="{{reward.xp}}" />
+                                    </div>
                                 </div>
                             </div>
 
@@ -190,12 +192,12 @@
                             </div>
                             {{/if}}
                         </div>
-                        <ol class="items-list reward-items">
+                        <ol class="items-list reward-items" style="height: calc(100% - 170px)">
                             <li class="items-header flexrow">
                                 <div class="encounter-buttons flexrow">
                                     <div class="assign-items" title="{{localize 'MonksEnhancedJournal.AssignItems'}}"><i class="fas fa-suitcase"></i></div>
                                 </div>
-                                <h3 class="item-name flexrow">{{localize 'MonksEnhancedJournal.Items'}}</h3>
+                                <h3 class="item-name noborder flexrow">{{localize 'MonksEnhancedJournal.Items'}}</h3>
 
                                 <div class="item-controls item-assigned">{{localize 'MonksEnhancedJournal.Assigned'}}</div>
 
@@ -211,7 +213,7 @@
                             <ol class="item-list">
                                 {{#each reward.groups}}
                                 <li class="items-header flexrow{{#if this.collapsed}} collapsed{{/if}}" data-id="{{this.id}}">
-                                    <h3 class="item-name flexrow">{{localize this.name}} <span class="item-count">({{this.items.length}} {{localize 'MonksEnhancedJournal.items'}})</span></h3>
+                                    <h3 class="item-name noborder flexrow">{{localize this.name}} <span class="item-count">({{this.items.length}} {{localize 'MonksEnhancedJournal.items'}})</span></h3>
                                 </li>
                                 <ul class="item-list" {{#if this.collapsed}}style="display: none;"{{/if}}>
                                     {{#each this.items}}
@@ -226,15 +228,15 @@
                                         </div>
 
                                         <div class="item-controls item-assigned">
-                                            <input type="checkbox" name="reward.{{../../reward.id}}.items.{{this.id}}.assigned" {{checked this.assigned}} style="text-align:center;" />
+                                            <input type="checkbox" name="reward.{{../../reward.id}}.items.{{this.id}}.flags.monks-enhanced-journal.assigned" {{checked this.assigned}} style="text-align:center;" />
                                         </div>
 
                                         <div class="item-controls item-quantity">
-                                            <input type="number" min="0" name="reward.{{../../reward.id}}.items.{{this.id}}.data.{{@root.quantityname}}{{@root.valStr}}" value="{{this.quantity}}" style="text-align:center;" />
+                                            <input type="number" min="0" name="reward.{{../../reward.id}}.items.{{this.id}}.flags.monks-enhanced-journal.quantity" value="{{this.quantity}}" style="text-align:center;" />
                                         </div>
 
                                         <div class="item-controls item-remaining">
-                                            <input type="number" name="reward.{{../../reward.id}}.items.{{this.id}}.data.remaining" value="{{this.remaining}}" style="text-align:center;" />
+                                            <input type="number" name="reward.{{../../reward.id}}.items.{{this.id}}.flags.monks-enhanced-journal.remaining" value="{{this.remaining}}" style="text-align:center;" />
                                         </div>
 
                                         <div class="item-controls flexrow">
@@ -271,14 +273,14 @@
                         <ul class="items-list">
                             {{#each relationships}}
                             <li class="items-header flexrow">
-                                <h3 class="item-name flexrow">{{this.name}}</h3>
-                                <h3 class="item-name flexrow">{{localize 'MonksEnhancedJournal.Relationship'}}</h3>
+                                <h3 class="item-name noborder flexrow">{{this.name}}</h3>
+                                <h3 class="item-name noborder flexrow">{{localize 'MonksEnhancedJournal.Relationship'}}</h3>
                                 {{#if @root.owner}}<div class="item-controls flexrow"></div>{{/if}}
                             </li>
                             {{#each documents}}
-                            <li class="item flexrow" data-id="{{this.id}}" data-pack="{{this.pack}}" data-container="relationships" data-document="JournalEntry" draggable="false">
+                            <li class="item flexrow" data-id="{{this.id}}" data-uuid="{{this.uuid}}" data-container="relationships" data-document="JournalEntry" draggable="false">
                                 <div class="item-name flexrow">
-                                    <img class="item-image actor-icon" src="{{this.img}}" onerror="this.src='modules/monks-enhanced-journal/assets/{{this.type}}.png'" />
+                                    <img class="item-image actor-icon" src="{{this.img}}" onerror="if (!this.imgerr) { this.imgerr = true; this.src = 'modules/monks-enhanced-journal/assets/{{this.type}}.png' }" />
                                     <h4>{{#if this.pack}}<i class="fas fa-atlas" title="{{localize 'MonksEnhancedJournal.FromCompendium'}}"></i> {{/if}}{{this.name}}</h4>
                                 </div>
 

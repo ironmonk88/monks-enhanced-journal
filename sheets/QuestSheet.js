@@ -1,13 +1,14 @@
 import { Objectives } from "../apps/objectives.js";
 import { setting, i18n, log, makeid, MonksEnhancedJournal, quantityname, pricename, currencyname } from "../monks-enhanced-journal.js";
 import { EnhancedJournalSheet } from "../sheets/EnhancedJournalSheet.js";
+import { getValue, setValue, MEJHelpers } from "../helpers.js";
 
 export class QuestSheet extends EnhancedJournalSheet {
     constructor(data, options) {
         super(data, options);
 
-        if (this.object.data.flags["monks-enhanced-journal"].status == undefined && this.object.data.flags["monks-enhanced-journal"].completed)
-            this.object.data.flags["monks-enhanced-journal"].status = 'completed';
+        if (this.object.flags["monks-enhanced-journal"].status == undefined && this.object.flags["monks-enhanced-journal"].completed)
+            this.object.flags["monks-enhanced-journal"].status = 'completed';
     }
 
     static get defaultOptions() {
@@ -27,9 +28,9 @@ export class QuestSheet extends EnhancedJournalSheet {
     }
 
     async getData() {
-        let data = super.getData();
+        let data = await super.getData();
 
-        data.showtoplayers = this.object.data.permission["default"] >= CONST.ENTITY_PERMISSIONS.OBSERVER;
+        data.showtoplayers = this.object.parent.ownership["default"] >= CONST.DOCUMENT_OWNERSHIP_LEVELS.OBSERVER;
 
         data.statusOptions = {
             inactive: "MonksEnhancedJournal.queststatus.unavailable",
@@ -38,7 +39,7 @@ export class QuestSheet extends EnhancedJournalSheet {
             failed: "MonksEnhancedJournal.queststatus.failed"
         };
 
-        data.objectives = duplicate(this.object.data.flags["monks-enhanced-journal"].objectives || [])?.filter(o => {
+        data.objectives = duplicate(this.object.flags["monks-enhanced-journal"].objectives || [])?.filter(o => {
             return this.object.isOwner || o.available;
         }).map(o => {
             let counter = { counter: ($.isNumeric(o.required) ? (o.done || 0) + '/' + o.required : '') };
@@ -52,6 +53,7 @@ export class QuestSheet extends EnhancedJournalSheet {
         });
 
         data.useobjectives = setting('use-objectives');
+        data.canxp = game.modules.get("monks-tokenbar")?.active;
 
         data.rewards = this.getRewardData();
         if (data.rewards.length) {
@@ -62,20 +64,20 @@ export class QuestSheet extends EnhancedJournalSheet {
             return { id: c.id, name: c.name, value: data.reward?.currency[c.id] ?? 0 };
         });
 
-        data.valStr = (['pf2e'].includes(game.system.id) ? ".value" : "");
-        data.quantityname = quantityname();
-
         data.relationships = {};
         for (let item of (data.data.flags['monks-enhanced-journal']?.relationships || [])) {
             let entity = await this.getDocument(item, "JournalEntry", false);
             if (entity && entity.testUserPermission(game.user, "LIMITED") && (game.user.isGM || !item.hidden)) {
-                if (!data.relationships[entity.type])
-                    data.relationships[entity.type] = { type: entity.type, name: i18n(`MonksEnhancedJournal.${entity.type.toLowerCase()}`), documents: [] };
+                let page = (entity instanceof JournalEntryPage ? entity : entity.pages.contents[0]);
+                let type = getProperty(page, "flags.monks-enhanced-journal.type");
+                if (!data.relationships[type])
+                    data.relationships[type] = { type: type, name: i18n(`MonksEnhancedJournal.${type.toLowerCase()}`), documents: [] };
 
-                item.name = entity.name;
-                item.img = entity.data.img;
+                item.name = page.name;
+                item.img = page.src;
+                item.type = type;
 
-                data.relationships[entity.type].documents.push(item);
+                data.relationships[type].documents.push(item);
             }
         }
 
@@ -89,17 +91,17 @@ export class QuestSheet extends EnhancedJournalSheet {
     getRewardData() {
         let rewards;
 
-        if (this.object.data.flags["monks-enhanced-journal"].rewards == undefined &&
-                (this.object.data.flags["monks-enhanced-journal"].items != undefined ||
-            this.object.data.flags["monks-enhanced-journal"].xp != undefined ||
-            this.object.data.flags["monks-enhanced-journal"].additional != undefined)) {
+        if (this.object.flags["monks-enhanced-journal"].rewards == undefined &&
+                (this.object.flags["monks-enhanced-journal"].items != undefined ||
+            this.object.flags["monks-enhanced-journal"].xp != undefined ||
+            this.object.flags["monks-enhanced-journal"].additional != undefined)) {
 
             rewards = this.convertRewards();
-            this.object.data.flags['monks-enhanced-journal'].reward = rewards[0].id;
+            this.object.flags['monks-enhanced-journal'].reward = rewards[0].id;
             this.object.setFlag('monks-enhanced-journal', 'rewards', rewards);
             this.object.setFlag('monks-enhanced-journal', 'reward', rewards[0].id);
         } else {
-            rewards = this.object.data.flags["monks-enhanced-journal"].rewards || [];
+            rewards = this.object.flags["monks-enhanced-journal"].rewards || [];
             rewards = rewards.map(reward => {
                 if (reward.currency instanceof Array)
                     reward.currency = reward.currency.reduce((a, v) => ({ ...a, [v.name]: v.value }), {});
@@ -110,19 +112,20 @@ export class QuestSheet extends EnhancedJournalSheet {
         return rewards;
     }
 
+    /*
     get allowedRelationships() {
         return ['person', 'quest'];
-    }
+    }*/
 
     convertRewards() {
-        let currency = MonksEnhancedJournal.currencies.reduce((a, v) => ({ ...a, [v.id]: this.object.data.flags["monks-enhanced-journal"][v.id] }), {});
+        let currency = MonksEnhancedJournal.currencies.reduce((a, v) => ({ ...a, [v.id]: this.object.flags["monks-enhanced-journal"][v.id] }), {});
         return [{
             id: makeid(),
             name: i18n("MonksEnhancedJournal.Rewards"),
             active: true,
-            items: this.object.data.flags["monks-enhanced-journal"].items,
-            xp: this.object.data.flags["monks-enhanced-journal"].xp,
-            additional: this.object.data.flags["monks-enhanced-journal"].additional,
+            items: this.object.flags["monks-enhanced-journal"].items,
+            xp: this.object.flags["monks-enhanced-journal"].xp,
+            additional: this.object.flags["monks-enhanced-journal"].additional,
             currency: currency,
             hasCurrency: Object.keys(currency).length > 0
         }];
@@ -146,7 +149,10 @@ export class QuestSheet extends EnhancedJournalSheet {
             this.object.setFlag('monks-enhanced-journal', 'reward', reward.id);
         }
 
-        reward.groups = this.getItemGroups(reward);
+        reward.groups = this.getItemGroups(
+            reward.items,
+            getProperty(this.object, "flags.monks-enhanced-journal.type")
+        );
 
         return reward;
     }
@@ -205,9 +211,9 @@ export class QuestSheet extends EnhancedJournalSheet {
         $('.roll-table', html).click(this.rollTable.bind(this, "items", false));
         $('.item-name h4', html).click(this._onItemSummary.bind(this));
 
-        $('.items-list .actor-icon', html).click(this.openRelationship.bind(this));
+        $('.relationships .items-list .actor-icon', html).click(this.openRelationship.bind(this));
 
-        $('.item-relationship .item-field', html).on('change', this.alterRelationship.bind(this));
+        //$('.item-relationship .item-field', html).on('change', this.alterRelationship.bind(this));
 
         $('.items-header', html).on("click", this.collapseItemSection.bind(this));
         $('.refill-all', html).click(this.refillItems.bind(this, 'all'));
@@ -432,8 +438,8 @@ export class QuestSheet extends EnhancedJournalSheet {
 
     deleteItem(id, container) {
         if (container == 'items') {
-            let rewards = duplicate(this.object.data.flags["monks-enhanced-journal"].rewards);
-            let reward = rewards.find(r => r.id == this.object.data.flags["monks-enhanced-journal"].reward);
+            let rewards = duplicate(this.object.flags["monks-enhanced-journal"].rewards);
+            let reward = rewards.find(r => r.id == this.object.flags["monks-enhanced-journal"].reward);
             reward.items.findSplice(i => i.id == id || i._id == id);
             this.object.setFlag('monks-enhanced-journal', "rewards", rewards);
         } else
@@ -461,7 +467,7 @@ export class QuestSheet extends EnhancedJournalSheet {
 
             let items = reward.items;
             let item = items.find(i => i._id == id);
-            if (!game.user.isGM && (this.object.data.flags["monks-enhanced-journal"].purchasing == 'locked' || item?.lock === true)) {
+            if (!game.user.isGM && (this.object.flags["monks-enhanced-journal"].purchasing == 'locked' || item?.lock === true)) {
                 event.preventDefault();
                 return;
             }
@@ -469,7 +475,9 @@ export class QuestSheet extends EnhancedJournalSheet {
             dragData.id = id;
             dragData.pack = li.dataset.pack;
             dragData.type = "Item";
-            dragData.journalid = this.object.id;
+            dragData.journalId = this.object.parent.id;
+            dragData.pageId = this.object.id;
+            dragData.pageUuid = this.object.uuid;
             dragData.data = item;
         } else if (li.dataset.document == 'Objective') {
             dragData.id = id;
@@ -481,7 +489,7 @@ export class QuestSheet extends EnhancedJournalSheet {
         MonksEnhancedJournal._dragItem = id;
     }
 
-    _onDrop(event) {
+    async _onDrop(event) {
         let data;
         try {
             data = JSON.parse(event.dataTransfer.getData('text/plain'));
@@ -498,7 +506,7 @@ export class QuestSheet extends EnhancedJournalSheet {
             this.addActor(data);
         } else if (data.type == 'Objective') {
             //re-order objectives
-            let objectives = duplicate(this.object.data.flags['monks-enhanced-journal']?.objectives || []);
+            let objectives = duplicate(this.object.flags['monks-enhanced-journal']?.objectives || []);
 
             let from = objectives.findIndex(a => a.id == data.id);
             let to = objectives.length - 1;
@@ -512,10 +520,29 @@ export class QuestSheet extends EnhancedJournalSheet {
 
             objectives.splice(to, 0, objectives.splice(from, 1)[0]);
 
-            this.object.data.flags['monks-enhanced-journal'].objectives = objectives;
+            this.object.flags['monks-enhanced-journal'].objectives = objectives;
             this.object.setFlag('monks-enhanced-journal', 'objectives', objectives);
         } else if (data.type == 'JournalEntry') {
             this.addRelationship(data);
+        } else if (data.type == 'JournalEntryPage') {
+            let doc = await fromUuid(data.uuid);
+            data.id = doc?.parent.id;
+            data.uuid = doc?.parent.uuid;
+            data.type = "JournalEntry";
+            this.addRelationship(data);
+        } else if (data.type == 'Folder' && data.documentName == "Item") {
+            if (!this.object.isOwner)
+                return false;
+            // Import items from the folder
+            let folder = await fromUuid(data.uuid);
+            if (folder) {
+                for (let item of folder.contents) {
+                    if (item instanceof Item) {
+                        let itemData = item.toObject();
+                        await this.addItem({ data: itemData });
+                    }
+                }
+            }
         }
 
         log('drop data', event, data);
@@ -542,22 +569,33 @@ export class QuestSheet extends EnhancedJournalSheet {
 
             let items = reward.items;
 
-            let update = { _id: makeid(), data: { remaining: 1 } };
+            let sysPrice = MEJHelpers.getSystemPrice(item, pricename()); //MEJHelpers.getPrice(getProperty(item, "flags.monks-enhanced-journal.price"));
+            let price = MEJHelpers.getPrice(sysPrice);
+            let update = {
+                _id: makeid(),
+                flags: {
+                    'monks-enhanced-journal': {
+                        parentId: item.id,
+                        remaining: 1,
+                        quantity: 1,
+                        price: `${price.value} ${price.currency}`
+                    }
+                }
+            };
             if (game.system.id == "dnd5e") {
-                update.data.equipped = false;
+                setProperty(update, "system.equipped", false);
             }
-            update[quantityname()] = item.data.data[quantityname()];
-            this.setValue(update, quantityname(), 1);
+
             items.push(mergeObject(itemData, update));
-            this.object.setFlag('monks-enhanced-journal', 'rewards', rewards);
+            await this.object.setFlag('monks-enhanced-journal', 'rewards', rewards);
         }
     }
 
     changePermissions(event) {
         let show = $(event.currentTarget).prop('checked');
-        let perms = this.object.data.permission;
-        perms['default'] = (show ? CONST.ENTITY_PERMISSIONS.OBSERVER : CONST.ENTITY_PERMISSIONS.NONE);
-        this.object.update({permission: perms});
+        let owns = this.object.parent.ownership;
+        owns['default'] = (show ? CONST.DOCUMENT_OWNERSHIP_LEVELS.OBSERVER : CONST.DOCUMENT_OWNERSHIP_LEVELS.NONE);
+        this.object.parent.update({ ownership: owns});
     }
 
     clickItem(event) {
@@ -574,7 +612,7 @@ export class QuestSheet extends EnhancedJournalSheet {
             if (items) {
                 let item = items.find(i => i._id == id);
                 if (item) {
-                    let max = this.getValue(item, "remaining", null);
+                    let max = getValue(item, "remaining", null);
                     let result = await QuestSheet.confirmQuantity(item, max, "transfer", false);
                     if ((result?.quantity ?? 0) > 0) {
                         if (item.data.remaining < result?.quantity) {
@@ -593,14 +631,14 @@ export class QuestSheet extends EnhancedJournalSheet {
 
     createObjective() {
         let objective = { status: false };
-        if (this.object.data.flags["monks-enhanced-journal"].objectives == undefined)
-            this.object.data.flags["monks-enhanced-journal"].objectives = [];
+        if (this.object.flags["monks-enhanced-journal"].objectives == undefined)
+            this.object.flags["monks-enhanced-journal"].objectives = [];
         new Objectives(objective, this).render(true);
     }
 
     editObjective(event) {
         let item = event.currentTarget.closest('.item');
-        let objective = this.object.data.flags["monks-enhanced-journal"].objectives.find(obj => obj.id == item.dataset.id);
+        let objective = this.object.flags["monks-enhanced-journal"].objectives.find(obj => obj.id == item.dataset.id);
         if (objective != undefined)
             new Objectives(objective, this).render(true);
     }
@@ -651,14 +689,14 @@ export class QuestSheet extends EnhancedJournalSheet {
 
         if (event == 'all') {
             for (let item of items) {
-                item.data.remaining = this.getValue(item, quantityname());
+                setProperty(item, "flags.monks-enhanced-journal.remaining", getProperty(item, "flags.monks-enhanced-journal.quantity"));
             }
             this.object.setFlag('monks-enhanced-journal', 'rewards', rewards);
         } else {
             let li = $(event.currentTarget).closest('li')[0];
             let item = items.find(i => i._id == li.dataset.id);
             if (item) {
-                item.data.remaining = this.getValue(item, quantityname());
+                setProperty(item, "flags.monks-enhanced-journal.remaining", getProperty(item, "flags.monks-enhanced-journal.quantity"));
                 this.object.setFlag('monks-enhanced-journal', 'rewards', rewards);
             }
         }

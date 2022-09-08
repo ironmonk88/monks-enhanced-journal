@@ -32,20 +32,28 @@ export class CheckListSheet extends EnhancedJournalSheet {
 
     initialize() {
         let idx = 0;
-        this.folders = (this.object.data?.flags['monks-enhanced-journal']?.folders || []).map(f => { if (f.parent == '') f.parent = null; return { id: f.id, name: f.name, data: f, sort: idx++ }; });
+        this.folders = (this.object?.flags['monks-enhanced-journal']?.folders || []).map(f => { if (f.parent == '') f.parent = null; return { id: f.id, name: f.name, data: f, sort: idx++ }; });
         idx = 0;
-        this.items = (this.object.data?.flags['monks-enhanced-journal']?.items || []).map(i => { return { id: i.id, data: i, sort: idx++ }; });
+        this.items = (this.object?.flags['monks-enhanced-journal']?.items || []).map(i => { return { id: i.id, data: i, sort: idx++ }; });
         // Build Tree
         this.tree = this.constructor.setupFolders(this.folders, this.items);
     }
 
-    getData() {
-        let data = super.getData();
+    async getData() {
+        let data = await super.getData();
 
         data.tree = this.tree;
         data.canCreate = this.object.isOwner;
 
         return data;
+    }
+
+    _documentControls() {
+        let ctrls = [
+            { id: 'show', text: i18n("MonksEnhancedJournal.ShowToPlayers"), icon: 'fa-eye', conditional: game.user.isGM, callback: this.enhancedjournal.doShowPlayers }
+        ];
+        //this.addPolyglotButton(ctrls);
+        return ctrls.concat(super._documentControls());
     }
 
     get canPlaySound() {
@@ -161,7 +169,7 @@ export class CheckListSheet extends EnhancedJournalSheet {
 
             // Entities
             if (el.classList.contains("document")) {
-                el.style.display = (!isSearch || documentIds.has(el.dataset.entityId)) ? "flex" : "none";
+                el.style.display = (!isSearch || documentIds.has(el.dataset.documentId)) ? "flex" : "none";
             }
 
             // Folders
@@ -176,7 +184,7 @@ export class CheckListSheet extends EnhancedJournalSheet {
 
     collapseAll() {
         $(this.element).find('li.folder').addClass("collapsed");
-        let folders = duplicate(this.object.data.flags['monks-enhanced-journal'].folders || []);
+        let folders = duplicate(this.object.flags['monks-enhanced-journal'].folders || []);
         for (let f of folders) {
             f.expanded = false;
         }
@@ -226,7 +234,7 @@ export class CheckListSheet extends EnhancedJournalSheet {
         const element = event.currentTarget;
         let li = $(element).closest('li')[0];
 
-        let items = duplicate(this.object.data.flags['monks-enhanced-journal']?.items || []);
+        let items = duplicate(this.object.flags['monks-enhanced-journal']?.items || []);
         let item = items.find(i => i.id == li.dataset.documentId);
 
         if (item) {
@@ -279,10 +287,10 @@ export class CheckListSheet extends EnhancedJournalSheet {
             callback: html => {
                 const form = html[0].querySelector("form");
                 const fd = new FormDataExtended(form);
-                data = foundry.utils.mergeObject(data, fd.toObject());
+                data = foundry.utils.mergeObject(data, fd.object);
                 if (!data.folder) delete data["folder"];
 
-                let collection = duplicate((options.type == 'folder' ? that.object.data.flags['monks-enhanced-journal']?.folders : that.object.data.flags['monks-enhanced-journal']?.items) || []);
+                let collection = duplicate((options.type == 'folder' ? that.object.flags['monks-enhanced-journal']?.folders : that.object.flags['monks-enhanced-journal']?.items) || []);
                 if (data.id == undefined) {
                     data.id = makeid();
                     collection.push(data);
@@ -301,7 +309,7 @@ export class CheckListSheet extends EnhancedJournalSheet {
     async _toggleFolder(event) {
         let elem = $(event.currentTarget.parentElement);
         let collapsed = elem.hasClass("collapsed");
-        let folders = duplicate(this.object.data.flags['monks-enhanced-journal']?.folders || []);
+        let folders = duplicate(this.object.flags['monks-enhanced-journal']?.folders || []);
         let id = elem.attr("data-folder-id");
         let folder = folders.find(f => f.id == id);
         if (folder) folder.expanded = collapsed;
@@ -387,7 +395,7 @@ export class CheckListSheet extends EnhancedJournalSheet {
     }
 
     async _handleDroppedDocument(target, data) {
-        let items = duplicate(this.object.data.flags['monks-enhanced-journal'].items || []);
+        let items = duplicate(this.object.flags['monks-enhanced-journal'].items || []);
         // Determine the closest folder ID
         const closestFolder = target ? target.closest(".folder") : null;
         if (closestFolder) closestFolder.classList.remove("droptarget");
@@ -425,7 +433,7 @@ export class CheckListSheet extends EnhancedJournalSheet {
     }
 
     async _handleDroppedFolder(target, data) {
-        let folders = duplicate(this.object.data.flags['monks-enhanced-journal'].folders || []);
+        let folders = duplicate(this.object.flags['monks-enhanced-journal'].folders || []);
 
         // Determine the closest folder ID
         const closestFolder = target ? target.closest(".folder") : null;
@@ -464,8 +472,8 @@ export class CheckListSheet extends EnhancedJournalSheet {
     }
 
     async _deleteFolder(folder, options, userId) {
-        let folders = duplicate(this.object.data.flags['monks-enhanced-journal']?.folders || []);
-        let items = duplicate(this.object.data.flags['monks-enhanced-journal']?.items || []);
+        let folders = duplicate(this.object.flags['monks-enhanced-journal']?.folders || []);
+        let items = duplicate(this.object.flags['monks-enhanced-journal']?.items || []);
         const parentId = folder.data.parent || null;
         const { deleteSubfolders, deleteContents } = options;
 
@@ -596,7 +604,7 @@ export class CheckListSheet extends EnhancedJournalSheet {
                         title: i18n("MonksEnhancedJournal.DeleteItem"),
                         content: `<h4>${game.i18n.localize("AreYouSure")}</h4><p>${game.i18n.localize("FOLDER.RemoveWarning")}</p>`,
                         yes: () => {
-                            let items = (that.object.data.flags['monks-enhanced-journal'].items || []);
+                            let items = (that.object.flags['monks-enhanced-journal'].items || []);
                             items.findSplice(i => i.id === item.id);
                             that.object.setFlag('monks-enhanced-journal', 'items', items);
                         },
@@ -613,7 +621,7 @@ export class CheckListSheet extends EnhancedJournalSheet {
                 icon: '<i class="far fa-copy"></i>',
                 condition: () => game.user.isGM,
                 callback: li => {
-                    let items = (that.object.data.flags['monks-enhanced-journal'].items || []);
+                    let items = (that.object.flags['monks-enhanced-journal'].items || []);
                     const original = items.find(i => i.id == li.data("documentId"));
                     let newItem = duplicate(original);
                     items.push(newItem);

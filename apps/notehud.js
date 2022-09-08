@@ -1,4 +1,4 @@
-import { log, setting, i18n } from '../monks-enhanced-journal.js';
+import { log, setting, i18n, MonksEnhancedJournal } from '../monks-enhanced-journal.js';
 
 export class NoteHUD extends BasePlaceableHUD {
     /** @override */
@@ -15,9 +15,11 @@ export class NoteHUD extends BasePlaceableHUD {
     getData() {
         const data = super.getData();
 
-        let type = this.entry.getFlag('monks-enhanced-journal', 'type');
+        let type = this.page?.type;
 
-        const visible = this.entry.data.permission.default >= CONST.ENTITY_PERMISSIONS.LIMITED;
+        let document = this.page || this.entry;
+
+        const visible = document.ownership.default >= CONST.DOCUMENT_OWNERSHIP_LEVELS.LIMITED;
 
         return mergeObject(data, {
             visibilityClass: visible ? "" : "active",
@@ -38,14 +40,26 @@ export class NoteHUD extends BasePlaceableHUD {
         return this.object.document.entry;
     }
 
+    get page() {
+        let page = this.object.document.page;
+        if (!page) {
+            if (this.object.document.entry.pages.contents.length == 1)
+                page = this.object.document.entry.pages.contents[0];
+        }
+        MonksEnhancedJournal.fixType(page);
+        return page;
+    }
+
     async _onToggleVisibility(event) {
         event.preventDefault();
 
-        let permissions = {};
-        Object.assign(permissions, this.entry.data.permission);
-        let isHidden = permissions["default"] >= CONST.ENTITY_PERMISSIONS.LIMITED;
-        permissions["default"] = (isHidden ? CONST.ENTITY_PERMISSIONS.NONE : (this.entry.type == "loot" || this.entry.type == "shop" || !setting("hud-limited") ? CONST.ENTITY_PERMISSIONS.OBSERVER : CONST.ENTITY_PERMISSIONS.LIMITED));
-        this.entry.update({ permission: permissions });
+        let document = this.object.document.page || this.entry;
+
+        let ownership = {};
+        Object.assign(ownership, document.ownership);
+        let isHidden = ownership["default"] >= CONST.DOCUMENT_OWNERSHIP_LEVELS.LIMITED;
+        ownership["default"] = (isHidden ? CONST.DOCUMENT_OWNERSHIP_LEVELS.NONE : (document.type == "loot" || document.type == "shop" || !setting("hud-limited") ? CONST.DOCUMENT_OWNERSHIP_LEVELS.OBSERVER : CONST.DOCUMENT_OWNERSHIP_LEVELS.LIMITED));
+        document.update({ ownership: ownership });
 
         event.currentTarget.classList.toggle("active", isHidden);
     }
@@ -54,23 +68,29 @@ export class NoteHUD extends BasePlaceableHUD {
     }
 
     startEncounter() {
-        const cls = (this.entry._getSheetClass ? this.entry._getSheetClass() : null);
-        if (cls && cls.createEncounter) {
-            cls.createEncounter.call(this.entry, this.object.data.x, this.object.data.y, true);
+        if (this.page) {
+            const cls = (this.page._getSheetClass ? this.page._getSheetClass() : null);
+            if (cls && cls.createEncounter) {
+                cls.createEncounter.call(this.page, this.object.x, this.object.y, true);
+            }
         }
     }
 
     selectEncounter() {
-        const cls = (this.entry._getSheetClass ? this.entry._getSheetClass() : null);
-        if (cls && cls.selectEncounter) {
-            cls.selectEncounter.call(this.entry);
+        if (this.page) {
+            const cls = (this.page._getSheetClass ? this.page._getSheetClass() : null);
+            if (cls && cls.selectEncounter) {
+                cls.selectEncounter.call(this.page);
+            }
         }
     }
 
     assignItems() {
-        const cls = (this.entry._getSheetClass ? this.entry._getSheetClass() : null);
-        if (cls && cls.assignItems) {
-            cls.assignItems.call(this.entry);
+        if (this.page) {
+            const cls = (this.page._getSheetClass ? this.page._getSheetClass() : null);
+            if (cls && cls.assignItems) {
+                cls.assignItems.call(this.page);
+            }
         }
     }
 
@@ -83,8 +103,8 @@ export class NoteHUD extends BasePlaceableHUD {
         const position = {
             width: (width / ratio) + (c * 2),
             height: height,
-            left: this.object.data.x - (c * ratio) - (width / 2),
-            top: this.object.data.y - (height / 2)
+            left: this.object.x - (c * ratio) - (width / 2),
+            top: this.object.y - (height / 2)
         };
         if (ratio !== 1) position.transform = `scale(${ratio})`;
         this.element.css(position);

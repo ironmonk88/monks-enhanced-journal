@@ -18,13 +18,26 @@ export class Objectives extends FormApplication {
         });
     }
 
+    async getData() {
+        let data = await super.getData();
+
+        //this._convertFormats(data);
+        data.enrichedText = await TextEditor.enrichHTML(data.object.content, {
+            relativeTo: this.object,
+            secrets: this.object.isOwner,
+            async: true
+        });
+
+        return data;
+    }
+
     /* -------------------------------------------- */
 
     /** @override */
     async _updateObject(event, formData) {
         log('updating objective', event, formData, this.object);
         mergeObject(this.object, formData);
-        let objectives = duplicate(this.journalentry.object.data.flags["monks-enhanced-journal"].objectives || []);
+        let objectives = duplicate(this.journalentry.object.flags["monks-enhanced-journal"].objectives || []);
         if (this.object.id == undefined) {
             this.object.id = makeid();
             objectives.push(this.object);

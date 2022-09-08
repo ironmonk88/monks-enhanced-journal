@@ -30,7 +30,7 @@ export class TrapConfig extends FormApplication {
         log('updating trap', event, formData, this.object);
 
         mergeObject(this.object, formData);
-        let traps = duplicate(this.journalentry.object.data.flags["monks-enhanced-journal"].traps || []);
+        let traps = duplicate(this.journalentry.object.flags["monks-enhanced-journal"].traps || []);
         if (this.object.id == undefined) {
             this.object.id = makeid();
             traps.push(this.object);

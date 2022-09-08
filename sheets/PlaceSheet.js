@@ -26,7 +26,7 @@ export class PlaceSheet extends EnhancedJournalSheet {
 
     fieldlist() {
         let fields = duplicate(setting("place-attributes"));
-        let attributes = this.object.data.flags['monks-enhanced-journal'].attributes;
+        let attributes = this.object.flags['monks-enhanced-journal'].attributes;
         for (let field of fields) {
             if (attributes[field.id]) {
                 field = mergeObject(field, attributes[field.id]);
@@ -40,12 +40,13 @@ export class PlaceSheet extends EnhancedJournalSheet {
         return { shops: [], townsfolk: [], attributes: {} };
     }
 
+    /*
     get allowedRelationships() {
         return ['organization', 'person', 'shop', 'poi', 'place'];
-    }
+    }*/
 
     async getData() {
-        let data = super.getData();
+        let data = await super.getData();
 
         if (data?.data?.flags['monks-enhanced-journal']?.townsfolk) {
             data.data.flags['monks-enhanced-journal'].relationships = data?.data?.flags['monks-enhanced-journal']?.townsfolk;
@@ -72,7 +73,7 @@ export class PlaceSheet extends EnhancedJournalSheet {
                 //delete data?.data?.flags['monks-enhanced-journal'][attr]
             }
             data.data.flags['monks-enhanced-journal'].attributes = attributes;
-            this.object.data.flags['monks-enhanced-journal'].attributes = attributes;
+            this.object.flags['monks-enhanced-journal'].attributes = attributes;
             this.object.setFlag('monks-enhanced-journal', 'attributes', data.data.flags['monks-enhanced-journal'].attributes);
         }
 
@@ -89,20 +90,23 @@ export class PlaceSheet extends EnhancedJournalSheet {
         for (let item of (data.data.flags['monks-enhanced-journal'].relationships || [])) {
             let entity = await this.getDocument(item, "JournalEntry", false);
             if (entity && entity.testUserPermission(game.user, "LIMITED") && (game.user.isGM || !item.hidden)) {
-                item.name = entity.name;
-                item.img = entity.data.img;
+                let page = (entity instanceof JournalEntryPage ? entity : entity.pages.contents[0]);
+                let type = getProperty(page, "flags.monks-enhanced-journal.type");
+                item.name = page.name;
+                item.img = page.src;
+                item.type = type;
 
-                if (entity.getFlag('monks-enhanced-journal', 'type') == "shop") {
-                    item.shoptype = entity.getFlag("monks-enhanced-journal", "shoptype");
+                if (type == "shop") {
+                    item.shoptype = page.getFlag("monks-enhanced-journal", "shoptype");
                     data.shops.push(item);
-                } else if (entity.getFlag('monks-enhanced-journal', 'type') == "person") {
-                    item.role = entity.getFlag("monks-enhanced-journal", "role");
+                } else if (type == "person") {
+                    item.role = page.getFlag("monks-enhanced-journal", "role");
                     data.townsfolk.push(item);
-                } else if(entity instanceof JournalEntry) {
-                    if (!data.relationships[entity.type])
-                        data.relationships[entity.type] = { type: entity.type, name: i18n(`MonksEnhancedJournal.${entity.type.toLowerCase()}`), documents: [] };
+                } else if(page instanceof JournalEntryPage) {
+                    if (!data.relationships[type])
+                        data.relationships[type] = { type: type, name: i18n(`MonksEnhancedJournal.${type.toLowerCase()}`), documents: [] };
 
-                    data.relationships[entity.type].documents.push(item);
+                    data.relationships[type].documents.push(item);
                 }
             }
         }
@@ -142,7 +146,7 @@ export class PlaceSheet extends EnhancedJournalSheet {
         $('.item-delete', html).on('click', $.proxy(this._deleteItem, this));
         $('.item-hide', html).on('click', this.alterItem.bind(this));
 
-        $('.item-relationship .item-field', html).on('change', this.alterRelationship.bind(this));
+        //$('.item-relationship .item-field', html).on('change', this.alterRelationship.bind(this));
     }
 
     _getSubmitData(updateData = {}) {
@@ -159,7 +163,7 @@ export class PlaceSheet extends EnhancedJournalSheet {
         }
 
         if (data.flags['monks-enhanced-journal']?.attributes) {
-            data.flags['monks-enhanced-journal'].attributes = mergeObject((this.object.data?.flags['monks-enhanced-journal']?.attributes || {}), (data.flags['monks-enhanced-journal']?.attributes || {}));
+            data.flags['monks-enhanced-journal'].attributes = mergeObject((this.object?.flags['monks-enhanced-journal']?.attributes || {}), (data.flags['monks-enhanced-journal']?.attributes || {}));
         }
 
         return flattenObject(data);
@@ -169,7 +173,7 @@ export class PlaceSheet extends EnhancedJournalSheet {
         return game.user.isGM || this.object.isOwner;
     }
 
-    _onDrop(event) {
+    async _onDrop(event) {
         let data;
         try {
             data = JSON.parse(event.dataTransfer.getData('text/plain'));
@@ -179,6 +183,12 @@ export class PlaceSheet extends EnhancedJournalSheet {
         }
 
         if (data.type == 'JournalEntry') {
+            this.addRelationship(data);
+        } else if (data.type == 'JournalEntryPage') {
+            let doc = await fromUuid(data.uuid);
+            data.id = doc?.parent.id;
+            data.uuid = doc?.parent.uuid;
+            data.type = "JournalEntry";
             this.addRelationship(data);
         }
 

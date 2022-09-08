@@ -32,6 +32,12 @@ export class DCConfig extends FormApplication {
             attributeOptions.push({ id: "attribute", text: i18n("MonksTokenBar.Attribute"), groups: { perception: CONFIG.PF2E.attributes.perception } });
         
         attributeOptions = attributeOptions.filter(g => g.groups);
+        for (let attr of attributeOptions) {
+            attr.groups = duplicate(attr.groups);
+            for (let [k, v] of Object.entries(attr.groups)) {
+                attr.groups[k] = v?.label || v;
+            }
+        }
 
         return mergeObject(super.getData(options),
             {
@@ -47,7 +53,7 @@ export class DCConfig extends FormApplication {
         log('updating dc', event, formData, this.object);
 
         mergeObject(this.object, formData);
-        let dcs = duplicate(this.journalentry.object.data.flags["monks-enhanced-journal"].dcs || []);
+        let dcs = duplicate(this.journalentry.object.flags["monks-enhanced-journal"].dcs || []);
         if (this.object.id == undefined) {
             this.object.id = makeid();
             dcs.push(this.object);

@@ -1,13 +1,13 @@
 <form class="flexcol journal-subsheet {{entrytype}}" editable="{{editable}}">
     <div class="organization-container">
-        <div class="fullscreen-image"><img src="{{data.img}}" /></div>
+        <div class="fullscreen-image"><img src="{{data.src}}" /></div>
         <header class="sheet-header journal-header flexrow">
             <div class="sheet-image">
-                <img class="profile" src="{{data.img}}" data-edit="img" onerror="this.src='modules/monks-enhanced-journal/assets/organization.png'">
+                <img class="profile" src="{{data.src}}" data-edit="img" onerror="if (!this.imgerr) { this.imgerr = true; this.src = 'modules/monks-enhanced-journal/assets/organization.png' }">
             </div>
             <section class="header-details">
                 <h1 class="organizationname flexrow">
-                    <i class="fas fa-flag sheet-icon"></i>
+                    <i class="fas {{data.icon}} sheet-icon"></i>
                     <input name="name" type="text" value="{{data.name}}" placeholder="{{localize 'MonksEnhancedJournal.OrganizationName'}}">
                     {{#if sound.audiofile}}
                     <button type="button" class="play-journal-sound">
@@ -34,7 +34,7 @@
         <section class="sheet-body half-size">
             <div class="tab description active" data-group="primary" data-tab="description">
                 <div class="tab-inner flexcol">
-                    {{editor target="content" content=data.content editable=true button=true owner=owner}}
+                    {{editor enrichedText target="text.content" editable=true button=true owner=owner}}
                 </div>
             </div>
             <div class="tab relationships" data-group="primary" data-tab="relationships">
@@ -43,14 +43,14 @@
                         <ul class="items-list">
                             {{#each relationships}}
                             <li class="items-header flexrow">
-                                <h3 class="item-name flexrow">{{this.name}}</h3>
-                                <h3 class="item-name flexrow">{{localize 'MonksEnhancedJournal.Relationship'}}</h3>
+                                <h3 class="item-name noborder flexrow">{{this.name}}</h3>
+                                <h3 class="item-name noborder flexrow">{{localize 'MonksEnhancedJournal.Relationship'}}</h3>
                                 {{#if @root.owner}}<div class="item-controls flexrow"></div>{{/if}}
                             </li>
                             {{#each documents}}
-                            <li class="item flexrow" data-id="{{this.id}}" data-pack="{{this.pack}}" data-container="relationships" data-document="JournalEntry" draggable="false">
+                            <li class="item flexrow" data-id="{{this.id}}" data-uuid="{{this.uuid}}" data-container="relationships" data-document="JournalEntry" draggable="false">
                                 <div class="item-name flexrow">
-                                    <img class="item-image actor-icon" src="{{this.img}}" onerror="this.src='modules/monks-enhanced-journal/assets/person.png'" />
+                                    <img class="item-image actor-icon" src="{{this.img}}" onerror="if (!this.imgerr) { this.imgerr = true; this.src = 'modules/monks-enhanced-journal/assets/{{this.type}}.png' }" />
                                     <h4>{{#if this.pack}}<i class="fas fa-atlas" title="{{localize 'MonksEnhancedJournal.FromCompendium'}}"></i> {{/if}}{{this.name}}</h4>
                                 </div>
 
@@ -83,9 +83,9 @@
                     <div class="offering-list">
                         <ul class="items-list">
                             <li class="items-header flexrow">
-                                <h3 class="item-name flexrow">Actor</h3>
-                                <h3 class="item-name flexrow">Items</h3>
-                                <h3 class="item-name flexrow">State</h3>
+                                <h3 class="item-name noborder flexrow">Actor</h3>
+                                <h3 class="item-name noborder flexrow">Items</h3>
+                                <h3 class="item-name noborder flexrow">State</h3>
 
                                 {{#if @root.owner}}
                                 <div class="item-controls flexrow owner">
@@ -96,7 +96,7 @@
                                 </div>
                             </li>
                             {{#each offerings}}
-                            <li class="item flexrow" data-id="{{this.id}}" data-container="offerings" draggable="false">
+                            <li class="item flexrow" data-id="{{this.id}}" data-actor-id="{{this.actorId}}" data-container="offerings" draggable="false">
                                 <div class="item-name flexrow">
                                     <img class="item-image actor-icon" src="{{this.img}}" />
                                     <span>{{this.name}}</span>

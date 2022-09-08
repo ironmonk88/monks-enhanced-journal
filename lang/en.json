@@ -27,7 +27,7 @@
   "MonksEnhancedJournal.chat-message.name": "Show Chat Message",
   "MonksEnhancedJournal.chat-message.hint": "Show a chat message when a player receives an item",
   "MonksEnhancedJournal.loot-sheet.name": "Loot Sheet",
-  "MonksEnhancedJournal.loot-sheet.hint": "What module should be used when assigning all encounter/quest loot",
+  "MonksEnhancedJournal.loot-sheet.hint": "What module should be used when assigning all loot",
   "MonksEnhancedJournal.loot-entity.name": "Loot Entity",
   "MonksEnhancedJournal.loot-entity.hint": "Where should the loot go if assigned to an Entity",
   "MonksEnhancedJournal.loot-folder.name": "Loot Folder",
@@ -60,6 +60,8 @@
   "MonksEnhancedJournal.use-system-tag.hint": "When styling the sub sheet, apply the system tag.  This can either solve some issues or break the sheet",
   "MonksEnhancedJournal.show-chatbubble.name": "Show NPC Chat tool button",
   "MonksEnhancedJournal.show-chatbubble.hint": "Show the button for toggling NPC chat bubbles on the Token toolbar",
+  "MonksEnhancedJournal.inline-roll-styling.name": "Inline roll styling",
+  "MonksEnhancedJournal.inline-roll-styling.hint": "Alter the inline roll styling to make it a little more like links",
 
   "MonksEnhancedJournal.SlideConfiguration": "Slide Configuration",
   "MonksEnhancedJournal.DCConfiguration": "DC Configuration",
@@ -154,6 +156,7 @@
   "MonksEnhancedJournal.VAlign": "V-Align",
   "MonksEnhancedJournal.Transition": "Transition",
   "MonksEnhancedJournal.Duration": "Slide Duration",
+  "MonksEnhancedJournal.TextDuration": "Text Duration",
   "MonksEnhancedJournal.SlideshowName": "Slideshow Name",
   "MonksEnhancedJournal.ShowAs": "Show As",
   "MonksEnhancedJournal.AudioFile": "Audio File",
@@ -263,6 +266,7 @@
   "MonksEnhancedJournal.From": "From",
   "MonksEnhancedJournal.Grant": "Grant",
   "MonksEnhancedJournal.Hidden": "Hidden",
+  "MonksEnhancedJournal.Shown": "Shown",
   "MonksEnhancedJournal.Players": "Players",
   "MonksEnhancedJournal.Offer": "Offer",
   "MonksEnhancedJournal.RemoveRelationship": "Remove Relationship",
@@ -449,6 +453,7 @@
   "MonksEnhancedJournal.msg.YouDoNotHavePermissionCreateToken": "You do not have permission to create new Tokens!",
   "MonksEnhancedJournal.msg.PleaseSelectJournal": "Please select a Journal",
   "MonksEnhancedJournal.msg.ShopIsNotReceivingItems": "Shop is not receiving items at this time",
+  "MonksEnhancedJournal.msg.NoItemsToAssign": "No items to assign to a target",
 
   "MonksEnhancedJournal.Contain": "Contain",
   "MonksEnhancedJournal.Cover": "Cover",
@@ -464,7 +469,6 @@
 
   "MonksEnhancedJournal.base": "Enhanced Journal Entry",
   "MonksEnhancedJournal.journalentry": "Journal Entry",
-  "MonksEnhancedJournal.journalentrytextonly": "Enhanced Journal Entry (Text Only)",
   "MonksEnhancedJournal.actor": "Actor",
   "MonksEnhancedJournal.slideshow": "Slideshow",
   "MonksEnhancedJournal.organization": "Organization",
@@ -526,6 +530,9 @@
   "MonksEnhancedJournal.currency.credit": "Credit",
   "MonksEnhancedJournal.currency.nuyen": "Nuyen",
   "MonksEnhancedJournal.currency.caps": "Caps",
+  "MonksEnhancedJournal.currency.merchants": "Merchants",
+  "MonksEnhancedJournal.currency.tavs": "Tavs",
+  "MonksEnhancedJournal.currency.hammer": "Hammer",
 
   "MonksEnhancedJournal.purchasing.hidden": "Hidden",
   "MonksEnhancedJournal.purchasing.visible": "Visible"

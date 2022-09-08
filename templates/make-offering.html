@@ -4,7 +4,7 @@
         <div class="form-group currency-group">
             <div class="form-fields" style="flex-wrap:nowrap;">
                 <img class="actor-icon" src="{{actor.img}}" />
-                <h3>{{actor.name}}</h3>
+                <h3 class="noborder">{{actor.name}}</h3>
                 <label style="white-space:nowrap;">Private Offer</label>
                 <input type="checkbox" class="private" {{checked private}} />
             </div>
@@ -26,7 +26,7 @@
                 {{#if (gt this.qty 1)}}<div class="offering-qty">{{this.qty}}</div>{{/if}}
             </div>
             {{else}}
-            <div class="instruction">Drag items here to offer</div>
+            <div class="instruction">Drag items here, from a player's inventory, to make an offer</div>
             {{/each}}
         </div>
     </div>

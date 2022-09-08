@@ -2,7 +2,7 @@
 <li class="checklist-item folder flexcol {{#unless folder.data.expanded}}collapsed{{/unless}}"
     data-folder-id="{{folder.data.id}}" data-folder-depth="{{folder.depth}}">
     <header class="folder-header flexrow">
-        <h3><i class="fas fa-folder-open fa-fw"></i>{{folder.data.name}}</h3>
+        <h3 class="noborder"><i class="fas fa-folder-open fa-fw"></i>{{folder.data.name}}</h3>
         {{#if @root.owner}}
         <a class="create-folder" data-parent-folder="{{folder.data.id}}"><i class="fas fa-folder-plus fa-fw"></i></a>
         <a class="create-item" data-folder="{{folder.data.id}}"><i class="fas fa-feather-alt fa-fw"></i></a>
@@ -24,14 +24,14 @@
 <li class="checklist-item document item flexrow{{#if this.data.checked}} checked{{/if}}" data-document-id="{{this.data.id}}">
     <div class="flexrow">
         <input class="item-checked" style="flex: 0 0 30px;" type="checkbox" name="data.checked" {{checked this.data.checked}}>
-        <h3>{{this.data.text}}</h3>
+        <h3 class="noborder">{{this.data.text}}</h3>
     </div>
 </li>
 {{/inline}}
 
 <form class="flexcol journal-subsheet journal-body {{entrytype}}" editable="{{editable}}">
     <header class="header-name flexrow">
-        <i class="fas fa-list sheet-icon"></i>
+        <i class="fas {{data.icon}} sheet-icon"></i>
         <input name="name" type="text" value="{{data.name}}" placeholder="{{localize 'MonksEnhancedJournal.JournalEntryName'}}">
         <div class="header-search flexrow" style="flex: 0 0 255px;">
             <i style="flex: 0 0 15px; line-height: 35px;" class="fas fa-search"></i>

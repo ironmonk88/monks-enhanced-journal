@@ -1,4 +1,5 @@
 import { MonksEnhancedJournal, log, setting, i18n, makeid, quantityname } from '../monks-enhanced-journal.js';
+import { getValue, setValue } from "../helpers.js";
 
 export class MakeOffering extends FormApplication {
     constructor(object, journalsheet, options = {}) {
@@ -10,8 +11,13 @@ export class MakeOffering extends FormApplication {
             items: []
         }, options.offering || {});
 
-        if (game.user.character)
-            this.offering.actorId = game.user.character.id;
+        if (game.user.character && !this.offering.actor) {
+            this.offering.actor = {
+                id: game.user.character.id,
+                name: game.user.character.name,
+                img: game.user.character.img
+            }
+        }
     }
 
     /** @override */
@@ -42,7 +48,7 @@ export class MakeOffering extends FormApplication {
             if (!actor)
                 return null;
 
-            let item = actor.data.items.get(i.id);
+            let item = actor.items.get(i.id);
             if (!item)
                 return null;
 
@@ -76,37 +82,41 @@ export class MakeOffering extends FormApplication {
         }
 
         if (data.type == 'Item') {
-            let item = new CONFIG.Item.documentClass(data.data);
-            let max = this.journalsheet.getValue(item.data, quantityname(), null);
-            if (!data.actorId)
-                max = null;
+            let item = await fromUuid(data.uuid);
+            let actor = item.parent;
 
             //Only allow items from an actor
-            if (!data.actorId)
+            if (!actor || actor.compendium)
                 return;
 
-            this.offering.actorId = data.actorId;
+            let max = getValue(item.system, quantityname(), null);
+
+            this.offering.actor = {
+                id: actor.id,
+                name: actor.name,
+                img: actor.img
+            }
 
             let result = await this.journalsheet.constructor.confirmQuantity(item, max, "offer", false);
             if ((result?.quantity ?? 0) > 0) {
-                //let itemData = item.toObject();
-                //this.setValue(itemData, quantityname(), result.quantity);
-                let actor = game.actors.get(data.actorId);
 
                 this.offering.items.push({
                     id: item.id,
                     itemName: item.name,
-                    actorId: data.actorId,
+                    actorId: actor.id,
                     actorName: actor.name,
                     qty: result.quantity
                 });
                 this.render();
             }
         } else if (data.type == "Actor") {
-            let actor = game.actors.get(data.id);
+            let actor = await fromUuid(data.uuid);
+
+            if (!actor || actor.compendium)
+                return;
 
             this.offering.actor = {
-                id: data.id,
+                id: actor.id,
                 name: actor.name,
                 img: actor.img
             }
@@ -127,7 +137,7 @@ export class MakeOffering extends FormApplication {
             offerings.unshift(this.offering);
             await this.object.setFlag("monks-enhanced-journal", "offerings", offerings);
         } else {
-            MonksEnhancedJournal.emit("makeOffering", { offering: this.offering, entryid: this.object.id });
+            MonksEnhancedJournal.emit("makeOffering", { offering: this.offering, uuid: this.object.uuid });
         }
     }
 
