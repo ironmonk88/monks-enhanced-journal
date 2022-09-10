@@ -273,6 +273,7 @@ export class MonksEnhancedJournal {
                     let page = entry.pages.contents[0];
                     MonksEnhancedJournal.fixType(page);
                     let type = getProperty(page, "flags.monks-enhanced-journal.type");
+                    if (type == "base" || type == "oldentry") type = "journalentry";
                     let types = MonksEnhancedJournal.getDocumentTypes();
                     if (types[type]) {
                         return page.sheet.render(true);
@@ -346,6 +347,7 @@ export class MonksEnhancedJournal {
                     let page = entry.pages.contents[0];
                     MonksEnhancedJournal.fixType(page);
                     let type = getProperty(page, "flags.monks-enhanced-journal.type");
+                    if (type == "base" || type == "oldentry") type = "journalentry";
                     let types = MonksEnhancedJournal.getDocumentTypes();
                     if (types[type]) {
                         return page.sheet.render(true, options);//return new JournalEntrySheet(page, options).render(true, options);
@@ -403,7 +405,12 @@ export class MonksEnhancedJournal {
                     }
 
                     if (fd.ownership > -2) {
-                        const ownership = doc.ownership;
+                        let entity = doc;
+                        let types = MonksEnhancedJournal.getDocumentTypes();
+                        if (entity instanceof JournalEntryPage && entity.parent.pages.size == 1 && types[getProperty(entity, "flags.monks-enhanced-journal.type")])
+                            entity = entity.parent;
+
+                        const ownership = entity.ownership;
                         // if all the users have been selected, then change the default.
                         let allUsers = (users.length == userCount);
                         if (allUsers) {
@@ -414,7 +421,7 @@ export class MonksEnhancedJournal {
                             if ((ownership[id] < fd.ownership || fd.forceDowngrade) && (!allUsers || ownership[id] > CONST.DOCUMENT_OWNERSHIP_LEVELS.INHERIT))
                                 ownership[id] = fd.ownership;
                         });
-                        await doc.update({ ownership });
+                        await entity.update({ ownership });
                     }
                     if (fd.showAs != "journal")
                         return this.showImage(doc.src, {
@@ -521,6 +528,7 @@ export class MonksEnhancedJournal {
                         if (doc.pages.size == 1) {
                             let page = doc.pages.contents[0];
                             let type = getProperty(page, "flags.monks-enhanced-journal.type");
+                            if (type == "base" || type == "oldentry") type = "journalentry";
                             let types = MonksEnhancedJournal.getDocumentTypes();
                             if (types[type]) {
                                 MonksEnhancedJournal.fixType(page);
@@ -587,6 +595,7 @@ export class MonksEnhancedJournal {
                 if (data.pages.length == 0) {
                     let pageData = { type: type, name: data.name };
                     let types = MonksEnhancedJournal.getDocumentTypes();
+                    if (type == "base" || type == "oldentry") type = "journalentry";
                     if (types[type]) {
                         setProperty(pageData, "flags.monks-enhanced-journal.type", type);
                     }
@@ -720,6 +729,20 @@ export class MonksEnhancedJournal {
             }
         }
 
+        let onTemplateDragStart = function (wrapped, ...args) {
+            if (this.encounterTemplate) return;
+            return wrapped(...args);
+        }
+
+        if (game.modules.get("lib-wrapper")?.active) {
+            libWrapper.register("monks-enhanced-journal", "TemplateLayer.prototype._onDragLeftStart", onTemplateDragStart, "MIXED");
+        } else {
+            const oldTemplateDragStart = TemplateLayer.prototype._onDragLeftStart;
+            TemplateLayer.prototype._onDragLeftStart = function (event) {
+                return onTemplateDragStart.call(this, oldTemplateDragStart.bind(this), ...arguments);
+            }
+        }
+
         /*
         let oldOnCreateDocument = JournalDirectory.prototype._onCreateDocument;
         JournalDirectory.prototype._onCreateDocument = async function (event) {
@@ -811,6 +834,7 @@ export class MonksEnhancedJournal {
                         MonksEnhancedJournal.fixType(page);
                     }
                     let type = getProperty(page, "flags.monks-enhanced-journal.type");
+                    if (type == "base" || type == "oldentry") type = "journalentry";
                     let types = MonksEnhancedJournal.getDocumentTypes();
 
                     if (this.entry.testUserPermission(game.user, "OBSERVER")) {
@@ -934,6 +958,8 @@ export class MonksEnhancedJournal {
                     noteData.icon = "icons/svg/sword.svg";
                 else if (page.type == 'place')
                     noteData.icon = "icons/svg/village.svg";
+                else if (page.type == 'person')
+                    noteData.icon = "icons/svg/cowled.svg";
 
             }
 
@@ -951,27 +977,32 @@ export class MonksEnhancedJournal {
 
         //Make sure that players can't see inline links that they don't know about.
         let oldCreateContentLink = TextEditor._createContentLink;
-        TextEditor._createContentLink = function (match, type, target, name) {
+        TextEditor._createContentLink = function (match, options = {}) {
+            let { relativeTo } = options;
+            let [type, target, hash, name] = match.slice(1, 5);
             let parts = [target];
             if (type == "JournalEntry") {
                 parts = target.split('#');
             }
             if (setting("hide-inline")) {
+                let doc;
                 if (CONST.DOCUMENT_TYPES.includes(type)) {
                     const collection = game.collections.get(type);
-                    
-                    const doc = /^[a-zA-Z0-9]{16}$/.test(parts[0]) ? collection.get(parts[0]) : collection.getName(parts[0]);
 
-                    if (doc && !doc.testUserPermission(game.user, "LIMITED")) {
-                        const span = document.createElement('span');
-                        span.classList.add("unknown-link");
-                        span.innerHTML = `<i class="fas fa-eye-slash"></i> Hidden`;
-                        return span;
-                    }
+                    doc = /^[a-zA-Z0-9]{16}$/.test(parts[0]) ? collection.get(parts[0]) : collection.getName(parts[0]);
+                } else if (type == "UUID") {
+                    doc = fromUuidSync(target, relativeTo);
+                }
+
+                if (doc && !doc.testUserPermission(game.user, "LIMITED")) {
+                    const span = document.createElement('span');
+                    span.classList.add("unknown-link");
+                    span.innerHTML = `<i class="fas fa-eye-slash"></i> Hidden`;
+                    return span;
                 }
             }
 
-            let a = oldCreateContentLink.call(this, match, type, parts[0], name);
+            let a = oldCreateContentLink.call(this, match, options);
             if (parts.length > 1) {
                 $(a).attr("data-anchor", parts[1]).append(`, ${parts[1]}`);
             }
@@ -1175,20 +1206,27 @@ export class MonksEnhancedJournal {
     static async fixPage(document) {
         // fix the splitting of Journal Entry pages
         let type = getProperty(document, "flags.monks-enhanced-journal.type");
-        if (document.pages.size > 0) {
+        let flags = getProperty(document, "flags.monks-enhanced-journal");
+        if (type == "base") {
+            type = "journalentry";
+            flags.type = type;
+        }
+        if (!!type && document.pages.size == 0) {
+            await JournalEntryPage.create({ name: document.name, type: "text", flags: { "monks-enhanced-journal": flags } }, { parent: document, render: false });
+        } else if (document.pages.size > 0 && type != "oldentry") {
             let picturePage = document.pages.find(p => p.type == "image");
             let textPage = document.pages.find(p => p.type == "text");
             if (textPage) {
                 if (type == "picture") {
                     await textPage.delete();
-                    await picturePage.update({ name: document.name, flags: { "monks-enhanced-journal": getProperty(document, "flags.monks-enhanced-journal") } });
+                    await picturePage.update({ name: document.name, flags: { "monks-enhanced-journal": flags } });
                 } else {
-                    await textPage.update({ name: document.name, src: picturePage?.src, flags: { "monks-enhanced-journal": getProperty(document, "flags.monks-enhanced-journal") } });
+                    await textPage.update({ name: document.name, src: picturePage?.src, flags: { "monks-enhanced-journal": flags } });
                     if (picturePage)
                         await picturePage.delete();
                 }
             } else if (picturePage) {
-                await picturePage.update({ name: document.name, flags: { "monks-enhanced-journal": getProperty(document, "flags.monks-enhanced-journal") } });
+                await picturePage.update({ name: document.name, flags: { "monks-enhanced-journal": flags } });
             }
         }
         for (let page of document.pages) {
@@ -2047,7 +2085,7 @@ export class MonksEnhancedJournal {
                 let id = this.dataset.folderId;
                 const folder = game.folders.get(id);
 
-                if (folder.data?.sorting !== "a") {
+                if (folder?.sorting !== "a") {
                     $('header h3 i', this).removeClass('fas').addClass('far');
                 }
             });
@@ -2064,6 +2102,7 @@ export class MonksEnhancedJournal {
             let type = "journalbook";
             if (document.pages.size == 1) {
                 type = document.pages.contents[0].getFlag('monks-enhanced-journal', 'type');
+                if (type == "base" || type == "oldentry") type = "journalentry";
                 if (types[type])
                     docIcon = MonksEnhancedJournal.getIcon(type);
             }
@@ -2144,15 +2183,13 @@ export class MonksEnhancedJournal {
                     const [ownership] = levels.find(([, level]) => level === document.ownership.default);
                     permissions.append($('<i>').addClass('fas fa-users').attr('title', `${i18n("MonksEnhancedJournal.Everyone")}: ${i18n(`OWNERSHIP.${ownership}`)}`));
                 }
-                else {
-                    for (let [key, value] of Object.entries(document.ownership)) {
-                        let user = game.users.find(u => {
-                            return u.id == key && !u.isGM;
-                        });
-                        if (user != undefined && value > 0) {
-                            const [ownership] = levels.find(([, level]) => level === value);
-                            permissions.append($('<div>').css({ backgroundColor: user.color }).html(user.name[0]).attr('title', user.name + ': ' + i18n(`OWNERSHIP.${ownership}`)));
-                        }
+                for (let [key, value] of Object.entries(document.ownership)) {
+                    let user = game.users.find(u => {
+                        return u.id == key && !u.isGM;
+                    });
+                    if (user != undefined && value > 0 && value != document.ownership.default) {
+                        const [ownership] = levels.find(([, level]) => level === value);
+                        permissions.append($('<div>').css({ backgroundColor: user.color }).html(user.name[0]).attr('title', user.name + ': ' + i18n(`OWNERSHIP.${ownership}`)));
                     }
                 }
                 $('h4', this).append(permissions);
@@ -2164,9 +2201,9 @@ export class MonksEnhancedJournal {
         ui[data.name]?.render();
     }
 
-    static purchaseItem(data) {
+    static async purchaseItem(data) {
         if (game.user.isGM) {
-            let entry = game.journal.get(data.shopid);
+            let entry = await fromUuid(data.shopid);
             let actor = game.actors.get(data.actorid);
 
             if (entry) {
@@ -2187,52 +2224,57 @@ export class MonksEnhancedJournal {
         }
     }
 
-    static requestLoot(data) {
+    static async requestLoot(data) {
         if (game.user.isGM) {
-            let entry = game.journal.get(data.shopid);
+            let entry = await fromUuid(data.shopid);
             let actor = game.actors.get(data.actorid);
 
             if (entry && actor) {
                 let items = duplicate(entry.getFlag('monks-enhanced-journal', 'items') || []);
                 let item = items.find(i => i._id == data.itemid);
                 if (item) {
-                    let requests = item.requests || {};
+                    let requests = getProperty(item, "flags.monks-enhanced-journal.requests") || {};
                     requests[data.senderId] = !requests[data.senderId];
-                    item.requests = requests;
+                    setProperty(item, "flags.monks-enhanced-journal.requests", requests);
                 }
                 entry.setFlag('monks-enhanced-journal', 'items', items);
             }
         }
     }
 
-    static addItem(data) {
+    static async addItem(data) {
         if (game.user.isGM) {
-            let entry = game.journal.get(data.lootid);
-            MonksEnhancedJournal.fixType(entry);
-            const cls = (entry._getSheetClass ? entry._getSheetClass() : null);
-            const sheet = new cls(entry, { render: false });
+            let entry = await fromUuid(data.lootid);
+            if (entry) {
+                MonksEnhancedJournal.fixType(entry);
+                const cls = (entry._getSheetClass ? entry._getSheetClass() : null);
+                const sheet = new cls(entry, { render: false });
 
-            sheet.addItem({ data: data.itemdata });
+                sheet.addItem({ data: data.itemdata });
+            }
         }
     }
 
     static async sellItem(data) {
         if (game.user.isGM) {
-            let entry = game.journal.get(data.shopid);
-            MonksEnhancedJournal.fixType(entry);
-            const cls = (entry._getSheetClass ? entry._getSheetClass() : null);
-            const sheet = new cls(entry, { render: false });
+            let entry = await fromUuid(data.shopid);
+            if (entry) {
+                MonksEnhancedJournal.fixType(entry);
+                const cls = (entry._getSheetClass ? entry._getSheetClass() : null);
+                const sheet = new cls(entry, { render: false });
 
-            sheet.addItem({ data: data.itemdata });
+                sheet.addItem({ data: data.itemdata });
+            }
         }
     }
 
-    static findVacantSpot(pos, size, newTokens) {
+    static findVacantSpot(template, size, newTokens, center) {
         let tokenList = canvas.scene.tokens.contents.concat(...newTokens);
 
-        let ring = 0;
         let width = size.width * canvas.scene.dimensions.size;
         let height = size.height * canvas.scene.dimensions.size;
+        let hw = width / 2;
+        let hh = height / 2;
 
         let tokenCollide = function (pt) {
             let rect1 = { x1: pt.x - (width / 2) + 10, y1: pt.y - (height / 2) + 10, x2: pt.x + (width / 2) - 10, y2: pt.y + (height / 2) - 10 };
@@ -2253,49 +2295,71 @@ export class MonksEnhancedJournal {
             return false
         }
 
-        pos = {
-            x: ((pos.x - (width / 2)).toNearest(canvas.scene.dimensions.size)) + (width / 2),
-            y: ((pos.y - (height / 2)).toNearest(canvas.scene.dimensions.size)) + (height / 2)
-        };
-        let spot = null;
+        // get the template grid positions
+        let positions = template._getGridHighlightPositions();
+        positions = positions.filter(p => {
+            let { x, y } = p;
+            // remove all the ones behind a wall
+            let checkspot = {
+                x: x + hw,
+                y: y + hh
+            };
 
-        while (spot == undefined && ring < 10) {
-            for (let x = -ring; x <= ring; x++) {
-                for (let y = -ring; y <= ring; y++) {
-                    if (Math.abs(x) == ring || Math.abs(y) == ring) {
-                        let checkspot = {
-                            x: pos.x + (x * canvas.scene.dimensions.size),
-                            y: pos.y + (y * canvas.scene.dimensions.size)
-                        };
+            //is this on the other side of a wall?
+            let ray = new Ray({ x: template.x, y: template.y }, { x: checkspot.x, y: checkspot.y });
+            return !wallCollide(ray);
+        });
 
-                        //is this on the other side of a wall?
-                        let ray = new Ray({ x: pos.x, y: pos.y }, { x: checkspot.x, y: checkspot.y });
-                        if (wallCollide(ray))
-                            continue;
+        if (positions.length == 0)
+            return { x: template.x - hw, y: template.y - hh };
+        
+        // find one without a token
+        let noTokens = positions.filter(p => {
+            return !tokenCollide(p);
+        });
 
-                        //are there any tokens at this position?
-                        if (tokenCollide(checkspot))
-                            continue;
+        let array = (noTokens.length == 0 ? positions : noTokens);
+        if (center) {
+            array = array.sort((a, b) => {
+                return Math.hypot((template.x - a.x), (template.y - a.y)) - Math.hypot((template.x - b.x), (template.y - b.y))
+            });
+            return { x: array[0].x - (width / 2), y: array[0].y - (height / 2) };
+        } else {
+            // if there aren't any, then just pick a random spot
+            let position = array[parseInt(Math.random() * array.length)];
+            return { x: position.x, y: position.y };
+        }
+    }
 
-                        spot = {
-                            x: checkspot.x - (width / 2),
-                            y: checkspot.y - (height / 2)
-                        };
-                        break;
-                    }
-                }
+    static _getGridHighlightPositions(template) {
+        const grid = canvas.grid.grid;
+        const d = canvas.dimensions;
+        const { x, y, distance } = template;
 
-                if (spot != undefined)
-                    break;
+        // Get number of rows and columns
+        const [maxRow, maxCol] = grid.getGridPositionFromPixels(d.width, d.height);
+        let nRows = Math.ceil(((distance * 1.5) / d.distance) / (d.size / grid.h));
+        let nCols = Math.ceil(((distance * 1.5) / d.distance) / (d.size / grid.w));
+        [nRows, nCols] = [Math.min(nRows, maxRow), Math.min(nCols, maxCol)];
+
+        // Get the offset of the template origin relative to the top-left grid space
+        const [tx, ty] = grid.getTopLeft(x, y);
+        const [row0, col0] = grid.getGridPositionFromPixels(tx, ty);
+        const [hx, hy] = [Math.ceil(grid.w / 2), Math.ceil(grid.h / 2)];
+        const isCenter = (x - tx === hx) && (y - ty === hy);
+
+        // Identify grid coordinates covered by the template Graphics
+        const positions = [];
+        for (let r = -nRows; r < nRows; r++) {
+            for (let c = -nCols; c < nCols; c++) {
+                const [gx, gy] = grid.getPixelsFromGridPosition(row0 + r, col0 + c);
+                const [testX, testY] = [(gx + hx) - x, (gy + hy) - y];
+                const contains = ((r === 0) && (c === 0) && isCenter) || grid._testShape(testX, testY, this.shape);
+                if (!contains) continue;
+                positions.push({ x: gx, y: gy });
             }
-            ring++;
         }
-
-        if (spot == undefined) {
-            spot = { x: pos.x - (width / 2), y: pos.y - (height / 2) };
-        }
-
-        return spot;
+        return positions;
     }
 
     static notify(data) {
@@ -2316,7 +2380,7 @@ export class MonksEnhancedJournal {
         if (status == 'accept') {
             //find the shop        
             let msgshop = message.getFlag('monks-enhanced-journal', 'shop');
-            let entry = game.journal.get(msgshop.id);
+            let entry = await fromUuid(msgshop.uuid);
             if (!entry)
                 return;
             //find the actor
@@ -2332,7 +2396,9 @@ export class MonksEnhancedJournal {
                 //find the item
                 let msgitems = message.getFlag('monks-enhanced-journal', 'items');
                 for (let msgitem of msgitems) {
-                    if (msgitem.quantity == 0)
+                    let data = getProperty(msgitem, "flags.monks-enhanced-journal")
+                    let purchaseQty = data.quantity;
+                    if (purchaseQty == 0)
                         continue;
                     let item = (entry.getFlag('monks-enhanced-journal', 'items') || []).find(i => i._id == msgitem._id);
                     if (!item) {
@@ -2344,17 +2410,17 @@ export class MonksEnhancedJournal {
                     MonksEnhancedJournal.fixType(entry);
                     const cls = (entry._getSheetClass ? entry._getSheetClass() : null);
 
-                    let remaining = getValue(item, quantityname(), null);
-                    if (remaining && remaining < msgitem.quantity) {
+                    let remaining = getProperty(item, "flags.monks-enhanced-journal.quantity");
+                    if (remaining && remaining < purchaseQty) {
                         //check to see if there's enough quantity
                         ui.notifications.warn(i18n("MonksEnhancedJournal.msg.CannotTransferItemQuantity"));
                         msg = `<span class="request-msg"><i class="fas fa-times"></i> ${i18n("MonksEnhancedJournal.msg.CannotTransferItemQuantity")}</span>`
                         continue;
                     }
 
-                    if (msgitem.sell > 0 && cls.canAfford) {
+                    if (data.sell > 0 && cls.canAfford) {
                         //check if the player can afford it
-                        if (!cls.canAfford((msgitem.sell * msgitem.quantity) + " " + msgitem.currency, actor)) {
+                        if (!cls.canAfford((data.sell * purchaseQty) + " " + data.currency, actor)) {
                             ui.notifications.warn(format("MonksEnhancedJournal.msg.CannotTransferCannotAffordIt", { name: actor.name }));
                             msg = `<span class="request-msg"><i class="fas fa-times"></i> ${format("MonksEnhancedJournal.msg.CannotTransferCannotAffordIt", { name: actor.name })}</span>`;
                             continue;
@@ -2366,15 +2432,18 @@ export class MonksEnhancedJournal {
                     if ((itemData.type === "spell") && game.system.id == 'dnd5e') {
                         itemData = await cls.createScrollFromSpell(itemData);
                     }
-                    setValue(itemData, quantityname(), msgitem.quantity);
-                    if (msgitem.sell > 0)
-                        setValue(itemData, pricename(), msgitem.sell + " " + msgitem.currency);
+                    let itemQty = getValue(itemData, quantityname(), 1);
+                    setValue(itemData, quantityname(), purchaseQty * itemQty);
+                    if (data.sell > 0)
+                        setValue(itemData, pricename(), MEJHelpers.toDefaultCurrency(data.sell + " " + data.currency));
                     delete itemData._id;
-                    actor.createEmbeddedDocuments("Item", [itemData]);
+                    let sheet = actor.sheet;
+                    sheet._onDropItem({ preventDefault: () => { } }, { data: itemData });
+                    //actor.createEmbeddedDocuments("Item", [itemData]);
                     //deduct the gold
-                    if (msgitem.sell > 0)
-                        cls.actorPurchase(actor, { value: (msgitem.sell * msgitem.quantity), currency: msgitem.currency });
-                    cls.purchaseItem.call(cls, entry, item._id, msgitem.quantity, { actor, chatmessage: false });
+                    if (data.sell > 0)
+                        cls.actorPurchase(actor, { value: (data.sell * purchaseQty), currency: data.currency });
+                    cls.purchaseItem.call(cls, entry, item._id, data.quantity, { actor, chatmessage: false });
                 }
 
                 $('.request-buttons', content).remove();
@@ -2398,27 +2467,30 @@ export class MonksEnhancedJournal {
 
                     let msgitems = message.getFlag('monks-enhanced-journal', 'items');
                     for (let msgitem of msgitems) {
-                        if (msgitem.quantity == 0)
+                        let data = getProperty(msgitem, "flags.monks-enhanced-journal")
+                        let purchaseQty = data.quantity;
+
+                        if (purchaseQty == 0)
                             continue;
 
                         let actoritem = actor.items.get(msgitem._id);
                         if (!actoritem)
                             continue;
 
-                        msgitem.maxquantity = getValue(actoritem.data, quantityname());
-                        if (msgitem.maxquantity < msgitem.quantity) {
-                            msgitem.quantity = Math.min(msgitem.maxquantity, msgitem.quantity);
-                            ui.notifications.warn(format("MonksEnhancedJournal.msg.NoteEnoughRemains", { quantity: msgitem.quantity }));
+                        data.maxquantity = getValue(actoritem.data, quantityname());
+                        if (data.maxquantity < purchaseQty) {
+                            purchaseQty = Math.min(data.maxquantity, purchaseQty);
+                            ui.notifications.warn(format("MonksEnhancedJournal.msg.NoteEnoughRemains", { quantity: purchaseQty }));
                         }
 
                         //give the player the money
-                        await cls.actorPurchase(actor, { value: -(msgitem.sell * msgitem.quantity), currency: msgitem.currency });
+                        await cls.actorPurchase(actor, { value: -(data.sell * purchaseQty), currency: data.currency });
 
                         //remove the item from the actor
-                        if (msgitem.quantity == msgitem.maxquantity) {
+                        if (purchaseQty == data.maxquantity) {
                             await actoritem.delete();
                         } else {
-                            let qty = msgitem.maxquantity - msgitem.quantity;
+                            let qty = data.maxquantity - purchaseQty;
                             let update = { system: {} };
                             update.system[quantityname()] = actoritem.system[quantityname()];
                             setValue(update, quantityname(), qty);
@@ -2426,17 +2498,15 @@ export class MonksEnhancedJournal {
                         }
 
                         //add the item to the shop
-                        setValue(msgitem, quantityname(), msgitem.quantity);
-                        setValue(msgitem, pricename(), (msgitem.sell * 2) + " " + msgitem.currency);
-                        msgitem.lock = true;
-                        msgitem.from = actor.name;
-                        delete msgitem.quantity;
-                        delete msgitem.sell;
-                        delete msgitem.currency;
-                        delete msgitem.maxquantity;
+                        data.quantity = purchaseQty;
+                        data.price = (data.sell * 2) + " " + data.currency;
+                        data.lock = true;
+                        data.from = actor.name;
+
+                        setProperty(msgitem, "flags.monks-enhanced-journal", data);
 
                         if (!game.user.isGM)
-                            MonksEnhancedJournal.emit("sellItem", { shopid: msgshop.id, itemdata: msgitem });
+                            MonksEnhancedJournal.emit("sellItem", { shopid: msgshop.uuid, itemdata: msgitem });
                         else {
                             const sheet = new cls(entry, { render: false });
                             await sheet.addItem(msgitem);
@@ -2445,6 +2515,8 @@ export class MonksEnhancedJournal {
                         $('input', content).remove();
                         $('.item-quantity span, .item-price span', content).removeClass('player-only').show();
                         $('.request-buttons', content).remove();
+                        $('input', content).remove();
+                        $('.item-quantity span, .item-price span', content).removeClass('player-only').show();
                         $('.card-footer', content).html(`<span class="request-msg"><i class="fas fa-check"></i> ${i18n("MonksEnhancedJournal.msg.SoldToShop")}</span>`);
                     }
                 }
@@ -2452,6 +2524,8 @@ export class MonksEnhancedJournal {
         } else {
             accepted = false;
             $('.request-buttons', content).remove();
+            $('input', content).remove();
+            $('.item-quantity span, .item-price span', content).removeClass('player-only').show();
             $('.card-footer', content).html(`<span class="request-msg"><i class="fas fa-times"></i> ${format("MonksEnhancedJournal.msg.SaleHasBeenAction", { verb: (status == 'reject' ? i18n("MonksEnhancedJournal.Rejected").toLowerCase() : i18n("MonksEnhancedJournal.Cancelled").toLowerCase())})}</span>`);
         }
 
@@ -2471,21 +2545,26 @@ export class MonksEnhancedJournal {
 
         let html = $(event.currentTarget).closest('ol.items-list');
 
-        item.quantity = parseInt($(`li[data-id="${id}"] input[name="quantity"]`, html).val());
-        $(`li[data-id="${id}"] .item-quantity span`, content).html(item.quantity);
+        let quantity = parseInt($(`li[data-id="${id}"] input[name="flags.monks-enhanced-journal.quantity"]`, html).val());
+        setProperty(item, "flags.monks-enhanced-journal.quantity", quantity);
+        $(`li[data-id="${id}"] .item-quantity span`, content).html(quantity);
 
-        if ($(`li[data-id="${id}"] input[name="sell"]`, html).length) {
-            let sell = $(`li[data-id="${id}"] input[name="sell"]`, html).val();
+        if ($(`li[data-id="${id}"] input[name="flags.monks-enhanced-journal.sell"]`, html).length) {
+            let data = getProperty(item, "flags.monks-enhanced-journal");
+
+            let sell = $(`li[data-id="${id}"] input[name="flags.monks-enhanced-journal.sell"]`, html).val();
             let price = MEJHelpers.getPrice(sell);
 
-            item.sell = price.value;
-            item.currency = price.currency;
-            item.total = item.quantity * item.sell;
+            data.sell = price.value;
+            data.currency = price.currency;
+            data.total = data.quantity * data.sell;
 
-            $(`li[data-id="${id}"] input[name="sell"]`, html).val(item.sell + ' ' + price.currency);
+            setProperty(item, "flags.monks-enhanced-journal", data);
 
-            $(`li[data-id="${id}"] .item-price span`, content).html(item.sell + ' ' + price.currency);
-            $(`li[data-id="${id}"] .item-total span`, content).html(item.total + ' ' + price.currency);
+            $(`li[data-id="${id}"] input[name="sell"]`, html).val(data.sell + ' ' + price.currency);
+
+            $(`li[data-id="${id}"] .item-price span`, content).html(data.sell + ' ' + price.currency);
+            $(`li[data-id="${id}"] .item-total span`, content).html(data.total + ' ' + price.currency);
         }
 
         message.update({ content: content[0].outerHTML, flags: { 'monks-enhanced-journal': { items: items } } });
@@ -2520,7 +2599,7 @@ export class MonksEnhancedJournal {
 
     static async cancelOffer(data) {
         if (game.user.isGM) {
-            let entry = game.journal.get(data.entryid);
+            let entry = await fromUuid(data.uuid);
             if (entry) {
                 let offerings = duplicate(entry.getFlag("monks-enhanced-journal", "offerings"));
                 let offering = offerings.find(r => r.id == data.id);
@@ -2558,7 +2637,7 @@ export class MonksEnhancedJournal {
         let list = $('<ul>')
             .addClass('journal-list')
             .append($('<li>').addClass('journal-item flexrow').toggleClass('selected', !id).attr('id', '').html($('<div>').addClass('journal-title').html('')).click(selectItem.bind({ id: '', name: '' })))
-            .append(getFolders(game.journal.directory.folders.filter(f => f.parentFolder == null)))
+            .append(getFolders(game.journal.directory.folders.filter(f => f.folder == null)))
             .append(game.journal.contents
                 .filter(j => j.folder == null)
                 .sort((a, b) => { return a.sort < b.sort ? -1 : a.sort > b.sort ? 1 : 0; })
@@ -2601,7 +2680,7 @@ export class MonksEnhancedJournal {
             else if (entity instanceof JournalEntry)
                 return "Adding new loot page to " + entity.name;
             else if (entity instanceof Folder)
-                return (game.journal.documentName == "JournalEntry" ? "Creating new Journal Entry within " + entity.name + " folder" : "Creating within " + entity.name + " folder");
+                return (entity.documentClass.documentName == "JournalEntry" ? "Creating new Journal Entry within " + entity.name + " folder" : "Creating within " + entity.name + " folder");
             else
                 return "Creating in the root folder";
         }
@@ -2609,13 +2688,12 @@ export class MonksEnhancedJournal {
         function getEntries(folderID, contents) {
             let result = [$('<li>').addClass('journal-item create-item').attr('data-uuid', folderID).html($('<div>').addClass('journal-title').toggleClass('selected', uuid == undefined).html("-- create entry here --")).click(selectItem.bind())];
             return result.concat((contents || [])
-                .filter(c => !(c instanceof JournalEntryPage) || getProperty(c, "flags.monks-enhanced-journal.type") == "loot")
+                .filter(c => {
+                    return c instanceof JournalEntry && c.pages.size == 1 && getProperty(c.pages.contents[0], "flags.monks-enhanced-journal.type") == "loot"
+                })
                 .sort((a, b) => { return a.sort < b.sort ? -1 : a.sort > b.sort ? 1 : 0; })
                 .map(e => {
-                    if (e instanceof JournalEntry) {
-                        return createFolder(e, "fa-book"); // Add the pages
-                    } else
-                        return $('<li>').addClass('journal-item flexrow').toggleClass('selected', uuid == e.uuid).attr('data-uuid', e.uuid).html($('<div>').addClass('journal-title').html(e.name)).click(selectItem.bind())
+                    return $('<li>').addClass('journal-item flexrow').toggleClass('selected', uuid == e.uuid).attr('data-uuid', e.uuid).html($('<div>').addClass('journal-title').html(e.name)).click(selectItem.bind())
                 }));
         }
 
@@ -2624,7 +2702,7 @@ export class MonksEnhancedJournal {
                 $('<ul>')
                     .addClass('subfolder')
                     .append(getFolders(folder?.children?.map(c => c.folder)))
-                    .append(getEntries(folder.uuid, folder.documents || folder.pages)))
+                    .append(getEntries(folder.uuid, folder.documents || folder.contents)))
                .click(function (event) { event.preventDefault(); event.stopPropagation(); $(this).toggleClass('collapse'); });
         }
 
@@ -2636,7 +2714,7 @@ export class MonksEnhancedJournal {
 
         let list = $('<ul>')
             .addClass('journal-list')
-            .append(getFolders(collection.directory.folders.filter(f => f.parentFolder == null)))
+            .append(getFolders(collection.directory.folders.filter(f => f.folder == null)))
             .append(getEntries(null, collection.contents.filter(j => j.folder == null)));
 
         $(html).click(function () { list.removeClass('open') });
@@ -2886,6 +2964,7 @@ Hooks.on("preCreateJournalEntryPage", (entry, data, options, userId) => {
     if (data.type) {
         if (entry.flags["monks-enhanced-journal"] == undefined || Object.keys(entry.flags["monks-enhanced-journal"]).length == 1) {
             let type = data.type;
+            if (type == "base" || type == "oldentry") type = "journalentry";
 
             let types = MonksEnhancedJournal.getDocumentTypes();
             if (types[type]) {
@@ -2906,6 +2985,7 @@ Hooks.on("preCreateJournalEntryPage", (entry, data, options, userId) => {
 Hooks.on("createJournalEntryPage", (entry, data, options, userId) => {
     let type = getProperty(entry, "flags.monks-enhanced-journal.type");
     if (type) {
+        if (type == "base" || type == "oldentry") type = "journalentry";
         let types = MonksEnhancedJournal.getDocumentTypes();
         if (types[type]) {
             let docIcon = "fa-book";
@@ -2976,50 +3056,49 @@ Hooks.on('renderSceneControls', (controls) => {
 
 Hooks.on('dropActorSheetData', (actor, sheet, data) => {
     //check to see if an item was dropped from either the encounter or quest and record what actor it was
-    if (data.id == MonksEnhancedJournal._dragItem) {
+    if (MonksEnhancedJournal._dragItem && data.itemId == MonksEnhancedJournal._dragItem) {
         MonksEnhancedJournal._dragItem = null;
-        let journal = game.journal.get(data.journalId);
-        if (journal) {
-            let page = journal.pages.get(data.pageId);
-            if (page) {
-                MonksEnhancedJournal.fixType(page);
-                const cls = (page._getSheetClass ? page._getSheetClass() : null);
-                if (cls && cls.itemDropped) {
-                    cls.itemDropped.call(cls, data.id, actor, page).then((result) => {
-                        if ((result?.quantity ?? 0) > 0) {
-                            setValue(data.data, quantityname(), result.quantity);
-                            sheet._onDropItem({ preventDefault: () => { } }, data);
-                        }
-                    });
-                }
+
+        let page = fromUuidSync(data.uuid);
+        if (page) {
+            MonksEnhancedJournal.fixType(page);
+            const cls = (page._getSheetClass ? page._getSheetClass() : null);
+            if (cls && cls.itemDropped) {
+                cls.itemDropped.call(cls, data.itemId, actor, page).then((result) => {
+                    if ((result?.quantity ?? 0) > 0) {
+                        let itemQty = getValue(data.data, quantityname());
+                        setValue(data.data, quantityname(), result.quantity * itemQty);
+                        setValue(data.data, pricename(), MEJHelpers.toDefaultCurrency(result.price));
+                        sheet._onDropItem({ preventDefault: () => { } }, data);
+                    }
+                });
             }
         }
+
         return false;
     }
 });
 
 Hooks.on('dropJournalSheetData', (journal, sheet, data) => {
     //check to see if an item was dropped from another Journal Sheet
-    if (data.id == MonksEnhancedJournal._dragItem) {
+    if (MonksEnhancedJournal._dragItem && data.itemId == MonksEnhancedJournal._dragItem) {
         MonksEnhancedJournal._dragItem = null;
-        let journal = game.journal.get(data.journalId);
-        if (journal) {
-            let page = journal.pages.get(data.pageId);
-            if (page) {
-                MonksEnhancedJournal.fixType(page);
-                const cls = (page._getSheetClass ? page._getSheetClass() : null);
-                if (cls && cls.itemDropped) {
-                    cls.itemDropped.call(cls, data.id, journal, page).then((result) => {
-                        if (!!result) {
-                            setValue(data.data, quantityname(), result);
-                            sheet._onDropItem({ preventDefault: () => { } }, data);
-                        }
-                    });
 
-                    return false;
-                }
+        let page = fromUuidSync(data.uuid);
+        if (page) {
+            MonksEnhancedJournal.fixType(page);
+            const cls = (page._getSheetClass ? page._getSheetClass() : null);
+            if (cls && cls.itemDropped) {
+                cls.itemDropped.call(cls, data.itemId, journal, page).then((result) => {
+                    if (!!result) {
+                        let itemQty = getValue(data.data, quantityname());
+                        setValue(data.data, quantityname(), result.quantity * itemQty);
+                        sheet._onDropItem({ preventDefault: () => { } }, data);
+                    }
+                });
             }
         }
+        return false;
     }
 });
 
@@ -3028,9 +3107,11 @@ Hooks.on('dropCanvasData', async (canvas, data) => {
     if (MonksEnhancedJournal.journal) {
         if (data.type == 'JournalTab' && data.uuid) {
             let document = await fromUuid(data.uuid);
-            if (document)
+            if (document) {
+                MonksEnhancedJournal.fixType(document);
                 document.sheet.render(true);
-        } else if (data.type == 'CreateEncounter' || data.type == 'CreateCombat') {
+            }
+        } /*else if (data.type == 'CreateEncounter' || data.type == 'CreateCombat') {
             if (!game.user.can("TOKEN_CREATE")) {
                 return ui.notifications.warn(i18n("MonksEnhancedJournal.msg.YouDoNotHavePermissionCreateToken"));
             }
@@ -3040,10 +3121,24 @@ Hooks.on('dropCanvasData', async (canvas, data) => {
                 MonksEnhancedJournal.fixType(encounter);
                 const cls = (encounter._getSheetClass ? encounter._getSheetClass() : null);
                 if (cls && cls.createEncounter) {
-                    cls.createEncounter.call(encounter, data.x, data.y, data.type == 'CreateCombat');
+                    const templateData = {
+                        t: "circle",
+                        user: game.user.id,
+                        direction: 0,
+                        x: data.x,
+                        y: data.y,
+                        fillColor: game.user.color,
+                        flags: { "monks-enhanced-journal": { encounter: data.uuid } }
+                    };
+
+                    const template = new MeasuredTemplateDocument(templateData, { parent: canvas.scene });
+                    const object = new MeasuredTemplate(template);
+                    //object.drawPreview();
+
+                    //cls.createEncounter.call(encounter, data.x, data.y, data.type == 'CreateCombat');
                 }
             }
-        }
+        }*/
     }
 });
 
@@ -3145,13 +3240,13 @@ Hooks.on("renderChatMessage", (message, html, data) => {
             $('.request-accept', html).toggleClass('active', (game.user.isGM ? !!offered : !!approved)).prop('disabled', !game.user.isGM && !offered);
         }
 
-        $('input[name="quantity"]', html).change(MonksEnhancedJournal.updateSale.bind(message));
-        $('input[name="sell"]', html).change(MonksEnhancedJournal.updateSale.bind(message));
+        $('input[name="flags.monks-enhanced-journal.quantity"]', html).change(MonksEnhancedJournal.updateSale.bind(message));
+        $('input[name="flags.monks-enhanced-journal.sell"]', html).change(MonksEnhancedJournal.updateSale.bind(message));
 
         let items = message.getFlag('monks-enhanced-journal', 'items') || [];
         for (let item of items) {
-            $(`li[data-id="${item._id}"] input[name="quantity"]`, html).val(item.quantity);
-            $(`li[data-id="${item._id}"] input[name="sell"]`, html).val(item.sell + " " + item.currency);
+            $(`li[data-id="${item._id}"] input[name="flags.monks-enhanced-journal.quantity"]`, html).val(getProperty(item, "flags.monks-enhanced-journal.quantity"));
+            $(`li[data-id="${item._id}"] input[name="flags.monks-enhanced-journal.sell"]`, html).val(getProperty(item, "flags.monks-enhanced-journal.sell") + " " + getProperty(item, "flags.monks-enhanced-journal.currency"));
         }
 
         $('.actor-icon', html).click(MonksEnhancedJournal.openRequestItem.bind(message, 'actor')).attr('onerror', "$(this).attr('src', 'icons/svg/mystery-man.svg');");
@@ -3337,17 +3432,42 @@ Hooks.on("renderDialog", (dialog, html, data) => {
 
 Hooks.on("renderJournalSheet", (sheet, html, data) => {
     if (data.pages) {
+        const levels = Object.entries(CONST.DOCUMENT_OWNERSHIP_LEVELS);
         for (let page of data.pages) {
             if (page?.numberIcon) {
-                $(`li[data-page-id="${page._id}"] .page-number`).html(`<i class="fas ${page.numberIcon}"></i>`);
+                $(`.pages-list li[data-page-id="${page._id}"] .page-number`, html).html(`<i class="fas ${page.numberIcon}"></i>`);
+            }
+
+            if ((setting('show-permissions') == 'true' || (setting('show-permissions') == 'mej' && sheet.enhancedjournal)) &&
+                game.user.isGM &&
+                (page.ownership.default >= 0 || Object.keys(page.ownership).length > 1)) {
+
+                let permissions = $(`.pages-list li[data-page-id="${page._id}"] .page-heading .page-ownership`, html);
+                permissions.empty();
+
+                if (page.ownership.default >= 0 && page.ownership.default != sheet.object.ownership.default) {
+                    const [ownership] = levels.find(([, level]) => level === page.ownership.default);
+                    permissions.append($('<i>').addClass(page.ownership.default == 0 ? 'fas fa-users-slash' : 'fas fa-users').attr('title', `${i18n("MonksEnhancedJournal.Everyone")}: ${i18n(`OWNERSHIP.${ownership}`)}`));
+                }
+                for (let [key, value] of Object.entries(page.ownership)) {
+                    let user = game.users.find(u => {
+                        return u.id == key && !u.isGM;
+                    });
+                    if (user != undefined && value > 0 && value != page.ownership.default) {
+                        const [ownership] = levels.find(([, level]) => level === value);
+                        permissions.append($('<div>').css({ backgroundColor: user.color }).html(user.name[0]).attr('title', user.name + ': ' + i18n(`OWNERSHIP.${ownership}`)));
+                    }
+                }
             }
         }
     }
 });
 
 Hooks.on("renderJournalPageSheet", (sheet, html, data) => {
-    let opt = $("<option>").attr("value", -1).html("Appendix");
-    $('select[name="title.level"]').append(opt);
+    if ($('select[name="title.level"] option[value="-1"]').length == 0) {
+        let opt = $("<option>").attr("value", -1).html("Appendix");
+        $('select[name="title.level"]').append(opt);
+    }
     if (getProperty(data, "flags.monks-enhanced-journal.appendix"))
         $('select[name="title.level"]').val(-1);
     if ((data.data.type == "video" || data.data.type == "image")) {
@@ -3402,7 +3522,7 @@ Hooks.on("setupTileActions", (app) => {
         },
         content: async (trigger, action) => {
             let entityName = await game.MonksActiveTiles.entityName(action.data?.entity, "journal");
-            return `<span class="action-style">${trigger.name}</span> of <span class="entity-style">${entityName}</span> to <span class="details-style">"${i18n(trigger.values.status[action.data?.status])}"</span>`;
+            return `<span class="action-style">${i18n(trigger.name)}</span> of <span class="entity-style">${entityName}</span> to <span class="details-style">"${i18n(trigger.values.status[action.data?.status])}"</span>`;
         }
     });
     app.registerTileAction('monks-enhanced-journal', 'startencounter', {
@@ -3444,12 +3564,23 @@ Hooks.on("setupTileActions", (app) => {
             if (!dests.length)
                 return;
 
+            dests = dests.map(d => {
+                if (d instanceof TileDocument) {
+                    return { x: d.x, y: d.y, distance: Math.min(d.width, d.height), t: 'rect' };
+                } else {
+                    return { x: d.x, y: d.y, distance: 20, center: true };
+                }
+            });
+
             let entities = await game.MonksActiveTiles.getEntities(args, null, 'journal');
             for (let entity of entities) {
+                if (entity instanceof JournalEntry && entity.pages.size == 1) {
+                    entity = entity.pages.contents[0];
+                }
                 MonksEnhancedJournal.fixType(entity);
                 const cls = (entity._getSheetClass ? entity._getSheetClass() : null);
                 if (cls && cls.createEncounter) {
-                    cls.createEncounter.call(entity, dests[0].x, dests[0].y, action.data.startcombat);
+                    cls.createEncounter.call(entity, dests, { combat: action.data.startcombat });
                 }
             }
         },
@@ -3479,6 +3610,9 @@ Hooks.on("setupTileActions", (app) => {
 
             let entities = await game.MonksActiveTiles.getEntities(args, null, 'journal');
             for (let entity of entities) {
+                if (entity instanceof JournalEntry && entity.pages.size == 1) {
+                    entity = entity.pages.contents[0];
+                }
                 MonksEnhancedJournal.fixType(entity);
                 const cls = (entity._getSheetClass ? entity._getSheetClass() : null);
                 if (cls && cls.selectEncounter) {

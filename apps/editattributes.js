@@ -58,7 +58,9 @@ export class EditAttributes extends FormApplication {
     refresh() {
         this.render(true);
         let that = this;
-        window.setTimeout(function () { that.setPosition(); }, 500);
+        window.setTimeout(function () {
+            that.setPosition({ height: 'auto' });
+        }, 100);
     }
 
     activateListeners(html) {

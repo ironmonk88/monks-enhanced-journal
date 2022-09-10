@@ -2,6 +2,7 @@ import { DCConfig } from "../apps/dc-config.js";
 import { TrapConfig } from "../apps/trap-config.js";
 import { setting, i18n, format, log, makeid, MonksEnhancedJournal, quantityname, pricename, currencyname } from "../monks-enhanced-journal.js";
 import { EnhancedJournalSheet } from "../sheets/EnhancedJournalSheet.js";
+import { EncounterTemplate } from "../apps/encounter-template.js";
 import { getValue, setValue, MEJHelpers } from "../helpers.js";
 
 export class EncounterSheet extends EnhancedJournalSheet {
@@ -19,8 +20,8 @@ export class EncounterSheet extends EnhancedJournalSheet {
                 { dragSelector: ".document.item", dropSelector: ".encounter-body" },
                 { dragSelector: ".encounter-monsters .item-list .item .item-image", dropSelector: "null" },
                 { dragSelector: ".encounter-items .item-list .item .item-name", dropSelector: "null" },
-                { dragSelector: ".create-encounter", dropSelector: "null" },
-                { dragSelector: ".create-combat", dropSelector: "null" },
+                //{ dragSelector: ".create-encounter", dropSelector: "null" },
+                //{ dragSelector: ".create-combat", dropSelector: "null" },
                 { dragSelector: ".sheet-icon", dropSelector: "#board" }
             ],
             scrollY: [".tab.description .tab-inner", ".encounter-content", ".encounter-items", ".encounter-dcs"]
@@ -112,6 +113,8 @@ export class EncounterSheet extends EnhancedJournalSheet {
         $('.monster-delete', html).on('click', $.proxy(this._deleteItem, this));
         html.on('dragstart', ".monster-icon", TextEditor._onDragContentLink);
         $('.select-encounter', html).click(this.constructor.selectEncounter.bind(this.object));
+        $('.create-encounter', html).click(this.constructor.startEncounter.bind(this.object, false));
+        $('.create-combat', html).click(this.constructor.startEncounter.bind(this.object, true));
 
         //item
         $('.item-icon', html).click(this.clickItem.bind(this));
@@ -177,37 +180,26 @@ export class EncounterSheet extends EnhancedJournalSheet {
 
         const target = event.currentTarget;
 
-        const dragData = { from: this.object.id };
+        const dragData = { from: this.object.uuid };
 
-        if ($(target).hasClass('create-encounter')) {
-            dragData.type = "CreateEncounter";
-            dragData.id = this.object.id;
-            dragData.uuid = this.object.uuid;
-        } else if ($(target).hasClass('create-combat')) {
-            dragData.type = "CreateCombat";
-            dragData.id = this.object.id;
-            dragData.uuid = this.object.uuid;
-        } else {
-            let li = $(event.currentTarget).closest('li')[0];
+        let li = $(event.currentTarget).closest('li')[0];
+        let type = li.dataset.document || li.dataset.type;
+        dragData.type = type;
+        if (type == "Item") {
             let id = li.dataset.id;
-            let container = li.dataset.container;
-            let item = this.object.flags["monks-enhanced-journal"][container].find(i => i._id == id || i.id == id);
-            if (container == "items" && !game.user.isGM && (this.object.flags["monks-enhanced-journal"].purchasing == 'locked' || item?.lock === true)) {
+            let item = this.object.flags["monks-enhanced-journal"]?.items.find(i => i._id == id || i.id == id);
+            if (!game.user.isGM && (this.object.flags["monks-enhanced-journal"].purchasing == 'locked' || item?.lock === true)) {
                 event.preventDefault();
                 return;
             }
+            dragData.itemId = id;
+            dragData.uuid = this.object.uuid;
+            dragData.data = duplicate(item);
 
-            dragData.id = id;
-            dragData.journalId = this.object.parent.id;
-            dragData.pageId = this.object.id;
-            dragData.pageUuid = this.object.uuid;
-            dragData.pack = li.dataset.pack;
-            dragData.type = li.dataset.document || li.dataset.type;
-            if (container == "items")
-                dragData.data = item;
-
-            log('Drag Start', dragData);
             MonksEnhancedJournal._dragItem = id;
+        } else if (type == "Actor") {
+            let actor = this.object.flags["monks-enhanced-journal"]?.actors.find(i => i._id == id || i.id == id);
+            dragData.uuid = actor.uuid;
         }
 
         event.dataTransfer.setData("text/plain", JSON.stringify(dragData));
@@ -241,7 +233,7 @@ export class EncounterSheet extends EnhancedJournalSheet {
             }
         }
         else if (data.type == 'Item') {
-            if (data.from == this.object.id)  //don't drop on yourself
+            if (data.from == this.object.uuid)  //don't drop on yourself
                 return;
             this.addItem(data);
         }
@@ -360,7 +352,14 @@ export class EncounterSheet extends EnhancedJournalSheet {
         }
     }
 
-    static async createEncounter(x, y, combat) {
+   static async startEncounter(combat) {
+        let template = await (EncounterTemplate.fromEncounter(this))?.drawPreview();
+        if (template) {
+            EncounterSheet.createEncounter.call(this, template, { combat });
+        }
+    }
+
+    static async createEncounter(templates, options) {
         canvas.tokens.releaseAll();
 
         let tokens = [];
@@ -387,7 +386,42 @@ export class EncounterSheet extends EnhancedJournalSheet {
                 }
 
                 for (let i = 0; i < (quantity || 1); i++) {
-                    let newSpot = MonksEnhancedJournal.findVacantSpot({ x: x, y: y }, { width: actor.prototypeToken.width, height: actor.prototypeToken.height }, tokens);
+                    let data = templates;
+                    if (templates instanceof Array) data = templates[parseInt(Math.random() * templates.length)];
+                    let template = duplicate(data);
+
+                    if (!(template instanceof MeasuredTemplate)) {
+                        const cls = CONFIG.MeasuredTemplate.documentClass;
+                        const doc = new cls(template, { parent: canvas.scene });
+                        template = new MeasuredTemplate(doc);
+
+                        let { x, y, direction, distance, angle, width } = template.document;
+                        let d = canvas.dimensions;
+                        distance *= (d.size / d.distance);
+                        width *= (d.size / d.distance);
+                        direction = Math.toRadians(direction);
+
+                        template.position.set(x, y);
+
+                        // Create ray and bounding rectangle
+                        template.ray = Ray.fromAngle(x, y, direction, distance);
+
+                        switch (template.document.t) {
+                            case "circle":
+                                template.shape = template._getCircleShape(distance);
+                                break;
+                            case "cone":
+                                template.shape = template._getConeShape(direction, angle, distance);
+                                break;
+                            case "rect":
+                                template.shape = template._getRectShape(direction, distance);
+                                break;
+                            case "ray":
+                                template.shape = template._getRayShape(direction, distance, width);
+                        }
+                    }
+
+                    let newSpot = MonksEnhancedJournal.findVacantSpot(template, { width: actor.prototypeToken.width, height: actor.prototypeToken.height }, tokens, data.center || options.center);
                     let td = await actor.getTokenDocument({ x: newSpot.x, y: newSpot.y, hidden: ea.hidden });
                     //if (ea.hidden)
                     //    td.hidden = true;
@@ -413,7 +447,7 @@ export class EncounterSheet extends EnhancedJournalSheet {
             let that = this;
             window.setTimeout(function () {
                 EncounterSheet.selectEncounter.call(that);
-                if (combat) {
+                if (options.combat) {
                     canvas.tokens.toggleCombat();
                     ui.sidebar.activateTab("combat");
                 }

@@ -231,7 +231,7 @@ export class SlideshowSheet extends EnhancedJournalSheet {
 
         const li = event.currentTarget;
 
-        const dragData = { from: this.object.id };
+        const dragData = { from: this.object.uuid };
 
         let id = li.dataset.slideId;
         dragData.slideId = id;

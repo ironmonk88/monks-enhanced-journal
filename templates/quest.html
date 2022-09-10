@@ -3,7 +3,7 @@
         <div class="fullscreen-image"><img src="{{data.src}}" /></div>
         <header class="sheet-header journal-header flexrow">
             <div class="sheet-image">
-                <img class="profile" src="{{data.src}}" data-edit="img" onerror="if (!this.imgerr) { this.imgerr = true; this.src = 'modules/monks-enhanced-journal/assets/quest.png' }">
+                <img class="profile" src="{{data.src}}" data-edit="src" onerror="if (!this.imgerr) { this.imgerr = true; this.src = 'modules/monks-enhanced-journal/assets/quest.png' }">
             </div>
             <section class="header-details">
                 <h1 class="questname flexrow">
@@ -220,7 +220,7 @@
                                     <li class="item flexrow{{#if this.received}} received{{/if}}{{#if (eq this.remaining 0)}} empty{{/if}}" data-id="{{this.id}}" data-container="items" data-document="Item" draggable="false">
                                         <div class="item-name flexrow">
                                             <div class="item-image" style="background-image: url('{{this.img}}')"></div>
-                                            <h4>{{this.name}}</h4>
+                                            <h4>{{this.name}}{{#if (gt this.qtyof 1)}} <span class="groups-of">(in groups of {{this.qtyof}})</span>{{/if}}</h4>
                                         </div>
 
                                         <div class="item-name item-received">

@@ -456,7 +456,6 @@ export class QuestSheet extends EnhancedJournalSheet {
 
         const li = $(event.currentTarget).closest('.item')[0];
         let id = li.dataset.id;
-        let uuid = li.dataset.uuid;
 
         const dragData = { from: 'monks-enhanced-journal' };
 
@@ -472,21 +471,17 @@ export class QuestSheet extends EnhancedJournalSheet {
                 return;
             }
 
-            dragData.id = id;
-            dragData.pack = li.dataset.pack;
+            dragData.itemId = id;
             dragData.type = "Item";
-            dragData.journalId = this.object.parent.id;
-            dragData.pageId = this.object.id;
-            dragData.pageUuid = this.object.uuid;
-            dragData.data = item;
+            dragData.uuid = this.object.uuid;
+            dragData.data = duplicate(item);
+            MonksEnhancedJournal._dragItem = id;
         } else if (li.dataset.document == 'Objective') {
             dragData.id = id;
             dragData.type = "Objective";
         }
 
         event.dataTransfer.setData("text/plain", JSON.stringify(dragData));
-
-        MonksEnhancedJournal._dragItem = id;
     }
 
     async _onDrop(event) {
@@ -499,7 +494,7 @@ export class QuestSheet extends EnhancedJournalSheet {
         }
 
         if (data.type == 'Item') {
-            if (data.from == this.object.id)  //don't drop on yourself
+            if (data.from == this.object.uuid)  //don't drop on yourself
                 return;
             this.addItem(data);
         } else if (data.type == 'Actor') {
@@ -730,6 +725,9 @@ export class QuestSheet extends EnhancedJournalSheet {
         let chatData = getProperty(item, "data.data.description");
         if (item.getChatData)
             chatData = item.getChatData({ secrets: false });
+
+        if (chatData instanceof Promise)
+            chatData = await chatData;
 
         // Toggle summary
         if (li.hasClass("expanded")) {

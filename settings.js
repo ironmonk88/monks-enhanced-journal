@@ -17,7 +17,6 @@ export const registerSettings = function () {
 	};
 
 	let lootsheetoptions = MonksEnhancedJournal.getLootSheetOptions();
-	let lootentity = {};
 	let lootfolder = {};
 
 	game.settings.registerMenu(modulename, 'editCurrency', {
@@ -164,6 +163,9 @@ export const registerSettings = function () {
 		config: true,
 		default: false,
 		type: Boolean,
+		onChange: (value) => {
+			ui.journal.render();
+		},
 	});
 
 	game.settings.register(modulename, "show-zero-quantity", {

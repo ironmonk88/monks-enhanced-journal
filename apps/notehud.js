@@ -71,7 +71,7 @@ export class NoteHUD extends BasePlaceableHUD {
         if (this.page) {
             const cls = (this.page._getSheetClass ? this.page._getSheetClass() : null);
             if (cls && cls.createEncounter) {
-                cls.createEncounter.call(this.page, this.object.x, this.object.y, true);
+                cls.createEncounter.call(this.page, { x: this.object.x, y: this.object.y, distance: 20, t: "rect", center: true }, { combat: true });
             }
         }
     }

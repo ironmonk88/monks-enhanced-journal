@@ -177,9 +177,9 @@ export class EnhancedJournal extends Application {
 
             let contentform = $('.content > section', this.element);
 
-            
             if (this.object instanceof JournalEntry && this.object.pages.size == 1 && (!!getProperty(this.object.pages.contents[0], "flags.monks-enhanced-journal.type") || !!getProperty(this.object, "flags.monks-enhanced-journal.type"))) {
                 let type = getProperty(this.object.pages.contents[0], "flags.monks-enhanced-journal.type") || getProperty(this.object, "flags.monks-enhanced-journal.type");
+                if (type == "base" || type == "oldentry") type = "journalentry";
                 let types = MonksEnhancedJournal.getDocumentTypes();
                 if (types[type]) {
                     this.object = this.object.pages.contents[0];
@@ -247,7 +247,10 @@ export class EnhancedJournal extends Application {
             else if (this.object instanceof JournalEntry)
                 this.subsheet.render();
 
-            $('.window-title', this.element).html(this.subsheet.title + ' - ' + i18n("MonksEnhancedJournal.Title"));
+            $('.window-title', this.element).html((this.subsheet.title || i18n("MonksEnhancedJournal.NewTab")) + ' - ' + i18n("MonksEnhancedJournal.Title"));
+
+            if (this.subsheet._createDocumentIdLink)
+                this.subsheet._createDocumentIdLink(this.element)
 
             $('.content', this.element).attr('entity-type', this.object.type).attr('entity-id', this.object.id);
             let classes = this.subsheet.options.classes.join(' ').replace('monks-enhanced-journal', '')
@@ -257,6 +260,11 @@ export class EnhancedJournal extends Application {
 
             if (!this.isEditable) {
                 this.subsheet._disableFields(contentform[0]);
+            }
+
+            if (this.subsheet._createSecretHandlers) {
+                this._secrets = this.subsheet._createSecretHandlers();
+                this._secrets.forEach(secret => secret.bind(this.element[0]));
             }
 
             //connect the tabs to the enhanced journal so that opening the regular document won't try and change tabs on the other window.
@@ -541,7 +549,7 @@ export class EnhancedJournal extends Application {
     async deleteEntity(entityId){
         //an entity has been deleted, what do we do?
         for (let tab of this.tabs) {
-            if (tab.entityId.startsWith(entityId)) {
+            if (tab.entityId?.startsWith(entityId)) {
                 tab.entity = await this.findEntity('', tab.text); //I know this will return a blank one, just want to maintain consistency
                 tab.text = i18n("MonksEnhancedJournal.NewTab");
                 $('.journal-tab[data-tabid="${tab.id}"] .tab-content', this.element).html(tab.text);
@@ -977,7 +985,7 @@ export class EnhancedJournal extends Application {
         const target = event.currentTarget;
 
         if ($(target).hasClass('journal-tab')) {
-            const dragData = { from: this.object.id };
+            const dragData = { from: this.object.uuid };
 
             let tabid = target.dataset.tabid;
             let tab = this.tabs.find(t => t.id == tabid);
@@ -1053,12 +1061,9 @@ export class EnhancedJournal extends Application {
         //find this id on the map
 
         let note = canvas.scene.notes.find(n => {
-            return n.entryId == id;
+            return n.entryId == id || n.pageId == id;
         });
-        if (note) {
-            //if (note.visible && !canvas.notes._active) canvas.notes.activate();
-            canvas.animatePan({ x: note.x, y: note.y, scale: 1, duration: 250 });
-        }
+        canvas.notes.panToNote(note);
     }
 
     doShowPlayers(event) {
@@ -1146,7 +1151,7 @@ export class EnhancedJournal extends Application {
                 name: i18n("MonksEnhancedJournal.journalentry"),
                 icon: '<i class="fas fa-book-open"></i>',
                 callback: li => {
-                    this.convert('base');
+                    this.convert('journalentry');
                 }
             },
             {
@@ -1336,6 +1341,8 @@ export class EnhancedJournal extends Application {
     }
 
     openPage(page) {
+        if (!page?.id)
+            return;
         let journal = game.journal.get(page.id);
         if (journal) this.open(journal);
     }

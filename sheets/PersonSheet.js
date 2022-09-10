@@ -186,7 +186,10 @@ export class PersonSheet extends EnhancedJournalSheet {
         const target = event.currentTarget;
 
         if (target.dataset.document == "Actor") {
-            const dragData = { id: target.dataset.id, type: target.dataset.document };
+            const dragData = {
+                uuid: target.dataset.uuid,
+                type: target.dataset.document
+            };
 
             event.dataTransfer.setData("text/plain", JSON.stringify(dragData));
         }

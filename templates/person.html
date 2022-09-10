@@ -27,7 +27,7 @@
             {{#if (and actor owner)}}
             <div class="actor-img">
                 <div class="person-actor">{{localize 'MonksEnhancedJournal.Actor'}}</div>
-                <img src="{{actor.img}}" data-id="{{actor.id}}" data-document="Actor" onerror="$(this).hide();">
+                <img src="{{actor.img}}" data-uuid="{{actor.uuid}}" data-document="Actor" onerror="$(this).hide();">
                 <div style="text-align: center;">{{actor.name}}</div>
             </div>
             {{/if}}

@@ -20,23 +20,23 @@
         </li>
         <li class="item flexrow" data-id="{{this._id}}">
             <div class="item-name flexrow">
-                <h4>{{localize 'MonksEnhancedJournal.Quantity'}}{{#if this.maxquantity}}  <i><small>(Max {{this.maxquantity}})</small></i>{{/if}}</h4>
+                <h4>{{localize 'MonksEnhancedJournal.Quantity'}}{{#if this.flags.monks-enhanced-journal.maxquantity}}  <i><small>(Max {{this.flags.monks-enhanced-journal.maxquantity}})</small></i>{{/if}}</h4>
             </div>
 
             <div class="item-quantity flexrow" style="flex: 0 0 70px;">
-                <input class="gm-only" type="number" min="0" {{#if this.maxquantity}} max="{{this.maxquantity}}" {{/if}} step="1" data-dtype="Number" name="quantity" value="{{this.quantity}}" style="text-align:right;" />
-                <span class="player-only" style="text-align: right; padding-right: 4px;">{{this.quantity}}</span>
+                <input class="gm-only" type="number" min="0" {{#if this.flags.monks-enhanced-journal.maxquantity}} max="{{this.flags.monks-enhanced-journal.maxquantity}}" {{/if}} step="1" data-dtype="Number" name="flags.monks-enhanced-journal.quantity" value="{{this.flags.monks-enhanced-journal.quantity}}" style="text-align:right;" />
+                <span class="player-only" style="text-align: right; padding-right: 4px;">{{this.flags.monks-enhanced-journal.quantity}}</span>
             </div>
         </li>
-        {{#if this.total}}
+        {{#if this.flags.monks-enhanced-journal.total}}
         <li class="item flexrow" data-id="{{this._id}}">
             <div class="item-name flexrow">
                 <h4>{{localize 'MonksEnhancedJournal.Price'}}</h4>
             </div>
 
             <div class="item-price flexrow" style="flex: 0 0 70px;">
-                <input class="gm-only" type="text" name="sell" value="{{this.sell}} {{this.currency}}" style="text-align:right;" />
-                <span class="player-only" style="text-align: right; padding-right: 4px;">{{this.sell}} {{this.currency}}</span>
+                <input class="gm-only" type="text" name="flags.monks-enhanced-journal.sell" value="{{this.flags.monks-enhanced-journal.sell}} {{this.flags.monks-enhanced-journal.currency}}" style="text-align:right;" />
+                <span class="player-only" style="text-align: right; padding-right: 4px;">{{this.flags.monks-enhanced-journal.sell}} {{this.flags.monks-enhanced-journal.currency}}</span>
             </div>
         </li>
         <li class="item flexrow" data-id="{{this._id}}" style="border-top: 1px solid #FFFFFF;">
@@ -45,7 +45,7 @@
             </div>
 
             <div class="item-total flexrow">
-                <span style="text-align: right; padding-right: 4px;">{{this.total}} {{this.currency}}</span>
+                <span style="text-align: right; padding-right: 4px;">{{this.flags.monks-enhanced-journal.total}} {{this.flags.monks-enhanced-journal.currency}}</span>
             </div>
         </li>
         {{/if}}

@@ -108,7 +108,7 @@ export class MEJHelpers {
     }
 
     static toDefaultCurrency(price) {
-        let value = MEJHelpers.getPrice(price, "price");
+        let value = (typeof price == "string" ? MEJHelpers.getPrice(price, "price") : price);
         let currency = MonksEnhancedJournal.currencies.find(c => c.id == value.currency);
         let result = (currency.convert || 1) * value.value;
 

@@ -1984,8 +1984,25 @@ height: fit-content;*/
     width: 100%;
 }
 
-.sidebar-tab.directory .directory-item.journalentry{
+.sidebar-tab.directory .directory-item.journalentry {
     position:relative;
+}
+
+.sheet.journal-entry .pages-list .page-heading {
+    position: relative;
+}
+
+.sheet.journal-entry .pages-list .page-heading .page-ownership {
+    width: unset;
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    pointer-events: all;
+    cursor: pointer;
+}
+
+.sheet.journal-entry .pages-list .page-heading .page-ownership.none {
+
 }
 
 .sidebar-tab.directory .directory-item.journalentry .permissions {
@@ -2013,7 +2030,8 @@ height: fit-content;*/
     display: none;
 }
 
-.sidebar-tab.directory .directory-item.journalentry .permissions div {
+.sidebar-tab.directory .directory-item.journalentry .permissions div,
+.pages-list .page-heading .page-ownership div {
     width: 14px;
     height: 14px;
     display: inline-block;
@@ -2027,8 +2045,15 @@ height: fit-content;*/
     text-shadow: none;
 }
 
+.pages-list .page-heading .page-ownership div {
+    font-weight: normal;
+    font-size: 10px;
+    line-height: 12px;
+}
+
 .sidebar-tab.directory .directory-item.journalentry .permissions i + div,
-.sidebar-tab.directory .directory-item.journalentry .permissions i + i {
+.sidebar-tab.directory .directory-item.journalentry .permissions i + i,
+.pages-list .page-heading .page-ownership i + div {
     margin-left: 5px;
 }
 

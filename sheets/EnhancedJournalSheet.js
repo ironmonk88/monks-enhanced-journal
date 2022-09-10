@@ -77,6 +77,7 @@ export class EnhancedJournalSheet extends JournalPageSheet {
             width: 1025,
             height: 700,
             resizable: true,
+            secrets: [{ parentSelector: ".editor" }],
             closeOnSubmit: false,
             submitOnClose: false,
             submitOnChange: true
@@ -243,13 +244,10 @@ export class EnhancedJournalSheet extends JournalPageSheet {
 
         if ($(target).hasClass("sheet-icon")) {
             const dragData = {
-                id: this.object.id,
                 uuid: this.object.uuid,
                 type: this.object.documentName,
                 QEBypass: true
             };
-            if (this.object.compendium)
-                dragData.pack = this.object.compendium;
 
             event.dataTransfer.setData("text/plain", JSON.stringify(dragData));
         }
@@ -846,7 +844,7 @@ export class EnhancedJournalSheet extends JournalPageSheet {
         if (data == undefined)
             return;
 
-        let content = $('.editor-content[data-edit="content"],.mce-content-body', (element || this.element));
+        let content = $('.editor-content[data-edit="text.content"],.mce-content-body', (element || this.element));
 
         let css = {
             'background-color': (data.color ? data.color : ''),
@@ -976,7 +974,7 @@ export class EnhancedJournalSheet extends JournalPageSheet {
         for (let item of items) {
             if (!item)
                 continue;
-            let requests = (Object.entries(item.requests || {})).map(([k, v]) => {
+            let requests = (Object.entries(getProperty(item, "flags.monks-enhanced-journal.requests") || {})).map(([k, v]) => {
                 if (!v)
                     return null;
                 let user = game.users.get(k);
@@ -1151,19 +1149,21 @@ export class EnhancedJournalSheet extends JournalPageSheet {
     }
 
     static async createRequestMessage(entry, item, actor, shop) {
-        let price = MEJHelpers.getPrice(getProperty(item, "flags.monks-enhanced-journal.cost")); //item, "cost", !shop);
-        item.sell = price?.value;
-        item.currency = price?.currency;
-        item.maxquantity = item.maxquantity ?? getValue(item, quantityname());
-        if (item.maxquantity)
-            item.quantity = Math.max(Math.min(item.maxquantity, item.quantity), 1);
-        item.total = (price ? item.quantity * item.sell : null);
+        let data = getProperty(item, "flags.monks-enhanced-journal");
+        let price = MEJHelpers.getPrice(data.cost); //item, "cost", !shop);
+        data.sell = price?.value;
+        data.currency = price?.currency;
+        data.maxquantity = data.maxquantity ?? data.quantity;
+        if (data.maxquantity)
+            data.quantity = Math.max(Math.min(data.maxquantity, data.quantity), 1);
+        data.total = (price ? data.quantity * data.sell : null);
+        setProperty(item, "flags.monks-enhanced-journal", data);
 
         let messageContent = {
             action: 'buy',
             actor: { id: actor.id, name: actor.name, img: actor.img },
             items: [item],
-            shop: { id: entry.id, name: entry.name, img: entry.img }
+            shop: { uuid: entry.uuid, name: entry.name, img: entry.img }
         }
 
         //create a chat message
@@ -1259,14 +1259,14 @@ export class EnhancedJournalSheet extends JournalPageSheet {
                     setProperty(item, "flags.monks-enhanced-journal.assigned", true);
                 } else {
                     let qty = getProperty(item, "flags.monks-enhanced-journal.quantity");
-                    if (qty != "")
+                    if (qty && qty != "")
                         setProperty(item, "flags.monks-enhanced-journal.quantity", Math.max(qty - quantity, 0));
                 }
                 if (rewards)
                     entry.setFlag('monks-enhanced-journal', 'rewards', rewards);
                 else {
                     if(entry.getFlag('monks-enhanced-journal', 'type') == 'loot')
-                        items = items.filter(i => getValue(i, quantityname()) > 0);
+                        items = items.filter(i => getProperty(i, "flags.monks-enhanced-journal.quantity") > 0);
                     entry.setFlag('monks-enhanced-journal', 'items', items);
                 }
                 if (chatmessage)
@@ -1369,7 +1369,7 @@ export class EnhancedJournalSheet extends JournalPageSheet {
                 let itm = items.find(i => i._id == itemData._id);
                 if (itm) {
                     itm = mergeObject(itm, formData);
-                    setValue(itm.system, pricename(), MEJHelpers.toDefaultCurrency(MEJHelpers.getPrice(getProperty(itm, "flags.monks-enhanced-journal.price"), "price")));
+                    setValue(itm.system, pricename(), MEJHelpers.toDefaultCurrency(getProperty(itm, "flags.monks-enhanced-journal.price"), "price"));
                     await this.object.setFlag('monks-enhanced-journal', 'items', items);
                 }
 
@@ -1389,7 +1389,7 @@ export class EnhancedJournalSheet extends JournalPageSheet {
 
             sheet._onSubmit = newSubmit.bind(sheet);
             try {
-                let result = sheet.render(true);
+                let result = sheet.render(true, { focus: true });
                 result.options.alterprice = true;
                 //result.options.addremaining = (this.object.type == "encounter" || this.object.type == "quest");
                 result.options.addcost = (this.object.type == "shop");
@@ -1607,10 +1607,11 @@ export class EnhancedJournalSheet extends JournalPageSheet {
 
         if (container == "relationships" && cascade) {
             let journal = game.journal.get(id);
-            if (journal) {
-                let data = duplicate(journal.flags["monks-enhanced-journal"].relationships);
+            if (journal && journal.pages.size > 0) {
+                let page = journal.pages.contents[0];
+                let data = duplicate(getProperty(page, "flags.monks-enhanced-journal.relationships") || {});
                 data.findSplice(i => i.id == this.object.id || i._id == this.object.id);
-                journal.setFlag('monks-enhanced-journal', "relationships", data);
+                page.setFlag('monks-enhanced-journal', "relationships", data);
             }
         }
     }
@@ -1621,12 +1622,13 @@ export class EnhancedJournalSheet extends JournalPageSheet {
             let li = $(event.currentTarget).closest('li.item');
             const uuid = li.data("uuid");
             let journal = await fromUuid(uuid);
-            if (journal) {
-                let relationships = duplicate(journal.flags["monks-enhanced-journal"].relationships);
+            if (journal && journal.pages.size > 0) {
+                let page = journal.pages.contents[0];
+                let relationships = duplicate(getProperty(page, "flags.monks-enhanced-journal.relationships") || {});
                 let relationship = relationships.find(r => r.id == this.object.id);
                 if (relationship) {
                     relationship.hidden = $(event.currentTarget).prev().prop('checked');
-                    journal.setFlag('monks-enhanced-journal', "relationships", relationships);
+                    page.setFlag('monks-enhanced-journal', "relationships", relationships);
                 }
             }
         } else if ($(event.currentTarget).hasClass('item-private')) {
@@ -1975,7 +1977,12 @@ export class EnhancedJournalSheet extends JournalPageSheet {
 
     async openRelationship(event) {
         let item = event.currentTarget.closest('.item');
-        let journal = await fromUuid(item.dataset.uuid);
+        let journal;
+        if (item.dataset.uuid) {
+            journal = await fromUuid(item.dataset.uuid);
+        } else {
+            journal = game.journal.get(item.dataset.id);
+        }
         if (!journal.testUserPermission(game.user, "LIMITED"))
             return ui.notifications.error("You don't have permissions to view this document");
 
@@ -1987,7 +1994,7 @@ export class EnhancedJournalSheet extends JournalPageSheet {
         // Get spell data
         const {
             actionType, description, source, activation, duration, target, range, damage, formula, save, level
-        } = itemData.data;
+        } = itemData.system;
 
         // Get scroll data
         const scrollUuid = `Compendium.${CONFIG.DND5E.sourcePacks.ITEMS}.${CONFIG.DND5E.spellScrollIds[level]}`;
@@ -1996,7 +2003,7 @@ export class EnhancedJournalSheet extends JournalPageSheet {
         delete scrollData._id;
 
         // Split the scroll description into an intro paragraph and the remaining details
-        const scrollDescription = scrollData.description.value;
+        const scrollDescription = scrollData.system.description?.value;
         const pdel = "</p>";
         const scrollIntroEnd = scrollDescription.indexOf(pdel);
         const scrollIntro = scrollDescription.slice(0, scrollIntroEnd + pdel.length);
@@ -2009,7 +2016,7 @@ export class EnhancedJournalSheet extends JournalPageSheet {
         const spellScrollData = foundry.utils.mergeObject(scrollData, {
             name: `${game.i18n.localize("DND5E.SpellScroll")}: ${itemData.name}`,
             img: itemData.img,
-            data: {
+            system: {
                 description: { value: desc.trim() }, source, actionType, activation, duration, target, range, damage, formula,
                 save, level
             }
@@ -2060,7 +2067,7 @@ export class EnhancedJournalSheet extends JournalPageSheet {
             offering.state = "cancelled";
             this.object.setFlag('monks-enhanced-journal', "offerings", offerings);
         } else
-            MonksEnhancedJournal.emit("cancelOffer", { id: id, entryid: this.object.id });
+            MonksEnhancedJournal.emit("cancelOffer", { id: id, uuid: this.object.uuid });
     }
 
     async acceptOffer(event) {
@@ -2169,10 +2176,11 @@ export class EnhancedJournalSheet extends JournalPageSheet {
                 //create a new Journal entry in the same folder as the current object
                 //set the content to the extracted text (selectedHTML.html()) and use the title
                 let type = getProperty(this.object, "flags.monks-enhanced-journal.type");
+                if (type == "base" || type == "oldentry") type = "journalentry";
                 let types = MonksEnhancedJournal.getDocumentTypes();
                 if (types[type]) {
                     let newentry = await JournalEntry.create({ name: title, folder: this.object.parent.folder }, { render: false });
-                    let data = { name: title, type: 'journalentry', text: { content: selectedHTML.html() } };
+                    let data = { name: title, type: 'journalentry', text: { content: `<p>${selectedHTML.html()}</p>` } };
                     await JournalEntryPage.create(data, { parent: newentry });
                     ui.journal.render();
                     MonksEnhancedJournal.emit("refreshDirectory", { name: "journal" });
@@ -2183,6 +2191,10 @@ export class EnhancedJournalSheet extends JournalPageSheet {
 
                     //save the current entry and refresh to make sure everything is reset
                     await this.object.update({ text: { content: $(ctrl).closest('div.editor-content').html() } });
+                    if (this.enhancedjournal)
+                        this.enhancedjournal.render();
+                    else
+                        this.render();
                 }
             } else
                 ui.notifications.warn(i18n("MonksEnhancedJournal.NothingSelected"));

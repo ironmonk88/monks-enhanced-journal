@@ -60,7 +60,10 @@ export class SlideConfig extends FormApplication {
         data.thumbnail = (this.journalentry._thumbnails && this.object.id && this.journalentry._thumbnails[this.object.id]) || this.object.img;
 
         if (this.object.background?.color == '') {
-            data.background = `background-image:url(\'${data.thumbnail}\');`;
+            if (data.thumbnail)
+                data.background = `background-image:url(\'${data.thumbnail}\');`;
+            else
+                data.background = `background-color:rgba(255, 255, 255, 0.5)`;
         }
         else
             data.background = `background-color:${this.object.color}`;
