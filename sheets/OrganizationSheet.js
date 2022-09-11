@@ -28,7 +28,7 @@ export class OrganizationSheet extends EnhancedJournalSheet {
             let entity = await this.getDocument(item, "JournalEntry", false);
             if (entity && entity.testUserPermission(game.user, "LIMITED") && (game.user.isGM || !item.hidden)) {
                 let page = (entity instanceof JournalEntryPage ? entity : entity.pages.contents[0]);
-                let type = getProperty(page, "flags.monks-enhanced-journal.type");
+                let type = getProperty(page, "flags.monks-enhanced-journal.type") || "";
                 if (!data.relationships[type])
                     data.relationships[type] = { type: type, name: i18n(`MonksEnhancedJournal.${type.toLowerCase()}`), documents: [] };
 

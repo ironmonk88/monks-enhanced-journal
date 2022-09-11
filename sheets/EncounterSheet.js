@@ -184,9 +184,9 @@ export class EncounterSheet extends EnhancedJournalSheet {
 
         let li = $(event.currentTarget).closest('li')[0];
         let type = li.dataset.document || li.dataset.type;
+        let id = li.dataset.id;
         dragData.type = type;
         if (type == "Item") {
-            let id = li.dataset.id;
             let item = this.object.flags["monks-enhanced-journal"]?.items.find(i => i._id == id || i.id == id);
             if (!game.user.isGM && (this.object.flags["monks-enhanced-journal"].purchasing == 'locked' || item?.lock === true)) {
                 event.preventDefault();

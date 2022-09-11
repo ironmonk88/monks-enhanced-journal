@@ -258,6 +258,10 @@ export class MonksEnhancedJournal {
             canvas.hud.note.clear();
         }
 
+        Note.prototype._onMouseOut = function (event) {
+            canvas.hud.note.clear();
+        }
+
         let clickDocumentName = function (wrapped, ...args) {
             let event = args[0];
             event.preventDefault();
@@ -994,7 +998,7 @@ export class MonksEnhancedJournal {
                     doc = fromUuidSync(target, relativeTo);
                 }
 
-                if (doc && !doc.testUserPermission(game.user, "LIMITED")) {
+                if (doc && doc.testUserPermission && !doc.testUserPermission(game.user, "LIMITED")) {
                     const span = document.createElement('span');
                     span.classList.add("unknown-link");
                     span.innerHTML = `<i class="fas fa-eye-slash"></i> Hidden`;

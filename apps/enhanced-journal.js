@@ -1060,8 +1060,8 @@ export class EnhancedJournal extends Application {
         let id = $(content).attr('entity-id');
         //find this id on the map
 
-        let note = canvas.scene.notes.find(n => {
-            return n.entryId == id || n.pageId == id;
+        let note = canvas.notes.placeables.find(n => {
+            return n.document.entryId == id || n.document.pageId == id;
         });
         canvas.notes.panToNote(note);
     }

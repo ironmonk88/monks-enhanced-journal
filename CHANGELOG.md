@@ -1,6 +1,8 @@
 # Version 10.1
 
-v10 changes
+v10 changes.  Lots has changed with this release.  With the addition of Journal Pages in Foundry I had to find a workaround.  I think ultimately the idea is that the Foundry Journal Entry represents an adventure book, whereas the Enhanced Journal pages are meant to be stand alone, interactive sheets.  The pages that MEJ uses aren't meant to be in a book, but are meant to stand alone.
+
+I also updated the interface when creating an encounter from the Encounter sheet.  Instead of dragging the icon to the map where you want the encounter to take place, you now click the button and draw a Measured Template on the canvas to denote the area you want the monsters to be created in.  This should avoid all the icons piling up around each other and allow a randomization of positioning.
 
 # Version 1.0.65
 

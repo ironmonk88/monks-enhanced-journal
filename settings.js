@@ -313,6 +313,7 @@ export const registerSettings = function () {
 			{ id: 'hair', name: "MonksEnhancedJournal.Hair", hidden: false, full: false },
 			{ id: 'life', name: "MonksEnhancedJournal.LifeStatus", hidden: true, full: false },
 			{ id: 'profession', name: "MonksEnhancedJournal.Profession", hidden: true, full: false },
+			{ id: 'pronoun', name: "MonksEnhancedJournal.Pronoun", hidden: true, full: false },
 			{ id: 'voice', name: "MonksEnhancedJournal.Voice", hidden: false, full: false },
 			{ id: 'faction', name: "MonksEnhancedJournal.Faction", hidden: true, full: false },
 			{ id: 'height', name: "MonksEnhancedJournal.Height", hidden: true, full: false },

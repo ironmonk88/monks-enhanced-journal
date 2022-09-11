@@ -342,15 +342,6 @@ export class ShopSheet extends EnhancedJournalSheet {
                             //give the player the money
                             await this.constructor.actorPurchase(actor, { value: -(price.value * result.quantity), currency: price.currency });
 
-                            //remove the item from the actor
-                            if (result.quantity == max) {
-                                await actoritem.delete();
-                            } else {
-                                let update = { system: {} };
-                                setProperty(update.system, quantityname(), max - result.quantity);
-                                actorItem.update(update);
-                            }
-
                             //add the item to the shop
                             let itemData = item.toObject();
                             setProperty(itemData, "flags.monks-enhanced-journal.quantity", result.quantity);
@@ -363,6 +354,15 @@ export class ShopSheet extends EnhancedJournalSheet {
                             //else {
                              //   this.addItem(itemData);
                             //}
+
+                            //remove the item from the actor
+                            if (result.quantity == max) {
+                                await item.delete();
+                            } else {
+                                let update = { system: {} };
+                                setProperty(update.system, quantityname(), max - result.quantity);
+                                item.update(update);
+                            }
                         } else {
                             let itemData = item.toObject();
                             setProperty(itemData, "flags.monks-enhanced-journal.quantity", result.quantity);
