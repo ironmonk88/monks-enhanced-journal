@@ -502,10 +502,19 @@ export class MonksEnhancedJournal {
 
             // Target 3 - World Document Link
             else {
-                const collection = game.collections.get(a.dataset.type);
-                if (!collection)
-                    return;
-                doc = collection.get(id);
+                var datatype = a.dataset.type;
+                if (datatype === 'JournalEntryPage') {
+                    const journal_collection = game.collections.get('JournalEntry');
+                    const journal_id = a.dataset.uuid.split('.')[1];
+                    const page_id = a.dataset.uuid.split('.')[3];
+                    const journal = journal_collection.get(journal_id);
+                    doc = journal.pages.get(page_id);
+                } else {
+                    const collection = game.collections.get(datatype);
+                    if (!collection)
+                        return;
+                    doc = collection.get(id);
+                }
                 if (!doc) return;
                 if ((doc.documentName === "Scene") && doc.journal) doc = doc.journal;
                 if (!doc.testUserPermission(game.user, "LIMITED")) {
@@ -831,7 +840,7 @@ export class MonksEnhancedJournal {
 
             let entity = this.page || this.entry;
             if (allowed && this.entry) {
-                if (!MonksEnhancedJournal.openJournalEntry(this.entry)) {
+                if (!MonksEnhancedJournal.openJournalEntry(this.entry, options)) {
                     let page = this.page;
                     if (this.entry.pages.size == 1) {
                         page = this.entry.pages.contents[0];
@@ -1438,14 +1447,15 @@ export class MonksEnhancedJournal {
 
         //if the enhanced journal is already open, then just pass it the new object, if not then let it render as normal
         if (MonksEnhancedJournal.journal) {
-            if (doc)
-                MonksEnhancedJournal.journal.open(doc, options.newtab, { anchor: options?.anchor, autoPage: true });
-            else
-                MonksEnhancedJournal.journal.render(true, { anchor: options?.anchor });
+            if (doc) {
+                options.autoPage = true;
+                MonksEnhancedJournal.journal.open(doc, options.newtab, options);
+            } else
+                MonksEnhancedJournal.journal.render(true, options);
+        } else {
+            options.autoPage = true;
+            MonksEnhancedJournal.journal = new EnhancedJournal(doc, options).render(true, options);
         }
-        else
-            MonksEnhancedJournal.journal = new EnhancedJournal(doc, { anchor: options?.anchor }).render(true, { autoPage: true });
-
         return true;
     }
 

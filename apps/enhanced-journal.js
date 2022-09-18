@@ -122,6 +122,10 @@ export class EnhancedJournal extends Application {
             });
         }
 
+        if (options.pageId !== undefined) {
+            this.subsheet.goToPage(options.pageId, options?.anchor);
+        }
+
         return result;
     }
 
@@ -569,12 +573,18 @@ export class EnhancedJournal extends Application {
         if (entity?.currentTarget != undefined)
             entity = null;
 
+        if (entity.parent) {
+            var pageId = entity.id;
+            entity = entity.parent;
+        }
+
         let tab = {
             id: makeid(),
             text: entity?.name || i18n("MonksEnhancedJournal.NewTab"),
             active: false,
             entityId: entity?.uuid,
             entity: entity || { flags: { 'monks-enhanced-journal': { type: 'blank' }, content: i18n("MonksEnhancedJournal.NewTab") } },
+            pageId: pageId,
             history: []
         };
         if (tab.entityId != undefined)
@@ -652,6 +662,11 @@ export class EnhancedJournal extends Application {
     updateTab(tab, entity, options = {}) {
         if (!entity)
             return;
+
+        if (entity.parent) {
+            options.pageId = entity.id;
+            entity = entity.parent;
+        }
 
         if (tab != undefined) {
             if (tab.entityId != entity.uuid) {
