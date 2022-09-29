@@ -1,3 +1,7 @@
+# Version 10.3
+
+Fixing a critical bug with opening inline journal links
+
 # Version 10.2
 
 Making sure that a player has permission to view a Journal Sheet before opening it.  This was affecting the recently opened links and previously viewed page.

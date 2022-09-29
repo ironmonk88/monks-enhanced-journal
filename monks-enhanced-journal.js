@@ -1034,7 +1034,7 @@ export class MonksEnhancedJournal {
         //Make sure that players can't see inline links that they don't know about.
         let oldCreateContentLink = TextEditor._createContentLink;
         TextEditor._createContentLink = function (match, options = {}) {
-            let { relativeTo } = options;
+            let { async, relativeTo } = options;
             let [type, target, hash, name] = match.slice(1, 5);
             let parts = [target];
             if (type == "JournalEntry") {
