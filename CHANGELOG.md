@@ -1,3 +1,51 @@
+# Version 10.2
+
+Making sure that a player has permission to view a Journal Sheet before opening it.  This was affecting the recently opened links and previously viewed page.
+
+Fixing the tool tip on a tab when the title changes.
+
+Fixing search highlighting when using the Adventure Book rather than an MEJ page.
+
+Fixed styling issues for the Vaesen system.
+
+Fixed price issues with the Shadow Run 5e system
+
+Added the option to open a journal entry from the sidebar directory using the alt key to bypass the browser.
+
+Fixed issues opening document links within  a Journal Page.
+
+Fixed issue if it an Adventure Book but has no pages
+
+Fixed issue with creating a document link and the uuid isn't async
+
+Fixed issues with showing a Journal Entry as a chat bubble
+
+Fixed issue with getting the Loot Entity's name.
+
+Fixed issue with pages not updating when they should
+
+Fixed issue with inline links not rendering properly.
+
+Fixed issue in PF2E with enriching the content text
+
+Fixed issue with the shop icon that gets displayed in the chat message when requesting an item.
+
+Fixed issue with dragging and dropping loot from a Quest onto an Actor.  And issue with how it deducts the item from the Quest.
+
+Fixed issue with multiple notification when filling items from a Roll Table and the roll table runs out of items.
+
+Fixed issue with item description not displaying the correct information.
+
+Fixed issue with Loot page and trying to update the permissions on the entry.
+
+Fixed issue with not being able to find the item attached to an actor when dropped onto the Loot sheet from an Actor.
+
+Fixed issue with getting a relationship if that relationship isn't a Journal Entry or Journal Page.
+
+Hopefully fixed an issue with the checklist refreshing the page when tryign to create a new entry.
+
+Fixed issue with the Picture sheet showing instructions behind the image.
+
 # Version 10.1
 
 v10 changes.  Lots has changed with this release.  With the addition of Journal Pages in Foundry I had to find a workaround.  I think ultimately the idea is that the Foundry Journal Entry represents an adventure book, whereas the Enhanced Journal pages are meant to be stand alone, interactive sheets.  The pages that MEJ uses aren't meant to be in a book, but are meant to stand alone.

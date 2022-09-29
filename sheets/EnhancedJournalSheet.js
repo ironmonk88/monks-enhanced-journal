@@ -151,7 +151,7 @@ export class EnhancedJournalSheet extends JournalPageSheet {
         });
 
         if (game.system.id == "pf2e") {
-            data.data.content = game.pf2e.TextEditor.enrichHTML(data.data.content, { secrets: game.user.isGM });
+            data.data.content = await game.pf2e.TextEditor.enrichHTML(data.data.content, { secrets: game.user.isGM, async: true });
         }
 
         data.userid = game.user.id;
@@ -275,8 +275,8 @@ export class EnhancedJournalSheet extends JournalPageSheet {
 
         new EnhancedJournalContextMenu($(html), (this.type == "text" ? ".editor" : ".tab.description .tab-inner"), this._getDescriptionContextOptions());
 
-        $("a.inline-request-roll", html).click(this._onClickInlineRequestRoll.bind(this));//.contextmenu(this._onClickInlineRequestRoll);
-        html.on("click", "a.picture-link", this._onClickPictureLink.bind(this));
+        $("a.inline-request-roll", html).click(MonksEnhancedJournal._onClickInlineRequestRoll.bind(this));
+        $("a.picture-link", html).click(MonksEnhancedJournal._onClickPictureLink.bind(this));
 
         $('a[href^="#"]', html).click(this._onClickAnchor.bind(this));
 
@@ -322,13 +322,17 @@ export class EnhancedJournalSheet extends JournalPageSheet {
             }
             */
 
+            /*
             if (game.system.id == "pf2e") {
                 let cls = CONFIG.JournalEntry.sheetClasses.base["pf2e.JournalSheetPF2e"].cls;
-                let sheet = new cls(this.object);
+                let object = this.object;
+                if (object instanceof JournalEntryPage)
+                    object = object.parent;
+                let sheet = new cls(object);
                 this.pf2eActivateEditor = sheet.activateEditor;
                 sheet.activateEditor = this.activateEditor.bind(this);
                 sheet.activateListeners.call(this, html);
-            }
+            }*/
         }
     }
 
@@ -686,66 +690,6 @@ export class EnhancedJournalSheet extends JournalPageSheet {
                 $('.play-journal-sound', this.element).removeClass("active").find("i").removeClass('fa-volume-up').addClass('fa-volume-off');
             });
         }
-    }
-
-    _onClickInlineRequestRoll(event) {
-        event.preventDefault();
-        const a = event.currentTarget;
-
-        if (game.MonksTokenBar) {
-            let data = duplicate(a.dataset);
-            if (data.dc) data.dc = parseInt(data.dc);
-            if (data.fastForward) data.fastForward = true;
-            if (data.silent) data.silent = true;
-
-            let requesttype = a.dataset.requesttype.toLowerCase();
-            if (requesttype == 'request')
-                game.MonksTokenBar.requestRoll(canvas.tokens.controlled, data);
-            else if (requesttype == 'contested')
-                game.MonksTokenBar.requestContestedRoll({ request: a.dataset.request }, { request: a.dataset.request1 }, data);
-        }
-    }
-
-    async _onClickPictureLink(event) {
-        event.preventDefault();
-        const a = event.currentTarget;
-        let document = null;
-        let id = a.dataset.id;
-
-        /*
-        // Target 1 - Compendium Link
-        if (a.dataset.pack) {
-            const pack = game.packs.get(a.dataset.pack);
-            if (a.dataset.lookup) {
-                if (!pack.index.length) await pack.getIndex();
-                const entry = pack.index.find(i => (i._id === a.dataset.lookup) || (i.name === a.dataset.lookup));
-                if (entry) {
-                    a.dataset.id = id = entry._id;
-                    delete a.dataset.lookup;
-                }
-            }
-            document = id ? await pack.getDocument(id) : null;
-        }
-
-        // Target 2 - World Entity Link
-        else {*/
-            document = game.journal.get(id);
-            if (!document) return;
-            if (!document.testUserPermission(game.user, "LIMITED")) {
-                return ui.notifications.warn(format("MonksEnhancedJournal.msg.YouDontHaveDocumentPermissions", {documentName: document.documentName}));
-            }
-        //}
-        if (!document) return;
-
-        new ImagePopout(document.img, {
-            title: document.name,
-            uuid: document.uuid,
-            shareable: false,
-            editable: false
-        })._render(true);
-
-        //if (game.user.isGM)
-        //    this._onShowPlayers({ data: { object: document } });
     }
 
     _onClickAnchor(event) {
@@ -1163,7 +1107,7 @@ export class EnhancedJournalSheet extends JournalPageSheet {
             action: 'buy',
             actor: { id: actor.id, name: actor.name, img: actor.img },
             items: [item],
-            shop: { uuid: entry.uuid, name: entry.name, img: entry.img }
+            shop: { uuid: entry.uuid, name: entry.name, img: entry.src }
         }
 
         //create a chat message
@@ -1246,7 +1190,9 @@ export class EnhancedJournalSheet extends JournalPageSheet {
         let rewards;
         if (entry.getFlag('monks-enhanced-journal', 'rewards')) {
             rewards = duplicate(entry.getFlag('monks-enhanced-journal', 'rewards'));
-            let reward = rewards.find(r => r.active);
+            let reward = rewards.find(r => {
+                return !!r.items.find(i => i._id == id);
+            });
             if (reward)
                 items = reward.items;
         }
@@ -1466,6 +1412,12 @@ export class EnhancedJournalSheet extends JournalPageSheet {
                     let currChanged = false;
 
                     for (let i = 0; i < quantity; i++) {
+                        const available = table.results.filter(r => !r.drawn);
+                        if (!table.formula || !available.length) {
+                            ui.notifications.warn("There are no available results which can be drawn from this table.");
+                            break;
+                        }
+
                         let result = await table.draw({ rollMode: "selfroll", displayChat: false });
 
                         if (!result.results.length)
@@ -1931,7 +1883,7 @@ export class EnhancedJournalSheet extends JournalPageSheet {
             let summary = li.children(".item-summary");
             summary.slideUp(200, () => summary.remove());
         } else {
-            let div = $(`<div class="item-summary">${(typeof chatData == "string" ? chatData : chatData.description.value || chatData.description)}</div>`);
+            let div = $(`<div class="item-summary">${(typeof chatData == "string" ? chatData : chatData.description.value ?? chatData.description)}</div>`);
             if (typeof chatData !== "string") {
                 let props = $('<div class="item-properties"></div>');
                 chatData.properties.forEach(p => props.append(`<span class="tag">${p.name || p}</span>`));

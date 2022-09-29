@@ -126,7 +126,10 @@ export class LootSheet extends EnhancedJournalSheet {
     }
 
     configure() {
-        new DocumentOwnershipConfig(this.object).render(true);
+        let object = this.object;
+        if (object instanceof JournalEntryPage)
+            object = object.parent;
+        new DocumentOwnershipConfig(object).render(true);
     }
 
     async splitMoney() {
@@ -236,6 +239,11 @@ export class LootSheet extends EnhancedJournalSheet {
         }
 
         if (data.type == 'Item') {
+            let entry;
+            try {
+                entry = await fromUuid(data.from);
+            } catch { }
+
             if (data.from == this.object.uuid) {
                 if (!$(event.currentTarget).hasClass('loot-character'))
                     return;
@@ -258,22 +266,14 @@ export class LootSheet extends EnhancedJournalSheet {
                         sheet._onDropItem({ preventDefault: () => { } }, { data: itemData });
                         //actor.createEmbeddedDocuments("Item", [itemData]);
 
-                        try {
-                            let entry = await fromUuid(data.from);
-                            if (entry)
-                                this.constructor.purchaseItem.call(this.constructor, entry, data.data._id, result.quantity, { actor });
-                        } catch { }
+                        if (entry)
+                            this.constructor.purchaseItem.call(this.constructor, entry, data.data._id, result.quantity, { actor });
                     }
                 }
             } else {
-                let entry;
-                try {
-                    entry = await fromUuid(data.from);
-                } catch { }
-
                 let item = await this.getDocument(data);
                 let max = getValue(item, quantityname(), null);
-                if (!entry && !data.actorId)
+                if (!entry && !item.actor?.id)
                     max = null;
 
                 //Don't transfer between Loot sheets unless purchasing is set to "Anyone" or the player owns the sheet
@@ -283,13 +283,14 @@ export class LootSheet extends EnhancedJournalSheet {
                     return;
 
                 //Only allow players to drop things from their own player onto the loot sheet
-                if (!this.object.isOwner && !(data.actorId || entry))
+                if (!this.object.isOwner && !(item.actor.id || entry))
                     return;
 
                 let result = await LootSheet.confirmQuantity(item, max, "transfer", false);
                 if ((result?.quantity ?? 0) > 0) {
                     let itemData = item.toObject();
                     setProperty(itemData, "flags.monks-enhanced-journal.quantity", result.quantity);
+                    setValue(itemData, quantityname(), 1);
 
                     if (game.user.isGM) {
                         this.addItem({ data: itemData });
@@ -315,19 +316,14 @@ export class LootSheet extends EnhancedJournalSheet {
                                     quantity: result.quantity,
                                     chatmessage: false
                                 });
-                    }
-
-                    if (data.data && data.actorId) {
-                        let actor = game.actors.get(data.actorId);
-                        if (actor) {
-                            let actorItem = actor.items.get(data.data._id);
-                            let quantity = getValue(actorItem.data, quantityname());
-                            if (result.quantity >= quantity)
-                                actorItem.delete();
-                            else {
-                                let newQty = quantity - result.quantity;
-                                actorItem.update({ quantity: newQty });
-                            }
+                    } else if (item.actor) {
+                        //let actorItem = item.actor.items.get(data.data._id);
+                        let quantity = getValue(item, quantityname());
+                        if (result.quantity >= quantity)
+                            item.delete();
+                        else {
+                            let newQty = quantity - result.quantity;
+                            item.update({ quantity: newQty });
                         }
                     }
                 }

@@ -192,13 +192,29 @@ export class EnhancedJournal extends Application {
 
             MonksEnhancedJournal.fixType(this.object);
 
-            //const cls = (this.object._getSheetClass ? this.object._getSheetClass() : null);
+            if (options.force != true) {
+                let testing = this.object;
+                if (testing instanceof JournalEntryPage && !!getProperty(testing, "flags.monks-enhanced-journal.type"))
+                    testing = testing.parent;
+
+                if (testing.testUserPermission && !testing.testUserPermission(game.user, "OBSERVER")) {
+                    this.object = {
+                        name: this.object.name,
+                        type: 'blank',
+                        options: { hidebuttons: true },
+                        flags: {
+                            'monks-enhanced-journal': { type: 'blank' }
+                        },
+                        content: `${i18n("MonksEnhancedJournal.DoNotHavePermission")}: ${this.object.name}`
+                    }
+                }
+            }
+
             const cls = (this.object._getSheetClass ? this.object._getSheetClass() : null);
             if (!cls)
-                this.subsheet = new EnhancedJournalSheet(this.object);
-            else 
-                this.subsheet = new cls(this.object, { editable: this.object.isOwner, enhancedjournal: this });   
-            
+                this.subsheet = new EnhancedJournalSheet(this.object, this.object.options);
+            else
+                this.subsheet = new cls(this.object, { editable: this.object.isOwner, enhancedjournal: this });
             this.object._sheet = this.subsheet;
 
             this.subsheet.options.popOut = false;
@@ -230,6 +246,8 @@ export class EnhancedJournal extends Application {
                     a.addClass('last');
             }
 
+            this.subsheet.enhancedjournal = this;
+
             let templateData = await this.subsheet.getData();
             //let defaultOptions = this.subsheet.constructor.defaultOptions;
             await loadTemplates({
@@ -241,7 +259,7 @@ export class EnhancedJournal extends Application {
             this.subdocument = $(html).get(0);
             this.subsheet.form = (this.subdocument.tagName == 'FORM' ? this.subdocument : $('form:first', this.subdocument).get(0));
             this.subsheet._element = $(this.subdocument);
-            this.subsheet.enhancedjournal = this;
+
             if (this.subsheet.refresh)
                 this.subsheet.refresh();
             else if (this.object instanceof JournalEntry)
@@ -465,7 +483,6 @@ export class EnhancedJournal extends Application {
         if (this.object instanceof JournalEntry) {
             const modes = JournalSheet.VIEW_MODES;
             $('.viewmode', html).attr("data-action", "toggleView").attr("title", this.subsheet?.mode === modes.SINGLE ? "View Multiple Pages" : "View Single Page").find("i").toggleClass("fa-notes", this.subsheet?.mode === modes.SINGLE).toggleClass("fa-note", this.subsheet?.mode !== modes.SINGLE);
-
         }
     }
 
@@ -736,7 +753,7 @@ export class EnhancedJournal extends Application {
     updateTabNames(uuid, name) {
         for (let tab of this.tabs) {
             if (tab.entityId == uuid) {
-                $(`.journal-tab[data-tabid="${tab.id}"] .tab-content`, this.element).html(name);
+                $(`.journal-tab[data-tabid="${tab.id}"] .tab-content`, this.element).attr("title", name).html(name);
                 tab.text = name;
                 this.saveTabs();
             }
@@ -936,7 +953,7 @@ export class EnhancedJournal extends Application {
 
     searchText(query) {
         let that = this;
-        $('.editor .editor-content', this.element).unmark().mark(query, {
+        $('.editor .editor-content,.journal-entry-content', this.element).unmark().mark(query, {
             wildcards: 'enabled',
             accuracy: "complementary",
             separateWordSearch: false,
@@ -949,8 +966,9 @@ export class EnhancedJournal extends Application {
                     $('.mainbar .navigation .search', that.element).removeClass('error');
                 if (total > 0) {
                     $('.mainbar .navigation .search', that.element).removeClass('error');
-                    let first = $('.editor .editor-content mark:first', that.element);
+                    let first = $('.editor .editor-content mark:first,.journal-entry-content .scrollable mark:first', that.element);
                     $('.editor', that.element).parent().scrollTop(first.position().top - 10);
+                    $('.scrollable', that.element).scrollTop(first.position().top - 10);
                 }
             }
         });
@@ -1354,10 +1372,11 @@ export class EnhancedJournal extends Application {
     toggleViewMode(event) {
         this._onAction(event);
         const modes = JournalSheet.VIEW_MODES;
-        $('.viewmode', this.enhancedjournal.element).attr("title", this.mode !== modes.SINGLE ? "View Multiple Pages" : "View Single Page")
+        this.enhancedjournal.mode = this.mode;
+        $('.viewmode', this.enhancedjournal.element).attr("title", this.mode === modes.SINGLE ? "View Multiple Pages" : "View Single Page")
             .find("i")
-            .toggleClass("fa-notes", this.mode !== modes.SINGLE)
-            .toggleClass("fa-note", this.mode === modes.SINGLE);
+            .toggleClass("fa-notes", this.mode === modes.SINGLE)
+            .toggleClass("fa-note", this.mode !== modes.SINGLE);
     }
 
     journalSettings() {

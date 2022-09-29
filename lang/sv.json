@@ -1,12 +1,10 @@
 {
   "I18N.LANGUAGE": "Svenska",
   "I18N.MAINTAINERS": "@Rangertheman#4927",
-
   "MonksEnhancedJournal.Title": "Monk's Enhanced Journal",
   "MonksEnhancedJournal.BackTooltip": "",
   "MonksEnhancedJournal.ForwardTooltip": "",
   "MonksEnhancedJournal.Sidebar": "",
-
   "MonksEnhancedJournal.allow-player.name": "Behörighet",
   "MonksEnhancedJournal.allow-player.hint": "Tillåt spelare att använda utökade anteckningsböcker",
   "MonksEnhancedJournal.rolling-module.name": "Modul för tärningsslag",
@@ -59,9 +57,12 @@
   "MonksEnhancedJournal.editplaceattribute.hint": "Redigera egenskaperna som visas på platsformuläret",
   "MonksEnhancedJournal.loot-inactive-players.name": "Bytesfördelning till inaktiva spelare",
   "MonksEnhancedJournal.loot-inactive-players.hint": "Lägg till en inaktiv spelare till en bytesanteckning för den ska vara med vid fördelningen",
-  "MonksEnhancedJournal.use-system-tag.name": "Use system tag",
-  "MonksEnhancedJournal.use-system-tag.hint": "When styling the sub sheet, apply the system tag.  This can either solve some issues or break the sheet",
-
+  "MonksEnhancedJournal.use-system-tag.name": "Använd systemetiketten",
+  "MonksEnhancedJournal.use-system-tag.hint": "Lägg till systemetiketten när du stylar underformulär. Detta kan antingen lösa vissa problem, eller göra att formuläret slutar fungera",
+  "MonksEnhancedJournal.show-chatbubble.name": "Visa verktygsknappen för SLP-chatt",
+  "MonksEnhancedJournal.show-chatbubble.hint": "Visa knappen för att växla chattbubblor för SLP i Token toolbar",
+  "MonksEnhancedJournal.inline-roll-styling.name": "Inbäddade slag",
+  "MonksEnhancedJournal.inline-roll-styling.hint": "Ändra stilen på inbäddade slag så att de ser lite mer ut som länkar",
   "MonksEnhancedJournal.SlideConfiguration": "Inställning för bildspel",
   "MonksEnhancedJournal.DCConfiguration": "Inställning för svårighetsnivå",
   "MonksEnhancedJournal.TrapConfiguration": "Inställning för fällor",
@@ -71,7 +72,6 @@
   "MonksEnhancedJournal.ClickForNext": "Klicka för nästa bild.",
   "MonksEnhancedJournal.MsgShowPlayers": "Visa {title} för {which}.",
   "MonksEnhancedJournal.MsgOnlyOneBookmark": "Kan inte bokmärka samma sak två gånger",
-
   "MonksEnhancedJournal.DistributeCurrency": "Fördela pengar",
   "MonksEnhancedJournal.Distribute": "Fördela",
   "MonksEnhancedJournal.NewTab": "Ny flik",
@@ -154,6 +154,7 @@
   "MonksEnhancedJournal.VAlign": "Vertikal justering",
   "MonksEnhancedJournal.Transition": "Övergång",
   "MonksEnhancedJournal.Duration": "Varaktighet",
+  "MonksEnhancedJournal.TextDuration": "Varaktighet för text",
   "MonksEnhancedJournal.SlideshowName": "Bildspelsnamn",
   "MonksEnhancedJournal.ShowAs": "Visa som",
   "MonksEnhancedJournal.AudioFile": "Ljudfil",
@@ -263,13 +264,13 @@
   "MonksEnhancedJournal.From": "Från",
   "MonksEnhancedJournal.Grant": "Bevilja",
   "MonksEnhancedJournal.Hidden": "Dold",
+  "MonksEnhancedJournal.Shown": "Visad",
   "MonksEnhancedJournal.Players": "Spelare",
   "MonksEnhancedJournal.Offer": "Erbjud",
   "MonksEnhancedJournal.RemoveRelationship": "Ta bort relation",
   "MonksEnhancedJournal.Audio": "Audio",
   "MonksEnhancedJournal.Slides": "Bilder",
   "MonksEnhancedJournal.CanvasColour": "Färg på spelmattan",
-
   "MonksEnhancedJournal.LifeStatus": "Livsstatus",
   "MonksEnhancedJournal.EditAttributes": "Redigera egenskaper",
   "MonksEnhancedJournal.Volume": "Volym",
@@ -383,10 +384,10 @@
   "MonksEnhancedJournal.AcceptOffering": "Acceptera erbjudande",
   "MonksEnhancedJournal.RejectOffering": "Avvisa erbjudande",
   "MonksEnhancedJournal.RemoveOffering": "Ta bort erbjudande",
+  "MonksEnhancedJournal.HideShowOffering": "Dölj/visa erbjudande",
   "MonksEnhancedJournal.Selected": "Vald",
   "MonksEnhancedJournal.QuantityOfItems": "Antal föremål",
-
-  "MonksEnhancedJournal.msg.NoPlayersSelected": "Ingen spelare har valts som mottagare av den här antecknigen",
+  "MonksEnhancedJournal.msg.NoPlayersSelected": "Ingen spelare har valts som mottagare av den här anteckningen",
   "MonksEnhancedJournal.msg.CannotAddItemType": "Kan inte lägga till föremål av den här typen",
   "MonksEnhancedJournal.msg.YouDontHaveTokenPermissions": "Du har inte tillåtelse att skapa en ny markör för {actorname}.",
   "MonksEnhancedJournal.msg.YouDontHaveDocumentPermissions": "Du har inte tillåtelse att visa {documentName}.",
@@ -399,7 +400,6 @@
   "MonksEnhancedJournal.msg.CouldNotFindLootEntity": "Kan inte visa bytesanteckning",
   "MonksEnhancedJournal.msg.CouldNotFindLootEntityCreating": "Kan inte hitta en bytesanteckning, skapar en ny istället",
   "MonksEnhancedJournal.msg.ThereAreNoCharactersToDistribute": "Det finns inga karaktärer att fördela ut till",
-
   "MonksEnhancedJournal.msg.ThereAreNoMoneyToDistribute": "Det finns inga pengar att dela på",
   "MonksEnhancedJournal.msg.YouDontHaveCharacter": "Du har ingen karaktär kopplad till din användare",
   "MonksEnhancedJournal.msg.CannotTakeLootWithoutGM": "Kan inte ta av bytet om inte SL är närvarande.",
@@ -414,18 +414,14 @@
   "MonksEnhancedJournal.msg.AssignRemainderToCharacter": "Ge resten av pengarna till den här karaktären",
   "MonksEnhancedJournal.msg.SetTheConversionToZero": "Ange omvandlingsfaktorn 0 om den här valutan ska vara standardvaluta. Alla andra valutaomvandlingar utgår från standardvalutan.",
   "MonksEnhancedJournal.msg.DragAnActorToAddToEncounter": "Dra en person eller varelse hit för att lägga den til mötet",
-
   "MonksEnhancedJournal.msg.NoMonstersAtTheMoment": "Inga monster för tillfället",
   "MonksEnhancedJournal.msg.DragAnItemToAddToRewards": "Dra ett föremål till mötet för att lägga till det som belöning",
-
   "MonksEnhancedJournal.msg.NoRewardsAtTheMoment": "Inga belöningar för tillfället",
   "MonksEnhancedJournal.msg.NoDCsAddedPressAddButton": "Ingen svårighetsgrad tillagd. Klicka på Lägg till för att skapa en",
-
   "MonksEnhancedJournal.msg.NoDCsAtTheMoment": "Ingen svårighetsgrad för tilfället",
   "MonksEnhancedJournal.msg.CannotEditNotesWithoutGM": "Kan inte redigera anteckningen om inte SL är närvarande",
   "MonksEnhancedJournal.msg.DragActorsHere": "Dra personer eller varelser hit.",
   "MonksEnhancedJournal.msg.DragItemsHereToAddToLoot": "Dra föremål hit för att lägga det till bytet",
-
   "MonksEnhancedJournal.msg.NoLootAtTheMoment": "Inget plundringsbyte för tillfället",
   "MonksEnhancedJournal.msg.DragPersonPlaceOrganizationToMakeRelationship": "Dra en person, plats eller organisation hit för att skapa en relation",
   "MonksEnhancedJournal.msg.DragPOIPlaceOrganizationToMakeRelationship": "Dra en sevärdhet, plats eller organisation hit för att skapa en relation",
@@ -447,17 +443,14 @@
   "MonksEnhancedJournal.msg.ShopMadeOffer": "Butiken gav dig ett erbjudande. Accepterar du det?",
   "MonksEnhancedJournal.msg.ShopConsideringOffer": "Butiken överväger ett erbjudande",
   "MonksEnhancedJournal.msg.NoteEnoughRemains": "Finns inte tilräcklingt många föremål kvar. Erbjuder bara {quantity}",
-
   "MonksEnhancedJournal.msg.SoldToShop": "Sälj till butiken",
-
   "MonksEnhancedJournal.msg.SaleHasBeenAction": "Försäljningen har blivit {verb}",
   "MonksEnhancedJournal.msg.ClickCustomImage": "... Klicka för att lägga till en anpassad bild",
-
   "MonksEnhancedJournal.msg.CreateNew": "-- Skapa ny --",
   "MonksEnhancedJournal.msg.YouDoNotHavePermissionCreateToken": "Du har inte tillåtelse att skapa nya markörer!",
   "MonksEnhancedJournal.msg.PleaseSelectJournal": "Vänligen välj en anteckning",
   "MonksEnhancedJournal.msg.ShopIsNotReceivingItems": "Butiken tar inte emot föremål just nu",
-
+  "MonksEnhancedJournal.msg.NoItemsToAssign": "Det finns inga föremål som kan ges till målet",
   "MonksEnhancedJournal.Contain": "Innehåller",
   "MonksEnhancedJournal.Cover": "Täcker",
   "MonksEnhancedJournal.Stretch": "Sträcker ut",
@@ -469,10 +462,8 @@
   "MonksEnhancedJournal.Middle": "Mitten",
   "MonksEnhancedJournal.Bottom": "Botten",
   "MonksEnhancedJournal.Fade": "Tona",
-
   "MonksEnhancedJournal.base": "Utökad anteckning",
   "MonksEnhancedJournal.journalentry": "Anteckning",
-  "MonksEnhancedJournal.journalentrytextonly": "Utökad anteckning (enbart text)",
   "MonksEnhancedJournal.actor": "Karaktär",
   "MonksEnhancedJournal.slideshow": "Bildspel",
   "MonksEnhancedJournal.organization": "Organisation",
@@ -486,24 +477,19 @@
   "MonksEnhancedJournal.shop": "Butik",
   "MonksEnhancedJournal.loot": "Plundringbyte",
   "MonksEnhancedJournal.checklist": "Checklista",
-
   "MonksEnhancedJournal.ReadAloud": "Läs upp",
   "MonksEnhancedJournal.DropCap": "Ta bort tak",
-
   "MonksEnhancedJournal.purchasing.locked": "Endast SL",
   "MonksEnhancedJournal.purchasing.confirm": "Bekräfta mottagning",
   "MonksEnhancedJournal.purchasing.free": "Alla",
   "MonksEnhancedJournal.purchasing.request": "Begär att få köpa",
-
   "MonksEnhancedJournal.selling.locked": "Köper inte från spelare",
   "MonksEnhancedJournal.selling.free": "Alla",
   "MonksEnhancedJournal.selling.request": "Kom med ett bud",
-
   "MonksEnhancedJournal.offer.offering": "Erbjudande",
   "MonksEnhancedJournal.offer.accepted": "Accepterat",
   "MonksEnhancedJournal.offer.rejected": "Avvisat",
   "MonksEnhancedJournal.offer.cancelled": "Avbrutet",
-
   "MonksEnhancedJournal.effect.none": "Ingen",
   "MonksEnhancedJournal.effect.slide-fade": "Tona in",
   "MonksEnhancedJournal.effect.slide-fade-left": "Tona in från vänster",
@@ -517,14 +503,12 @@
   "MonksEnhancedJournal.effect.slide-hinge": "Vik in",
   "MonksEnhancedJournal.effect.slide-flip": "Flippa in",
   "MonksEnhancedJournal.effect.slide-page-turn": "Vänd blad",
-
   "MonksEnhancedJournal.queststatus.notactive": "Inaktiv",
   "MonksEnhancedJournal.queststatus.unavailable": "Inte tillgängligt",
   "MonksEnhancedJournal.queststatus.available": "Tillgängligt",
   "MonksEnhancedJournal.queststatus.inprogress": "Pågår",
   "MonksEnhancedJournal.queststatus.completed": "Slutfört",
   "MonksEnhancedJournal.queststatus.failed": "Misslyckat",
-
   "MonksEnhancedJournal.currency.platinum": "Platina",
   "MonksEnhancedJournal.currency.gold": "Guld",
   "MonksEnhancedJournal.currency.electrum": "Electrum",
@@ -533,7 +517,10 @@
   "MonksEnhancedJournal.currency.galacticcredit": "Galaktiska krediter",
   "MonksEnhancedJournal.currency.credit": "Kredit",
   "MonksEnhancedJournal.currency.nuyen": "Nuyen",
-
+  "MonksEnhancedJournal.currency.caps": "Kapsyler",
+  "MonksEnhancedJournal.currency.merchants": "Handlare",
+  "MonksEnhancedJournal.currency.tavs": "Tavs",
+  "MonksEnhancedJournal.currency.hammer": "Hammare",
   "MonksEnhancedJournal.purchasing.hidden": "Dold",
   "MonksEnhancedJournal.purchasing.visible": "Synlig"
 }

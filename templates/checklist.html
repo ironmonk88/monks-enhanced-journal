@@ -36,11 +36,13 @@
         <div class="header-search flexrow" style="flex: 0 0 255px;">
             <i style="flex: 0 0 15px; line-height: 35px;" class="fas fa-search"></i>
             <input type="text" name="search" style="margin-top:1px;font-size:14px !important;" placeholder="{{localize 'MonksEnhancedJournal.SearchChecklist'}}" autocomplete="off">
-            <button type="button" style="flex:0 0 35px;" class="header-control collapse-all" title="{{localize 'FOLDER.Collapse'}}"><i class="fas fa-sort-amount-up fa-fw"></i></button>
         </div>
-        <button class="create-item"><i class="fas fa-feather"></i> {{localize 'MonksEnhancedJournal.CreateEntry'}}</button>
-        <button class="create-folder"><i class="fas fa-folder"></i> {{localize 'FOLDER.Create'}}</button>
     </header>
+    <div class="flexrow" style="flex: 0 0 30px;">
+        <button type="button" style="flex:0 0 35px;" class="header-control collapse-all" title="{{localize 'FOLDER.Collapse'}}"><i class="fas fa-sort-amount-up fa-fw"></i></button>
+        <button type="button" class="create-item"><i class="fas fa-feather"></i> {{localize 'MonksEnhancedJournal.CreateEntry'}}</button>
+        <button type="button" class="create-folder"><i class="fas fa-folder"></i> {{localize 'FOLDER.Create'}}</button>
+    </div>
     <div class="flexcol" style="height: 100%; overflow: hidden;">
         <ol class="checklist-list">
             {{~#each tree.children as |f fi|}}

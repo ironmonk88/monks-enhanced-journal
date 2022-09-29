@@ -64,6 +64,8 @@ export class PersonSheet extends EnhancedJournalSheet {
         data.relationships = {};
         for (let item of (data.data.flags['monks-enhanced-journal']?.relationships || [])) {
             let entity = await this.getDocument(item, "JournalEntry", false);
+            if (!(entity instanceof JournalEntry || entity instanceof JournalEntryPage))
+                continue;
             if (entity && entity.testUserPermission(game.user, "LIMITED") && (game.user.isGM || !item.hidden)) {
                 let page = (entity instanceof JournalEntryPage ? entity : entity.pages.contents[0]);
                 let type = getProperty(page, "flags.monks-enhanced-journal.type");

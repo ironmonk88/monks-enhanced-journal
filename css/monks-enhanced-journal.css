@@ -3251,6 +3251,16 @@ monks-journal-sheet.journal-sheet form select {
     color: #968c6a;
 }
 
+.vaesen.monks-enhanced-journal .monks-enhanced-journal .content,
+.vaesen.monks-enhanced-journal .monks-enhanced-journal .content .sheet.journal-sheet {
+    width: 100%;
+    max-width: 100%;
+}
+
+.vaesen.monks-enhanced-journal .monks-journal-sheet .header-name input {
+    filter: none;
+}
+
 .cyphersystem.monks-enhanced-journal .monks-journal-sheet.sheet .items-list .item-name,
 .cyphersystem.monks-enhanced-journal .monks-journal-sheet.sheet .items-list .item-name h3,
 .cyphersystem.monks-enhanced-journal .monks-journal-sheet.sheet .items-list .item-name h4 {
@@ -3480,7 +3490,8 @@ span.unknown-link {
 
 #MonksEnhancedJournal .journal-sheet-container .sidebar .directory-header,
 #MonksEnhancedJournal .journal-sheet-container .sidebar .action-buttons,
-#MonksEnhancedJournal .journal-sheet-container .window-resizable-handle {
+#MonksEnhancedJournal .journal-sheet-container .window-resizable-handle,
+#MonksEnhancedJournal .journal-subsheet .window-resizable-handle {
     display: none;
 }
 

@@ -81,6 +81,8 @@ export class ShopSheet extends EnhancedJournalSheet {
         data.relationships = {};
         for (let item of (data.data.flags['monks-enhanced-journal']?.relationships || [])) {
             let entity = await this.getDocument(item, "JournalEntry", false);
+            if (!(entity instanceof JournalEntry || entity instanceof JournalEntryPage))
+                continue;
             if (entity && entity.testUserPermission(game.user, "LIMITED") && (game.user.isGM || !item.hidden)) {
                 let page = (entity instanceof JournalEntryPage ? entity : entity.pages.contents[0]);
                 let type = getProperty(page, "flags.monks-enhanced-journal.type");
@@ -349,11 +351,7 @@ export class ShopSheet extends EnhancedJournalSheet {
                             setProperty(itemData, "flags.monks-enhanced-journal.lock", true);
                             setProperty(itemData, "flags.monks-enhanced-journal.from", actor.name);
 
-                            //if (!game.user.isGM)
-                                MonksEnhancedJournal.emit("sellItem", { shopid: this.object.uuid, itemdata: itemData });
-                            //else {
-                             //   this.addItem(itemData);
-                            //}
+                            MonksEnhancedJournal.emit("sellItem", { shopid: this.object.uuid, itemdata: itemData });
 
                             //remove the item from the actor
                             if (result.quantity == max) {

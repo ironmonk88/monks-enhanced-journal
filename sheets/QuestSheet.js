@@ -67,6 +67,8 @@ export class QuestSheet extends EnhancedJournalSheet {
         data.relationships = {};
         for (let item of (data.data.flags['monks-enhanced-journal']?.relationships || [])) {
             let entity = await this.getDocument(item, "JournalEntry", false);
+            if (!(entity instanceof JournalEntry || entity instanceof JournalEntryPage))
+                continue;
             if (entity && entity.testUserPermission(game.user, "LIMITED") && (game.user.isGM || !item.hidden)) {
                 let page = (entity instanceof JournalEntryPage ? entity : entity.pages.contents[0]);
                 let type = getProperty(page, "flags.monks-enhanced-journal.type");
@@ -460,7 +462,7 @@ export class QuestSheet extends EnhancedJournalSheet {
         const dragData = { from: 'monks-enhanced-journal' };
 
         if (li.dataset.document == 'Item') {
-            let reward = this.getActiveReward();
+            let reward = this.getReward();
             if (reward == undefined)
                 return;
 
@@ -607,15 +609,16 @@ export class QuestSheet extends EnhancedJournalSheet {
             if (items) {
                 let item = items.find(i => i._id == id);
                 if (item) {
-                    let max = getValue(item, "remaining", null);
+                    let max = getProperty(item, "flags.monks-enhanced-journal.remaining");
                     let result = await QuestSheet.confirmQuantity(item, max, "transfer", false);
                     if ((result?.quantity ?? 0) > 0) {
-                        if (item.data.remaining < result?.quantity) {
+                        if (getProperty(item, "flags.monks-enhanced-journal.remaining") < result?.quantity) {
                             ui.notifications.warn(i18n("MonksEnhancedJournal.msg.CannotTransferItemQuantity"));
                             return false;
                         }
 
                         this.purchaseItem.call(this, entry, id, result.quantity, { actor, remaining: true });
+                        result.quantity *= (getValue(item, quantityname()) || 1);   // set the quantity if we're selling quantities of.
                         return result;
                     }
                 }
