@@ -96,6 +96,11 @@ export class EnhancedJournalSheet extends JournalPageSheet {
         return ["encounter", "loot", "organization", "person", "place", "poi", "quest", "shop"];
     }
 
+    _canUserView(user) {
+        if (this.object.compendium) return user.isGM || !this.object.compendium.private;
+        return this.object.parent.testUserPermission(user, this.options.viewPermission);
+    }
+
     _inferDefaultMode() {
         const hasImage = !!this.object.img;
         if (this.object.limited) return hasImage ? "image" : null;
@@ -196,6 +201,9 @@ export class EnhancedJournalSheet extends JournalPageSheet {
         if (this.enhancedjournal)
             this._minimized = true;
 
+        if (!this._searchFilters)
+            this._searchFilters = [];
+
         await super._render(force, options);
 
         if (this.enhancedjournal)
@@ -275,17 +283,22 @@ export class EnhancedJournalSheet extends JournalPageSheet {
 
         new EnhancedJournalContextMenu($(html), (this.type == "text" ? ".editor" : ".tab.description .tab-inner"), this._getDescriptionContextOptions());
 
-        $("a.inline-request-roll", html).click(MonksEnhancedJournal._onClickInlineRequestRoll.bind(this));
+        //$("a.inline-request-roll", html).click(MonksEnhancedJournal._onClickInlineRequestRoll.bind(this));
         $("a.picture-link", html).click(MonksEnhancedJournal._onClickPictureLink.bind(this));
 
         $('a[href^="#"]', html).click(this._onClickAnchor.bind(this));
 
-        $('.sheet-image .profile', html).contextmenu(() => { $('.fullscreen-image').addClass("show"); });
-        $('.fullscreen-image', html).click(() => { $('.fullscreen-image', html).removeClass("show"); });
+        $('.sheet-image .profile', html).contextmenu(() => {
+            const ip = new ImagePopout(this.object.src, {
+                uuid: this.object.uuid,
+                title: this.object.name,
+                caption: this.object.image?.caption
+            });
+            ip.shareImage = () => Journal.showDialog(this.object, { showAs: "image" });
+            ip.render(true);
+        });
 
         html.find('img[data-edit],div.picture-img').click(this._onEditImage.bind(this));
-
-        $('.fullscreen-image,.picture-img', html).on("wheel", this.scaleImage.bind(this));
 
         $('.play-journal-sound', html).prop("disabled", false).click(this.toggleSound.bind(this));
 
@@ -380,7 +393,7 @@ export class EnhancedJournalSheet extends JournalPageSheet {
     }
 
     _getDescriptionContextOptions() {
-        return [
+        let menu = [
             {
                 name: "Show in Chat",
                 icon: '<i class="fas fa-comment"></i>',
@@ -398,6 +411,33 @@ export class EnhancedJournalSheet extends JournalPageSheet {
                 }
             }
         ];
+
+        if (game.modules.get("narrator-tools")?.active) {
+            menu = menu.concat(
+                [{
+                    icon: '<i class="fas fa-comment"></i>',
+                    name: 'Describe',
+                    condition: game.user.isGM,
+                    callback: () => {
+                        const selection = NarratorTools._getSelectionText();
+                        if (selection)
+                            NarratorTools.chatMessage.describe(selection);
+                    },
+                },
+                {
+                    icon: '<i class="fas fa-comment-dots"></i>',
+                    name: 'Narrate',
+                    condition: game.user.isGM,
+                    callback: () => {
+                        const selection = NarratorTools._getSelectionText();
+                        if (selection)
+                            NarratorTools.chatMessage.narrate(selection);
+                    },
+                }]
+            );
+        }
+
+        return menu;
     }
 
     _disableFields(form) {
@@ -417,6 +457,12 @@ export class EnhancedJournalSheet extends JournalPageSheet {
                     coinage = (coin && coin.system.quantity); //price.value[denomination]);
                 }
                 break;
+            case 'wfrp4e':
+                {
+                    let currency = MonksEnhancedJournal.currencies.find(c => c.id == denomination);
+                    let coin = actor.itemCategories.money.find(i => { return i.type == "money" && i.name == currency.name });
+                    coinage = parseInt((coin && coin.system.quantity.value) || 0);
+                } break;
             case 'mythras':
                 {
                     let currency = MonksEnhancedJournal.currencies.find(c => c.id == denomination);
@@ -478,7 +524,7 @@ export class EnhancedJournalSheet extends JournalPageSheet {
         return this.constructor.getCurrency(actor, denomination);
     }
 
-    static addCurrency(actor, denomination, value) {
+    static async addCurrency(actor, denomination, value) {
         let changes = {};
         if (value < 0 && setting("purchase-conversion")) {
             let currencies = duplicate(MonksEnhancedJournal.currencies || []).filter(c => c.convert != undefined);
@@ -555,8 +601,16 @@ export class EnhancedJournalSheet extends JournalPageSheet {
             let promises = [];
             for (let [k, v] of Object.entries(changes)) {
                 let coinage = actor.items.find(i => { return i.isCoinage && i.system.price.value[k] == 1 });
-                updates[`data.quantity`] = v;
-                promises.push(coinage.update(updates));
+                if (!coinage) {
+                    let itemData = MonksEnhancedJournal.pf2eCurrency[k];
+                    setProperty(itemData, "system.quantity", v);
+                    let items = await actor.createEmbeddedDocuments("Item", [itemData]);
+                    if (items.length)
+                        coinage = items[0];
+                } else {
+                    updates[`system.quantity`] = v;
+                    promises.push(coinage.update(updates));
+                }
             }
             return Promise.all(promises);
         } else if (game.system.id == 'mythras') {
@@ -565,7 +619,24 @@ export class EnhancedJournalSheet extends JournalPageSheet {
                 let currency = MonksEnhancedJournal.currencies.find(c => c.id == k);
                 let coinage = actor.items.find(i => { return i.type == "currency" && i.name == currency });
                 if (coinage) {
-                    updates[`data.quantity`] = v;
+                    updates[`system.quantity`] = v;
+                    promises.push(coinage.update(updates));
+                }
+            }
+            return Promise.all(promises);
+        } else if (game.system.id == 'wfrp4e') {
+            let promises = [];
+            for (let [k, v] of Object.entries(changes)) {
+                let currency = MonksEnhancedJournal.currencies.find(c => c.id == k);
+                let coinage = actor.itemCategories.money.find(i => { return i.type == "money" && i.name == currency.name });
+                if (!coinage) {
+                    let itemData = MonksEnhancedJournal.wfrp4eCurrency[k];
+                    setProperty(itemData, "system.quantity.value", v);
+                    let items = await actor.createEmbeddedDocuments("Item", [itemData]);
+                    if (items.length)
+                        coinage = items[0];
+                } else {
+                    updates[`system.quantity.value`] = v;
                     promises.push(coinage.update(updates));
                 }
             }
@@ -714,7 +785,6 @@ export class EnhancedJournalSheet extends JournalPageSheet {
             current: this.object.img,
             callback: path => {
                 $(event.currentTarget).attr('src', path).css({ backgroundImage: `url(${path})` });
-                $('.fullscreen-image > img', this.element).attr('src', path)
                 $('img[data-edit="src"]', this.element).css({ opacity: '' });
                 $('.tab.picture .instruction', this.element).hide();
                 $('.picture-area .instruction', this.element).hide();
@@ -950,6 +1020,7 @@ export class EnhancedJournalSheet extends JournalPageSheet {
                 img: item.img,
                 hide: flags.hide,
                 lock: flags.lock,
+                consumable: flags.consumable,
                 from: flags.from,
                 quantity: flags.quantity,
                 qtyof: qtyof,
@@ -963,7 +1034,7 @@ export class EnhancedJournalSheet extends JournalPageSheet {
                 requests: requests
             };
 
-            if (game.user.isGM || this.object.isOwner || (item.hide !== true && (flags.quantity !== 0 || setting('show-zero-quantity')))) {
+            if (game.user.isGM || this.object.isOwner || (flags.hide !== true && (flags.quantity !== 0 || setting('show-zero-quantity')))) {
                 let groupId = (!sort || sort == "name" ? this.slugify(item.type) : "");
                 if (groups[groupId] == undefined)
                     groups[groupId] = { id: groupId, name: item.type, items: [] };
@@ -1094,7 +1165,7 @@ export class EnhancedJournalSheet extends JournalPageSheet {
 
     static async createRequestMessage(entry, item, actor, shop) {
         let data = getProperty(item, "flags.monks-enhanced-journal");
-        let price = MEJHelpers.getPrice(data.cost); //item, "cost", !shop);
+        let price = shop ? MEJHelpers.getPrice(data.cost) : null; //item, "cost", !shop);
         data.sell = price?.value;
         data.currency = price?.currency;
         data.maxquantity = data.maxquantity ?? data.quantity;
@@ -1400,6 +1471,8 @@ export class EnhancedJournalSheet extends JournalPageSheet {
                 let clear = $('[name="clear"]').prop("checked");
                 let duplicate = $('[name="duplicate"]').val();
 
+                let useFrom = $('[name="from"]').prop("checked");
+
                 let table = await fromUuid(rolltable);
                 if (table) {
                     await that.object.setFlag('monks-enhanced-journal', "lastrolltable", rolltable);
@@ -1518,7 +1591,8 @@ export class EnhancedJournalSheet extends JournalPageSheet {
                                             cost: `${cost.value} ${cost.currency}`,
                                             quantity: count != "" ? await getDiceRoll(count) : 1
                                         };
-                                        itemData.from = table.name;
+                                        if (useFrom)
+                                            setProperty(itemData, "flags.monks-enhanced-journal.from", table.name);
                                         items.push(itemData);
                                     }
                                 } else if (itemtype == "actors" && item instanceof Actor) {
@@ -2067,11 +2141,26 @@ export class EnhancedJournalSheet extends JournalPageSheet {
         }
 
         // If we've made it here then we're good to process this offer
+        let destActor;
+        let actorLink = this.object.getFlag('monks-enhanced-journal', 'actor');
+        if (actorLink) 
+            destActor = game.actors.find(a => a.id == actorLink.id);
+
         for (let [k, v] of Object.entries(offering.currency)) {
             this.addCurrency(actor, k, -v);
+            if (destActor)
+                this.addCurrency(destActor, k, v);
         }
 
         for (let item of offering.items) {
+            if (destActor) {
+                let itemData = duplicate(item.item);
+                delete itemData._id;
+                let itemQty = getValue(itemData, quantityname(), 1);
+                setValue(itemData, quantityname(), item.qty * itemQty);
+                let sheet = destActor.sheet;
+                sheet._onDropItem({ preventDefault: () => { } }, { data: itemData });
+            }
             if (item.qty == item.max) {
                 await item.item.delete();
             } else {

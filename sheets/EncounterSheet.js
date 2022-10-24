@@ -362,6 +362,17 @@ export class EncounterSheet extends EnhancedJournalSheet {
     static async createEncounter(templates, options) {
         canvas.tokens.releaseAll();
 
+        let folder = game.folders.find(f => f.name == "Encounter Monsters" && f.folder == undefined);
+        if (!folder) {
+            let folderData = {
+                name: "Encounter Monsters",
+                type: "Actor",
+                sorting: "m",
+                folder: null
+            };
+            folder = await Folder.create(folderData);
+        }
+
         let tokens = [];
         for (let ea of (this.flags['monks-enhanced-journal']?.actors || [])) {
             let actor = await EnhancedJournalSheet.getDocument(ea);//Actor.implementation.fromDropData(ea);
@@ -369,10 +380,11 @@ export class EncounterSheet extends EnhancedJournalSheet {
                 if (!actor.isOwner) {
                     return ui.notifications.warn(format("MonksEnhancedJournal.msg.YouDontHaveTokenPermissions", { actorname: actor.name }));
                 }
-                //if (actor.compendium) {
-                //    const actorData = game.actors.fromCompendium(actor);
-                //    actor = await Actor.implementation.create(actorData);
-                //}
+                if (actor.compendium) {
+                    const actorData = game.actors.fromCompendium(actor);
+                    actorData.folder = folder;
+                    actor = await Actor.implementation.create(actorData);
+                }
 
                 // Prepare the Token data
                 let quantity = String(ea.quantity || "1");

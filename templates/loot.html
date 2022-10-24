@@ -1,11 +1,10 @@
 <form class="flexcol journal-subsheet sheet-body {{entrytype}}{{#if isGM}} gm{{/if}}{{#if owner}} owner{{/if}}" editable="{{editable}}">
     <div class="loot-container flexcol">
-        <div class="fullscreen-image"><img src="{{data.src}}" /></div>
         <header class="sheet-header journal-header flexrow" style="max-height: 162px; overflow: hidden;">
             <div class="sheet-image">
                 <img class="profile" src="{{data.src}}" data-edit="src" onerror="if (!this.imgerr) { this.imgerr = true; this.src = 'modules/monks-enhanced-journal/assets/loot.png' }">
             </div>
-            <section class="header-details">
+            <section class="header-details" style="width: calc(100% - 160px);">
                 <h1 class="lootname flexrow">
                     <i class="fas {{data.icon}} sheet-icon"></i>
                     <input name="name" type="text" value="{{data.name}}" placeholder="{{localize 'MonksEnhancedJournal.LootName'}}">
@@ -21,56 +20,44 @@
                         {{ selectOptions purchaseOptions selected=data.flags.monks-enhanced-journal.purchasing localize=true }}
                     </select>
                 </div>
-                {{#if currency}}
-                <div class="form-group currency-group">
-                    <label>
-                        {{localize 'MonksEnhancedJournal.Currency'}}
-                    </label>
-                    <div class="form-fields" style="flex-wrap:nowrap;">
-                        {{#each currency}}
-                        <label>{{localize this.name}}</label>
-                        <input type="text" name="flags.monks-enhanced-journal.currency.{{this.id}}" placeholder="0" value="{{this.value}}" data-dtype="Number" style="text-align:right;" />
+                {{#if isGM }}
+                <ol class="items-list loot-characters" style="flex: 0 0 138px; overflow-y: hidden; ">
+                    <ol class="items-list flexrow">
+                        {{#each characters}}
+                        <li class="loot-character" title="{{this.name}}" id="{{this.id}}">
+                            <img src="{{this.img}}" />
+                            <div class="character-name">{{this.name}}</div>
+                            {{#if this.letter}}<div class="loot-player" title="{{this.username}}" style="background-color: {{this.color}};border-color: {{this.border}};">{{this.letter}}</div>{{/if}}
+                        </li>
+                        {{else}}
+                        {{#if owner}}
+                        <li class="instruction">{{localize 'MonksEnhancedJournal.msg.DragActorsHere'}}</li>
+                        {{/if}}
                         {{/each}}
-                    </div>
-                </div>
+                    </ol>
+                </ol>
                 {{/if}}
-                <div class="form-group owner-only" style="align-items: flex-start;">
-                    <label>{{localize 'MonksEnhancedJournal.Players'}}</label>
-                    <div class="configure-permissions" title="{{localize 'MonksEnhancedJournal.ConfigurePermissions'}}" style="flex: 0 0 25px;cursor: pointer;"><i class="fas fa-lock"></i></div><span style="flex: 1;">{{players}}</span>
-                </div>
             </section>
         </header>
         <section class="sheet-body half-size flexcol">
-            {{#if isGM }}
-            <ol class="items-list loot-characters" style="flex: 0 0 138px; overflow-y: hidden; ">
+            {{#if currency}}
+            <ol class="items-list loot-items currency-group" style="flex: 0 0 70px;">
                 <li class="items-header flexrow">
-                    <h3 class="item-name noborder flexrow">{{localize 'MonksEnhancedJournal.Characters'}}</h3>
-
-                    <div class="item-controls flexrow owner-only" style="flex: 0 0 160px;">
-                        <a class="item-control add-players" title="{{localize 'MonksEnhancedJournal.ReplaceWithPlayerCharacters'}}">
-                            <i class="fas fa-user"></i> {{localize 'MonksEnhancedJournal.Players'}}
-                        </a>
+                    <h3 class="item-name noborder flexrow">{{localize 'MonksEnhancedJournal.Currency'}}</h3>
+                    <div class="item-controls flexrow owner-only">
                         <a class="item-control split-money" title="{{localize 'MonksEnhancedJournal.SplitBetweenPlayers'}}">
                             <i class="fas fa-dollar-sign"></i> {{localize 'MonksEnhancedJournal.Distribute'}}
                         </a>
                     </div>
                 </li>
-                <ol class="items-list flexrow">
-                    {{#each characters}}
-                    <li class="loot-character" title="{{this.name}}" id="{{this.id}}">
-                        <img src="{{this.img}}" />
-                        <div class="character-name">{{this.name}}</div>
-                        {{#if this.letter}}<div class="loot-player" title="{{this.username}}" style="background-color: {{this.color}};border-color: {{this.border}};">{{this.letter}}</div>{{/if}}
-                    </li>
-                    {{else}}
-                    {{#if owner}}
-                    <li class="instruction">{{localize 'MonksEnhancedJournal.msg.DragActorsHere'}}</li>
-                    {{/if}}
+                <li class="flexrow" style="padding-top: 5px;">
+                    {{#each currency}}
+                    <label>{{localize this.name}}</label>
+                    <input type="text" name="flags.monks-enhanced-journal.currency.{{this.id}}" placeholder="0" value="{{this.value}}" data-dtype="Number" style="text-align:right;" />
                     {{/each}}
-                </ol>
+                </li>
             </ol>
             {{/if}}
-
             <ol class="items-list loot-items">
                 <li class="items-header flexrow">
                     <h3 class="item-name noborder flexrow">{{localize 'MonksEnhancedJournal.Items'}}</h3>
@@ -92,7 +79,7 @@
                     <li class="items-header flexrow{{#if this.collapsed}} collapsed{{/if}}" data-id="{{this.id}}">
                         <h3 class="item-name noborder flexrow">{{localize this.name}} <span class="item-count">({{this.items.length}} {{localize 'MonksEnhancedJournal.items'}})</span></h3>
                     </li>
-                    <ul class="item-list" {{#if this.collapsed}}style="display: none;"{{/if}}>
+                    <ul class="item-list" {{#if this.collapsed}} style="display: none;" {{/if}}>
                         {{#each this.items}}
                         <li class="item flexrow" data-id="{{this.id}}" data-container="items" data-document="Item" draggable="false">
                             <div class="item-name flexrow">

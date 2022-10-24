@@ -14,6 +14,7 @@ export class OrganizationSheet extends EnhancedJournalSheet {
             tabs: [{ navSelector: ".tabs", contentSelector: ".sheet-body", initial: "description" }],
             dragDrop: [
                 { dropSelector: ".organization-container" },
+                { dragSelector: ".actor-img img", dropSelector: "null" },
                 { dragSelector: ".sheet-icon", dropSelector: "#board" }
             ],
             scrollY: [".tab.description .tab-inner"]
@@ -46,6 +47,16 @@ export class OrganizationSheet extends EnhancedJournalSheet {
             v.documents = v.documents.sort((a, b) => a.name.localeCompare(b.name));
         }
 
+        let actorLink = this.object.getFlag('monks-enhanced-journal', 'actor');
+        if (actorLink) {
+            let actor = game.actors.find(a => a.id == actorLink.id);
+
+            if (actor && actor.testUserPermission(game.user, "OBSERVER")) {
+                data.actor = { id: actor.id, name: actor.name, img: actor.img };
+            }
+        }
+        data.canViewActor = !!data.actor;
+
         data.offerings = this.getOfferings();
 
         return data;
@@ -68,6 +79,9 @@ export class OrganizationSheet extends EnhancedJournalSheet {
         $('.relationships .items-list .actor-icon', html).click(this.openRelationship.bind(this));
         $('.offerings .items-list .actor-icon', html).click(this.openOfferingActor.bind(this));
         //$('.item-relationship .item-field', html).on('change', this.alterRelationship.bind(this));
+
+        const actorOptions = this._getPersonActorContextOptions();
+        if (actorOptions) new ContextMenu($(html), ".actor-img", actorOptions);
 
         $('.item-private', html).on('click', this.alterItem.bind(this));
         $('.make-offering', html).on('click', this.makeOffer.bind(this));
@@ -105,6 +119,22 @@ export class OrganizationSheet extends EnhancedJournalSheet {
         return flattenObject(data);
     }
 
+    _onDragStart(event) {
+        if ($(event.currentTarget).hasClass("sheet-icon"))
+            return super._onDragStart(event);
+
+        const target = event.currentTarget;
+
+        if (target.dataset.document == "Actor") {
+            const dragData = {
+                uuid: target.dataset.uuid,
+                type: target.dataset.document
+            };
+
+            event.dataTransfer.setData("text/plain", JSON.stringify(dragData));
+        }
+    }
+
     _canDragDrop(selector) {
         return game.user.isGM || this.object.isOwner;
     }
@@ -118,7 +148,9 @@ export class OrganizationSheet extends EnhancedJournalSheet {
             return false;
         }
 
-        if (data.type == 'JournalEntry') {
+        if (data.type == 'Actor') {
+            this.addActor(data);
+        } else if (data.type == 'JournalEntry') {
             this.addRelationship(data);
         } else if (data.type == 'JournalEntryPage') {
             let doc = await fromUuid(data.uuid);
@@ -147,5 +179,56 @@ export class OrganizationSheet extends EnhancedJournalSheet {
         }
 
         log('drop data', event, data);
+    }
+
+    async addActor(data) {
+        let actor = await this.getItemData(data);
+
+        if (actor) {
+            this.object.setFlag("monks-enhanced-journal", "actor", actor);
+        }
+    }
+
+    openActor(event) {
+        let actorLink = this.object.getFlag('monks-enhanced-journal', 'actor');
+        let actor = game.actors.find(a => a.id == actorLink.id);
+        if (!actor)
+            return;
+
+        if (event.newtab == true || event.altKey)
+            actor.sheet.render(true);
+        else
+            this.open(actor);
+    }
+
+    removeActor() {
+        this.object.unsetFlag('monks-enhanced-journal', 'actor');
+        $('.actor-img', this.element).remove();
+    }
+
+    _getPersonActorContextOptions() {
+        return [
+            {
+                name: "SIDEBAR.Delete",
+                icon: '<i class="fas fa-trash"></i>',
+                condition: () => game.user.isGM,
+                callback: li => {
+                    const id = li.data("id");
+                    Dialog.confirm({
+                        title: `${game.i18n.localize("SIDEBAR.Delete")} Actor Link`,
+                        content: i18n("MonksEnhancedJournal.ConfirmRemoveLink"),
+                        yes: this.removeActor.bind(this)
+                    });
+                }
+            },
+            {
+                name: i18n("MonksEnhancedJournal.OpenActorSheet"),
+                icon: '<i class="fas fa-user fa-fw"></i>',
+                condition: () => game.user.isGM,
+                callback: li => {
+                    this.openActor.call(this, { newtab: true });
+                }
+            }
+        ];
     }
 }

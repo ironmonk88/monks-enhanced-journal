@@ -13,12 +13,9 @@ import { SlideshowSheet } from "./sheets/SlideshowSheet.js"
 import { OrganizationSheet } from "./sheets/OrganizationSheet.js"
 import { ShopSheet } from "./sheets/ShopSheet.js"
 import { LootSheet } from "./sheets/LootSheet.js"
-import { TextEntrySheet } from "./sheets/TextEntrySheet.js"
-import { JournalEntrySheet } from "./sheets/JournalEntrySheet.js"
+import { TextEntrySheet, TextImageEntrySheet } from "./sheets/TextEntrySheet.js"
 import { backgroundinit } from "./plugins/background.plugin.js"
-import { dcconfiginit } from "./plugins/dcconfig.plugin.js"
 import { NoteHUD } from "./apps/notehud.js"
-import { EnhancedJournalSheet } from "./sheets/EnhancedJournalSheet.js";
 import { getValue, setValue, MEJHelpers } from "./helpers.js";
 
 export let debugEnabled = 0;
@@ -135,6 +132,13 @@ export class MonksEnhancedJournal {
         game.socket.emit(MonksEnhancedJournal.SOCKET, args, (resp) => { });
     }
 
+    static getSystemPrice(item) {
+        return MEJHelpers.getSystemPrice(item, MonksEnhancedJournal.pricename);
+    }
+    static getPrice(price) {
+        return MEJHelpers.getPrice(price);
+    }
+
     static init() {
         log('Initializing Monks Enhanced Journal');
         registerSettings();
@@ -154,6 +158,8 @@ export class MonksEnhancedJournal {
             MonksEnhancedJournal.quantityname = "technology.quantity";
         } else if (game.system.id == "earthdawn4e") {
             MonksEnhancedJournal.currencyname = "money";
+        } else if (game.system.id == "TheWitcherTRPG") {
+            MonksEnhancedJournal.pricename = "cost";
         }
 
         game.MonksEnhancedJournal = this;
@@ -220,7 +226,6 @@ export class MonksEnhancedJournal {
             .reduce((r, [k, v]) => ({ ...r, [k]: v }), {});
 
         CONFIG.TextEditor.enrichers.push({ id: 'MonksEnhancedJournalPicture', pattern: new RegExp(`@(Picture)\\[([^\\]]+)\\](?:{([^}]+)})?`, 'g'), enricher: MonksEnhancedJournal._createPictureLink });
-        CONFIG.TextEditor.enrichers.push({ id: 'MonksEnhancedJournalRequest', pattern: /@(Request|Contested)\[([^\]]+)\](?:{([^}]+)})?/gi, enricher: MonksEnhancedJournal._createRequestRoll });
 
         Note.prototype._canHUD = function(user, event) {
             return game.user.isGM && this.entry;
@@ -363,8 +368,9 @@ export class MonksEnhancedJournal {
             }
         }
 
-        Journal.prototype.constructor.showDialog = async function (doc) {
+        Journal.prototype.constructor.showDialog = async function (doc, options) {
             if (!((doc instanceof JournalEntry) || (doc instanceof JournalEntryPage))) return;
+
             if (!doc.isOwner) return ui.notifications.error("JOURNAL.ShowBadPermissions", { localize: true });
             if (game.users.size < 2) return ui.notifications.warn("JOURNAL.ShowNoPlayers", { localize: true });
 
@@ -377,7 +383,8 @@ export class MonksEnhancedJournal {
                 ...ownership.map(([name, level]) => ({ level, label: `OWNERSHIP.${name}` }))
             ];
             const hasImage = (doc instanceof JournalEntryPage) && ((["loot", "organization", "person", "place", "poi", "quest", "shop", "picture"].includes(doc.type) || (doc.type === "image")) && !!doc.src);
-            let showAs = doc.getFlag("monks-enhanced-journal", "showAs") || (doc.type == "image" ? "image" : "journal");
+
+            let showAs = doc.getFlag("monks-enhanced-journal", "showAs") || (doc.type == "image" ? "image" : options?.showAs || "journal");
             if (!hasImage && showAs != "journal")
                 showAs = "journal";
             const html = await renderTemplate("modules/monks-enhanced-journal/templates/dialog-show.html", { users, levels, hasImage, showAs });
@@ -833,6 +840,16 @@ export class MonksEnhancedJournal {
         let oldImportDocument = CompendiumCollection.prototype.importDocument;
         CompendiumCollection.prototype.importDocument = function (document, options = {}) {
             options.renderSheet = false;
+            if (document instanceof JournalEntry && document.pages.size == 1 && !!getProperty(document.pages.contents[0], "flags.monks-enhanced-journal.type")) {
+                let type = getProperty(document.pages.contents[0], "flags.monks-enhanced-journal.type");
+                if (type == "base" || type == "oldentry") type = "journalentry";
+                let types = MonksEnhancedJournal.getDocumentTypes();
+                if (types[type]) {
+                    setProperty(document, "_source.flags.monks-enhanced-journal.img", document.pages.contents[0].src);
+                }
+            }
+
+            MonksEnhancedJournal.fixType(this.object);
             return oldImportDocument.call(this, document, options);
         }
 
@@ -883,7 +900,7 @@ export class MonksEnhancedJournal {
 
             let entity = this.page || this.entry;
             if (allowed && this.entry) {
-                if (!MonksEnhancedJournal.openJournalEntry(this.entry)) {
+                if (!MonksEnhancedJournal.openJournalEntry(this.entry, options)) {
                     let page = this.page;
                     if (this.entry.pages.size == 1) {
                         page = this.entry.pages.contents[0];
@@ -921,10 +938,10 @@ export class MonksEnhancedJournal {
         }
 
         let clickNote = function (wrapped, ...args) {
-            if (setting("show-chat-bubbles") && this.document.flags['monks-enhanced-journal']?.chatbubble) {
-                let journal = game.journal.get(this.entryId);
+            if ((setting("show-chat-bubbles") || !game.user.isGM) && this.document.flags['monks-enhanced-journal']?.chatbubble) {
+                let journal = game.journal.get(this.document.entryId);
                 if (journal && !journal.testUserPermission(game.user, "OBSERVER"))
-                    MonksEnhancedJournal.showAsChatBubble(this, journal);
+                    MonksEnhancedJournal.showAsChatBubble(this, journal, this.document.pageId);
             }
             return wrapped(...args);
         }
@@ -948,7 +965,7 @@ export class MonksEnhancedJournal {
         }
 
         let onCanControlToken = function (wrapped, ...args) {
-            if (setting("show-chat-bubbles") && this.document.flags['monks-enhanced-journal']?.chatbubble) {
+            if ((setting("show-chat-bubbles") || !game.user.isGM) && this.document.flags['monks-enhanced-journal']?.chatbubble) {
                 let journal = game.journal.get(this.document.flags['monks-enhanced-journal']?.chatbubble);
                 if (journal)
                     MonksEnhancedJournal.showAsChatBubble(this, journal);
@@ -1276,6 +1293,9 @@ export class MonksEnhancedJournal {
     }
 
     static async fixPage(document) {
+        if (!document)
+            return;
+
         // fix the splitting of Journal Entry pages
         let type = getProperty(document, "flags.monks-enhanced-journal.type");
         let flags = getProperty(document, "flags.monks-enhanced-journal");
@@ -1374,15 +1394,33 @@ export class MonksEnhancedJournal {
                 label: i18n(v)
             });
         }
+        DocumentSheetConfig.registerSheet(JournalEntryPage, "monks-enhanced-journal", TextImageEntrySheet, {
+            types: ["journalentry"],
+            makeDefault: false,
+            label: "Text and Image"
+        });
 
         game.system.documentTypes.JournalEntryPage = game.system.documentTypes.JournalEntryPage.concat(Object.keys(types)).sort();
         CONFIG.JournalEntryPage.typeLabels = mergeObject((CONFIG.JournalEntryPage.typeLabels || {}), labels);
     }
 
-    static showAsChatBubble(object, journal) {
+    static showAsChatBubble(object, journal, pageId) {
         if (!journal || !journal.pages || journal.pages.size == 0)
             return;
-        let page = journal.pages.contents[0];
+
+        let page;
+
+        if (journal.pages.size == 1 && !!getProperty(journal.pages.contents[0], "flags.monks-enhanced-journal.type")) {
+            let type = getProperty(journal.pages.contents[0], "flags.monks-enhanced-journal.type") || getProperty(journal, "flags.monks-enhanced-journal.type");
+            if (type == "base" || type == "oldentry") type = "journalentry";
+            let types = MonksEnhancedJournal.getDocumentTypes();
+            if (types[type])
+                page = journal.pages.contents[0];
+        }
+        if (pageId && !page) {
+            journal.pages.get(pageId);
+        }
+
         if (!page)
             return;
 
@@ -1511,14 +1549,17 @@ export class MonksEnhancedJournal {
         }
 
         //if the enhanced journal is already open, then just pass it the new object, if not then let it render as normal
+        options = mergeObject(options, { force: options?.tempOwnership, autoPage: true });
         if (MonksEnhancedJournal.journal) {
             if (doc)
-                MonksEnhancedJournal.journal.open(doc, options.newtab, { force: options?.tempOwnership, anchor: options?.anchor, autoPage: true });
-            else
-                MonksEnhancedJournal.journal.render(true, { anchor: options?.anchor, force: options?.tempOwnership });
+                MonksEnhancedJournal.journal.open(doc, options.newtab, options);
+            else {
+                delete options.autoPage;
+                MonksEnhancedJournal.journal.render(true, options);
+            }
         }
         else
-            MonksEnhancedJournal.journal = new EnhancedJournal(doc, { anchor: options?.anchor, force: options?.tempOwnership }).render(true, { autoPage: true, force: options?.tempOwnership });
+            MonksEnhancedJournal.journal = new EnhancedJournal(doc, options).render(true, options);
 
         return true;
     }
@@ -1551,53 +1592,6 @@ export class MonksEnhancedJournal {
             Object.entries(group.groups).forEach(e => option(...e));
         }
         return new Handlebars.SafeString(html);
-    }
-
-    static _createRequestRoll(match, ...args) {
-        let [command, options, name] = match.slice(1, 5);
-        // Define default inline data
-        let [request, ...props] = options.split(' ');
-
-        let dataset = {
-            requesttype: command,
-            request: request,
-        }
-
-        if (command == "Contested") {
-            dataset.request1 = props[0];
-        }
-
-        let dc = props.filter(p => $.isNumeric(p) || p.toLowerCase().startsWith('dc')).map(p => !$.isNumeric(p) ? parseInt(p.toLowerCase().replace('dc:', '')) : p);
-        if (dc.length)
-            dataset.dc = parseInt(dc[0]);
-        let rollmode = props.filter(p => { if ($.isNumeric(p)) return false; return p.toLowerCase().startsWith('rollmode') }).map(p => p.toLowerCase().replace('rollmode:', ''));
-        if (rollmode.length) {
-            if (["roll", "gmroll", "blindroll", "selfroll"].includes(rollmode[0]))
-                dataset.rollmode = rollmode;
-        }
-        if (props.find(p => p == 'silent') != undefined)
-            dataset.silent = true;
-        if (props.find(p => p == 'fastForward') != undefined)
-            dataset.fastForward = true;
-        if (name)
-            dataset.flavor = name;
-
-        const data = {
-            cls: ["inline-request-roll"],
-            title: `${i18n("MonksEnhancedJournal.RequestRoll")}: ${request} ${dc}`,
-            label: name || i18n("MonksEnhancedJournal.RequestRoll"),
-            dataset: dataset
-        };
-
-        // Construct and return the formed link element
-        const a = document.createElement('a');
-        a.classList.add(...data.cls);
-        a.title = data.title;
-        for (let [k, v] of Object.entries(data.dataset)) {
-            a.dataset[k] = v;
-        }
-        a.innerHTML = `<i class="fas fa-dice-d20"></i> ${data.label}`;
-        return a;
     }
 
     static _createPictureLink(match, { async = false, relativeTo } = {}) {
@@ -1664,24 +1658,6 @@ export class MonksEnhancedJournal {
         return constructAnchor(doc);
     }
 
-    static _onClickInlineRequestRoll(event) {
-        event.preventDefault();
-        const a = event.currentTarget;
-
-        if (game.MonksTokenBar) {
-            let data = duplicate(a.dataset);
-            if (data.dc) data.dc = parseInt(data.dc);
-            if (data.fastForward) data.fastForward = true;
-            if (data.silent) data.silent = true;
-
-            let requesttype = a.dataset.requesttype.toLowerCase();
-            if (requesttype == 'request')
-                game.MonksTokenBar.requestRoll(canvas.tokens.controlled, data);
-            else if (requesttype == 'contested')
-                game.MonksTokenBar.requestContestedRoll({ request: a.dataset.request }, { request: a.dataset.request1 }, data);
-        }
-    }
-
     static async _onClickPictureLink(event) {
         event.preventDefault();
         const a = event.currentTarget;
@@ -1726,6 +1702,30 @@ export class MonksEnhancedJournal {
 
     static async ready() {
         game.socket.on(MonksEnhancedJournal.SOCKET, MonksEnhancedJournal.onMessage);
+
+        if (game.system.id == 'pf2e') {
+            MonksEnhancedJournal.pf2eCurrency = {};
+            let pack = game.packs.get("pf2e.equipment-srd");
+            const index = await pack.getIndex();
+            for (let [key, coin] of Object.entries({ cp: "Copper Pieces", sp: "Silver Pieces", gp: "Gold Pieces", pp: "Platinum Pieces" })) {
+                let item = index.find(i => i.name == coin);
+                if (item) {
+                    const document = await pack.getDocument(item._id);
+                    MonksEnhancedJournal.pf2eCurrency[key] = document.toObject();
+                }
+            }
+        } else if (game.system.id == 'wfrp4e') {
+            MonksEnhancedJournal.wfrp4eCurrency = {};
+            let pack = game.packs.get("wfrp4e.basic");
+            const index = await pack.getIndex();
+            for (let [key, coin] of Object.entries({ gc: "Gold Crown", ss: "Silver Shilling", bp: "Brass Penny" })) {
+                let item = index.find(i => i.name == coin);
+                if (item) {
+                    const document = await pack.getDocument(item._id);
+                    MonksEnhancedJournal.wfrp4eCurrency[key] = document.toObject();
+                }
+            }
+        }
 
         if (game.system.id == "sfrpg") {
             let cls = CONFIG.Actor.sheetClasses.character["sfrpg.ActorSheetSFRPGCharacter"].cls;
@@ -1827,7 +1827,6 @@ export class MonksEnhancedJournal {
         //CONFIG.TinyMCE.font_formats = CONFIG.TinyMCE.font_formats = (CONFIG.TinyMCE.font_formats ? CONFIG.TinyMCE.font_formats + ";" : "") + "Anglo Text=anglo_textregular;Lovers Quarrel=lovers_quarrelregular;Play=Play-Regular";
 
         tinyMCE.PluginManager.add('background', backgroundinit);
-        tinyMCE.PluginManager.add('dcconfig', dcconfiginit);
 
         // Preload fonts for polyglot so there isn't a delay in showing them, and possibly revealing something
         if (game.modules.get("polyglot")?.active && !isNewerVersion(game.modules.get("polyglot").version, "1.7.30")) {
@@ -2575,8 +2574,10 @@ export class MonksEnhancedJournal {
                     if (data.sell > 0)
                         setValue(itemData, pricename(), MEJHelpers.toDefaultCurrency(data.sell + " " + data.currency));
                     delete itemData._id;
-                    let sheet = actor.sheet;
-                    sheet._onDropItem({ preventDefault: () => { } }, { data: itemData });
+                    if (!data.consumable) {
+                        let sheet = actor.sheet;
+                        sheet._onDropItem({ preventDefault: () => { } }, { data: itemData });
+                    }
                     //actor.createEmbeddedDocuments("Item", [itemData]);
                     //deduct the gold
                     if (data.sell > 0)
@@ -2709,18 +2710,45 @@ export class MonksEnhancedJournal {
     }
 
     static async openRequestItem(type, event) {
+        let options = { editable: type != 'item' };
         let document;
         if (type == 'actor') {
             document = game.actors.get(this.flags['monks-enhanced-journal'].actor.id);
         } else if (type == 'shop') {
-            document = game.journal.get(this.flags['monks-enhanced-journal'].shop.id);
+            document = await fromUuid(this.flags['monks-enhanced-journal'].shop.uuid);
+
+            if (MonksEnhancedJournal.openJournalEntry(document))
+                return;
+
+            // if it's a journal entry, then check to see if it's an MEJ sheet, then switch to the page
+            if (document instanceof JournalEntry && document.pages.size == 1 && !!getProperty(this.object.pages.contents[0], "flags.monks-enhanced-journal.type")) {
+                document = this.object.pages.contents[0];
+            }
+
+            if (document instanceof JournalEntryPage) {
+                // Fix the page, and confirm that it's an MEJ type, otherwise switch to the parent, with the page as a link
+                MonksEnhancedJournal.fixType(document);
+                let type = getProperty(document, "flags.monks-enhanced-journal.type");
+                if (type == "base" || type == "oldentry") type = "journalentry";
+                let types = MonksEnhancedJournal.getDocumentTypes();
+                if (!types[type]) {
+                    options.pageId = document.id;
+                    document = document.parent;
+                }
+            }
         } else if (type == 'item') {
-            let li = $(event.currentTarget).closest('li')[0]
-            document = await fromUuid(li.dataset.uuid);
+            let li = $(event.currentTarget).closest('li')[0];
+            if (li.dataset.uuid)
+                document = await fromUuid(li.dataset.uuid);
+            else {
+                let items = this.getFlag('monks-enhanced-journal', 'items') || [];
+                let itemData = items.find(i => i._id == li.dataset.id);
+                document= new CONFIG.Item.documentClass(itemData);
+            }
         }
 
         if (document)
-            document.sheet.render(true);
+            document.sheet.render(true, options);
     }
 
     static async makeOffering(data) {
@@ -3025,6 +3053,22 @@ export class MonksEnhancedJournal {
                     { id: 'sp', name: i18n('CYPHERSYSTEM.Silver'), convert: 0.1 },
                     { id: 'cp', name: i18n('CYPHERSYSTEM.Copper'), convert: 0.01 }
                 ];
+            case "TheWitcherTRPG":
+                return [
+                    { id: 'bizant', name: i18n('WITCHER.Currency.bizant'), convert: 4 },
+                    { id: 'ducat', name: i18n('WITCHER.Currency.ducat'), convert: 0.333333333 },
+                    { id: 'lintar', name: i18n('WITCHER.Currency.lintar'), convert: 2 },
+                    { id: 'floren', name: i18n('WITCHER.Currency.floren'), convert: 3 },
+                    { id: 'crown', name: i18n('WITCHER.Currency.crown'), convert: 0 },
+                    { id: 'oren', name: i18n('WITCHER.Currency.oren'), convert: 6 },
+                    { id: 'falsecoin', name: i18n('WITCHER.Currency.falsecoin'), convert: 0.01 }
+                ];
+            case "wfrp4e":
+                return [
+                    { id: 'gc', name: "Gold Crown", convert: 0 },
+                    { id: 'ss', name: "Silver Shilling", convert: 20 },
+                    { id: 'bp', name: "Brass Penny", convert: 240 }
+                ];
             case "tormenta20":
                 return [{ id: "to", name: "TO", convert: 1 }, { id: "tp", name: "T$", convert: 0 }, { id: "tc", name: "TC", convert: 1 }];
             case "starwarsffg":
@@ -3038,11 +3082,9 @@ export class MonksEnhancedJournal {
             case "dnd5e":
             case "dnd4e":
             case "dnd3e":
-            case "pf2e":
-            case "pf1e":
-            case "pf1":
             case "a5e":
                 return [{ id: "pp", name: i18n("MonksEnhancedJournal.currency.platinum"), convert: 10 }, { id: "gp", name: i18n("MonksEnhancedJournal.currency.gold"), convert: 0 }, { id: "ep", name: i18n("MonksEnhancedJournal.currency.electrum"), convert: null }, { id: "sp", name: i18n("MonksEnhancedJournal.currency.silver"), convert: 0.1 }, { id: "cp", name: i18n("MonksEnhancedJournal.currency.copper"), convert: 0.01 }];
+            case "pf2e":
             case "pf1e":
             case "pf1":
                 return [{ id: "pp", name: i18n("MonksEnhancedJournal.currency.platinum"), convert: 10 }, { id: "gp", name: i18n("MonksEnhancedJournal.currency.gold"), convert: 0 }, { id: "sp", name: i18n("MonksEnhancedJournal.currency.silver"), convert: 0.1 }, { id: "cp", name: i18n("MonksEnhancedJournal.currency.copper"), convert: 0.01 }];
@@ -3161,7 +3203,7 @@ Hooks.on("updateJournalEntryPage", (document, data, options, userId) => {
         }
 
         if (MonksEnhancedJournal.journal.tabs.active().entityId?.endsWith(data._id) &&
-            (data.content != undefined ||
+            (data.text?.content != undefined ||
                 data.ownership != undefined ||
                 renderUpdate ||
                 getProperty(data, "flags.core.sheetClass") != undefined))
@@ -3172,7 +3214,7 @@ Hooks.on("updateJournalEntryPage", (document, data, options, userId) => {
         if (data.content != undefined ||
             data.ownership != undefined ||
             renderUpdate ||
-            data?.flags['core']?.sheetClass != undefined)
+            getProperty(data, "flags.core.sheetClass") != undefined)
         {
             if (document._sheet)
                 document._sheet.render(true, { reload: true });
@@ -3390,6 +3432,7 @@ Hooks.on("renderChatMessage", (message, html, data) => {
         $('.chat-actor-icon', html).click(MonksEnhancedJournal.openRequestItem.bind(message, 'actor')).attr('onerror', "$(this).attr('src', 'icons/svg/mystery-man.svg');");
         $('.chat-shop-icon', html).click(MonksEnhancedJournal.openRequestItem.bind(message, 'shop')).attr('onerror', "$(this).attr('src', 'modules/monks-enhanced-journal/assets/shop.png');");
         $('.item-list .item-name .item-image', html).click(MonksEnhancedJournal.openRequestItem.bind(message, 'item'));
+        $('.items-list .item-icon', html).click(MonksEnhancedJournal.openRequestItem.bind(message, 'item'));
     }
 });
 
@@ -3569,9 +3612,9 @@ Hooks.on("renderDialog", (dialog, html, data) => {
 });
 
 Hooks.on("renderJournalSheet", (sheet, html, data) => {
-    if (data.pages) {
+    if (sheet._pages) {
         const levels = Object.entries(CONST.DOCUMENT_OWNERSHIP_LEVELS);
-        for (let page of data.pages) {
+        for (let page of sheet._pages) {
             if (page?.numberIcon) {
                 $(`.pages-list li[data-page-id="${page._id}"] .page-number`, html).html(`<i class="fas ${page.numberIcon}"></i>`);
             }
@@ -3581,6 +3624,8 @@ Hooks.on("renderJournalSheet", (sheet, html, data) => {
                 (page.ownership.default >= 0 || Object.keys(page.ownership).length > 1)) {
 
                 let permissions = $(`.pages-list li[data-page-id="${page._id}"] .page-heading .page-ownership`, html);
+                if (!permissions.length)
+                    permissions = $("<span>").addClass("page-ownership").appendTo($(`.pages-list li[data-page-id="${page._id}"] .page-heading`, html));
                 permissions.empty();
 
                 if (page.ownership.default >= 0 && page.ownership.default != sheet.object.ownership.default) {
@@ -3602,7 +3647,7 @@ Hooks.on("renderJournalSheet", (sheet, html, data) => {
 });
 
 Hooks.on("renderJournalPageSheet", (sheet, html, data) => {
-    $("a.inline-request-roll", html).click(MonksEnhancedJournal._onClickInlineRequestRoll.bind(sheet));
+    //$("a.inline-request-roll", html).click(MonksEnhancedJournal._onClickInlineRequestRoll.bind(sheet));
     $("a.picture-link", html).click(MonksEnhancedJournal._onClickPictureLink.bind(sheet));
 
     if ($('select[name="title.level"] option[value="-1"]').length == 0) {
@@ -3618,6 +3663,20 @@ Hooks.on("renderJournalPageSheet", (sheet, html, data) => {
             div.show();
             $('img, video', html).parent().hide();
         });
+    }
+});
+
+Hooks.on("renderCompendium", async (app, html, data) => {
+    if (app.collection.documentName == "JournalEntry") {
+        await app.collection.getIndex({ fields: ["img", "flags.monks-enhanced-journal"] });
+        for (let index of app.collection.index) {
+            let img = $(`li[data-document-id="${index._id}"] > img.thumbnail`, html);
+            if (img.length) {
+                img.attr("src", index.img || getProperty(index, "flags.monks-enhanced-journal.img") || "icons/svg/book.svg")
+            } else {
+                $(`li[data-document-id="${index._id}"]`, html).prepend($("<img>").addClass("thumbnail").attr("title", index.name).attr("alt", index.name).attr("src", index.img || getProperty(index, "flags.monks-enhanced-journal.img") || "icons/svg/book.svg"));
+            }
+        }
     }
 });
 
@@ -3766,6 +3825,129 @@ Hooks.on("setupTileActions", (app) => {
         content: async (trigger, action) => {
             let entityName = await game.MonksActiveTiles.entityName(action.data?.entity, "journal");
             return `<span class="action-style">${i18n(trigger.name)}</span> of <span class="entity-style">${entityName}</span>`;
+        }
+    });
+    app.registerTileAction('monks-enhanced-journal', 'append', {
+        name: "Write to Journal",
+        requiresGM: true,
+        ctrls: [
+            {
+                id: "entity",
+                name: "MonksEnhancedJournal.SelectEntity",
+                type: "select",
+                subtype: "entity",
+                options: { showPrevious: true, showPlayers: true },
+                restrict: (entity) => { return (entity instanceof JournalEntry); },
+                required: true,
+                defaultType: 'journal',
+                placeholder: 'Please select a Journal',
+                onChange: async (app, ctrl, action, data) => {
+                    $('select[name="data.page"]', app.element).empty();
+                    let value = $(ctrl).val();
+                    if (!!value) {
+                        try {
+                            let entityVal = JSON.parse(value);
+
+                            let pageCtrl = action.ctrls.find(c => c.id == "page");
+                            let list = await pageCtrl.list(app, action, { entity: entityVal });
+                            $('select[name="data.page"]', app.element).append(app.fillList(list, data.page));
+                        } catch { }
+                    }
+                }
+            },
+            {
+                id: "page",
+                name: "Page",
+                placeholder: 'Please select a Journal Page',
+                list: async (app, action, data) => {
+                    let value = data.entity?.id;
+                    if (!!value) {
+                        try {
+                            // make sure it's not an enhanced journal, those shouldn't reveal their pages
+                            if (/^JournalEntry.[a-zA-Z0-9]{16}$/.test(value)) {
+                                let entity = await fromUuid(value);
+
+                                if (entity && !(entity.pages.size == 1 && !!getProperty(entity.pages.contents[0], "flags.monks-enhanced-journal.type"))) {
+                                    let list = { "": "" };
+                                    for (let p of entity.pages)
+                                        list[p._id] = p.name;
+
+                                    return list;
+                                }
+                            }
+                        } catch { }
+                    }
+                },
+                type: "list",
+                required: false
+            },
+            {
+                id: "text",
+                name: "MonksActiveTiles.ctrl.text",
+                type: "text",
+                subtype: "multiline",
+                required: true
+            },
+            {
+                id: "append",
+                name: "Write",
+                list: "append-type",
+                type: "list",
+                required: true,
+                defvalue: "append"
+            }
+        ],
+        values: {
+            'append-type': {
+                'append': "Append",
+                'prepend': "Prepend",
+                'overwrite': "Overwrite",
+            }
+        },
+        group: 'monks-enhanced-journal',
+        fn: async (args = {}) => {
+            const { tile, tokens, action, userid, value, method, change } = args;
+
+            let entities = await game.MonksActiveTiles.getEntities(args, null, 'journal');
+            for (let entity of entities) {
+                if (entity instanceof JournalEntry && entity.pages.size > 0) {
+                    let page = (action.data.page ? entity.pages.get(action.data.page) : entity.pages.contents[0]);
+                    if (!page)
+                        continue;
+
+                    let text = action.data.text;
+                    if (text.includes("{{")) {
+                        let context = {
+                            actor: tokens[0]?.actor?.toObject(false),
+                            token: tokens[0]?.toObject(false),
+                            tile: tile.toObject(false),
+                            entity: entity,
+                            user: game.users.get(userid),
+                            value: value,
+                            scene: canvas.scene,
+                            method: method,
+                            change: change
+                        };
+
+                        const compiled = Handlebars.compile(text);
+                        text = compiled(context, { allowProtoMethodsByDefault: true, allowProtoPropertiesByDefault: true }).trim();
+                    }
+
+                    let content = page.text.content;
+                    if (action.data.append == "append")
+                        content = content + text;
+                    else if (action.data.append == "prepend")
+                        content = text + content;
+                    else if (action.data.append == "overwrite")
+                        content = text;
+
+                    await page.update({ text: { content: content } });
+                }
+            }
+        },
+        content: async (trigger, action) => {
+            let entityName = await game.MonksActiveTiles.entityName(action.data?.entity, "journal");
+            return `<span class="action-style">${i18n(trigger.name)}</span>, <span class="entity-style">${entityName}</span>`;
         }
     });
 });

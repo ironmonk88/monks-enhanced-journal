@@ -39,13 +39,19 @@ export class CheckListSheet extends EnhancedJournalSheet {
         this.tree = this.constructor.setupFolders(this.folders, this.items);
     }
 
-    async getData() {
+    async getData(options) {
         let data = await super.getData();
 
         data.tree = this.tree;
         data.canCreate = this.object.isOwner;
 
         return data;
+    }
+
+    async _render(force = false, options = {}) {
+        if (options.reload)
+            this.initialize();
+        super._render(force, options);
     }
 
     _documentControls() {
@@ -530,7 +536,7 @@ export class CheckListSheet extends EnhancedJournalSheet {
             {
                 name: "FOLDER.Edit",
                 icon: '<i class="fas fa-edit"></i>',
-                condition: game.user.isGM,
+                condition: game.user.isGM || this.object.isOwner,
                 callback: header => {
                     const li = header.parent()[0];
                     const folder = this.folders.find(f => f.id == li.dataset.folderId);
@@ -541,7 +547,7 @@ export class CheckListSheet extends EnhancedJournalSheet {
             {
                 name: "FOLDER.Remove",
                 icon: '<i class="fas fa-trash"></i>',
-                condition: game.user.isGM,
+                condition: game.user.isGM || this.object.isOwner,
                 callback: header => {
                     const li = header.parent();
                     const folder = that.folders.find(f => f.id == li.data("folderId"));
@@ -560,7 +566,7 @@ export class CheckListSheet extends EnhancedJournalSheet {
             {
                 name: "FOLDER.Delete",
                 icon: '<i class="fas fa-dumpster"></i>',
-                condition: game.user.isGM,
+                condition: game.user.isGM || this.object.isOwner,
                 callback: header => {
                     const li = header.parent();
                     const folder = that.folders.find(f => f.id == li.data("folderId"));
@@ -585,7 +591,7 @@ export class CheckListSheet extends EnhancedJournalSheet {
             {
                 name: i18n("MonksEnhancedJournal.EditItem"),
                 icon: '<i class="fas fa-edit"></i>',
-                condition: game.user.isGM,
+                condition: game.user.isGM || this.object.isOwner,
                 callback: li => {
                     const item = that.items.find(i => i.id == li[0].dataset.documentId);
                     if (!item) return;
@@ -596,13 +602,13 @@ export class CheckListSheet extends EnhancedJournalSheet {
             {
                 name: "SIDEBAR.Delete",
                 icon: '<i class="fas fa-trash"></i>',
-                condition: () => game.user.isGM,
+                condition: () => game.user.isGM || this.object.isOwner,
                 callback: li => {
                     const item = that.items.find(i => i.id == li[0].dataset.documentId);
                     if (!item) return;
                     return Dialog.confirm({
                         title: i18n("MonksEnhancedJournal.DeleteItem"),
-                        content: `<h4>${game.i18n.localize("AreYouSure")}</h4><p>${game.i18n.localize("FOLDER.RemoveWarning")}</p>`,
+                        content: `<h4>${game.i18n.localize("AreYouSure")}</h4><p>${game.i18n.format("SIDEBAR.DeleteWarning", { type: "Checklist Item" })}</p>`,
                         yes: () => {
                             let items = (that.object.flags['monks-enhanced-journal'].items || []);
                             items.findSplice(i => i.id === item.id);
@@ -619,7 +625,7 @@ export class CheckListSheet extends EnhancedJournalSheet {
             {
                 name: "SIDEBAR.Duplicate",
                 icon: '<i class="far fa-copy"></i>',
-                condition: () => game.user.isGM,
+                condition: () => game.user.isGM || this.object.isOwner,
                 callback: li => {
                     let items = (that.object.flags['monks-enhanced-journal'].items || []);
                     const original = items.find(i => i.id == li.data("documentId"));

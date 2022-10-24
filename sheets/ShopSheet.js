@@ -24,7 +24,7 @@ export class ShopSheet extends EnhancedJournalSheet {
                 { dragSelector: ".actor-img img", dropSelector: "null" },
                 { dragSelector: ".sheet-icon", dropSelector: "#board" }
             ],
-            scrollY: [".shop-items", ".tab.description .tab-inner"]
+            scrollY: [".shop-items > .item-list", ".tab.description .tab-inner"]
         });
     }
 
@@ -71,12 +71,15 @@ export class ShopSheet extends EnhancedJournalSheet {
         let hasGM = (game.users.find(u => u.isGM && u.active) != undefined);
         data.showrequest = (['confirm', 'free'].includes(purchasing) && !this.object.isOwner && game.user.character && hasGM);
 
-        let actorData = data.data.flags['monks-enhanced-journal']?.actor;
-        let actor = (actorData ? game.actors.get(actorData) : null);
+        let actorLink = this.object.getFlag('monks-enhanced-journal', 'actor');
+        if (actorLink) {
+            let actor = game.actors.find(a => a.id == actorLink.id);
 
-        if (actor) {
-            data.actor = { id: actor.id, name: actor.name, img: actor.img };
+            if (actor && actor.testUserPermission(game.user, "OBSERVER")) {
+                data.actor = { id: actor.id, name: actor.name, img: actor.img };
+            }
         }
+        data.canViewActor = !!data.actor;
 
         data.relationships = {};
         for (let item of (data.data.flags['monks-enhanced-journal']?.relationships || [])) {
@@ -550,9 +553,10 @@ export class ShopSheet extends EnhancedJournalSheet {
                     let itemQty = getValue(itemData, quantityname(), 1);
                     setValue(itemData, quantityname(), result.quantity * itemQty);
                     setValue(itemData, pricename(), MEJHelpers.toDefaultCurrency(result.price));
-                    let sheet = actor.sheet;
-                    sheet._onDropItem({ preventDefault: () => { } }, { data: itemData });
-                    //await actor.createEmbeddedDocuments("Item", [itemData]);
+                    if (!data.consumable) {
+                        let sheet = actor.sheet;
+                        sheet._onDropItem({ preventDefault: () => { } }, { data: itemData });
+                    }
 
                     MonksEnhancedJournal.emit("purchaseItem",
                         {
@@ -728,6 +732,8 @@ export class ShopSheet extends EnhancedJournalSheet {
                 if (game.user.isGM) {
                     ShopSheet.actorPurchase.call(entry, actor, { value: (price.value * result.quantity), currency: price.currency });
                     ShopSheet.purchaseItem.call(this, entry, id, result.quantity, { actor, purchased: true });
+                    if (getProperty(item, "flags.monks-enhanced-journal.consumable"))
+                        result.quantity = 0;
                     return result;
                 } else {
                     if (getProperty(entry, "flags.monks-enhanced-journal.purchasing") == 'confirm') {
@@ -755,7 +761,8 @@ export class ShopSheet extends EnhancedJournalSheet {
                                         quantity: result.quantity,
                                         purchase: true,
                                         user: game.user.id
-                                    });
+                                    }
+                                );
                             }
                         }
                         return result;

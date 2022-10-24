@@ -1,3 +1,69 @@
+# Version 10.4
+
+Added support for opening inline links to specific pages within an Adventure Book.
+
+Added the option to view the old journal sheets that had both text and image in tabs.
+
+Allow document owners to add a page to an Adventure Book.
+
+Added the status of the quest to the Objective display
+
+Fixed styling issues with Warhammer
+
+Fixed styling issues with The Witcher RPG
+
+Changed the Loot Sheet display around a bit to make it a little easier to understand.
+
+Updated currencies so they should work in Warhammer now.
+
+Limited conversions to only convert if there is more than one currency to convert into.
+
+Moved the inline request rolls to the Tokenbar module, since it's technically the one making the rolls.
+
+Fixed the show to players dialog to default to image if the journal entry is a picture.
+
+Fixed issues with chat bubble not finding the correct page to pull text from.
+
+Added the option to set items in a shop to be consumable, so the player can pay for them, but won't receive the item.
+
+Fixed issues when opening the appropriate document when clicking on the icons on a purchase request chat card.
+
+Fixed issues with changing the icons on the Adventure Book table of contents when viewing as a single page.
+
+Added the option to see images associated with Journal compendium entries.
+
+Added an action to Monk's Active Tiles to be able to write text to a journal.
+
+Fixed issue with checklist entry, when a non gm player tried to edit, and delete entries.
+
+Fixed warning message when deleteing an entry in a checklist.
+
+When creating an encounter, newly created creatures will get added tot he Encounter Monsters folder instead of being added to the root.
+
+Fixed issue with adding encounter monsters from a compendium.
+
+Fixed issue with players being able to see journal entries from a compendium.
+
+Changed journal entries with images to open those images as a popout on right click, instead of expanding with the entry.  This should give you the option to show to players as just the image.
+
+Added Narrator Tool commands to the right click menu that Enhanced Journal adds.
+
+Fixed issue with pf2e when converting an removign currency.
+
+Fixed issue where hidden shop items were being shown to players.
+
+Fixed issue where loot chat message were incorrectly claiming the item had been purchased.
+
+Respected the setting to not include the roll from table when adding items from a roll table.
+
+Added the option to have offering go to the attached actor.
+
+Added Leader to the Organization sheet.
+
+Fixed issue with the scroll placement not being saved when a shop is edited.
+
+Fixed issue with the height of the chat card in pf2e
+
 # Version 10.3
 
 Fixing a critical bug with opening inline journal links

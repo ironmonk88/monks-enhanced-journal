@@ -1,0 +1,31 @@
+<form class="flexcol journal-subsheet journal-body {{entrytype}}" editable="{{editable}}">
+    <header class="header-name flexrow">
+        <i class="fas fa-book-open sheet-icon"></i>
+        <input name="name" type="text" value="{{data.name}}" placeholder="{{localize 'MonksEnhancedJournal.JournalEntryName'}}">
+        {{#if sound.audiofile}}
+        <button type="button" class="play-journal-sound">
+            <i class="fas {{#if sound.playing}}fa-volume-up{{else}}fa-volume-off{{/if}}"></i>
+        </button>
+        {{/if}}
+        <input type="text" style="display:none;" /><!--I can't figure out what's going on, but to avoid Enter causing a page submit a second text needs to be on the page-->
+    </header>
+    <nav class="sheet-navigation tabs" data-group="primary" {{#if hideTabs}} style="display:none;" {{/if}}>
+        <a class="item active" data-tab="description">{{localize 'MonksEnhancedJournal.Description'}}</a>
+        <a class="item" data-tab="picture">{{localize 'MonksEnhancedJournal.Picture'}}</a>
+    </nav>
+    <section class="sheet-body">
+        <div class="tab description active" data-group="primary" data-tab="description">
+            <div class="tab-inner flexcol">
+                {{editor enrichedText target="text.content" editable=true button=true owner=owner}}
+            </div>
+        </div>
+        <div class="tab picture active" data-group="primary" data-tab="picture" style="position:relative;">
+            <div class="tab-inner flexrow">
+                <div class="picture-img lightbox-image" name="src" src="{{data.src}}" style="background-image: url('{{data.src}}')" data-edit="src" onerror="$(this).css({opacity:0});"></div>
+                {{#if owner}}
+                <div class="instruction" style="position: absolute; width: 100%;pointer-events: none;{{#if data.src}}display:none;{{/if}}">Click to add an Image</div>
+                {{/if}}
+            </div>
+        </div>
+    </section>
+</form>

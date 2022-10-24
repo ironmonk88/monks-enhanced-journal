@@ -88,10 +88,11 @@ export class PersonSheet extends EnhancedJournalSheet {
         if (actorLink) {
             let actor = game.actors.find(a => a.id == actorLink.id);
 
-            if (actor) {
+            if (actor && actor.testUserPermission(game.user, "OBSERVER")) {
                 data.actor = { id: actor.id, name: actor.name, img: actor.img };
             }
         }
+        data.canViewActor = !!data.actor
 
         data.fields = this.fieldlist();
 

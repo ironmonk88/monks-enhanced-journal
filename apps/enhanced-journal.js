@@ -113,11 +113,8 @@ export class EnhancedJournal extends Application {
             })
 
             this.renderSubSheet(options).then(() => {
-                if (options?.anchor) {
-                    const anchor = $(`#${options?.anchor}`, this.element);
-                    if (anchor.length) {
-                        anchor[0].scrollIntoView();
-                    }
+                if (options?.pageId) {
+                    this.subsheet.goToPage(options.pageId, options?.anchor);
                 }
             });
         }
@@ -444,7 +441,7 @@ export class EnhancedJournal extends Application {
             for (let ctrl of ctrls) {
                 if (ctrl.conditional != undefined) {
                     if (typeof ctrl.conditional == 'function') {
-                        if (!ctrl.conditional.call(this.subsheet))
+                        if (!ctrl.conditional.call(this.subsheet, this.subsheet.object))
                             continue;
                     }
                     else if (!ctrl.conditional)
@@ -586,12 +583,19 @@ export class EnhancedJournal extends Application {
         if (entity?.currentTarget != undefined)
             entity = null;
 
+        if (entity?.parent) {
+            options.pageId = entity.id;
+            entity = entity.parent;
+        }
+
         let tab = {
             id: makeid(),
             text: entity?.name || i18n("MonksEnhancedJournal.NewTab"),
             active: false,
             entityId: entity?.uuid,
             entity: entity || { flags: { 'monks-enhanced-journal': { type: 'blank' }, content: i18n("MonksEnhancedJournal.NewTab") } },
+            pageId: options.pageId,
+            anchor: options.anchor,
             history: []
         };
         if (tab.entityId != undefined)
@@ -670,11 +674,18 @@ export class EnhancedJournal extends Application {
         if (!entity)
             return;
 
+        if (entity?.parent) {
+            options.pageId = entity.id;
+            entity = entity.parent;
+        }
+
         if (tab != undefined) {
             if (tab.entityId != entity.uuid) {
                 tab.text = entity.name;
                 tab.entityId = entity.uuid;
                 tab.entity = entity;
+                tab.pageId = options.pageId;
+                tab.anchor = options.anchor;
 
                 if ((game.user.isGM || setting('allow-player')) && tab.entityId != undefined) {    //only save the history if the player is a GM or they get the full journal experience... and if it's not a blank tab
                     if (tab.history == undefined)
@@ -1090,8 +1101,6 @@ export class EnhancedJournal extends Application {
         else if (event.ctrlKey)
             this._onShowPlayers({ data: { users: null, object: this.object, options: { showpic: true } } });
         else {
-            //let type = this.entitytype;
-            //new SelectPlayer(this, { showpic: $('.fullscreen-image', this.element).is(':visible') || ((type == 'journalentry' || type == 'oldentry') && $('.tab.picture', this.element).hasClass('active') )}).render(true);
             this._onShowPlayers(event);
         }
     }
@@ -1170,6 +1179,13 @@ export class EnhancedJournal extends Application {
                 icon: '<i class="fas fa-book-open"></i>',
                 callback: li => {
                     this.convert('journalentry');
+                }
+            },
+            {
+                name: i18n("MonksEnhancedJournal.textimage"),
+                icon: '<i class="fas fa-book-open-reader"></i>',
+                callback: li => {
+                    this.convert('textimage');
                 }
             },
             {
@@ -1351,7 +1367,11 @@ export class EnhancedJournal extends Application {
             { text: '<i class="fas fa-search"></i>', type: 'text' },
             { id: 'search', type: 'input', text: "Search Journal", callback: this.searchText },
             { id: 'viewmode', text: "View Single Page", icon: 'fa-notes', callback: this.toggleViewMode },
-            { id: 'add', text: "Add a Page", icon: 'fa-file-plus', conditional: game.user.isGM, callback: this.addPage },
+            {
+                id: 'add', text: "Add a Page", icon: 'fa-file-plus', conditional: (doc) => {
+                    return game.user.isGM || doc.isOwner
+                }, callback: this.addPage
+            },
             { id: 'show', text: i18n("MonksEnhancedJournal.ShowToPlayers"), icon: 'fa-eye', conditional: game.user.isGM, callback: this.doShowPlayers }
         ];
 

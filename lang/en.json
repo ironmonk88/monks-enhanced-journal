@@ -62,6 +62,8 @@
   "MonksEnhancedJournal.show-chatbubble.hint": "Show the button for toggling NPC chat bubbles on the Token toolbar",
   "MonksEnhancedJournal.inline-roll-styling.name": "Inline roll styling",
   "MonksEnhancedJournal.inline-roll-styling.hint": "Alter the inline roll styling to make it a little more like links",
+  "MonksEnhancedJournal.show-chat-bubbles.name": "Show chat bubbles",
+  "MonksEnhancedJournal.show-chat-bubbles.hint": "Show chat bubbles when clicking on a Note or Token that's linked to a Journal",
 
   "MonksEnhancedJournal.SlideConfiguration": "Slide Configuration",
   "MonksEnhancedJournal.DCConfiguration": "DC Configuration",
@@ -390,6 +392,9 @@
   "MonksEnhancedJournal.Selected": "Selected",
   "MonksEnhancedJournal.QuantityOfItems": "Quantity of Items",
   "MonksEnhancedJournal.DoNotHavePermission": "You do not have permission to view this document",
+  "MonksEnhancedJournal.Leader": "Leader",
+  "MonksEnhancedJournal.Consumable": "Consumable",
+  "MonksEnhancedJournal.Consume": "Consume",
 
   "MonksEnhancedJournal.msg.NoPlayersSelected": "No players selected to send this entry to",
   "MonksEnhancedJournal.msg.CannotAddItemType": "Cannot add item of this type",
@@ -470,6 +475,7 @@
 
   "MonksEnhancedJournal.base": "Enhanced Journal Entry",
   "MonksEnhancedJournal.journalentry": "Journal Entry",
+  "MonksEnhancedJournal.textimage": "Text and Image",
   "MonksEnhancedJournal.actor": "Actor",
   "MonksEnhancedJournal.slideshow": "Slideshow",
   "MonksEnhancedJournal.organization": "Organization",

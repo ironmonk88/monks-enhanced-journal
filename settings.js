@@ -359,6 +359,8 @@ export const registerSettings = function () {
 	});
 
 	game.settings.register(modulename, "show-chat-bubbles", {
+		name: game.i18n.localize("MonksEnhancedJournal.show-chat-bubbles.name"),
+		hint: game.i18n.localize("MonksEnhancedJournal.show-chat-bubbles.hint"),
 		scope: "client",
 		default: false,
 		type: Boolean,

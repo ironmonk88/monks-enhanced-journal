@@ -5,14 +5,14 @@
             <h4>{{actor.name}}</h4>
         </div>
     </div>
-    <ol class="items-list receive-items">
+    <ol class="items-list receive-items" style="overflow-y: visible;">
         <li class="items-header flexrow">
             <h3 class="item-name noborder flexrow">{{localize 'MonksEnhancedJournal.Items'}}</h3>
 
             <div class="item-controls item-quantity">{{localize 'MonksEnhancedJournal.Qty'}}</div>
         </li>
 
-        <ol class="item-list">
+        <ol class="item-list" style="overflow-y: visible;">
             {{#each items}}
             <li class="item flexrow" data-id="{{this.id}}" draggable="false">
                 <div class="item-name flexrow">
@@ -21,7 +21,7 @@
                 </div>
 
                 <div class="item-controls item-quantity">
-                    <span>{{this.flags.monks-enhanced-journal.quantity}}</span>
+                    <span>{{this.quantity}}</span>
                 </div>
             </li>
             {{/each}}

@@ -40,6 +40,8 @@ export class MEJHelpers {
         name = name || pricename();
 
         let cost = (typeof item == "string" ? item : (item.system?.denomination != undefined && name != "cost" ? item.system?.value.value + " " + item.system?.denomination.value : getValue(item, name, null)));
+        if (game.system.id == "wfrp4e")
+            cost = (cost.gc != "0" ? `${cost.gc} gc` : (cost.ss != "0" ? `${cost.ss} ss` : (cost.bp != "0" ? `${cost.bp} bp` : "0 gc")));
         if (name == "cost" && cost == undefined && typeof item !== "string" && !ignorePrice)
             cost = (item.system?.denomination != undefined ? item.system?.value.value + " " + item.system?.denomination.value : getValue(item, "price"));
 
@@ -72,7 +74,7 @@ export class MEJHelpers {
             currency = MEJHelpers.defaultCurrency();
 
         if (parseInt(price) != price) {
-            if (MonksEnhancedJournal.currencies.length) {
+            if (MonksEnhancedJournal.currencies.length > 1) {
                 let numDecimal = price.toString().split(".")[1].length || 0;
                 let currs = MonksEnhancedJournal.currencies.filter(c => {
                     if (!c.convert)

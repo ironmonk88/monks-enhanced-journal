@@ -260,6 +260,10 @@
     background: rgba(255, 255, 240, 0.8);
 }
 
+.wfrp4e.monks-enhanced-journal footer.navigation .nav-button {
+    color: #111;
+}
+
 .monks-enhanced-journal footer.navigation .nav-button.navigate {
     flex: 0 0 50px;
 }
@@ -605,6 +609,10 @@
     color: #888
 }
 
+.wfrp4e.monks-enhanced-journal .monks-journal-sheet.sheet .shop-container .item-list > li input {
+    color: #111;
+}
+
 .monks-journal-sheet .header-name .header-search {
     font-size: 14px;
 }
@@ -870,55 +878,6 @@ height: fit-content;*/
     background-size: contain;
 }
 
-/*
-.monks-journal-sheet.sheet .sheet-header .magnify-image {
-    width: 20px;
-    height: 20px;
-    position: absolute;
-    top: 0px;
-    left: 0px;
-    display: none;
-    cursor: pointer;
-    border: 1px solid #C0C0C0;
-    border-radius: 4px;
-    text-align: center;
-    line-height: 20px;
-    font-size: 14px;
-    background-color: rgba(255, 255, 255, 0.5);
-}
-
-.monks-journal-sheet.sheet .sheet-header:hover .magnify-image {
-    display:inline-block;
-}
-    */
-.monks-journal-sheet.sheet .fullscreen-image {
-    width: 160px;
-    height: 160px;
-    opacity: 0;
-    position: absolute;
-    float: left;
-    z-index: 900;
-    background: url(../../../ui/parchment.jpg) repeat;
-    transition: width 1s, height 1s, opacity 1s;
-    pointer-events: none;
-}
-
-.monks-journal-sheet.sheet .fullscreen-image.show {
-    opacity: 1;
-    width: 100%;
-    height: 100%;
-    pointer-events: all;
-}
-
-.monks-journal-sheet.sheet .fullscreen-image img {
-    width: 100%;
-    height: 100%;
-    position: absolute;
-    float: left;
-    object-fit: contain;
-    border: none;
-}
-
 .monks-journal-sheet.sheet .person-container .sheet-header .header-details .form-group label,
 .monks-journal-sheet.sheet .place-container .sheet-header .header-details .form-group label,
 .monks-journal-sheet.sheet .quest-container .sheet-header .header-details .form-group label,
@@ -963,6 +922,23 @@ height: fit-content;*/
 
 .monks-journal-sheet.sheet .currency-group .form-fields input {
     flex: 2;
+}
+
+.loot-container .currency-group label {
+    font-weight: bold;
+    padding-top: 2px;
+    max-width: 75px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.loot-container .currency-group label:not(:first-child) {
+    padding-left: 10px;
+}
+
+.loot-container .currency-group input {
+    max-width: 75px;
 }
 
 .monks-journal-sheet.sheet .tab.entry-details .details-section label,
@@ -1713,6 +1689,29 @@ height: fit-content;*/
     right: -1px;
 }
 
+#objective-display .objective-list > li[status] .quest-name {
+    border-bottom: 2px solid #808080;
+    width: 100%;
+    border-left: 2px solid #808080;
+    padding-left: 4px;
+}
+
+#objective-display .objective-list > li[status="available"] .quest-name {
+    border-color: #2f96b4;
+}
+
+#objective-display .objective-list > li[status="inprogress"] .quest-name {
+    border-color: #f89406;
+}
+
+#objective-display .objective-list > li[status="completed"] .quest-name {
+    border-color: #51a351;
+}
+
+#objective-display .objective-list > li[status="failed"] .quest-name {
+    border-color: #bd362f;
+}
+
 .monks-journal-sheet.sheet .recent-link,
 .monks-journal-sheet.sheet .new-link {
     cursor: pointer;
@@ -1736,7 +1735,7 @@ height: fit-content;*/
 
 .monks-journal-sheet.sheet .loot-container .items-list.loot-characters .items-list {
     overflow-y: hidden;
-    height: 105px;
+    height: 80px;
     overflow-x: auto;
     flex-wrap: nowrap;
 }
@@ -1990,6 +1989,10 @@ height: fit-content;*/
 
 .sheet.journal-entry .pages-list .page-heading {
     position: relative;
+}
+
+.monks-enhanced-journal .sheet.journal-entry .pages-list .directory-item.active {
+    background-color: rgba(0, 0, 0, 0.4);
 }
 
 .sheet.journal-entry .pages-list .page-heading .page-ownership {
@@ -2281,15 +2284,6 @@ height: fit-content;*/
     border-top: 2px groove #eeede0;
     margin-top: 0px;
     padding-top: 5px;
-}
-
-a.inline-request-roll {
-    background: #DDD;
-    padding: 1px 4px;
-    border: 1px solid #4b4a44;
-    border-radius: 2px;
-    white-space: nowrap;
-    word-break: break-all;
 }
 
 a.journal-link {
@@ -2744,23 +2738,32 @@ a.picture-link.broken {
 }
 
 .loot-character {
-    height: 100px;
-    flex: 0 0 80px;
+    height: 78px;
+    flex: 0 0 60px;
     margin: 0 8px;
-    width:80px;
+    width:60px;
     position: relative;
+    text-align: center;
 }
 
-.loot-character > img {
-    width:80px;
-    height: 80px;
+.sheet header.sheet-header .loot-character > img {
+    width: 60px;
+    height: 60px;
     object-fit: contain;
+    border: 0px;
+    border-radius: 4px;
 }
 
 .loot-character > .character-name {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    width: 100%;
+}
+
+.monks-journal-sheet.sheet .items-list.loot-characters {
+    margin-top: 5px;
+    font-size: 14px;
 }
 
 .loot-characters .items-list .items-list {
@@ -3117,12 +3120,6 @@ monks-journal-sheet.journal-sheet form select {
     color: darkslategray;
 }
 
-.mta.monks-enhanced-journal .monks-journal-sheet.sheet .fullscreen-image {
-    margin-top: -4px;
-    margin-left: -4px;
-    background: var(--background-sheet-0);
-}
-
 .mta.monks-enhanced-journal .monks-journal-sheet .slideshow-container .add-slide {
     border-color: rgba(255, 255, 255, 0.2);
     color: rgba(255, 255, 255, 0.2);
@@ -3267,6 +3264,10 @@ monks-journal-sheet.journal-sheet form select {
     text-indent: 0px;
 }
 
+.wwn.monks-enhanced-journal .monks-journal-sheet .items-list .items-header.collapsed {
+    display: flex;
+}
+
 .dark-mode .monks-enhanced-journal .tab-bar .journal-tab .tab-content {
     color: #111;
 }
@@ -3277,6 +3278,14 @@ monks-journal-sheet.journal-sheet form select {
 
 .dark-mode .monks-journal-sheet.sheet .items-list .items-header {
     border-color: var(--5edark-rgb-border-grey--alt);
+}
+
+.TheWitcherTRPG.monks-enhanced-journal .monks-journal-sheet.sheet .tab.description {
+    margin: 0px;
+}
+
+.TheWitcherTRPG.monks-enhanced-journal .monks-journal-sheet.sheet .tab.description .editor {
+    border: none;
 }
 
 span.unknown-link {

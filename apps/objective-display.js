@@ -34,6 +34,7 @@ export class ObjectiveDisplay extends Application {
                 id: page.id,
                 uuid: page.uuid,
                 completed: page.getFlag('monks-enhanced-journal', 'completed'),
+                status: getProperty(page, 'flags.monks-enhanced-journal.status') || (getProperty(page, 'flags.monks-enhanced-journal.completed') ? 'completed' : 'inactive'),
                 name: page.name
             };
 
