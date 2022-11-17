@@ -1073,19 +1073,35 @@ export class MonksEnhancedJournal {
                     }
                 }
 
-                const checkPermission = doc => {
-                    if (doc && doc.testUserPermission && !doc.testUserPermission(game.user, "LIMITED")) {
-                        const span = document.createElement('span');
-                        span.classList.add("unknown-link");
-                        span.innerHTML = `<i class="fas fa-eye-slash"></i> Hidden`;
-                        return span;
-                    } else {
-                        let a = oldCreateContentLink.call(this, match, options);
-                        if (parts.length > 1) {
-                            $(a).attr("data-anchor", parts[1]).append(`, ${parts[1]}`);
-                        }
-                        return a;
+                const isCompendiumEntry = doc => {
+                    return !!(doc && doc.pack);
+                }
+                
+                const isPrivatePack = pack => {
+                    return game.packs.get(pack).private;
+                }
+
+                const replaceWithHidden = () => {
+                    const span = document.createElement('span');
+                    span.classList.add("unknown-link");
+                    span.innerHTML = `<i class="fas fa-eye-slash"></i> Hidden`;
+                    return span;
+                }
+
+                const showNormal = () => {
+                    let a = oldCreateContentLink.call(this, match, options);
+                    if (parts.length > 1) {
+                        $(a).attr("data-anchor", parts[1]).append(`, ${parts[1]}`);
                     }
+                    return a;
+                }
+
+                const checkPermission = doc => {
+                    const hasPermission = isCompendiumEntry(doc) ? game.user.isGM || !isPrivatePack(doc.pack) : doc?.testUserPermission(game.user, "LIMITED");
+                    if (doc && !hasPermission) {
+                        return replaceWithHidden();
+                    }
+                    return showNormal();
                 }
                 if (doc instanceof Promise) return doc.then(checkPermission)
                 else return checkPermission(doc);
