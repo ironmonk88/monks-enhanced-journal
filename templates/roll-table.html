@@ -7,11 +7,19 @@
     </div>
     <div class="form-group">
         <label>{{localize 'MonksEnhancedJournal.NumberOfItems'}}</label>
-        <input name="quantity" type="text" value="1" style="text-align:right;flex: 0 0 50px;" />
+        <input name="numberof" type="text" value="1" style="text-align:right;flex: 0 0 50px;" />
+    </div>
+    <div class="form-group">
+        <label>Roll Table formula</label>
+        <span class="roll-formula" style="text-align:right;">{{rollformula}}</span>
+    </div>
+    <div class="form-group">
+        <label>Reset once all drawn</label>
+        <input name="reset" type="checkbox" />
     </div>
     <div class="form-group">
         <label>{{localize 'MonksEnhancedJournal.QuantityOfItems'}}</label>
-        <input name="count" type="text" value="1" style="text-align:right;flex: 0 0 50px;" />
+        <input name="quantity" type="text" value="1" style="text-align:right;flex: 0 0 50px;" />
     </div>
     {{#if useFrom}}
     <div class="form-group">

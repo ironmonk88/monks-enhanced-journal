@@ -627,7 +627,7 @@ export class LootSheet extends EnhancedJournalSheet {
     _getActorContextOptions() {
         return [
             {
-                name: "SIDEBAR.Remove",
+                name: i18n("MonksEnhancedJournal.RemoveActor"),
                 icon: '<i class="fas fa-trash"></i>',
                 condition: () => game.user.isGM,
                 callback: li => {

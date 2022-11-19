@@ -1,3 +1,41 @@
+# Version 10.5
+
+Fixed issue with permission of Journal Page permissions
+
+Fixed issue with remembering the sidebar being collapsed
+
+Fixed styling in Alien RPG system
+
+Fixed issue with right click context menu in Alien RPG
+
+Fixed styling issue with Stars without number
+
+Added an alert to let players without a default character know why they can't purchase from the shop
+
+Fixed an issue with Fallout currency
+
+Fixed an issue opening a compendium entry
+
+Fixed an issue when no notes are present on a Journal Entry
+
+Fixed an issue with links to compendium entries being shown as broken.
+
+Fixed libWrapper warning with Advanced Macros
+
+Fixed issue where editing an image entry that had no image was adding additional elements to the page.
+
+Added the option to create a Journal Entry Page when trigger from Monk's Active Tiles, using the Write to Journal action.
+
+Fixed issue with the polyglot menu not being added to MEJ pages.
+
+Fixed issue with resetting result from a Roll Table
+
+Fixed issue with the text on the context menu to remove an actor from a loot sheet
+
+Fixed issue with opening the actor that's been attached to an Organization, Person, and Shop sheet.
+
+Fixed the issue with a stray image being shown on the Place sheet.
+
 # Version 10.4
 
 Added support for opening inline links to specific pages within an Adventure Book.

@@ -160,6 +160,8 @@ export class MonksEnhancedJournal {
             MonksEnhancedJournal.currencyname = "money";
         } else if (game.system.id == "TheWitcherTRPG") {
             MonksEnhancedJournal.pricename = "cost";
+        } else if (game.system.id == "fallout") {
+            MonksEnhancedJournal.pricename = "cost";
         }
 
         game.MonksEnhancedJournal = this;
@@ -360,6 +362,7 @@ export class MonksEnhancedJournal {
                     if (type == "base" || type == "oldentry") type = "journalentry";
                     let types = MonksEnhancedJournal.getDocumentTypes();
                     if (types[type]) {
+                        page.parent.ownership[game.userId] = CONST.DOCUMENT_OWNERSHIP_LEVELS.OBSERVER;
                         return page.sheet.render(true, options);//return new JournalEntrySheet(page, options).render(true, options);
                     }
                 }
@@ -630,6 +633,17 @@ export class MonksEnhancedJournal {
             const document = await this.collection.getDocument(li.dataset.documentId);
             if (document instanceof JournalEntry) {
                 if (!MonksEnhancedJournal.openJournalEntry(document, { editable: game.user.isGM && !this.collection.locked })) {
+                    if (document.pages.size == 1) {
+                        let page = document.pages.contents[0];
+                        MonksEnhancedJournal.fixType(page);
+                        let type = getProperty(page, "flags.monks-enhanced-journal.type");
+                        if (type == "base" || type == "oldentry") type = "journalentry";
+                        let types = MonksEnhancedJournal.getDocumentTypes();
+                        if (types[type]) {
+                            return page.sheet.render(true);
+                        }
+                    }
+
                     return wrapped(...args);
                 }
             } else
@@ -818,7 +832,7 @@ export class MonksEnhancedJournal {
         let stripData = function(data) {
             if (data.flags['monks-enhanced-journal'] != undefined) {
                 for (let [k, v] of Object.entries(data.flags['monks-enhanced-journal'])) {
-                    if (v.notes != undefined)
+                    if (v?.notes != undefined)
                         delete data.flags['monks-enhanced-journal'][k];
                 }
 
@@ -1049,8 +1063,8 @@ export class MonksEnhancedJournal {
         }
 
         //Make sure that players can't see inline links that they don't know about.
-        let oldCreateContentLink = TextEditor._createContentLink;
-        TextEditor._createContentLink = function (match, options = {}) {
+        let createContentLink = function (wrapped, ...args) {
+            let [match, options] = args;
             let { async, relativeTo } = options;
             let [type, target, hash, name] = match.slice(1, 5);
             let parts = [target];
@@ -1074,13 +1088,13 @@ export class MonksEnhancedJournal {
                 }
 
                 const checkPermission = doc => {
-                    if (doc && doc.testUserPermission && !doc.testUserPermission(game.user, "LIMITED")) {
+                    if (doc && ((!doc.compendium && doc.testUserPermission && !doc.testUserPermission(game.user, "LIMITED")) || (doc.compendium && doc.compendium.private))) {
                         const span = document.createElement('span');
                         span.classList.add("unknown-link");
                         span.innerHTML = `<i class="fas fa-eye-slash"></i> Hidden`;
                         return span;
                     } else {
-                        let a = oldCreateContentLink.call(this, match, options);
+                        let a = wrapped.call(this, match, options);
                         if (parts.length > 1) {
                             $(a).attr("data-anchor", parts[1]).append(`, ${parts[1]}`);
                         }
@@ -1091,11 +1105,20 @@ export class MonksEnhancedJournal {
                 else return checkPermission(doc);
             }
 
-            let a = oldCreateContentLink.call(this, match, options);
+            let a = wrapped.call(this, match, options);
             if (parts.length > 1) {
                 $(a).attr("data-anchor", parts[1]).append(`, ${parts[1]}`);
             }
             return a;
+        }
+
+        if (game.modules.get("lib-wrapper")?.active) {
+            libWrapper.register("monks-enhanced-journal", "TextEditor._createContentLink", createContentLink, "MIXED");
+        } else {
+            const oldCreateContentLink = TextEditor._createContentLink;
+            TextEditor._createContentLink = function (event) {
+                return createContentLink.call(this, oldCreateContentLink.bind(this), ...arguments);
+            }
         }
 
         let onCreateDialog = async function (wrapped, ...args) {
@@ -3657,12 +3680,14 @@ Hooks.on("renderJournalPageSheet", (sheet, html, data) => {
     if (getProperty(data, "flags.monks-enhanced-journal.appendix"))
         $('select[name="title.level"]').val(-1);
     if ((data.data.type == "video" || data.data.type == "image")) {
-        let div = $('<div>').addClass("no-file-notification").toggle(data.data.src == undefined).html(`<i class="fas ${data.data.type == "video" ? 'fa-video-slash' : 'fa-image-slash'}"></i> No ${data.data.type}`).insertAfter(html[0]);
-        if (data.data.type == "image" && data.data.src == undefined) $('img', html).hide();
-        $('img, video', html).on("error", () => {
-            div.show();
-            $('img, video', html).parent().hide();
-        });
+        if (!sheet.isEditable) {
+            let div = $('<div>').addClass("no-file-notification").toggle(data.data.src == undefined).html(`<i class="fas ${data.data.type == "video" ? 'fa-video-slash' : 'fa-image-slash'}"></i> No ${data.data.type}`).insertAfter(html[0]);
+            if (data.data.type == "image" && data.data.src == undefined) $('img', html).hide();
+            $('img, video', html).on("error", () => {
+                div.show();
+                $('img, video', html).parent().hide();
+            });
+        }
     }
 });
 
@@ -3882,8 +3907,26 @@ Hooks.on("setupTileActions", (app) => {
                 required: false
             },
             {
+                id: "create",
+                name: "Create page if not found",
+                type: "checkbox",
+                defvalue: false,
+                onClick: (app) => {
+                    app.checkConditional();
+                }
+            },
+            {
+                id: "createname",
+                name: "New Page name",
+                type: "text",
+                required: false,
+                conditional: (app) => {
+                    return $('input[name="data.create"]', app.element).prop('checked');
+                }
+            },
+            {
                 id: "text",
-                name: "MonksActiveTiles.ctrl.text",
+                name: "Text",
                 type: "text",
                 subtype: "multiline",
                 required: true
@@ -3911,29 +3954,41 @@ Hooks.on("setupTileActions", (app) => {
             let entities = await game.MonksActiveTiles.getEntities(args, null, 'journal');
             for (let entity of entities) {
                 if (entity instanceof JournalEntry && entity.pages.size > 0) {
-                    let page = (action.data.page ? entity.pages.get(action.data.page) : entity.pages.contents[0]);
+                    let context = {
+                        actor: tokens[0]?.actor?.toObject(false),
+                        token: tokens[0]?.toObject(false),
+                        tile: tile.toObject(false),
+                        entity: entity,
+                        user: game.users.get(userid),
+                        value: value,
+                        scene: canvas.scene,
+                        method: method,
+                        change: change
+                    };
+
+                    let page = (action.data.page ? entity.pages.get(action.data.page) : null);
+                    if (!page) {
+                        if (action.data.create) {
+                            let name = action.data.createname || "";
+                            if (name.includes("{{")) {
+                                const compiled = Handlebars.compile(name);
+                                name = compiled(context, { allowProtoMethodsByDefault: true, allowProtoPropertiesByDefault: true }).trim();
+                            }
+                            page = await JournalEntryPage.create({ type: "text", name: name }, { parent: entity });
+                        } else if (entity.pages.contents.length)
+                            page = entity.pages.contents[0];
+                    }
+
                     if (!page)
                         continue;
 
                     let text = action.data.text;
                     if (text.includes("{{")) {
-                        let context = {
-                            actor: tokens[0]?.actor?.toObject(false),
-                            token: tokens[0]?.toObject(false),
-                            tile: tile.toObject(false),
-                            entity: entity,
-                            user: game.users.get(userid),
-                            value: value,
-                            scene: canvas.scene,
-                            method: method,
-                            change: change
-                        };
-
                         const compiled = Handlebars.compile(text);
                         text = compiled(context, { allowProtoMethodsByDefault: true, allowProtoPropertiesByDefault: true }).trim();
                     }
 
-                    let content = page.text.content;
+                    let content = page.text.content || "";
                     if (action.data.append == "append")
                         content = content + text;
                     else if (action.data.append == "prepend")

@@ -285,6 +285,7 @@ export class EnhancedJournalSheet extends JournalPageSheet {
 
         //$("a.inline-request-roll", html).click(MonksEnhancedJournal._onClickInlineRequestRoll.bind(this));
         $("a.picture-link", html).click(MonksEnhancedJournal._onClickPictureLink.bind(this));
+        $("img:not(.nopopout)", html).click(this._onClickImage.bind(this));
 
         $('a[href^="#"]', html).click(this._onClickAnchor.bind(this));
 
@@ -353,6 +354,82 @@ export class EnhancedJournalSheet extends JournalPageSheet {
         $('.editor .editor-content', this.element).unmark();
 
         if (this.editors[name] != undefined) {
+            if (game.modules.get("polyglot")?.active) {
+                if (!game.user.isGM) {
+                    var langs = {};
+                    for (let lang of this.known_languages) {
+                        langs[lang] = game.polyglot.LanguageProvider.languages[lang];
+                    }
+                    for (let lang of this.literate_languages) {
+                        langs[lang] = game.polyglot.LanguageProvider.languages[lang];
+                    }
+                } else langs = game.polyglot.LanguageProvider.languages;
+                const languages = Object.entries(langs).map(([lang, name]) => {
+                    return {
+                        title: name || "",
+                        inline: "span",
+                        classes: "polyglot-journal",
+                        attributes: {
+                            title: name || "",
+                            "data-language": lang || "",
+                        },
+                    };
+                });
+                if (this.truespeech) {
+                    const truespeechIndex = languages.findIndex((element) => element.attributes["data-language"] == this.truespeech);
+                    if (truespeechIndex !== -1) languages.splice(truespeechIndex, 1);
+                }
+                if (this.comprehendLanguages && !this._isTruespeech(this.comprehendLanguages)) {
+                    const comprehendLanguagesIndex = languages.findIndex((element) => element.attributes["data-language"] == this.comprehendLanguages);
+                    if (comprehendLanguagesIndex !== -1) languages.splice(comprehendLanguagesIndex, 1);
+                }
+                options.style_formats = [
+                    ...CONFIG.TinyMCE.style_formats,
+                    {
+                        title: "Polyglot",
+                        items: languages,
+                    },
+                ];
+                options.formats = {
+                    removeformat: [
+                        // Default remove format configuration from tinyMCE
+                        {
+                            selector: "b,strong,em,i,font,u,strike,sub,sup,dfn,code,samp,kbd,var,cite,mark,q,del,ins",
+                            remove: "all",
+                            split: true,
+                            expand: false,
+                            block_expand: true,
+                            deep: true,
+                        },
+                        {
+                            selector: "span",
+                            attributes: ["style", "class"],
+                            remove: "empty",
+                            split: true,
+                            expand: false,
+                            deep: true,
+                        },
+                        {
+                            selector: "*",
+                            attributes: ["style", "class"],
+                            split: false,
+                            expand: false,
+                            deep: true,
+                        },
+                        // Add custom config to remove spans from polyglot when needed
+                        {
+                            selector: "span",
+                            classes: "polyglot-journal",
+                            attributes: ["title", "class", "data-language"],
+                            remove: "all",
+                            split: true,
+                            expand: false,
+                            deep: true,
+                        },
+                    ],
+                };
+            }
+
             if (this.object.type == 'text' || this.object.type == 'journalentry' || this.object.type == 'oldentry' || setting("show-menubar")) {
                 options = foundry.utils.mergeObject(options, {
                     menubar: true,
@@ -386,6 +463,14 @@ export class EnhancedJournalSheet extends JournalPageSheet {
                 //}
             }
         }
+    }
+
+    _onClickImage(event) {
+        const target = event.currentTarget;
+        const title = this.object?.name ?? target.title;
+        const ip = new ImagePopout(target.src, { title });
+        //ip.shareImage = () => Journal.showDialog(this.object, { showAs: "image" });
+        ip.render(true);
     }
 
     _contextMenu(html) {
@@ -1445,6 +1530,8 @@ export class EnhancedJournalSheet extends JournalPageSheet {
 
         let lastrolltable = that.object.getFlag('monks-enhanced-journal', "lastrolltable") || game.user.getFlag('monks-enhanced-journal', "lastrolltable");
 
+        //let table = await fromUuid(lastrolltable);
+
         let html = await renderTemplate("modules/monks-enhanced-journal/templates/roll-table.html", { rollTables: rolltables, useFrom: useFrom, lastrolltable: lastrolltable });
         Dialog.confirm({
             title: i18n("MonksEnhancedJournal.PopulateFromRollTable"),
@@ -1466,8 +1553,9 @@ export class EnhancedJournalSheet extends JournalPageSheet {
                 }
 
                 let rolltable = $('[name="rollable-table"]').val();
+                let numberof = $('[name="numberof"]').val();
                 let quantity = $('[name="quantity"]').val();
-                let count = $('[name="count"]').val();
+                let reset = $('[name="reset"]').prop("checked");
                 let clear = $('[name="clear"]').prop("checked");
                 let duplicate = $('[name="duplicate"]').val();
 
@@ -1478,17 +1566,22 @@ export class EnhancedJournalSheet extends JournalPageSheet {
                     await that.object.setFlag('monks-enhanced-journal', "lastrolltable", rolltable);
                     await game.user.setFlag('monks-enhanced-journal', "lastrolltable", rolltable);
 
-                    quantity = await getDiceRoll(quantity);
+                    numberof = await getDiceRoll(numberof);
 
                     let items = (clear ? [] : that.object.getFlag('monks-enhanced-journal', itemtype) || []);
                     let currency = that.object.getFlag('monks-enhanced-journal', "currency") || {};
                     let currChanged = false;
 
-                    for (let i = 0; i < quantity; i++) {
+                    for (let i = 0; i < numberof; i++) {
                         const available = table.results.filter(r => !r.drawn);
+                        
                         if (!table.formula || !available.length) {
-                            ui.notifications.warn("There are no available results which can be drawn from this table.");
-                            break;
+                            if (table.formula && reset)
+                                await table.resetResults();
+                            else {
+                                ui.notifications.warn("There are no available results which can be drawn from this table.");
+                                break;
+                            }
                         }
 
                         let result = await table.draw({ rollMode: "selfroll", displayChat: false });
@@ -1576,7 +1669,7 @@ export class EnhancedJournalSheet extends JournalPageSheet {
                                     if (oldItem && duplicate != "additional") {
                                         if (duplicate == "increase") {
                                             let oldqty = getProperty(oldItem, "flags.monks-enhanced-journal.quantity") || 1;
-                                            let newqty = parseInt(oldqty) + parseInt(count != "" ? await getDiceRoll(count) : 1);
+                                            let newqty = parseInt(oldqty) + parseInt(quantity != "" ? await getDiceRoll(quantity) : 1);
                                             setProperty(oldItem, "flags.monks-enhanced-journal.quantity", newqty);
                                         }
                                     } else {
@@ -1589,7 +1682,7 @@ export class EnhancedJournalSheet extends JournalPageSheet {
                                             parentId: oldId,
                                             price: `${price.value} ${price.currency}`,
                                             cost: `${cost.value} ${cost.currency}`,
-                                            quantity: count != "" ? await getDiceRoll(count) : 1
+                                            quantity: quantity != "" ? await getDiceRoll(quantity) : 1
                                         };
                                         if (useFrom)
                                             setProperty(itemData, "flags.monks-enhanced-journal.from", table.name);
@@ -1601,7 +1694,7 @@ export class EnhancedJournalSheet extends JournalPageSheet {
                                         uuid: item.uuid,
                                         img: item.img,
                                         name: item.name,
-                                        quantity: (count != "" ? await getDiceRoll(count) : 1),
+                                        quantity: (quantity != "" ? await getDiceRoll(quantity) : 1),
                                         type: "Actor"
                                     }
                                     if (item.pack)
@@ -1618,6 +1711,23 @@ export class EnhancedJournalSheet extends JournalPageSheet {
                         await that.object.setFlag('monks-enhanced-journal', "currency", currency);
                 }
             },
+            render: (html) => {
+                $('input[name="numberof"]', html).on("blur", async () => {
+                    if ($('input[name="numberof"]', html).val() == "") {
+                        $('input[name="numberof"]', html).val(1);
+                    }
+                });
+                $('input[name="quantity"]', html).on("blur", () => {
+                    if ($('input[name="quantity"]', html).val() == "") {
+                        $('input[name="quantity"]', html).val(1);
+                    }
+                });
+                $('select[name="rollable-table"]', html).on("change", async () => {
+                    let rolltable = $('[name="rollable-table"]').val();
+                    let table = await fromUuid(rolltable);
+                    $('.roll-formula', html).html(table?.formula);
+                });
+            }
         });
     }
 

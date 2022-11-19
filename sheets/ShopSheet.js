@@ -70,13 +70,14 @@ export class ShopSheet extends EnhancedJournalSheet {
         let purchasing = data.data.flags['monks-enhanced-journal']?.purchasing || 'confirm';
         let hasGM = (game.users.find(u => u.isGM && u.active) != undefined);
         data.showrequest = (['confirm', 'free'].includes(purchasing) && !this.object.isOwner && game.user.character && hasGM);
+        data.nocharacter = !game.user.isGM && !game.user.character;
 
         let actorLink = this.object.getFlag('monks-enhanced-journal', 'actor');
         if (actorLink) {
             let actor = game.actors.find(a => a.id == actorLink.id);
 
             if (actor && actor.testUserPermission(game.user, "OBSERVER")) {
-                data.actor = { id: actor.id, name: actor.name, img: actor.img };
+                data.actor = { uuid: actor.uuid, name: actor.name, img: actor.img };
             }
         }
         data.canViewActor = !!data.actor;
@@ -164,6 +165,8 @@ export class ShopSheet extends EnhancedJournalSheet {
         $('.items-header', html).on("click", this.collapseItemSection.bind(this));
 
         $('[sort]', html).on("click", this.alterSort.bind(this));
+
+        $('.open-player-config', html).on("click", () => { game.user.sheet.render(true) });
 
         const actorOptions = this._getPersonActorContextOptions();
         if (actorOptions) new ContextMenu($(html), ".actor-img", actorOptions);

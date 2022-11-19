@@ -63,7 +63,9 @@
             </div>
             <div class="tab items active" data-group="primary" data-tab="items">
                 <div class="tab-inner flexcol">
-
+                    {{#if nocharacter}}
+                    <div class="no-character-alert">You don't have a selected default character, and won't be able to automatically purchase items.  Please select a character <a class="open-player-config">here</a></div>
+                    {{/if}}
                     <ol class="items-list shop-items">
                         <li class="items-header flexrow">
                             <h3 class="item-name noborder flexrow" sort="name">{{localize 'MonksEnhancedJournal.Items'}}</h3>
@@ -87,7 +89,7 @@
                                 <h3 class="item-name noborder flexrow">{{localize this.name}} <span class="item-count">({{this.items.length}} items)</span></h3>
                             </li>
                             {{/if}}
-                            <ul class="item-list" {{#if this.collapsed}}style="display: none;"{{/if}}>
+                            <ul class="item-list" {{#if this.collapsed}} style="display: none;" {{/if}}>
                                 {{#each this.items}}
                                 <li class="item flexrow{{#if (eq this.quantity 0)}} empty{{/if}}" data-id="{{this.id}}" data-container="items" data-document="Item" draggable="false">
                                     <div class="item-name flexrow">

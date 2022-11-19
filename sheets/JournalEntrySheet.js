@@ -22,7 +22,6 @@ export class JournalEntrySheet extends DocumentSheet {
     async getData() {
         let data = await super.getData();
 
-
         return data;
     }
 

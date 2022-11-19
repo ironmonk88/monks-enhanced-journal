@@ -75,9 +75,19 @@ export class EnhancedJournal extends Application {
     }
 
     get isEditable() {
-        let editable = !!this.options["editable"] && this.object.isOwner;
-        if (this.object.pack) {
-            const pack = game.packs.get(this.object.pack);
+        let object = this.object;
+        if (object instanceof JournalEntryPage && !!getProperty(object, "flags.monks-enhanced-journal.type")) {
+            let type = getProperty(object, "flags.monks-enhanced-journal.type");
+            if (type == "base" || type == "oldentry") type = "journalentry";
+            let types = MonksEnhancedJournal.getDocumentTypes();
+            if (types[type]) {
+                object = object.parent;
+            }
+        }
+
+        let editable = !!this.options["editable"] && object.isOwner;
+        if (object.pack) {
+            const pack = game.packs.get(object.pack);
             if (pack.locked) editable = false;
         }
         return editable;
@@ -112,8 +122,10 @@ export class EnhancedJournal extends Application {
                 MonksEnhancedJournal.updateDirectory(html, false);
             })
 
+            options.mode = options.mode ?? this.mode;
+            options.collapsed = options.collapsed ?? this.sidebarCollapsed;
             this.renderSubSheet(options).then(() => {
-                if (options?.pageId) {
+                if (options?.pageId && this.subsheet.goToPage) {
                     this.subsheet.goToPage(options.pageId, options?.anchor);
                 }
             });
@@ -260,7 +272,7 @@ export class EnhancedJournal extends Application {
             if (this.subsheet.refresh)
                 this.subsheet.refresh();
             else if (this.object instanceof JournalEntry)
-                this.subsheet.render();
+                this.subsheet.render(true, options);
 
             $('.window-title', this.element).html((this.subsheet.title || i18n("MonksEnhancedJournal.NewTab")) + ' - ' + i18n("MonksEnhancedJournal.Title"));
 
@@ -271,6 +283,12 @@ export class EnhancedJournal extends Application {
             let classes = this.subsheet.options.classes.join(' ').replace('monks-enhanced-journal', '')
             if (!(this.subsheet instanceof ActorSheet) && !setting("use-system-tag"))
                 classes = classes.replace(game.system.id, '');
+
+            if (this.object instanceof JournalEntry) {
+                const modes = JournalSheet.VIEW_MODES;
+                classes += (this.subsheet?.mode === modes.MULTIPLE ? " multiple-pages" : " single-page");
+            }
+
             contentform.empty().attr('class', classes).append(this.subdocument); //.concat([`${game.system.id}`]).join(' ')
 
             if (!this.isEditable) {
@@ -343,7 +361,7 @@ export class EnhancedJournal extends Application {
 
             let oldActivateEditor = this.subsheet.activateEditor;
             this.subsheet.activateEditor = function (...args) {
-                that.activateEditor();
+                that.activateEditor.apply(this, args);
                 return oldActivateEditor.call(this, ...args);
             }
 
@@ -1387,6 +1405,7 @@ export class EnhancedJournal extends Application {
 
     toggleMenu() {
         if (this.subsheet.toggleSidebar) this.subsheet.toggleSidebar(event);
+        this.sidebarCollapsed = this.subsheet.sidebarCollapsed;
     }
 
     toggleViewMode(event) {

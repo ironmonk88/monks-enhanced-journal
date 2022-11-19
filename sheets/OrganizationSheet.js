@@ -52,7 +52,7 @@ export class OrganizationSheet extends EnhancedJournalSheet {
             let actor = game.actors.find(a => a.id == actorLink.id);
 
             if (actor && actor.testUserPermission(game.user, "OBSERVER")) {
-                data.actor = { id: actor.id, name: actor.name, img: actor.img };
+                data.actor = { uuid: actor.uuid, name: actor.name, img: actor.img };
             }
         }
         data.canViewActor = !!data.actor;
