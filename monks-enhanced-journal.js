@@ -3111,6 +3111,8 @@ export class MonksEnhancedJournal {
             case "pf1e":
             case "pf1":
                 return [{ id: "pp", name: i18n("MonksEnhancedJournal.currency.platinum"), convert: 10 }, { id: "gp", name: i18n("MonksEnhancedJournal.currency.gold"), convert: 0 }, { id: "sp", name: i18n("MonksEnhancedJournal.currency.silver"), convert: 0.1 }, { id: "cp", name: i18n("MonksEnhancedJournal.currency.copper"), convert: 0.01 }];
+            case "ds4":
+                return [{ id: "gold", name: i18n("MonksEnhancedJournal.currency.gold"), convert: 0 }, { id: "silver", name: i18n("MonksEnhancedJournal.currency.silver"), convert: 0.1 },{ id: "copper", name: i18n("MonksEnhancedJournal.currency.copper"), convert: 0.01 }];
             default:
             return [];
         }
