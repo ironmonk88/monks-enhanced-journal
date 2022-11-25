@@ -1065,7 +1065,7 @@ export class MonksEnhancedJournal {
         //Make sure that players can't see inline links that they don't know about.
         let createContentLink = function (wrapped, ...args) {
             let [match, options] = args;
-            let { async, relativeTo } = options;
+            let { async, relativeTo } = (options || {});
             let [type, target, hash, name] = match.slice(1, 5);
             let parts = [target];
             if (type == "JournalEntry") {
@@ -1088,7 +1088,7 @@ export class MonksEnhancedJournal {
                 }
 
                 const checkPermission = doc => {
-                    if (doc && ((!doc.compendium && doc.testUserPermission && !doc.testUserPermission(game.user, "LIMITED")) || (doc.compendium && doc.compendium.private))) {
+                    if (!game.user.isGM && doc && ((!doc.compendium && doc.testUserPermission && !doc.testUserPermission(game.user, "OBSERVER")) || (doc.compendium && doc.compendium.private))) {
                         const span = document.createElement('span');
                         span.classList.add("unknown-link");
                         span.innerHTML = `<i class="fas fa-eye-slash"></i> Hidden`;
@@ -2869,9 +2869,11 @@ export class MonksEnhancedJournal {
             else if (entity instanceof JournalEntry)
                 return "Adding new loot page to " + entity.name;
             else if (entity instanceof Folder)
-                return (entity.documentClass.documentName == "JournalEntry" ? "Creating new Journal Entry within " + entity.name + " folder" : "Creating within " + entity.name + " folder");
+                return (entity.documentClass.documentName == "JournalEntry" ? "Creating new Journal Entry within " + entity.name + " folder" : "Creating Actor within " + entity.name + " folder");
+            else if(entity)
+                return `Creating ${entity.documentClass.documentName == "JournalEntry" ? "Journal Entry" : "Actor"} in the root folder`;
             else
-                return "Creating in the root folder";
+                return "Unknown";
         }
 
         function getEntries(folderID, contents) {

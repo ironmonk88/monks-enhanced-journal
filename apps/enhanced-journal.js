@@ -122,13 +122,11 @@ export class EnhancedJournal extends Application {
                 MonksEnhancedJournal.updateDirectory(html, false);
             })
 
-            options.mode = options.mode ?? this.mode;
-            options.collapsed = options.collapsed ?? this.sidebarCollapsed;
-            this.renderSubSheet(options).then(() => {
+            this.renderSubSheet(options); /*.then(() => {
                 if (options?.pageId && this.subsheet.goToPage) {
                     this.subsheet.goToPage(options.pageId, options?.anchor);
                 }
-            });
+            });*/
         }
 
         return result;
@@ -172,8 +170,10 @@ export class EnhancedJournal extends Application {
         return html;
     }
 
-    async renderSubSheet(options) {
+    async renderSubSheet(options = {}) {
         try {
+            const modes = JournalSheet.VIEW_MODES;
+
             let currentTab = this.tabs.active();
             if (!currentTab.entity)
                 currentTab.entity = await this.findEntity(currentTab.entityId);
@@ -183,6 +183,8 @@ export class EnhancedJournal extends Application {
             //if there's no object then show the default
             if (this.object instanceof Promise)
                 this.object = await this.object;
+
+            options = mergeObject(options, game.user.getFlag("monks-enhanced-journal", `pagestate.${this.object.id}`) || {});
 
             let contentform = $('.content > section', this.element);
 
@@ -206,7 +208,7 @@ export class EnhancedJournal extends Application {
                 if (testing instanceof JournalEntryPage && !!getProperty(testing, "flags.monks-enhanced-journal.type"))
                     testing = testing.parent;
 
-                if (testing.testUserPermission && !testing.testUserPermission(game.user, "OBSERVER")) {
+                if (!game.user.isGM && testing && ((!testing.compendium && testing.testUserPermission && !testing.testUserPermission(game.user, "OBSERVER")) || (testing.compendium && testing.compendium.private))) {
                     this.object = {
                         name: this.object.name,
                         type: 'blank',
@@ -257,7 +259,29 @@ export class EnhancedJournal extends Application {
 
             this.subsheet.enhancedjournal = this;
 
-            let templateData = await this.subsheet.getData();
+            let templateData = await this.subsheet.getData(options);
+            if (this.object instanceof JournalEntry) {
+                game.user.setFlag("monks-enhanced-journal", `pagestate.${this.object.id}.pageId`, options?.pageId);
+                game.user.setFlag("monks-enhanced-journal", `pagestate.${this.object.id}.anchor`, options?.anchor);
+
+                templateData.mode = (options?.mode || templateData.mode);
+                if (templateData.mode == modes.SINGLE) {
+                    let pageIndex = this.subsheet._pages.findIndex(p => p._id === options?.pageId);
+                    if (pageIndex == -1) pageIndex = this.subsheet.pageIndex;
+                    templateData.pages = [templateData.toc[pageIndex]];
+                    templateData.viewMode = { label: "JOURNAL.ViewMultiple", icon: "fa-solid fa-note", cls: "single-page" };
+                } else {
+                    templateData.pages = templateData.toc;
+                    templateData.viewMode = { label: "JOURNAL.ViewSingle", icon: "fa-solid fa-notes", cls: "multi-page" };
+                }
+
+                let collapsed = options?.collapsed ?? this.subsheet.sidebarCollapsed;
+                templateData.sidebarClass = collapsed ? "collapsed" : "";
+                templateData.collapseMode = collapsed
+                    ? { label: "JOURNAL.ViewExpand", icon: "fa-solid fa-caret-left" }
+                    : { label: "JOURNAL.ViewCollapse", icon: "fa-solid fa-caret-right" };
+            }
+
             //let defaultOptions = this.subsheet.constructor.defaultOptions;
             await loadTemplates({
                 journalEntryPageHeader: "templates/journal/parts/page-header.html",
@@ -271,8 +295,11 @@ export class EnhancedJournal extends Application {
 
             if (this.subsheet.refresh)
                 this.subsheet.refresh();
-            else if (this.object instanceof JournalEntry)
+            else if (this.object instanceof JournalEntry) {
                 this.subsheet.render(true, options);
+                if (templateData.mode != this.subsheet.mode)
+                    this.toggleViewMode({ preventDefault: () => { }, currentTarget: { dataset: { action: "toggleView" }}});
+            }
 
             $('.window-title', this.element).html((this.subsheet.title || i18n("MonksEnhancedJournal.NewTab")) + ' - ' + i18n("MonksEnhancedJournal.Title"));
 
@@ -285,7 +312,6 @@ export class EnhancedJournal extends Application {
                 classes = classes.replace(game.system.id, '');
 
             if (this.object instanceof JournalEntry) {
-                const modes = JournalSheet.VIEW_MODES;
                 classes += (this.subsheet?.mode === modes.MULTIPLE ? " multiple-pages" : " single-page");
             }
 
@@ -363,6 +389,16 @@ export class EnhancedJournal extends Application {
             this.subsheet.activateEditor = function (...args) {
                 that.activateEditor.apply(this, args);
                 return oldActivateEditor.call(this, ...args);
+            }
+
+            if (this.subsheet.goToPage) {
+                let oldGoToPage = this.subsheet.goToPage;
+                this.subsheet.goToPage = function (...args) {
+                    let [pageId, anchor] = args;
+                    game.user.setFlag("monks-enhanced-journal", `pagestate.${that.object.id}.pageId`, pageId);
+                    game.user.setFlag("monks-enhanced-journal", `pagestate.${that.object.id}.anchor`, anchor);
+                    return oldGoToPage.call(this, ...args);
+                }
             }
 
             this.object._sheet = null;  // Adding this to prevent Quick Encounters from automatically opening
@@ -497,7 +533,8 @@ export class EnhancedJournal extends Application {
 
         if (this.object instanceof JournalEntry) {
             const modes = JournalSheet.VIEW_MODES;
-            $('.viewmode', html).attr("data-action", "toggleView").attr("title", this.subsheet?.mode === modes.SINGLE ? "View Multiple Pages" : "View Single Page").find("i").toggleClass("fa-notes", this.subsheet?.mode === modes.SINGLE).toggleClass("fa-note", this.subsheet?.mode !== modes.SINGLE);
+            let mode = game.user.getFlag("monks-enhanced-journal", `pagestate.${this.object.id}.mode`) ?? this.subsheet?.mode;
+            $('.viewmode', html).attr("data-action", "toggleView").attr("title", mode === modes.SINGLE ? "View Multiple Pages" : "View Single Page").find("i").toggleClass("fa-notes", mode === modes.SINGLE).toggleClass("fa-note", mode !== modes.SINGLE);
         }
     }
 
@@ -680,7 +717,6 @@ export class EnhancedJournal extends Application {
         this.saveTabs();
 
         //this.updateHistory();
-
         this.render(true, options);
 
         this.updateRecent(tab.entity);
@@ -1384,7 +1420,7 @@ export class EnhancedJournal extends Application {
         let ctrls = [
             { text: '<i class="fas fa-search"></i>', type: 'text' },
             { id: 'search', type: 'input', text: "Search Journal", callback: this.searchText },
-            { id: 'viewmode', text: "View Single Page", icon: 'fa-notes', callback: this.toggleViewMode },
+            { id: 'viewmode', text: "View Single Page", icon: 'fa-notes', callback: this.toggleViewMode.bind(this) },
             {
                 id: 'add', text: "Add a Page", icon: 'fa-file-plus', conditional: (doc) => {
                     return game.user.isGM || doc.isOwner
@@ -1405,17 +1441,17 @@ export class EnhancedJournal extends Application {
 
     toggleMenu() {
         if (this.subsheet.toggleSidebar) this.subsheet.toggleSidebar(event);
-        this.sidebarCollapsed = this.subsheet.sidebarCollapsed;
+        game.user.setFlag("monks-enhanced-journal", `pagestate.${this.object.id}.collapsed`, this.subsheet.sidebarCollapsed);
     }
 
     toggleViewMode(event) {
-        this._onAction(event);
+        this.subsheet._onAction(event);
         const modes = JournalSheet.VIEW_MODES;
-        this.enhancedjournal.mode = this.mode;
-        $('.viewmode', this.enhancedjournal.element).attr("title", this.mode === modes.SINGLE ? "View Multiple Pages" : "View Single Page")
+        game.user.setFlag("monks-enhanced-journal", `pagestate.${this.object.id}.mode`, this.subsheet.mode);
+        $('.viewmode', this.element).attr("title", this.subsheet.mode === modes.SINGLE ? "View Multiple Pages" : "View Single Page")
             .find("i")
-            .toggleClass("fa-notes", this.mode === modes.SINGLE)
-            .toggleClass("fa-note", this.mode !== modes.SINGLE);
+            .toggleClass("fa-notes", this.subsheet.mode === modes.SINGLE)
+            .toggleClass("fa-note", this.subsheet.mode !== modes.SINGLE);
     }
 
     journalSettings() {
@@ -1423,10 +1459,13 @@ export class EnhancedJournal extends Application {
     }
 
     addPage() {
+        /*
         let journal = this.object.parent || this.object;
 
         const options = { parent: journal };
         return JournalEntryPage.implementation.createDialog({}, options);
+        */
+        this.createPage();
     }
 
     previousPage() {

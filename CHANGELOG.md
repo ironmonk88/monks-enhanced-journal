@@ -1,3 +1,15 @@
+# Version 10.6
+
+Fixed issue with MEJ remembering the way Foundry Journals were last displayed.  So it will now keep track of the page mode, side bar collapse, and last page viewed.
+
+Fixed issue with adding a page not appearing at the end.
+
+Fixed issue with testing permissions of the Journal Entry.
+
+Fixed issues with displaying the entity name when handling saving loot.
+
+Fixed issue when single clicking on page images popping out the image while also opening the FilePicker.
+
 # Version 10.5
 
 Fixed issue with permission of Journal Page permissions
