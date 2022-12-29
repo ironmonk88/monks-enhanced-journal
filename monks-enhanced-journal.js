@@ -185,9 +185,28 @@ export class MonksEnhancedJournal {
             CONFIG.TinyMCE.content_css.push('modules/polyglot/css/polyglot.css');
 
         CONFIG.TinyMCE.style_formats.push({
-            title: "Enhanced Journal", items: [
+            title: "Enhanced Journal",
+            items: [
                 { block: "section", classes: "readaloud", title: "Read Aloud", wrapper: true },
-                { inline: "span", classes: "drop-cap", title: "Drop Cap" }]
+                { inline: "span", classes: "drop-cap", title: "Drop Cap" }
+            ]
+        });
+
+        CONFIG.TinyMCE.style_formats.push({
+            title: "Dynamic Fonts",
+            items: [
+                { inline: "span", classes: "font-size-11", title: "11" },
+                { inline: "span", classes: "font-size-12", title: "12" },
+                { inline: "span", classes: "font-size-13", title: "13" },
+                { inline: "span", classes: "font-size-14", title: "14" },
+                { inline: "span", classes: "font-size-16", title: "16" },
+                { inline: "span", classes: "font-size-18", title: "18" },
+                { inline: "span", classes: "font-size-20", title: "20" },
+                { inline: "span", classes: "font-size-24", title: "24" },
+                { inline: "span", classes: "font-size-28", title: "28" },
+                { inline: "span", classes: "font-size-32", title: "32" },
+                { inline: "span", classes: "font-size-48", title: "48" }
+            ]
         });
 
         const moreNoteIcons = {
@@ -1222,7 +1241,7 @@ export class MonksEnhancedJournal {
                         delete data._id;
                         let newDoc = await JournalEntry.create(data);
 
-                        page.delete();
+                        //page.delete();
 
                         MonksEnhancedJournal.openJournalEntry(newDoc);
                     }
@@ -4098,6 +4117,7 @@ Hooks.on("setupTileActions", (app) => {
     app.registerTileAction('monks-enhanced-journal', 'append', {
         name: "Write to Journal",
         requiresGM: true,
+        visible: false,
         ctrls: [
             {
                 id: "entity",

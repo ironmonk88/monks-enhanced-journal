@@ -97,9 +97,43 @@ span.drop-cap {
     padding-bottom: 0em;
 }
 
-html{
-    min-height:100%;
-    height:fit-content;
+span.font-size-11 {
+    font-size: var(--font-size-11);
+}
+span.font-size-12 {
+    font-size: var(--font-size-12);
+}
+span.font-size-13 {
+    font-size: var(--font-size-13);
+}
+span.font-size-14 {
+    font-size: var(--font-size-14);
+}
+span.font-size-16 {
+    font-size: var(--font-size-16);
+}
+span.font-size-18 {
+    font-size: var(--font-size-18);
+}
+span.font-size-20 {
+    font-size: var(--font-size-20);
+}
+span.font-size-24 {
+    font-size: var(--font-size-24);
+}
+span.font-size-28 {
+    font-size: var(--font-size-28);
+}
+span.font-size-32 {
+    font-size: var(--font-size-32);
+}
+span.font-size-48 {
+    font-size: var(--font-size-48);
+}
+
+html {
+    min-height: 100%;
+    height: fit-content;
 }
 
 /*

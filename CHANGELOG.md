@@ -1,3 +1,11 @@
+# Version 10.9
+
+Hid the Write to Journal action in Active Tiles.
+
+Added dynamic fonts.
+
+Tried to fix issue when extracting a Journal Page.
+
 # Version 10.8
 
 Fixing issue that requires Polyglot to be installed
