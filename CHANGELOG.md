@@ -1,3 +1,7 @@
+# Version 10.8
+
+Fixing issue that requires Polyglot to be installed
+
 # Version 10.7
 
 Fixed issues with the save state overwriting requested changes

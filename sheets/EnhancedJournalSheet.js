@@ -353,10 +353,10 @@ export class EnhancedJournalSheet extends JournalPageSheet {
     activateEditor(name, options = {}, initialContent = "") {
         $('.editor .editor-content', this.element).unmark();
 
-        let polyglot = (isNewerVersion(game.modules.get("polyglot").version, "1.7.30") ? game.polyglot : polyglot.polyglot);
+        let polyglot = (isNewerVersion(game.modules.get("polyglot")?.version, "1.7.30") ? game.polyglot : polyglot?.polyglot);
 
         if (this.editors[name] != undefined) {
-            if (game.modules.get("polyglot")?.active) {
+            if (game.modules.get("polyglot")?.active && polyglot) {
                 if (!game.user.isGM) {
                     var langs = {};
                     for (let lang of polyglot.known_languages) {
@@ -1047,7 +1047,10 @@ export class EnhancedJournalSheet extends JournalPageSheet {
             if (!lang) return;
 
             let text = $(this).html();
-            let polyglot = (isNewerVersion(game.modules.get("polyglot").version, "1.7.30") ? game.polyglot : polyglot.polyglot);
+            let polyglot = (isNewerVersion(game.modules.get("polyglot")?.version, "1.7.30") ? game.polyglot : polyglot?.polyglot);
+            if (!polyglot)
+                return;
+
             let scramble = polyglot.scrambleString(this.textContent, game.settings.get('polyglot', 'useUniqueSalt') ? that.object.id : lang, lang);
             let font = polyglot._getFontStyle(lang);
 

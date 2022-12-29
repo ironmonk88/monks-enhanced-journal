@@ -2057,7 +2057,7 @@ export class MonksEnhancedJournal {
         tinyMCE.PluginManager.add('background', backgroundinit);
 
         // Preload fonts for polyglot so there isn't a delay in showing them, and possibly revealing something
-        if (game.modules.get("polyglot")?.active && !isNewerVersion(game.modules.get("polyglot").version, "1.7.30")) {
+        if (game.modules.get("polyglot")?.active && !isNewerVersion(game.modules.get("polyglot")?.version, "1.7.30")) {
             let root = $('<div>').attr('id', 'enhanced-journal-fonts').appendTo('body');
             for (let [k, v] of Object.entries(polyglot.polyglot.LanguageProvider.alphabets)) {
                 $('<span>').attr('lang', k).css({ font: v }).appendTo(root);
