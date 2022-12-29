@@ -305,11 +305,19 @@ export class SlideshowSheet extends EnhancedJournalSheet {
     }
 
     deleteAll() {
-        if (this.object.flags["monks-enhanced-journal"].state == 'stopped') {
-            this.object.setFlag("monks-enhanced-journal", 'slides', []);
-            //$(`.slideshow-body`, this.element).empty();
-            //MonksEnhancedJournal.journal.saveData();
-        }
+        if (this.object.flags["monks-enhanced-journal"].state != 'stopped')
+            return ui.notifications.warn("Can't clear slides when a slideshow is playing");
+
+        Dialog.confirm({
+            title: "Clear Slides",
+            content: "Are you sure want to clear all slides?",
+            yes: () => {
+                this.object.setFlag("monks-enhanced-journal", 'slides', []);
+                //$(`.slideshow-body`, this.element).empty();
+                //MonksEnhancedJournal.journal.saveData();
+            },
+            defaultYes: true
+        });
     }
 
     deleteSlide(id, html) {

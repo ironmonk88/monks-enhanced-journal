@@ -1,3 +1,71 @@
+# Version 10.7
+
+Fixed issues with the save state overwriting requested changes
+
+Added special classes to the Enhanced Journal browser to maintain some css styling that require the main form to be in the css path.
+
+Fixed issue with PF2E css styling.
+
+Fixed issue when activating the journal editor.
+
+Fixed issue with PF2E when rendering the TextPageSheet.
+
+Added code to maintain scroll height when changing between pages.
+
+Changed font sizes so they will respond to changes in the Core font size.
+
+Added styling to Journal Entry tabs that have data.
+
+Fixed styling with currency labels
+
+Fixed styling issues with wfrp4e system.
+
+Updated the journal sheet sound effect button to indicate when the sound is loading.
+
+Fixed issues getting system currency in pf2e.
+
+Added the option to always show the Quest Objectives.
+
+Fixed issue with currency text when displaying UPB.
+
+Added default currency for SWADE, 13th Age, and AGE system
+
+Fixed issues with getting embedded documents.
+
+Added the option to extract an Adventure Book page to its own page.
+
+Added the option to convert a single Adventure Book page to an Enhanced Journal page.
+
+Added the option to drag and drop a MEJ Journal Page onto an Adventure Book page.
+
+Fixed issues with displaying the selected Loot entry in the settings.
+
+Fixed issue with dragging and dropping quest rewards onto a character sheet.
+
+Fixed issues with integration with Active Tiles.
+
+Fixed issue with Journal Page sounds only playing once, and never again once opened a second time.
+
+Fixed issues with players being able to edit journal pages
+
+Fixed issues in PF2E where unidentified items were showing as identified
+
+Fixed the item description drop down in PF2E.
+
+Fixed issues with items converted to scrolls no longer linking to the original item.
+
+Fixed issues with getting the default Lootable name.
+
+Fixed issue with adding a new item to a character sheet.
+
+Updated the relationship interface to allow clicking on the image to view an image popout and clicking on the title opening the associated journal entry.
+
+Updated Quest so that players can view rewards, provided the GM allows them to see.
+
+Added dialog box to confirm deleting all slides.
+
+Fixed issue with custom colour font entries in the sidebar directory.
+
 # Version 10.6
 
 Fixed issue with MEJ remembering the way Foundry Journals were last displayed.  So it will now keep track of the page mode, side bar collapse, and last page viewed.
@@ -9,6 +77,8 @@ Fixed issue with testing permissions of the Journal Entry.
 Fixed issues with displaying the entity name when handling saving loot.
 
 Fixed issue when single clicking on page images popping out the image while also opening the FilePicker.
+
+Fixed issue with creating an inline link
 
 # Version 10.5
 

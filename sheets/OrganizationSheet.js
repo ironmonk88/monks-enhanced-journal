@@ -24,28 +24,7 @@ export class OrganizationSheet extends EnhancedJournalSheet {
     async getData() {
         let data = await super.getData();
 
-        data.relationships = {};
-        for (let item of (data.data.flags['monks-enhanced-journal']?.relationships || [])) {
-            let entity = await this.getDocument(item, "JournalEntry", false);
-            if (!(entity instanceof JournalEntry || entity instanceof JournalEntryPage))
-                continue;
-            if (entity && entity.testUserPermission(game.user, "LIMITED") && (game.user.isGM || !item.hidden)) {
-                let page = (entity instanceof JournalEntryPage ? entity : entity.pages.contents[0]);
-                let type = getProperty(page, "flags.monks-enhanced-journal.type") || "";
-                if (!data.relationships[type])
-                    data.relationships[type] = { type: type, name: i18n(`MonksEnhancedJournal.${type.toLowerCase()}`), documents: [] };
-
-                item.name = page.name;
-                item.img = page.src;
-                item.type = type;
-
-                data.relationships[type].documents.push(item);
-            }
-        }
-
-        for (let [k, v] of Object.entries(data.relationships)) {
-            v.documents = v.documents.sort((a, b) => a.name.localeCompare(b.name));
-        }
+        data.relationships = await this.getRelationships();
 
         let actorLink = this.object.getFlag('monks-enhanced-journal', 'actor');
         if (actorLink) {
@@ -58,6 +37,11 @@ export class OrganizationSheet extends EnhancedJournalSheet {
         data.canViewActor = !!data.actor;
 
         data.offerings = this.getOfferings();
+
+        data.has = {
+            relationships: Object.keys(data.relationships || {})?.length,
+            offerings: data.offerings?.length
+        }
 
         return data;
     }
@@ -76,7 +60,7 @@ export class OrganizationSheet extends EnhancedJournalSheet {
         
         $('.item-hide', html).on('click', this.alterItem.bind(this));
         $('.item-delete', html).on('click', $.proxy(this._deleteItem, this));
-        $('.relationships .items-list .actor-icon', html).click(this.openRelationship.bind(this));
+        $('.relationships .items-list h4', html).click(this.openRelationship.bind(this));
         $('.offerings .items-list .actor-icon', html).click(this.openOfferingActor.bind(this));
         //$('.item-relationship .item-field', html).on('change', this.alterRelationship.bind(this));
 

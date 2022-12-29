@@ -45,6 +45,10 @@ export class PointOfInterestSheet extends EnhancedJournalSheet {
             v.documents = v.documents.sort((a, b) => a.name.localeCompare(b.name));
         }
 
+        data.has = {
+            relationships: Object.keys(data.relationships || {})?.length
+        }
+
         return data;
     }
 
@@ -61,7 +65,7 @@ export class PointOfInterestSheet extends EnhancedJournalSheet {
         super.activateListeners(html, enhancedjournal);
         $('.item-hide', html).on('click', this.alterItem.bind(this));
         $('.item-delete', html).on('click', $.proxy(this._deleteItem, this));
-        $('.relationships .items-list .actor-icon', html).click(this.openRelationship.bind(this));
+        $('.relationships .items-list h4', html).click(this.openRelationship.bind(this));
         //$('.item-relationship .item-field', html).on('change', this.alterRelationship.bind(this));
     }
 

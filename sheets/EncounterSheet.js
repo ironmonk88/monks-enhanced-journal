@@ -83,6 +83,12 @@ export class EncounterSheet extends EnhancedJournalSheet {
             return { id: c.id, name: c.name, value: currency[c.id] ?? 0 };
         });
 
+        data.has = {
+            monsters: getProperty(data, "data.flags.monks-enhanced-journal.actors")?.length,
+            items: getProperty(data, "data.flags.monks-enhanced-journal.items")?.length,
+            dcs: getProperty(data, "data.flags.monks-enhanced-journal.dcs")?.length
+        }
+
         return data;
     }
 

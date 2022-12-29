@@ -58,12 +58,16 @@
   "MonksEnhancedJournal.loot-inactive-players.hint": "Add inactive players to a Loot Entry for loot distribution",
   "MonksEnhancedJournal.use-system-tag.name": "Use system tag",
   "MonksEnhancedJournal.use-system-tag.hint": "When styling the sub sheet, apply the system tag.  This can either solve some issues or break the sheet",
+  "MonksEnhancedJournal.extract-extra-classes.name": "Add extra styles",
+  "MonksEnhancedJournal.extract-extra-classes.hint": "When styling a sub sheet, extract any additional classes and apply them to the main browser",
   "MonksEnhancedJournal.show-chatbubble.name": "Show NPC Chat tool button",
   "MonksEnhancedJournal.show-chatbubble.hint": "Show the button for toggling NPC chat bubbles on the Token toolbar",
   "MonksEnhancedJournal.inline-roll-styling.name": "Inline roll styling",
   "MonksEnhancedJournal.inline-roll-styling.hint": "Alter the inline roll styling to make it a little more like links",
   "MonksEnhancedJournal.show-chat-bubbles.name": "Show chat bubbles",
   "MonksEnhancedJournal.show-chat-bubbles.hint": "Show chat bubbles when clicking on a Note or Token that's linked to a Journal",
+  "MonksEnhancedJournal.objectives-always.name": "Always Show Objectives",
+  "MonksEnhancedJournal.objectives-always.hint": "Show Objectives even if the Notes layer isn't active'",
 
   "MonksEnhancedJournal.SlideConfiguration": "Slide Configuration",
   "MonksEnhancedJournal.DCConfiguration": "DC Configuration",
@@ -540,6 +544,7 @@
   "MonksEnhancedJournal.currency.merchants": "Merchants",
   "MonksEnhancedJournal.currency.tavs": "Tavs",
   "MonksEnhancedJournal.currency.hammer": "Hammer",
+  "MonksEnhancedJournal.currency.upb": "UPB",
 
   "MonksEnhancedJournal.purchasing.hidden": "Hidden",
   "MonksEnhancedJournal.purchasing.visible": "Visible"

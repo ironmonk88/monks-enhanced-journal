@@ -23,7 +23,7 @@ export class QuestSheet extends EnhancedJournalSheet {
                 { dragSelector: ".objective-items .item-list .item", dropSelector: ".quest-container" },
                 { dragSelector: ".sheet-icon", dropSelector: "#board" }
             ],
-            scrollY: [".objective-items", ".reward-container", ".tab.description .tab-inner"]
+            scrollY: [".objective-items", ".reward-container .reward-items > .item-list", ".tab.description .tab-inner"]
         });
     }
 
@@ -53,7 +53,7 @@ export class QuestSheet extends EnhancedJournalSheet {
         });
 
         data.useobjectives = setting('use-objectives');
-        data.canxp = game.modules.get("monks-tokenbar")?.active;
+        data.canxp = game.modules.get("monks-tokenbar")?.active && this.object.isOwner;
 
         data.rewards = this.getRewardData();
         if (data.rewards.length) {
@@ -64,27 +64,12 @@ export class QuestSheet extends EnhancedJournalSheet {
             return { id: c.id, name: c.name, value: data.reward?.currency[c.id] ?? 0 };
         });
 
-        data.relationships = {};
-        for (let item of (data.data.flags['monks-enhanced-journal']?.relationships || [])) {
-            let entity = await this.getDocument(item, "JournalEntry", false);
-            if (!(entity instanceof JournalEntry || entity instanceof JournalEntryPage))
-                continue;
-            if (entity && entity.testUserPermission(game.user, "LIMITED") && (game.user.isGM || !item.hidden)) {
-                let page = (entity instanceof JournalEntryPage ? entity : entity.pages.contents[0]);
-                let type = getProperty(page, "flags.monks-enhanced-journal.type");
-                if (!data.relationships[type])
-                    data.relationships[type] = { type: type, name: i18n(`MonksEnhancedJournal.${type.toLowerCase()}`), documents: [] };
+        data.relationships = await this.getRelationships();
 
-                item.name = page.name;
-                item.img = page.src;
-                item.type = type;
-
-                data.relationships[type].documents.push(item);
-            }
-        }
-
-        for (let [k, v] of Object.entries(data.relationships)) {
-            v.documents = v.documents.sort((a, b) => a.name.localeCompare(b.name));
+        data.has = {
+            objectives: data.objectives?.length,
+            rewards: data.rewards?.length,
+            relationships: Object.keys(data.relationships || {})?.length
         }
 
         return data;
@@ -108,7 +93,7 @@ export class QuestSheet extends EnhancedJournalSheet {
                 if (reward.currency instanceof Array)
                     reward.currency = reward.currency.reduce((a, v) => ({ ...a, [v.name]: v.value }), {});
                 return reward;
-            });
+            }).filter(r => game.user.isGM || r.visible);
         }
 
         return rewards;
@@ -125,6 +110,7 @@ export class QuestSheet extends EnhancedJournalSheet {
             id: makeid(),
             name: i18n("MonksEnhancedJournal.Rewards"),
             active: true,
+            visible: false,
             items: this.object.flags["monks-enhanced-journal"].items,
             xp: this.object.flags["monks-enhanced-journal"].xp,
             additional: this.object.flags["monks-enhanced-journal"].additional,
@@ -213,7 +199,7 @@ export class QuestSheet extends EnhancedJournalSheet {
         $('.roll-table', html).click(this.rollTable.bind(this, "items", false));
         $('.item-name h4', html).click(this._onItemSummary.bind(this));
 
-        $('.relationships .items-list .actor-icon', html).click(this.openRelationship.bind(this));
+        $('.relationships .items-list h4', html).click(this.openRelationship.bind(this));
 
         //$('.item-relationship .item-field', html).on('change', this.alterRelationship.bind(this));
 
@@ -358,8 +344,11 @@ export class QuestSheet extends EnhancedJournalSheet {
         let id = (typeof event == 'string' ? event : $(event.currentTarget).closest('.reward-tab').data('rewardId'));
 
         this.object.setFlag('monks-enhanced-journal', 'reward', id);
-        //this.loadRewards(id);
-        //this.render(true);
+        let rewards = duplicate(this.getRewardData() || []);
+        for (let reward of rewards) {
+            reward.active = (reward.id == id);
+        }
+        this.object.setFlag('monks-enhanced-journal', 'rewards', rewards);
     }
 
     async addReward() {
@@ -474,6 +463,7 @@ export class QuestSheet extends EnhancedJournalSheet {
             }
 
             dragData.itemId = id;
+            dragData.rewardId = reward.id;
             dragData.type = "Item";
             dragData.uuid = this.object.uuid;
             dragData.data = duplicate(item);
@@ -725,25 +715,80 @@ export class QuestSheet extends EnhancedJournalSheet {
             return;
 
         let item = new CONFIG.Item.documentClass(itemData);
-        let chatData = getProperty(item, "data.data.description");
+        let chatData = getProperty(item, "system.description");
         if (item.getChatData)
             chatData = item.getChatData({ secrets: false });
 
         if (chatData instanceof Promise)
             chatData = await chatData;
 
-        // Toggle summary
-        if (li.hasClass("expanded")) {
-            let summary = li.children(".item-summary");
-            summary.slideUp(200, () => summary.remove());
-        } else {
-            let div = $(`<div class="item-summary">${(typeof chatData == "string" ? chatData : chatData.description.value || chatData.description)}</div>`);
-            let props = $('<div class="item-properties"></div>');
-            chatData.properties.forEach(p => props.append(`<span class="tag">${p.name || p}</span>`));
-            div.append(props);
-            li.append(div.hide());
-            div.slideDown(200);
+        if (chatData) {
+            // Toggle summary
+            if (li.hasClass("expanded")) {
+                let summary = li.children(".item-summary");
+                summary.slideUp(200, () => summary.remove());
+            } else {
+                let div;
+                if (game.system.id == "pf2e") {
+                    var _a, _b;
+                    const itemIsPhysical = item.isOfType("physical"),
+                        gmVisibilityWrap = (span, visibility) => {
+                            const wrapper = document.createElement("span");
+                            return wrapper.dataset.visibility = visibility, wrapper.append(span), wrapper
+                        },
+                        rarityTag = itemIsPhysical ? (() => {
+                            const span = document.createElement("span");
+                            return span.classList.add("tag", item.rarity), span.innerText = game.i18n.localize(CONFIG.PF2E.rarityTraits[item.rarity]), gmVisibilityWrap(span, item.isIdentified ? "all" : "gm")
+                        })() : null,
+                        levelPriceLabel = itemIsPhysical && "coins" !== item.system.stackGroup ? (() => {
+                            const price = item.price.value.toString(),
+                                priceLabel = game.i18n.format("PF2E.Item.Physical.PriceLabel", {
+                                    price
+                                }),
+                                levelLabel = game.i18n.format("PF2E.LevelN", {
+                                    level: item.level
+                                }),
+                                paragraph = document.createElement("p");
+                            return paragraph.dataset.visibility = item.isIdentified ? "all" : "gm", paragraph.append(levelLabel, document.createElement("br"), priceLabel), paragraph
+                        })() : $(),
+                        properties = null !== (_b = null === (_a = chatData.properties) || void 0 === _a ? void 0 : _a.filter((property => "string" == typeof property)).map((property => {
+                            const span = document.createElement("span");
+                            return span.classList.add("tag", "tag_secondary"), span.innerText = game.i18n.localize(property), itemIsPhysical ? gmVisibilityWrap(span, item.isIdentified ? "all" : "gm") : span
+                        }))) && void 0 !== _b ? _b : [],
+                        allTags = [rarityTag, ...Array.isArray(chatData.traits) ? chatData.traits.filter((trait => !trait.excluded)).map((trait => {
+                            const span = document.createElement("span");
+                            return span.classList.add("tag"), span.innerText = game.i18n.localize(trait.label), trait.description && (span.title = game.i18n.localize(trait.description), $(span).tooltipster({
+                                maxWidth: 400,
+                                theme: "crb-hover",
+                                contentAsHTML: !0
+                            })), itemIsPhysical ? gmVisibilityWrap(span, item.isIdentified || !trait.mystified ? "all" : "gm") : span
+                        })) : [], ...properties].filter((tag => !!tag)),
+                        propertiesElem = document.createElement("div");
+                    propertiesElem.classList.add("tags", "item-properties"), propertiesElem.append(...allTags);
+                    const description = chatData?.description?.value ?? item.description;
+                    div = $('<div>').addClass("item-summary").append(propertiesElem, levelPriceLabel, `<div class="item-description">${description}</div>`);
+                } else {
+                    div = $(`<div class="item-summary">${(typeof chatData == "string" ? chatData : chatData.description.value ?? chatData.description)}</div>`);
+                    if (typeof chatData !== "string") {
+                        let props = $('<div class="item-properties"></div>');
+                        chatData.properties.forEach(p => {
+                            if (game.system.id == "pf1" && typeof p == "string" && p.startsWith(`${game.i18n.localize("PF1.ChargePlural")}:`)) {
+                                let prop = p;
+                                const uses = item.system?.uses;
+                                if (uses) prop = `${game.i18n.localize("PF1.ChargePlural")}: ${uses.value}/${uses.max}`;
+                                props.append(`<span class="tag">${prop}</span>`);
+                            } else
+                                props.append(`<span class="tag">${p.name || p}</span>`)
+                        });
+                        if (chatData.price != undefined)
+                            props.append(`<span class="tag">${i18n("MonksEnhancedJournal.Price")}: ${chatData.price}</span>`)
+                        div.append(props);
+                    }
+                }
+                li.append(div.hide());
+                div.slideDown(200);
+            }
+            li.toggleClass("expanded");
         }
-        li.toggleClass("expanded");
     }
 }

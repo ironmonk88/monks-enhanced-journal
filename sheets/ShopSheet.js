@@ -82,27 +82,11 @@ export class ShopSheet extends EnhancedJournalSheet {
         }
         data.canViewActor = !!data.actor;
 
-        data.relationships = {};
-        for (let item of (data.data.flags['monks-enhanced-journal']?.relationships || [])) {
-            let entity = await this.getDocument(item, "JournalEntry", false);
-            if (!(entity instanceof JournalEntry || entity instanceof JournalEntryPage))
-                continue;
-            if (entity && entity.testUserPermission(game.user, "LIMITED") && (game.user.isGM || !item.hidden)) {
-                let page = (entity instanceof JournalEntryPage ? entity : entity.pages.contents[0]);
-                let type = getProperty(page, "flags.monks-enhanced-journal.type");
-                if (!data.relationships[type])
-                    data.relationships[type] = { type: type, name: i18n(`MonksEnhancedJournal.${type.toLowerCase()}`), documents: [] };
+        data.relationships = await this.getRelationships();
 
-                item.name = page.name;
-                item.img = page.src;
-                item.type = type;
-
-                data.relationships[type].documents.push(item);
-            }
-        }
-
-        for (let [k, v] of Object.entries(data.relationships)) {
-            v.documents = v.documents.sort((a, b) => a.name.localeCompare(b.name));
+        data.has = {
+            items: getProperty(data, "data.flags.monks-enhanced-journal.items")?.length,
+            relationships: Object.keys(data.relationships || {})?.length
         }
 
         return data;
@@ -140,7 +124,7 @@ export class ShopSheet extends EnhancedJournalSheet {
         super.activateListeners(html, enhancedjournal);
 
         $('.actor-img img', html).click(this.openActor.bind(this));
-        $('.relationships .items-list .actor-icon', html).click(this.openRelationship.bind(this));
+        $('.relationships .items-list h4', html).click(this.openRelationship.bind(this));
 
         //item
         $('.item-icon', html).click(this.clickItem.bind(this));
@@ -558,7 +542,7 @@ export class ShopSheet extends EnhancedJournalSheet {
                     setValue(itemData, pricename(), MEJHelpers.toDefaultCurrency(result.price));
                     if (!data.consumable) {
                         let sheet = actor.sheet;
-                        sheet._onDropItem({ preventDefault: () => { } }, { data: itemData });
+                        sheet._onDropItem({ preventDefault: () => { } }, { type: "Item", uuid: `${this.object.uuid}.Items.${item._id}`, data: itemData });
                     }
 
                     MonksEnhancedJournal.emit("purchaseItem",

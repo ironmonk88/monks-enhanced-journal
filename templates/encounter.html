@@ -12,9 +12,9 @@
         <nav class="sheet-navigation tabs" data-group="primary">
             <a class="item active" data-tab="description">{{localize 'MonksEnhancedJournal.Description'}}</a>
             {{#if owner}}
-            <a class="item" data-tab="monsters">{{localize 'MonksEnhancedJournal.Monsters'}}</a>
-            <a class="item" data-tab="items">{{localize 'MonksEnhancedJournal.Loot'}}</a>
-            <a class="item" data-tab="dcs">{{localize 'MonksEnhancedJournal.DCs'}}</a>
+            <a class="item{{#if has.monsters}} hasitems{{/if}}" data-tab="monsters">{{localize 'MonksEnhancedJournal.Monsters'}}</a>
+            <a class="item{{#if has.items}} hasitems{{/if}}" data-tab="items">{{localize 'MonksEnhancedJournal.Loot'}}</a>
+            <a class="item{{#if has.dcs}} hasitems{{/if}}" data-tab="dcs">{{localize 'MonksEnhancedJournal.DCs'}}</a>
             {{/if}}
             <a class="item" data-tab="notes">{{localize 'MonksEnhancedJournal.Notes'}}</a>
         </nav>
@@ -93,8 +93,8 @@
                         <label style="max-width: 150px;">{{localize 'MonksEnhancedJournal.Currency'}}</label>
                         <div class="form-fields" style="flex-wrap:nowrap;">
                             {{#each currency}}
-                            <label style="max-width: 60px;">{{localize this.name}}</label>
-                            <input type="text" name="flags.monks-enhanced-journal.currency.{{this.id}}" placeholder="0" value="{{this.value}}" style="text-align:right;max-width:60px;" />
+                            <label>{{localize this.name}}</label>
+                            <input type="text" name="flags.monks-enhanced-journal.currency.{{this.id}}" placeholder="0" value="{{this.value}}" />
                             {{/each}}
                         </div>
                     </div>

@@ -16,7 +16,7 @@
                 </h1>
                 <div class="form-group owner-only">
                     <label style="background: none; border: none;">{{localize 'MonksEnhancedJournal.PlayerReceiving'}}</label>
-                    <select class="shop-state" name="flags.monks-enhanced-journal.purchasing" style="font-size: inherit; font-family: inherit; height: 26px; margin: 0px; ">
+                    <select class="shop-state" name="flags.monks-enhanced-journal.purchasing" style="font-size: inherit; font-family: inherit; height: calc(var(--font-size-20) + 6); margin: 0px; ">
                         {{ selectOptions purchaseOptions selected=data.flags.monks-enhanced-journal.purchasing localize=true }}
                     </select>
                 </div>
@@ -50,10 +50,10 @@
                         </a>
                     </div>
                 </li>
-                <li class="flexrow" style="padding-top: 5px;">
+                <li class="flexrow form-fields" style="padding-top: 5px;">
                     {{#each currency}}
                     <label>{{localize this.name}}</label>
-                    <input type="text" name="flags.monks-enhanced-journal.currency.{{this.id}}" placeholder="0" value="{{this.value}}" data-dtype="Number" style="text-align:right;" />
+                    <input type="text" name="flags.monks-enhanced-journal.currency.{{this.id}}" placeholder="0" value="{{this.value}}" data-dtype="Number" />
                     {{/each}}
                 </li>
             </ol>

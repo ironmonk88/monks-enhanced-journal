@@ -184,7 +184,7 @@ export class EnhancedJournal extends Application {
             if (this.object instanceof Promise)
                 this.object = await this.object;
 
-            options = mergeObject(options, game.user.getFlag("monks-enhanced-journal", `pagestate.${this.object.id}`) || {});
+            options = mergeObject(options, game.user.getFlag("monks-enhanced-journal", `pagestate.${this.object.id}`) || {}, { overwrite: false });
 
             let contentform = $('.content > section', this.element);
 
@@ -307,9 +307,20 @@ export class EnhancedJournal extends Application {
                 this.subsheet._createDocumentIdLink(this.element)
 
             $('.content', this.element).attr('entity-type', this.object.type).attr('entity-id', this.object.id);
-            let classes = this.subsheet.options.classes.join(' ').replace('monks-enhanced-journal', '')
-            if (!(this.subsheet instanceof ActorSheet) && !setting("use-system-tag"))
-                classes = classes.replace(game.system.id, '');
+            //extract special classes
+            if (setting("extract-extra-classes")) {
+                let extraClasses = this.subsheet.options.classes.filter(x => !["sheet", "journal-sheet", "journal-entry", "monks-journal-sheet"].includes(x) && !!x);
+                if (extraClasses.length) {
+                    this.element.addClass(extraClasses);
+                }
+            }
+            let classes = this.subsheet.options.classes.join(' ').replace('monks-enhanced-journal', '');
+            if (game.system.id == "pf2e")
+                classes += " journal-page-content";
+            if (!(this.subsheet instanceof ActorSheet)) {
+                if (!setting("use-system-tag"))
+                    classes = classes.replace(game.system.id, '');
+            }
 
             if (this.object instanceof JournalEntry) {
                 classes += (this.subsheet?.mode === modes.MULTIPLE ? " multiple-pages" : " single-page");
@@ -353,20 +364,6 @@ export class EnhancedJournal extends Application {
             subDragDrop.forEach(d => d.bind(contentform[0]));
             this._dragDrop = this._dragDrop.concat(subDragDrop);
 
-            if (this.subsheet.options.scrollY) {
-                this._scrollPositions = this._scrollPositions || {};
-                /*
-                for (let [k, v] of Object.entries(this.subsheet._scrollPositions || {})) {
-                    this._scrollPositions[k] = v || this._scrollPositions[k];
-                }*/
-                let oldScrollY = this.options.scrollY;
-                this.options.scrollY = this.options.scrollY.concat(this.subsheet.options.scrollY);
-                this._restoreScrollPositions(contentform);
-                this.options.scrollY = oldScrollY;
-
-                this.subsheet._scrollPositions = {};
-            }
-
             this.subsheet.activateListeners($(this.subdocument), this);
 
             $('button[type="submit"]', $(this.subdocument)).attr('type', 'button').on("click", this.subsheet._onSubmit.bind(this.subsheet))
@@ -387,7 +384,7 @@ export class EnhancedJournal extends Application {
 
             let oldActivateEditor = this.subsheet.activateEditor;
             this.subsheet.activateEditor = function (...args) {
-                that.activateEditor.apply(this, args);
+                that.activateEditor.apply(that, args);
                 return oldActivateEditor.call(this, ...args);
             }
 
@@ -403,10 +400,29 @@ export class EnhancedJournal extends Application {
 
             this.object._sheet = null;  // Adding this to prevent Quick Encounters from automatically opening
 
-            if (this.object.type != 'blank')
+            if (this.object.type != 'blank') {
                 Hooks.callAll('renderJournalSheet', this.subsheet, contentform, templateData); //this.object);
+                if (this.object._source.type == "text")
+                    Hooks.callAll('renderJournalTextPageSheet', this.subsheet, contentform, templateData);
+                Hooks.callAll('renderJournalPageSheet', this.subsheet, contentform, templateData);
+            }
 
             this.object._sheet = this.subsheet;
+
+            if (this.subsheet.options.scrollY) {
+                let savedScroll = flattenObject(game.user.getFlag("monks-enhanced-journal", `pagestate.${this.object.id}.scrollPositions`) || {});
+                this._scrollPositions = flattenObject(mergeObject(this._scrollPositions || {}, savedScroll));
+                /*
+                for (let [k, v] of Object.entries(this.subsheet._scrollPositions || {})) {
+                    this._scrollPositions[k] = v || this._scrollPositions[k];
+                }*/
+                let oldScrollY = this.options.scrollY;
+                this.options.scrollY = this.options.scrollY.concat(this.subsheet.options.scrollY);
+                this._restoreScrollPositions(contentform);
+                this.options.scrollY = oldScrollY;
+
+                this.subsheet._scrollPositions = this._scrollPositions;
+            }
 
             //if this entry is different from the last one...
             if (this._lastentry != this.object.id) {
@@ -431,7 +447,6 @@ export class EnhancedJournal extends Application {
             this._lastentry = this.object.id;
 
             this.activateControls($('#journal-buttons', this.element).empty());
-            
 
             this.object._sheet = null; //set this to null so that other things can open the sheet
             this.subsheet._state = this.subsheet.constructor.RENDER_STATES.RENDERED;
@@ -444,7 +459,7 @@ export class EnhancedJournal extends Application {
 
     _saveScrollPositions(html) {
         super._saveScrollPositions(html);
-        if (this.subsheet && this.subsheet.options.scrollY && this.subsheet.object.id == this.object.id) {   //only save if we're refreshing the sheet
+        if (this.subsheet && this.subsheet.rendered && this.subsheet.options.scrollY && this.subsheet.object.id == this.object.id) {   //only save if we're refreshing the sheet
             const selectors = this.subsheet.options.scrollY || [];
 
             this._scrollPositions = selectors.reduce((pos, sel) => {
@@ -454,6 +469,24 @@ export class EnhancedJournal extends Application {
                 pos[sel] = Array.from(el).map(el => el.scrollTop);
                 return pos;
             }, (this._scrollPositions || {}));
+
+            game.user.setFlag("monks-enhanced-journal", `pagestate.${this.object.id}.scrollPositions`, flattenObject(this._scrollPositions));
+        }
+    }
+
+    saveScrollPos() {
+        if (this?.subsheet && this.subsheet.options.scrollY && this.subsheet.object.id == this.object.id) {   //only save if we're refreshing the sheet
+            const selectors = this.subsheet.options.scrollY || [];
+
+            let newScrollPositions = selectors.reduce((pos, sel) => {
+                const el = $(this.subdocument).find(sel);
+                pos[sel] = Array.from(el).map(el => el.scrollTop);
+                return pos;
+            }, {});
+
+            let oldScrollPosition = flattenObject(game.user.getFlag("monks-enhanced-journal", `pagestate.${this.object.id}.scrollPositions`) || {});
+
+            game.user.setFlag("monks-enhanced-journal", `pagestate.${this.object.id}.scrollPositions`, flattenObject(mergeObject(oldScrollPosition, newScrollPositions)));
         }
     }
 
@@ -559,8 +592,11 @@ export class EnhancedJournal extends Application {
 
     async close(options) {
         if (options?.submit !== false) {
+            this.saveScrollPos();
+
             if (await this?.subsheet?.close() === false)
                 return false;
+
             MonksEnhancedJournal.journal = null;
             // if there's a sound file playing, then close it
             for (let [key, sound] of Object.entries(this._backgroundsound)) {
@@ -671,6 +707,8 @@ export class EnhancedJournal extends Application {
     }
 
     async activateTab(tab, event, options) {
+        this.saveScrollPos();
+
         if (await this?.subsheet?.close() === false)
             return false;
 
@@ -1193,7 +1231,7 @@ export class EnhancedJournal extends Application {
         this.object._sheet = null;
         MonksEnhancedJournal.fixType(this.object, type);
         await this.object.setFlag('monks-enhanced-journal', 'type', type);
-        await ui.sidebar.tabs.journal.render(true)
+        await ui.sidebar.tabs.journal.render(true);
         //MonksEnhancedJournal.updateDirectory($('#journal'));
     }
 

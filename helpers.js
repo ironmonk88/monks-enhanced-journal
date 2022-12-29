@@ -19,9 +19,9 @@ export class MEJHelpers {
             return defvalue;
         let value = (item.system != undefined ? getProperty(item?.system, name) : getProperty(item, name));
         value = (value?.hasOwnProperty("value") ? value.value : value);
-        if (value && typeof value === 'object' && game.system.id == "pf2e") {
+        /*if (value && typeof value === 'object' && game.system.id == "pf2e") {
             value = Object.values(value)[0];
-        }
+        }*/
         return value ?? defvalue;
     }
 
@@ -39,9 +39,23 @@ export class MEJHelpers {
     static getSystemPrice(item, name, ignorePrice = false) {
         name = name || pricename();
 
-        let cost = (typeof item == "string" ? item : (item.system?.denomination != undefined && name != "cost" ? item.system?.value.value + " " + item.system?.denomination.value : getValue(item, name, null)));
-        if (game.system.id == "wfrp4e")
-            cost = (cost.gc != "0" ? `${cost.gc} gc` : (cost.ss != "0" ? `${cost.ss} ss` : (cost.bp != "0" ? `${cost.bp} bp` : "0 gc")));
+        let cost = 0;
+        if (typeof item == "string")
+            cost = item;
+        else if (item.system?.denomination != undefined && name != "cost") {
+            cost = item.system?.value.value + " " + item.system?.denomination.value;
+        } else {
+            cost = getValue(item, name, null);
+        }
+        if (cost) {
+            for (let curr of ["pp", "gp", "sp", "cp", "gc", "ss", "bp"]) {
+                if (cost[curr] && cost[curr] != "0" && cost[curr] != 0) {
+                    cost = `${cost[curr]} ${curr}`;
+                    break;
+                }
+            }
+        }
+
         if (name == "cost" && cost == undefined && typeof item !== "string" && !ignorePrice)
             cost = (item.system?.denomination != undefined ? item.system?.value.value + " " + item.system?.denomination.value : getValue(item, "price"));
 

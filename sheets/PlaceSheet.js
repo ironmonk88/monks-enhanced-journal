@@ -121,6 +121,12 @@ export class PlaceSheet extends EnhancedJournalSheet {
 
         data.fields = this.fieldlist();
 
+        data.has = {
+            relationships: Object.keys(data.relationships || {})?.length,
+            townsfolk: data.townsfolk?.length,
+            shops: data.shops?.length
+        }
+
         return data;
     }
 
@@ -142,7 +148,7 @@ export class PlaceSheet extends EnhancedJournalSheet {
 
         $('.townsfolk .actor-icon', html).click(this.openRelationship.bind(this));
         $('.shop-icon', html).click(this.openRelationship.bind(this));
-        $('.actor-icon', html).click(this.openRelationship.bind(this));
+        $('.relationships .items-list h4', html).click(this.openRelationship.bind(this));
 
         $('.item-action', html).on('click', this.alterItem.bind(this));
         $('.item-delete', html).on('click', $.proxy(this._deleteItem, this));

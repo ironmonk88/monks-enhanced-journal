@@ -263,7 +263,7 @@ export class LootSheet extends EnhancedJournalSheet {
                         let itemQty = getValue(itemData, quantityname(), 1);
                         setValue(itemData, quantityname(), result.quantity * itemQty);
                         let sheet = actor.sheet;
-                        sheet._onDropItem({ preventDefault: () => { } }, { data: itemData });
+                        sheet._onDropItem({ preventDefault: () => { } }, { type: "Item", uuid: `${this.object.uuid}.Items.${item._id}`, data: itemData });
                         //actor.createEmbeddedDocuments("Item", [itemData]);
 
                         if (entry)
@@ -410,7 +410,7 @@ export class LootSheet extends EnhancedJournalSheet {
                 let itemQty = getValue(itemData, quantityname(), 1);
                 setValue(itemData, quantityname(), result.quantity * itemQty);
                 let sheet = actor.sheet;
-                sheet._onDropItem({ preventDefault: () => { } }, { data: itemData });
+                sheet._onDropItem({ preventDefault: () => { } }, { type: "Item", uuid: `${this.object.uuid}.Items.${item._id}`, data: itemData });
                 //actor.createEmbeddedDocuments("Item", [itemData]);
                 MonksEnhancedJournal.emit("purchaseItem",
                     {
@@ -454,7 +454,7 @@ export class LootSheet extends EnhancedJournalSheet {
             let itemQty = getValue(itemData, quantityname(), 1);
             setValue(itemData, quantityname(), result.quantity * itemQty);
             let sheet = actor.sheet;
-            sheet._onDropItem({ preventDefault: () => { } }, { data: itemData });
+            sheet._onDropItem({ preventDefault: () => { } }, { type: "Item", uuid: `${this.object.uuid}.Items.${item._id}`, data: itemData });
             //actor.createEmbeddedDocuments("Item", [itemData]);
 
             await this.constructor.purchaseItem.call(this.constructor, this.object, id, result.quantity, { actor, user });
@@ -574,6 +574,7 @@ export class LootSheet extends EnhancedJournalSheet {
         return false;
     }
 
+    /*
     async _onItemSummary(event) {
         event.preventDefault();
 
@@ -608,7 +609,7 @@ export class LootSheet extends EnhancedJournalSheet {
             }
             li.toggleClass("expanded");
         }
-    }
+    }*/
 
     openActor(event) {
         let actor = game.actors.get(event.currentTarget.id);

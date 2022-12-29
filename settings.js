@@ -89,6 +89,15 @@ export const registerSettings = function () {
 		type: Boolean,
 	});
 
+	game.settings.register(modulename, "objectives-always", {
+		name: i18n("MonksEnhancedJournal.objectives-always.name"),
+		hint: i18n("MonksEnhancedJournal.objectives-always.hint"),
+		scope: "client",
+		config: true,
+		default: false,
+		type: Boolean,
+	});
+
 	game.settings.register(modulename, "use-runes", {
 		name: i18n("MonksEnhancedJournal.use-runes.name"),
 		hint: i18n("MonksEnhancedJournal.use-runes.hint"),
@@ -246,6 +255,15 @@ export const registerSettings = function () {
 		scope: "world",
 		config: true,
 		default: game.system.id == "pf2e",
+		type: Boolean,
+	});
+
+	game.settings.register(modulename, "extract-extra-classes", {
+		name: i18n("MonksEnhancedJournal.extract-extra-classes.name"),
+		hint: i18n("MonksEnhancedJournal.extract-extra-classes.hint"),
+		scope: "world",
+		config: true,
+		default: false,
 		type: Boolean,
 	});
 
