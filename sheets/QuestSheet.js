@@ -66,6 +66,16 @@ export class QuestSheet extends EnhancedJournalSheet {
 
         data.relationships = await this.getRelationships();
 
+        let actorLink = this.object.getFlag('monks-enhanced-journal', 'actor');
+        if (actorLink) {
+            let actor = actorLink.id ? game.actors.find(a => a.id == actorLink.id) : await fromUuid(actorLink);
+
+            if (actor && actor.testUserPermission(game.user, "OBSERVER")) {
+                data.actor = { uuid: actor.uuid, name: actor.name, img: actor.img };
+            }
+        }
+        data.canViewActor = !!data.actor;
+
         data.has = {
             objectives: data.objectives?.length,
             rewards: data.rewards?.length,

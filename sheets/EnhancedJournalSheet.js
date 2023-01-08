@@ -281,7 +281,7 @@ export class EnhancedJournalSheet extends JournalPageSheet {
         super.activateListeners(html);
         this._contextMenu(html);
 
-        new EnhancedJournalContextMenu($(html), (this.type == "text" ? ".editor" : ".tab.description .tab-inner"), this._getDescriptionContextOptions());
+        new EnhancedJournalContextMenu($(html), (this.type == "text" ? ".editor-parent" : ".tab.description .tab-inner"), this._getDescriptionContextOptions());
 
         //$("a.inline-request-roll", html).click(MonksEnhancedJournal._onClickInlineRequestRoll.bind(this));
         $("a.picture-link", html).click(MonksEnhancedJournal._onClickPictureLink.bind(this));
@@ -482,7 +482,7 @@ export class EnhancedJournalSheet extends JournalPageSheet {
     async getRelationships() {
         let relationships = {};
         for (let item of (this.object.flags['monks-enhanced-journal']?.relationships || [])) {
-            let entity = await this.getDocument(item, "JournalEntry", false);
+            let entity = item.uuid ? await fromUuid(item.uuid) : game.journal.get(item.id);
             if (!(entity instanceof JournalEntry || entity instanceof JournalEntryPage))
                 continue;
             if (entity && entity.testUserPermission(game.user, "LIMITED") && (game.user.isGM || !item.hidden)) {
@@ -491,12 +491,14 @@ export class EnhancedJournalSheet extends JournalPageSheet {
                 if (!relationships[type])
                     relationships[type] = { type: type, name: i18n(`MonksEnhancedJournal.${type.toLowerCase()}`), documents: [] };
 
-                if (relationships[type].documents.some(r => r.uuid == item.uuid))
+                if (relationships[type].documents.some(r => r.id == item.id && r.uuid == item.uuid))
                     continue;
 
                 item.name = page.name;
-                item.img = page.src;
+                item.img = page.src || `modules/monks-enhanced-journal/assets/${type}.png`;
                 item.type = type;
+                item.shoptype = page.getFlag("monks-enhanced-journal", "shoptype");
+                item.role = page.getFlag("monks-enhanced-journal", "role");
 
                 relationships[type].documents.push(item);
             }
@@ -1802,8 +1804,8 @@ export class EnhancedJournalSheet extends JournalPageSheet {
             let li = $(event.currentTarget).closest('li.item');
             const uuid = li.data("uuid");
             let journal = await fromUuid(uuid);
-            if (journal && journal.pages.size > 0) {
-                let page = journal.pages.contents[0];
+            if (journal && (journal instanceof JournalEntryPage || journal.pages.size > 0)) {
+                let page = journal instanceof JournalEntryPage ? journal : journal.pages.contents[0];
                 let relationships = duplicate(getProperty(page, "flags.monks-enhanced-journal.relationships") || {});
                 let relationship = relationships.find(r => r.id == this.object.id);
                 if (relationship) {

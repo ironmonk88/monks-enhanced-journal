@@ -1,3 +1,25 @@
+# Version 10.10
+
+Fix chat card stylings in PF2E
+
+Fixed issue when finding default currency if there's no currency registered.
+
+Fixed issue with opening a Note related to a picture entry that has limited permission.
+
+Fixed issue with right click context menu nto appearing in the rihght place on long journal entries.
+
+Fixed issue with default relationship images.
+
+Fixed issue with missing relationships.
+
+Fixed issue if relationship points to a page instead of a journal entry.
+
+Fixed issue with actors linked to journal entries.
+
+Fixed issues opening relationships on the Place sheet.
+
+Fixed Actor link issues on the Quest entry.
+
 # Version 10.9
 
 Hid the Write to Journal action in Active Tiles.

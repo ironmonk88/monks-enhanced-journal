@@ -74,7 +74,7 @@ export class ShopSheet extends EnhancedJournalSheet {
 
         let actorLink = this.object.getFlag('monks-enhanced-journal', 'actor');
         if (actorLink) {
-            let actor = game.actors.find(a => a.id == actorLink.id);
+            let actor = actorLink.id ? game.actors.find(a => a.id == actorLink.id) : await fromUuid(actorLink);
 
             if (actor && actor.testUserPermission(game.user, "OBSERVER")) {
                 data.actor = { uuid: actor.uuid, name: actor.name, img: actor.img };
@@ -764,7 +764,7 @@ export class ShopSheet extends EnhancedJournalSheet {
     }
 
     async addActor(data) {
-        this.object.setFlag("monks-enhanced-journal", "actor", data.id);
+        this.object.setFlag("monks-enhanced-journal", "actor", data.uuid);
     }
 
     openActor(event) {

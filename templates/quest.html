@@ -37,11 +37,11 @@
                 </div>
                 {{/if}}
             </section>
-            {{#if data.flags.monks-enhanced-journal.actor}}
+            {{#if (and actor canViewActor)}}
             <div class="actor-img">
                 <div class="quest-source">{{localize 'MonksEnhancedJournal.Source'}}</div>
-                <img src="{{data.flags.monks-enhanced-journal.actor.img}}" data-id="{{data.flags.monks-enhanced-journal.actor.id}}" data-document="Actor" onerror="$(this).hide();">
-                <div style="text-align: center;font-size:12px;">{{data.flags.monks-enhanced-journal.actor.name}}</div>
+                <img src="{{actor.img}}" data-uuid="{{actor.uuid}}" data-document="Actor" onerror="$(this).hide();">
+                <div style="text-align: center;font-size:12px;">{{actor.name}}</div>
             </div>
             {{/if}}
         </header>

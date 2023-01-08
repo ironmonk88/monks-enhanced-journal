@@ -65,7 +65,7 @@ export class PersonSheet extends EnhancedJournalSheet {
 
         let actorLink = this.object.getFlag('monks-enhanced-journal', 'actor');
         if (actorLink) {
-            let actor = game.actors.find(a => a.id == actorLink.id);
+            let actor = actorLink.id ? game.actors.find(a => a.id == actorLink.id) : await fromUuid(actorLink);
 
             if (actor && actor.testUserPermission(game.user, "OBSERVER")) {
                 data.actor = { uuid: actor.uuid, name: actor.name, img: actor.img };

@@ -1712,7 +1712,7 @@ height: fit-content;*/
 .monks-journal-sheet.sheet .items-list .item-name h3, .monks-journal-sheet.sheet .items-list .item-name h4 {
     margin: 0;
     white-space: nowrap;
-    overflow-x: hidden;
+    overflow: hidden;
 }
 
 .monks-journal-sheet.sheet .shop-container .items-list .item-name h4, .monks-journal-sheet.sheet .loot-container .items-list .item-name h4 {
@@ -2303,6 +2303,7 @@ a.journal-link:hover {
 
 .monks-enhanced-journal.request-item .request-buttons {
     margin-top: 8px;
+    flex: 0 0 30px;
 }
 
 .monks-enhanced-journal.request-item .card-footer {

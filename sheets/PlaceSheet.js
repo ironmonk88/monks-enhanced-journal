@@ -84,9 +84,14 @@ export class PlaceSheet extends EnhancedJournalSheet {
             this.object.unsetFlag('monks-enhanced-journal', 'shops');
         }
 
-        data.shops = [];
-        data.townsfolk = [];
-        data.relationships = {};
+
+        data.relationships = await this.getRelationships();
+        data.shops = (data.relationships?.shop?.documents || []);
+        data.townsfolk = (data.relationships?.person?.documents || []);
+        delete data.relationships.shop;
+        delete data.relationships.person;
+
+        /*
         for (let item of (data.data.flags['monks-enhanced-journal'].relationships || [])) {
             let entity = await this.getDocument(item, "JournalEntry", false);
             if (!(entity instanceof JournalEntry || entity instanceof JournalEntryPage))
@@ -112,6 +117,7 @@ export class PlaceSheet extends EnhancedJournalSheet {
                 }
             }
         }
+        */
 
         data.shops = data.shops.sort((a, b) => a.name.localeCompare(b.name));
         data.townsfolk = data.townsfolk.sort((a, b) => a.name.localeCompare(b.name));
@@ -146,8 +152,8 @@ export class PlaceSheet extends EnhancedJournalSheet {
     activateListeners(html, enhancedjournal) {
         super.activateListeners(html, enhancedjournal);
 
-        $('.townsfolk .actor-icon', html).click(this.openRelationship.bind(this));
-        $('.shop-icon', html).click(this.openRelationship.bind(this));
+        $('.townsfolk .items-list h4', html).click(this.openRelationship.bind(this));
+        $('.shops .items-list h4', html).click(this.openRelationship.bind(this));
         $('.relationships .items-list h4', html).click(this.openRelationship.bind(this));
 
         $('.item-action', html).on('click', this.alterItem.bind(this));

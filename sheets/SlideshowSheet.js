@@ -9,6 +9,9 @@ export let createSlideThumbnail = (src) => {
 export class SlideshowSheet extends EnhancedJournalSheet {
     constructor(data, options) {
         super(data, options);
+
+        if (options.play)
+            this.playSlideshow();
     }
 
     static get defaultOptions() {
@@ -134,7 +137,7 @@ export class SlideshowSheet extends EnhancedJournalSheet {
     async _render(force, options = {}) {
         await super._render(force, options);
 
-        if (this.object.testUserPermission(game.user, "OBSERVER", { exact: true })) {
+        if (this.object.testUserPermission(game.user, "OBSERVER", { exact: true }) || options.play) {
             this.playSlideshow();
         }
     }

@@ -1022,6 +1022,26 @@ export class MonksEnhancedJournal {
             }
         }
 
+        let noteCanView = function (wrapped, ...args) {
+            if (!this.entry) return false;
+            if (game.user.isGM) return true;
+            if (this.page?.testUserPermission(game.user, "LIMITED", { exact: true })) {
+                // Special-case handling for image pages.
+                return this.page?.type === "image" || getProperty(this.page, "flags.monks-enhanced-journal.type") == "picture";
+            }
+            const accessTest = this.page ? this.page : this.entry;
+            return accessTest.testUserPermission(game.user, "OBSERVER");
+        }
+
+        if (game.modules.get("lib-wrapper")?.active) {
+            libWrapper.register("monks-enhanced-journal", "Note.prototype._canView", noteCanView, "OVERRIDE");
+        } else {
+            const oldCanView = Note.prototype._canView;
+            Note.prototype._canView = function (event) {
+                return noteCanView.call(this, oldCanView.bind(this));
+            }
+        }
+
         let clickNote = function (wrapped, ...args) {
             if ((setting("show-chat-bubbles") || !game.user.isGM) && this.document.flags['monks-enhanced-journal']?.chatbubble) {
                 let journal = game.journal.get(this.document.entryId);
@@ -2161,6 +2181,26 @@ export class MonksEnhancedJournal {
             //check to see if this is a tab
         }
     }
+
+    /*
+    static startSlideshow(id) {
+        let journal = game.journal.get(id);
+        if (journal && journal.pages.size == 1 && getProperty(journal.pages.contents[0], "flags.monks-enhanced-journal.type") == "slideshow") {
+            let page = journal.pages.contents[0];
+            page.type = "slideshow";
+            return page.sheet.render(true, { play: true });
+        }
+    }
+
+    static endSlideshow(id) {
+        let journal = game.journal.get(id);
+        if (journal && journal.pages.size == 1 && getProperty(journal.pages.contents[0], "flags.monks-enhanced-journal.type") == "slideshow") {
+            let page = journal.pages.contents[0];
+            let sheet = page.sheet;
+            sheet.stopSlideshow();
+        }
+    }
+    */
 
     static async stopSlideshowAudio(data) {
         if (MonksEnhancedJournal.slideshow?.sound?.src != undefined) {
