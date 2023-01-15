@@ -697,7 +697,7 @@
 .monks-journal-sheet .content[document-type="journalentry"] .tab.picture{
     display: none;
 }*/
-.monks-journal-sheet .person-container, .monks-journal-sheet .place-container, .monks-journal-sheet .organization-container, .monks-journal-sheet .shop-container, .monks-journal-sheet .loot-container, .monks-journal-sheet .poi-container {
+.monks-journal-sheet .person-container, .monks-journal-sheet .place-container, .monks-journal-sheet .organization-container, .monks-journal-sheet .shop-container, .monks-journal-sheet .loot-container, .monks-journal-sheet .poi-container, .monks-journal-sheet .event-container {
     height: 100%;
 }
 
@@ -830,7 +830,7 @@ height: fit-content;*/
     align-items: flex-start;
 }
 
-.monks-journal-sheet.sheet .person-container, .monks-journal-sheet.sheet .place-container, .monks-journal-sheet.sheet .quest-container, .monks-journal-sheet.sheet .organization-container, .monks-journal-sheet.sheet .shop-container, .monks-journal-sheet.sheet .loot-container, .monks-journal-sheet.sheet .poi-container {
+.monks-journal-sheet.sheet .person-container, .monks-journal-sheet.sheet .place-container, .monks-journal-sheet.sheet .quest-container, .monks-journal-sheet.sheet .organization-container, .monks-journal-sheet.sheet .shop-container, .monks-journal-sheet.sheet .loot-container, .monks-journal-sheet.sheet .poi-container, .monks-journal-sheet.sheet .event-container {
     height: 100%;
     padding: 4px;
 }
@@ -845,7 +845,7 @@ height: fit-content;*/
     margin-right: 6px;
 }
 
-.monks-journal-sheet.sheet .person-container .sheet-header img.profile, .monks-journal-sheet.sheet .place-container .sheet-header img.profile, .monks-journal-sheet.sheet .quest-container .sheet-header img.profile, .monks-journal-sheet.sheet .organization-container .sheet-header img.profile, .monks-journal-sheet.sheet .poi-container .sheet-header img.profile, .monks-journal-sheet.sheet .shop-container .sheet-header img.profile, .monks-journal-sheet.sheet .loot-container .sheet-header img.profile {
+.monks-journal-sheet.sheet .person-container .sheet-header img.profile, .monks-journal-sheet.sheet .place-container .sheet-header img.profile, .monks-journal-sheet.sheet .quest-container .sheet-header img.profile, .monks-journal-sheet.sheet .organization-container .sheet-header img.profile, .monks-journal-sheet.sheet .poi-container .sheet-header img.profile, .monks-journal-sheet.sheet .event-container .sheet-header img.profile, .monks-journal-sheet.sheet .shop-container .sheet-header img.profile, .monks-journal-sheet.sheet .loot-container .sheet-header img.profile {
     width: 100%;
     height: 100%;
     object-fit: contain;
@@ -856,11 +856,11 @@ height: fit-content;*/
     background-size: contain;
 }
 
-.monks-journal-sheet.sheet .person-container .sheet-header .header-details .form-group label, .monks-journal-sheet.sheet .place-container .sheet-header .header-details .form-group label, .monks-journal-sheet.sheet .quest-container .sheet-header .header-details .form-group label, .monks-journal-sheet.sheet .poi-container .sheet-header .header-details .form-group label, .monks-journal-sheet.sheet .organization-container .sheet-header .header-details .form-group label, .monks-journal-sheet.sheet .shop-container .sheet-header .header-details .form-group label, .monks-journal-sheet.sheet .loot-container .sheet-header .header-details .form-group label {
+.monks-journal-sheet.sheet .person-container .sheet-header .header-details .form-group label, .monks-journal-sheet.sheet .place-container .sheet-header .header-details .form-group label, .monks-journal-sheet.sheet .quest-container .sheet-header .header-details .form-group label, .monks-journal-sheet.sheet .poi-container .sheet-header .header-details .form-group label, .monks-journal-sheet.sheet .event-container .sheet-header .header-details .form-group label, .monks-journal-sheet.sheet .organization-container .sheet-header .header-details .form-group label, .monks-journal-sheet.sheet .shop-container .sheet-header .header-details .form-group label, .monks-journal-sheet.sheet .loot-container .sheet-header .header-details .form-group label {
     max-width: 175px;
 }
 
-.monks-journal-sheet.sheet .person-container .sheet-header .header-details .form-group, .monks-journal-sheet.sheet .place-container .sheet-header .header-details .form-group, .monks-journal-sheet.sheet .quest-container .sheet-header .header-details .form-group, .monks-journal-sheet.sheet .poi-container .sheet-header .header-details .form-group, .monks-journal-sheet.sheet .organization-container .sheet-header .header-details .form-group, .monks-journal-sheet.sheet .shop-container .sheet-header .header-details .form-group, .monks-journal-sheet.sheet .loot-container .sheet-header .header-details .form-group {
+.monks-journal-sheet.sheet .person-container .sheet-header .header-details .form-group, .monks-journal-sheet.sheet .place-container .sheet-header .header-details .form-group, .monks-journal-sheet.sheet .quest-container .sheet-header .header-details .form-group, .monks-journal-sheet.sheet .poi-container .sheet-header .header-details .form-group, .monks-journal-sheet.sheet .event-container .sheet-header .header-details .form-group, .monks-journal-sheet.sheet .organization-container .sheet-header .header-details .form-group, .monks-journal-sheet.sheet .shop-container .sheet-header .header-details .form-group, .monks-journal-sheet.sheet .loot-container .sheet-header .header-details .form-group {
     margin: 4px 8px 0px 0px;
 }
 
@@ -1779,7 +1779,7 @@ height: fit-content;*/
     margin-right: 5px;
 }
 
-.monks-journal-sheet.sheet .place-container .items-list .item .item-name .item-image, .monks-journal-sheet.sheet .person-container .items-list .item .item-name .item-image, .monks-journal-sheet.sheet .shop-container .relationships .items-list .item .item-name .item-image, .monks-journal-sheet.sheet .organization-container .items-list .item .item-name .item-image, .monks-journal-sheet.sheet .poi-container .items-list .item .item-name .item-image, .monks-journal-sheet.sheet .quest-container .relationships .items-list .item .item-name .item-image {
+.monks-journal-sheet.sheet .place-container .items-list .item .item-name .item-image, .monks-journal-sheet.sheet .person-container .items-list .item .item-name .item-image, .monks-journal-sheet.sheet .shop-container .relationships .items-list .item .item-name .item-image, .monks-journal-sheet.sheet .organization-container .items-list .item .item-name .item-image, .monks-journal-sheet.sheet .poi-container .items-list .item .item-name .item-image, .monks-journal-sheet.sheet .event-container .items-list .item .item-name .item-image, .monks-journal-sheet.sheet .quest-container .relationships .items-list .item .item-name .item-image {
     flex: 0 0 70px;
     height: 70px;
     width: 70px;
@@ -1798,11 +1798,11 @@ height: fit-content;*/
     opacity: 0.7;
 }
 
-.monks-journal-sheet.sheet .shop-container .item-list > li input, .monks-journal-sheet.sheet .loot-container .item-list > li input, .monks-journal-sheet.sheet .person-container .items-list > li input, .monks-journal-sheet.sheet .place-container .items-list > li input, .monks-journal-sheet.sheet .organization-container .items-list > li input, .monks-journal-sheet.sheet .poi-container .items-list > li input, .monks-journal-sheet.sheet .quest-container .items-list > li input, .monks-journal-sheet.sheet .distribute-container .item-list > li input {
+.monks-journal-sheet.sheet .shop-container .item-list > li input, .monks-journal-sheet.sheet .loot-container .item-list > li input, .monks-journal-sheet.sheet .person-container .items-list > li input, .monks-journal-sheet.sheet .place-container .items-list > li input, .monks-journal-sheet.sheet .organization-container .items-list > li input, .monks-journal-sheet.sheet .poi-container .items-list > li input, .monks-journal-sheet.sheet .event-container .items-list > li input, .monks-journal-sheet.sheet .quest-container .items-list > li input, .monks-journal-sheet.sheet .distribute-container .item-list > li input {
     border-color: transparent;
 }
 
-.monks-journal-sheet.sheet .shop-container .item-list > li input:hover, .monks-journal-sheet.sheet .loot-container .item-list > li input:hover, .monks-journal-sheet.sheet .person-container .items-list > li input:hover, .monks-journal-sheet.sheet .place-container .items-list > li input:hover, .monks-journal-sheet.sheet .organization-container .items-list > li input:hover, .monks-journal-sheet.sheet .poi-container .items-list > li input:hover, .monks-journal-sheet.sheet .quest-container .items-list > li input:hover, .monks-journal-sheet.sheet .distribute-container .item-list > li input:hover {
+.monks-journal-sheet.sheet .shop-container .item-list > li input:hover, .monks-journal-sheet.sheet .loot-container .item-list > li input:hover, .monks-journal-sheet.sheet .person-container .items-list > li input:hover, .monks-journal-sheet.sheet .place-container .items-list > li input:hover, .monks-journal-sheet.sheet .organization-container .items-list > li input:hover, .monks-journal-sheet.sheet .poi-container .items-list > li input:hover, .monks-journal-sheet.sheet .event-container .items-list > li input:hover, .monks-journal-sheet.sheet .quest-container .items-list > li input:hover, .monks-journal-sheet.sheet .distribute-container .item-list > li input:hover {
     border-color: unset;
 }
 

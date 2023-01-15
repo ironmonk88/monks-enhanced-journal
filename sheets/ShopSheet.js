@@ -539,7 +539,7 @@ export class ShopSheet extends EnhancedJournalSheet {
                     delete itemData._id;
                     let itemQty = getValue(itemData, quantityname(), 1);
                     setValue(itemData, quantityname(), result.quantity * itemQty);
-                    setValue(itemData, pricename(), MEJHelpers.toDefaultCurrency(result.price));
+                    setPrice(itemData, pricename(), result.price);
                     if (!data.consumable) {
                         let sheet = actor.sheet;
                         sheet._onDropItem({ preventDefault: () => { } }, { type: "Item", uuid: `${this.object.uuid}.Items.${item._id}`, data: itemData });

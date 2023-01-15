@@ -410,18 +410,24 @@ export class EnhancedJournal extends Application {
             this.object._sheet = this.subsheet;
 
             if (this.subsheet.options.scrollY) {
-                let savedScroll = flattenObject(game.user.getFlag("monks-enhanced-journal", `pagestate.${this.object.id}.scrollPositions`) || {});
-                this._scrollPositions = flattenObject(mergeObject(this._scrollPositions || {}, savedScroll));
-                /*
-                for (let [k, v] of Object.entries(this.subsheet._scrollPositions || {})) {
-                    this._scrollPositions[k] = v || this._scrollPositions[k];
-                }*/
-                let oldScrollY = this.options.scrollY;
-                this.options.scrollY = this.options.scrollY.concat(this.subsheet.options.scrollY);
-                this._restoreScrollPositions(contentform);
-                this.options.scrollY = oldScrollY;
+                let resetScrollPos = () => {
+                    let savedScroll = flattenObject(game.user.getFlag("monks-enhanced-journal", `pagestate.${this.object.id}.scrollPositions`) || {});
+                    this._scrollPositions = flattenObject(mergeObject(this._scrollPositions || {}, savedScroll));
+                    /*
+                    for (let [k, v] of Object.entries(this.subsheet._scrollPositions || {})) {
+                        this._scrollPositions[k] = v || this._scrollPositions[k];
+                    }*/
+                    let oldScrollY = this.options.scrollY;
+                    this.options.scrollY = this.options.scrollY.concat(this.subsheet.options.scrollY);
+                    this._restoreScrollPositions(contentform);
+                    this.options.scrollY = oldScrollY;
 
-                this.subsheet._scrollPositions = this._scrollPositions;
+                    this.subsheet._scrollPositions = this._scrollPositions;
+                }
+                if (this.subsheet?.mode == modes.SINGLE)
+                    window.setTimeout(resetScrollPos, 100);
+                else
+                    resetScrollPos();
             }
 
             //if this entry is different from the last one...
@@ -1264,6 +1270,13 @@ export class EnhancedJournal extends Application {
                 icon: '<i class="fas fa-toolbox"></i>',
                 callback: li => {
                     this.convert('encounter');
+                }
+            },
+            {
+                name: i18n("MonksEnhancedJournal.event"),
+                icon: '<i class="fas fa-calendar-days"></i>',
+                callback: li => {
+                    this.convert('event');
                 }
             },
             {

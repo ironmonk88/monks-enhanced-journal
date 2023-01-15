@@ -93,7 +93,7 @@ export class EnhancedJournalSheet extends JournalPageSheet {
     }
 
     get allowedRelationships() {
-        return ["encounter", "loot", "organization", "person", "place", "poi", "quest", "shop"];
+        return ["encounter", "loot", "organization", "person", "place", "poi", "event", "quest", "shop"];
     }
 
     _canUserView(user) {
@@ -270,7 +270,7 @@ export class EnhancedJournalSheet extends JournalPageSheet {
             return false;
         }
 
-        if ((data.type == 'JournalEntry' || data.type == 'JournalEntryPage') && this.enhancedjournal) {
+        if ((data.type == 'JournalEntry' || data.type == 'JournalEntryPage' || data.type == 'Actor') && this.enhancedjournal) {
             let document = await fromUuid(data.uuid);
             this.enhancedjournal.open(document);
         } else
@@ -1515,7 +1515,7 @@ export class EnhancedJournalSheet extends JournalPageSheet {
                 let itm = items.find(i => i._id == itemData._id);
                 if (itm) {
                     itm = mergeObject(itm, formData);
-                    setValue(itm.system, pricename(), MEJHelpers.toDefaultCurrency(getProperty(itm, "flags.monks-enhanced-journal.price"), "price"));
+                    setPrice(itm.system, pricename(), getProperty(itm, "flags.monks-enhanced-journal.price"), "price");
                     await this.object.setFlag('monks-enhanced-journal', 'items', items);
                 }
 
@@ -2170,8 +2170,12 @@ export class EnhancedJournalSheet extends JournalPageSheet {
                             } else
                                 props.append(`<span class="tag">${p.name || p}</span>`)
                         });
-                        if (chatData.price != undefined)
-                            props.append(`<span class="tag">${i18n("MonksEnhancedJournal.Price")}: ${chatData.price}</span>`)
+                        if (chatData.price != undefined) {
+                            let price = chatData.price;
+                            if (price.denomination)
+                                price = `${price.value} ${price.denomination}`;
+                            props.append(`<span class="tag">${i18n("MonksEnhancedJournal.Price")}: ${price}</span>`);
+                        }
                         div.append(props);
                     }
                 }

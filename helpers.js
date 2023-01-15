@@ -12,13 +12,17 @@ export let getPrice = (item, name, ignorePrice = false) => {
     return MEJHelpers.getPrice(item, name, ignorePrice);
 }
 
+export let setPrice = (item, name, price) => {
+    return MEJHelpers.setPrice(item, name, price);
+}
+
 export class MEJHelpers {
     static getValue(item, name, defvalue = 0) {
         name = name || pricename();
         if (!item)
             return defvalue;
         let value = (item.system != undefined ? getProperty(item?.system, name) : getProperty(item, name));
-        value = (value?.hasOwnProperty("value") ? value.value : value);
+        value = (value?.hasOwnProperty("value") ? value.value + (value.denomination ? " " + value.denomination : "") : value);
         /*if (value && typeof value === 'object' && game.system.id == "pf2e") {
             value = Object.values(value)[0];
         }*/
@@ -28,7 +32,7 @@ export class MEJHelpers {
     static setValue(item, name, value = 1) {
         let prop = (item.system != undefined ? item.system : item);
         let data = getProperty(prop, name);
-        setProperty(prop, name, (data && data.hasOwnProperty("value") ? { value: value } : value));
+        setProperty(prop, name, (data && data.hasOwnProperty("value") && !value.hasOwnProperty("value") ? { value: value } : value));
     }
 
     static defaultCurrency() {
@@ -121,6 +125,14 @@ export class MEJHelpers {
         result.currency = currency;
 
         return result;
+    }
+
+    static setPrice(item, name, price) {
+        if (game.system.id == "dnd5e" && isNewerVersion(game.system.version, "2.0.3")) {
+            setValue(item, name, { value: price.value, denomination: price.currency });
+        } else {
+            setValue(item, name, MEJHelpers.toDefaultCurrency(price));
+        }
     }
 
     static toDefaultCurrency(price) {

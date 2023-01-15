@@ -25,7 +25,8 @@ export class TextEntrySheet extends EnhancedJournalSheet {
         return mergeObject(super.defaultOptions, {
             title: i18n("MonksEnhancedJournal.journalentry"),
             template: "modules/monks-enhanced-journal/templates/textentry.html",
-            tabs: []
+            tabs: [],
+            scrollY: [".editor-parent"]
         });
     }
 
@@ -77,7 +78,7 @@ export class TextImageEntrySheet extends TextEntrySheet {
             title: i18n("MonksEnhancedJournal.journalentry"),
             template: "modules/monks-enhanced-journal/templates/textimageentry.html",
             tabs: [{ navSelector: ".tabs", contentSelector: ".sheet-body", initial: 'description' }],
-            scrollY: [".description"]
+            scrollY: [".editor-parent"]
         });
     }
 

@@ -13,10 +13,11 @@ import { SlideshowSheet } from "./sheets/SlideshowSheet.js"
 import { OrganizationSheet } from "./sheets/OrganizationSheet.js"
 import { ShopSheet } from "./sheets/ShopSheet.js"
 import { LootSheet } from "./sheets/LootSheet.js"
+import { EventSheet } from "./sheets/EventSheet.js"
 import { TextEntrySheet, TextImageEntrySheet } from "./sheets/TextEntrySheet.js"
 import { backgroundinit } from "./plugins/background.plugin.js"
 import { NoteHUD } from "./apps/notehud.js"
-import { getValue, setValue, MEJHelpers } from "./helpers.js";
+import { getValue, setValue, setPrice, MEJHelpers } from "./helpers.js";
 
 export let debugEnabled = 0;
 
@@ -78,6 +79,7 @@ export class MonksEnhancedJournal {
         return {
             checklist: CheckListSheet,
             encounter: EncounterSheet,
+            event: EventSheet,
             organization: OrganizationSheet,
             person: PersonSheet,
             picture: PictureSheet,
@@ -100,6 +102,7 @@ export class MonksEnhancedJournal {
             poi: "MonksEnhancedJournal.poi",
             quest: "MonksEnhancedJournal.quest",
             encounter: "MonksEnhancedJournal.encounter",
+            event: "MonksEnhancedJournal.event",
             organization: "MonksEnhancedJournal.organization",
             shop: "MonksEnhancedJournal.shop",
             loot: "MonksEnhancedJournal.loot",
@@ -739,6 +742,13 @@ export class MonksEnhancedJournal {
 
             // Pre create a new page
             let type = getProperty(data, "flags.monks-enhanced-journal.pagetype");
+            if (game.modules.get("storyteller")?.active) {
+                let types = game.StoryTeller.constructor.types;
+                if (types[type] != undefined) {
+                    // This is a storyteller page, it can be ignored.
+                    return wrapped(...args);
+                }
+            }
             if (type) {
                 if (data.pages.length == 0) {
                     let pageData = { type: type, name: data.name };
@@ -786,6 +796,18 @@ export class MonksEnhancedJournal {
                 return createJournalEntryPage.call(this, oldOnCreate.bind(this), ...arguments);
             }
         }*/
+
+        let onAutosave = function (...args) {
+            this.object.parent?._sheet?.render(false);
+        }
+
+        if (game.modules.get("lib-wrapper")?.active) {
+            libWrapper.register("monks-enhanced-journal", "JournalTextPageSheet.prototype.onAutosave", onAutosave, "OVERRIDE");
+        } else {
+            JournalTextPageSheet.prototype.onAutosave = function (event) {
+                return onAutosave.call(this, ...arguments);
+            }
+        }
 
         let getPageData = function (wrapped, ...args) {
             let pages = wrapped(...args);
@@ -1783,6 +1805,8 @@ export class MonksEnhancedJournal {
                 return false;
             if ((sheet?.name || sheet?.constructor?.name) == 'NearbyApp')
                 return false;
+            if ((sheet?.name || sheet?.constructor?.name) == 'StorySheet')
+                return false;
             if (doc.flags["pdfoundry"])
                 return false;
         }
@@ -2113,12 +2137,12 @@ export class MonksEnhancedJournal {
     static getIcon(type) {
         switch (type) {
             case 'picture':
-            case 'image':
-                return 'fa-image';
+            case 'image': return 'fa-image';
             case 'person': return 'fa-user';
             case 'place': return 'fa-place-of-worship';
             case 'slideshow': return 'fa-photo-video';
             case 'encounter': return 'fa-toolbox';
+            case 'event': return 'fa-calendar-days';
             case 'quest': return 'fa-map-signs';
             case 'journalentry': return 'fa-book-open';
             case 'actor': return 'fa-users';
@@ -2861,7 +2885,7 @@ export class MonksEnhancedJournal {
                     let itemQty = getValue(itemData, quantityname(), 1);
                     setValue(itemData, quantityname(), purchaseQty * itemQty);
                     if (data.sell > 0)
-                        setValue(itemData, pricename(), MEJHelpers.toDefaultCurrency(data.sell + " " + data.currency));
+                        setPrice(itemData, pricename(), data.sell + " " + data.currency);
                     delete itemData._id;
                     if (!data.consumable) {
                         let sheet = actor.sheet;
@@ -3571,7 +3595,7 @@ Hooks.on('dropActorSheetData', (actor, sheet, data) => {
                     if ((result?.quantity ?? 0) > 0) {
                         let itemQty = getValue(data.data, quantityname());
                         setValue(data.data, quantityname(), result.quantity * itemQty);
-                        setValue(data.data, pricename(), MEJHelpers.toDefaultCurrency(result.price));
+                        setPrice(data.data, pricename(), result.price);
                         data.uuid = `${data.uuid}${data.rewardId ? `.Rewards.${data.rewardId}` : ""}.Items.${data.itemId}`;
                         sheet._onDropItem({ preventDefault: () => { } }, data);
                     }
@@ -3918,12 +3942,21 @@ Hooks.on("renderDialog", (dialog, html, data) => {
             .filter((t, index, self) => { return self.findIndex(i => i.id == t.id) == index })
             .sort((a, b) => { return a.name.localeCompare(b.name); });
 
+        let select = $("<select>").attr("name", "flags.monks-enhanced-journal.pagetype")
+            .append($('<optgroup>').attr("label", "Adventure Book").append(original.map((t) => { return $('<option>').attr('value', t.id).prop("selected", t.id == "text").html(t.name) })))
+            .append($('<optgroup>').attr("label", "Single Sheet").append(types.map((t) => { return $('<option>').attr('value', t.id).html(t.name) })));
+
+        if (game.modules.get("storyteller")?.active) {
+            select.append($('<optgroup>').attr("label", "Storyteller").append(Object.entries(game.StoryTeller.constructor.types).filter(([k, v]) => k != "base").map(([k, v]) => { return $('<option>').attr('value', k).html(v.name); })));
+            $('select[name="type"]', html).parent().parent().remove();
+        }
+
         $('<div>')
             .addClass("form-group")
             .append($('<label>').html(i18n("Type")))
             .append($('<div>')
                 .addClass("form-fields")
-                .append($("<select>").attr("name", "flags.monks-enhanced-journal.pagetype").append($('<optgroup>').attr("label", "Adventure Book").append(original.map((t) => { return $('<option>').attr('value', t.id).prop("selected", t.id == "text").html(t.name) }))).append($('<optgroup>').attr("label", "Single Sheet").append(types.map((t) => { return $('<option>').attr('value', t.id).html(t.name) })))))
+                .append(select))
             .insertAfter($('[name="name"]', html).closest('.form-group'));
 
         dialog.setPosition({ height: "auto" });
@@ -3981,7 +4014,7 @@ Hooks.on("renderJournalPageSheet", (sheet, html, data) => {
     }
     if (getProperty(data, "flags.monks-enhanced-journal.appendix"))
         $('select[name="title.level"]').val(-1);
-    if ((data.data.type == "video" || data.data.type == "image")) {
+    if (data.isCharacter == undefined && (data.data.type == "video" || data.data.type == "image")) {
         if (!sheet.isEditable) {
             let div = $('<div>').addClass("no-file-notification").toggle(data.data.src == undefined).html(`<i class="fas ${data.data.type == "video" ? 'fa-video-slash' : 'fa-image-slash'}"></i> No ${data.data.type}`).insertAfter(html[0]);
             if (data.data.type == "image" && data.data.src == undefined) $('img', html).hide();

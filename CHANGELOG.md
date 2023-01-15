@@ -1,3 +1,19 @@
+# Version 10.11
+
+Fixing some pages not remembering the scroll height of scrollable sections
+
+Added the Event sheet
+
+Fixed issues with the changes to the D&D 5e system.
+
+Added Storyteller integration, so story teller pages won't open in MEJ and the story sheet is added to the sheet type dropdown.
+
+Fixed issues with Foundry's autosave opening the Journal browser if it's closed.
+
+Fixed error that shows when trying to open an Actor sheet in the enhanced browser.
+
+Fixed issue dropping an actor onto a blank page not opening the actor.
+
 # Version 10.10
 
 Fix chat card stylings in PF2E
