@@ -165,14 +165,13 @@ Journal Entries that were created outside of Enhanced Journal are represented by
 
 ![monks-enhanced-journal](/screenshots/actor.png)
 
-If you draw an actor onto a blank tab, or onto a journal page that isn't an encounter, it will open that actor in its own page.  The idea is that you can prepare for an encounter by having the text on one tab, and any monsters that could be encountered on separate tabs, that way you can switch between them easily.
+If you drop an actor onto a blank tab, it will open that actor in its own page.  The idea is that you can prepare for an encounter by having the text on one tab, and any monsters that could be encountered on separate tabs, that way you can switch between them easily.
 
 ## Plans for the future
 
 I'd like to add a name generator for a person entry so that you can create a Person quickly.
 I'd like to add traps to the encounter entry, so you can contain multiple related DCs and record potential damage or effects applied.
 Add additional dice rolling modules in case you don't use Monk's TokenBar... it's just easier to code for my own modules.  :-)  But it's coming.
-Additional transition effects for the slideshow.
 Preload and switch to a new scene once the slideshow finishes.
 
 ## Bug Reporting
