@@ -3782,6 +3782,12 @@ Hooks.on("renderChatMessage", (message, html, data) => {
         $('.chat-shop-icon', html).click(MonksEnhancedJournal.openRequestItem.bind(message, 'shop')).attr('onerror', "$(this).attr('src', 'modules/monks-enhanced-journal/assets/shop.png');");
         $('.item-list .item-name .item-image', html).click(MonksEnhancedJournal.openRequestItem.bind(message, 'item'));
         $('.items-list .item-icon', html).click(MonksEnhancedJournal.openRequestItem.bind(message, 'item'));
+
+        if (game.modules.get("chat-portrait")?.active) {
+            window.setTimeout(() => {
+                $('.items-list .items-header h3.item-name img', html).insertBefore($('.message-content .request-item > div > div > h4', html));
+            }, 100);
+        }
     }
 });
 

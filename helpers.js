@@ -22,10 +22,12 @@ export class MEJHelpers {
         if (!item)
             return defvalue;
         let value = (item.system != undefined ? getProperty(item?.system, name) : getProperty(item, name));
-        value = (value?.hasOwnProperty("value") ? value.value + (value.denomination ? " " + value.denomination : "") : value);
-        /*if (value && typeof value === 'object' && game.system.id == "pf2e") {
+        
+        if (value && typeof value === 'object' && game.system.id == "pf2e") {
             value = Object.values(value)[0];
-        }*/
+        } else {
+            value = (value?.hasOwnProperty("value") ? value.value + (value.denomination ? " " + value.denomination : "") : value);
+        }
         return value ?? defvalue;
     }
 

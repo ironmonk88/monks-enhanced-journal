@@ -1,6 +1,6 @@
 import { setting, i18n, format, log, makeid, MonksEnhancedJournal, quantityname, pricename, currencyname } from "../monks-enhanced-journal.js";
 import { EnhancedJournalSheet } from "../sheets/EnhancedJournalSheet.js";
-import { getValue, setValue, MEJHelpers } from "../helpers.js";
+import { getValue, setValue, setPrice, MEJHelpers } from "../helpers.js";
 
 export class ShopSheet extends EnhancedJournalSheet {
     constructor(data, options) {

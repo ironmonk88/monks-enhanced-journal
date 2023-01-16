@@ -1,3 +1,11 @@
+# Version 10.12
+
+Fixed an issue with getting the price of an item in PF2E.
+
+Fixed issues with Chat portrait moving the images around.
+
+Fixed issue with editing items in a Shop.
+
 # Version 10.11
 
 Fixing some pages not remembering the scroll height of scrollable sections

@@ -3,7 +3,7 @@ import { EditFields } from "../apps/editfields.js";
 import { SelectPlayer } from "../apps/selectplayer.js";
 import { EditSound } from "../apps/editsound.js";
 import { MakeOffering } from "../apps/make-offering.js";
-import { getValue, setValue, MEJHelpers } from "../helpers.js";
+import { getValue, setValue, setPrice, MEJHelpers } from "../helpers.js";
 
 class EnhancedJournalContextMenu extends ContextMenu {
     constructor(...args) {
@@ -1443,6 +1443,9 @@ export class EnhancedJournalSheet extends JournalPageSheet {
                 content: content,
                 flavor: format("MonksEnhancedJournal.ActorPurchasedAnItem", { alias: (actor.alias ? actor.alias : actor.name), verb: (purchased ? i18n("MonksEnhancedJournal.Purchased").toLowerCase() : i18n("MonksEnhancedJournal.Received").toLowerCase()) }),
                 whisper: whisper,
+                flags: {
+                    'monks-enhanced-journal': messageContent
+                }
             };
 
             ChatMessage.create(messageData, {});
@@ -1515,7 +1518,9 @@ export class EnhancedJournalSheet extends JournalPageSheet {
                 let itm = items.find(i => i._id == itemData._id);
                 if (itm) {
                     itm = mergeObject(itm, formData);
-                    setPrice(itm.system, pricename(), getProperty(itm, "flags.monks-enhanced-journal.price"), "price");
+                    //let sysPrice = MEJHelpers.getSystemPrice(itm, pricename());
+                    //let price = MEJHelpers.getPrice(sysPrice);
+                    //setProperty(itm, "flags.monks-enhanced-journal.price", `${price.value} ${price.currency}`);
                     await this.object.setFlag('monks-enhanced-journal', 'items', items);
                 }
 
