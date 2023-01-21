@@ -590,6 +590,11 @@
     font-size: 24px;
 }
 
+.wfrp4e.monks-journal-sheet .header-name {
+    padding: 18px 18px 0px 22px;
+    border-bottom: initial;
+}
+
 .monks-journal-sheet .header-name input {
     background: none;
     border: 1px solid transparent !important;
@@ -598,15 +603,15 @@
     color: var(--color-text-dark-primary);
 }
 
-.wfrp4e.monks-enhanced-journal .monks-journal-sheet .header-name input {
+.wfrp4e.monks-enhanced-journal.monks-journal-sheet .header-name input {
     color: #111;
 }
 
-.wfrp4e.monks-enhanced-journal .monks-journal-sheet .header-name input::placeholder {
+.wfrp4e.monks-enhanced-journal.monks-journal-sheet .header-name input::placeholder {
     color: #888
 }
 
-.wfrp4e.monks-enhanced-journal .monks-journal-sheet.sheet .shop-container .item-list > li input {
+.wfrp4e.monks-enhanced-journal.monks-journal-sheet.sheet .shop-container .item-list > li input {
     color: #111;
 }
 
@@ -735,6 +740,14 @@
     flex: 2;
     color: #4b4a44;
     font-weight: bold;
+}
+
+.wfrp4e .monks-journal-sheet.sheet .shop .form-group label {
+    background-color: #080808 !important;
+}
+
+.wfrp4e .monks-journal-sheet.sheet .form-group label {
+    color:#dadada;
 }
 
 .age-system .monks-journal-sheet.sheet .form-group label {
@@ -996,6 +1009,10 @@ height: fit-content;*/
     position: absolute;
     top: 0px;
     left: 0px;
+}
+
+.wfrp4e .monks-journal-sheet .picture-img{
+
 }
 
 .monks-journal-sheet .picture-container .img-background {
@@ -1661,6 +1678,11 @@ height: fit-content;*/
     cursor: pointer;
     opacity: 0.8;
     padding: 4px;
+}
+
+.wfrp4e .monks-journal-sheet.sheet .recent-link, .wfrp4e .monks-journal-sheet.sheet .new-link {
+    background: url(../../../systems/wfrp4e/ui/frames/parchment-texture.webp);
+
 }
 
 .monks-journal-sheet.sheet .recent-link:hover, .monks-journal-sheet.sheet .new-link:hover {
@@ -2456,6 +2478,7 @@ a.picture-link.broken {
 
 .wfrp4e.monks-enhanced-journal .collapse .tab-bar .tab-button.sidebar-toggle {
     right: 0px;
+    color: #000000;
 }
 
 .wfrp4e.monks-enhanced-journal .directory-sidebar > section .directory-list {
@@ -2509,12 +2532,16 @@ a.picture-link.broken {
 }
 
 .wfrp4e.monks-enhanced-journal .content {
-    background: url(../../../systems/wfrp4e/ui/frames/parchment-texture.webp);
+    background: url(../../../systems/wfrp4e/ui/frames/window-app-background-bookshelf.webp);
     border-width: 10px;
-    border-image: url(../../../systems/wfrp4e/ui/frames/window-app-journal-sheet-content.webp) 5 repeat;
+    
     border-image-slice: 25;
     border-image-width: 25px;
     border-image-outset: 0px 0px 0px 0px;
+}
+
+.wfrp4e.monks-enhanced-journal .content .monks-journal-sheet {
+    background: url(../../../systems/wfrp4e/ui/frames/parchment-texture.webp);
 }
 
 .wfrp4e.monks-enhanced-journal .content > section {
@@ -2538,6 +2565,12 @@ a.picture-link.broken {
     box-shadow: 4px 4px 1px #00000085;
     background-origin: padding-box;
     text-shadow: 0px 0px 1px #00000063;
+    padding:0px;
+    font-size:18px;
+}
+
+.wfrp4e.monks-enhanced-journal .mainbar{
+    background: url(../../../systems/wfrp4e/ui/frames/parchment-texture.webp);
 }
 
 .wfrp4e.monks-enhanced-journal .mainbar .navigation .nav-input {
@@ -2554,8 +2587,8 @@ a.picture-link.broken {
     text-align: left;
 }
 
-.wfrp4e.monks-enhanced-journal .mainbar .bookmark-bar {
-    color: #f0f0e0;
+.wfrp4e.monks-enhanced-journal .mainbar .navigation .nav-input::placeholder{
+    color:#444444;
 }
 
 .wfrp4e.monks-enhanced-journal .monks-enhanced-journal footer {
@@ -2569,6 +2602,37 @@ a.picture-link.broken {
     color: #dadada;
 }
 
+.wfrp4e.monks-enhanced-journal input[name="name"], .wfrp4e.monks-enhanced-journal input[name="title"] {
+    border: 1px solid blue;
+    border-image: url(../../../systems/wfrp4e/ui/item-sheet-header.webp) repeat;
+    border-image-slice: 5;
+    border-image-width: 4px;
+    border-image-outset: 0px;
+    border-radius: 0px;
+    font-family: CaslonAntique;
+    font-weight: 500;
+    color: #670c0c;
+    text-shadow: 0px 0px 1px #00000063;
+    text-align: center;
+    box-shadow: 0px 0px 3px black inset;
+    opacity: 0.9;
+    background: none;
+    width: 100%;
+    margin: 0px;
+}
+
+.wfrp4e.monks-enhanced-journal .journal-entry-page.text h1 {
+    margin: 0.5em 0 0.5em;
+    font-size: 2.2em;
+    text-transform: uppercase;
+    font-weight: bold;
+    font-family: CaslonAntique;
+    text-align: center;
+    border: none;
+    letter-spacing: 2px;
+    color: black;
+}
+
 .wfrp4e.monks-enhanced-journal .monks-enhanced-journal footer > div:hover {
     text-shadow: 0 0 8px #ff9f00 !important;
 }
@@ -2576,6 +2640,20 @@ a.picture-link.broken {
 .system-wfrp4e #journal-editcurrency .dialog-content,
 .system-wfrp4e #edit-attributes .dialog-content {
     background: url(../../../systems/wfrp4e/ui/frames/parchment-texture.webp);
+}
+
+.wfrp4e.monks-enhanced-journal .mainbar .navigation .nav-button, .wfrp4e.monks-enhanced-journal footer.navigation .nav-button{
+    border: 1px solid black;
+    border-image: url(../../../systems/wfrp4e/ui/footer-button.webp) 10 repeat;
+    border-image-width: 4px;
+    border-image-outset: 0px;
+    box-shadow: 2px 2px 1px #00000042;
+    background: url(../../../systems/wfrp4e/ui/sidebar_button-background_red.webp) repeat;
+    background-origin: padding-box;
+    color: #dadada;
+    font-family: CaslonAntique;
+    font-weight: 500;
+    text-shadow: 0px 0px 1px #00000063;
 }
 
 .-emu-layout body.-emu .monks-journal-sheet.journal-sheet.sheet.window-app .window-content form.sheet-body.flexcol {
@@ -3047,6 +3125,9 @@ monks-journal-sheet.journal-sheet form select {
 .forbidden-lands.monks-enhanced-journal .monks-journal-sheet .header-name input {
     font-size: 28px !important;
 }
+.wfrp4e.monks-enhanced-journal .tab-bar .journal-tab .tab-content {
+    font-size: 16px;
+}
 
 .mta.monks-enhanced-journal .tab-bar .journal-tab .tab-content {
     color: #000;
@@ -3491,6 +3572,14 @@ span.unknown-link {
 
 #MonksEnhancedJournal .sheet.journal-entry .journal-entry-content {
     border: 0px;
+}
+
+#MonksEnhancedJournal.wfrp4e .sheet.journal-entry .journal-entry-content {
+    border: 10px solid transparent;
+    border-image: url(../../../systems/wfrp4e/ui/frames/window-app-journal-sheet-content.webp) 5 repeat;
+    border-image-slice: 25;
+    border-image-width: 25px;
+    border-image-outset: 0px 0px 0px 0px;
 }
 
 #MonksEnhancedJournal .sheet.journal-entry .no-file-notification {
