@@ -1011,8 +1011,10 @@ height: fit-content;*/
     left: 0px;
 }
 
-.wfrp4e .monks-journal-sheet .picture-img{
-
+.wfrp4e.monks-journal-sheet .picture-img{
+    width: calc(100% - 40px);
+    height: calc(100% - 20px);
+    margin: 0px 20px 20px 20px;
 }
 
 .monks-journal-sheet .picture-container .img-background {
