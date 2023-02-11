@@ -68,6 +68,10 @@
   "MonksEnhancedJournal.show-chat-bubbles.hint": "Show chat bubbles when clicking on a Note or Token that's linked to a Journal",
   "MonksEnhancedJournal.objectives-always.name": "Always Show Objectives",
   "MonksEnhancedJournal.objectives-always.hint": "Show Objectives even if the Notes layer isn't active'",
+  "MonksEnhancedJournal.loot-name.name": "Loot Name",
+  "MonksEnhancedJournal.loot-name.hint": "This name will be used when creating the new entry.",
+  "MonksEnhancedJournal.add-create-link.name": "Add Create Link",
+  "MonksEnhancedJournal.add-create-link.hint": "Add context menu, when text is selected to find a document with that name and replace the text with a link.",
 
   "MonksEnhancedJournal.SlideConfiguration": "Slide Configuration",
   "MonksEnhancedJournal.DCConfiguration": "DC Configuration",
@@ -319,7 +323,7 @@
   "MonksEnhancedJournal.ClearContents": "Clear Contents",
   "MonksEnhancedJournal.RollTables": "Roll Tables",
   "MonksEnhancedJournal.PopulateFromRollTable": "Populate from Rollable table",
-  "MonksEnhancedJournal.LootEntry": "Loot Entry",
+  "MonksEnhancedJournal.LootEntry": "Loot Entry ({{#}})",
   "MonksEnhancedJournal.ItemAddedToActor": "Items added to {name}",
   "MonksEnhancedJournal.GrantToActor": "grant to <b>{name}</b>",
   "MonksEnhancedJournal.AreYouSureRemoveActor": "Are you sure you want to remove this Actor?",
@@ -400,6 +404,7 @@
   "MonksEnhancedJournal.Consumable": "Consumable",
   "MonksEnhancedJournal.Consume": "Consume",
   "MonksEnhancedJournal.Date": "Date",
+  "MonksEnhancedJournal.Rarity": "Rarity",
 
   "MonksEnhancedJournal.msg.NoPlayersSelected": "No players selected to send this entry to",
   "MonksEnhancedJournal.msg.CannotAddItemType": "Cannot add item of this type",

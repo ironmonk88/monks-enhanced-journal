@@ -304,7 +304,7 @@ export class QuestSheet extends EnhancedJournalSheet {
             data.flags['monks-enhanced-journal'].rewards = duplicate(this.getRewardData() || []);
             for (let reward of data.flags['monks-enhanced-journal'].rewards) {
                 let dataReward = data.reward[reward.id];
-                let olditems = duplicate(reward.items);
+                let olditems = duplicate(reward.items || []);
                 reward = mergeObject(reward, dataReward);
                 reward.items = olditems;
                 if (reward.items && dataReward) {
@@ -564,6 +564,7 @@ export class QuestSheet extends EnhancedJournalSheet {
                     return;
             }
 
+            if (!reward.items) reward.items = [];
             let items = reward.items;
 
             let sysPrice = MEJHelpers.getSystemPrice(item, pricename()); //MEJHelpers.getPrice(getProperty(item, "flags.monks-enhanced-journal.price"));
@@ -706,7 +707,7 @@ export class QuestSheet extends EnhancedJournalSheet {
         if (reward == undefined)
             return;
 
-        reward.items = await super.assignItems(reward.items, reward.currency);
+        reward.items = await super.assignItems(reward.items || [], reward.currency) || [];
         for(let key of Object.keys(reward.currency))
             reward.currency[key] = 0;
 

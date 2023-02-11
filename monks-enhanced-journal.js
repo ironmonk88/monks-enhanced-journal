@@ -16,6 +16,7 @@ import { LootSheet } from "./sheets/LootSheet.js"
 import { EventSheet } from "./sheets/EventSheet.js"
 import { TextEntrySheet, TextImageEntrySheet } from "./sheets/TextEntrySheet.js"
 import { backgroundinit } from "./plugins/background.plugin.js"
+import { createlinkinit } from "./plugins/createlink.plugin.js"
 import { NoteHUD } from "./apps/notehud.js"
 import { getValue, setValue, setPrice, MEJHelpers } from "./helpers.js";
 
@@ -802,7 +803,8 @@ export class MonksEnhancedJournal {
         }
 
         if (game.modules.get("lib-wrapper")?.active) {
-            libWrapper.register("monks-enhanced-journal", "JournalTextPageSheet.prototype.onAutosave", onAutosave, "OVERRIDE");
+            if (JournalTextPageSheet.prototype.onAutosave)
+                libWrapper.register("monks-enhanced-journal", "JournalTextPageSheet.prototype.onAutosave", onAutosave, "OVERRIDE");
         } else {
             JournalTextPageSheet.prototype.onAutosave = function (event) {
                 return onAutosave.call(this, ...arguments);
@@ -997,7 +999,7 @@ export class MonksEnhancedJournal {
         }
 
         let clickNote2 = function (wrapped, ...args) {
-            const options = {};
+            const options = { newtab: setting("open-new-tab")};
             if (this.page) {
                 options.mode = JournalSheet.VIEW_MODES.SINGLE;
                 options.pageId = this.page.id;
@@ -1153,7 +1155,7 @@ export class MonksEnhancedJournal {
                 if (page.type == 'shop')
                     noteData.icon = "icons/svg/hanging-sign.svg";
                 else if (page.type == 'loot')
-                    noteData.icon = "icons/svg/chest.svg";
+                    noteData.icon = page.src || "icons/svg/chest.svg";
                 else if (page.type == 'encounter')
                     noteData.icon = "icons/svg/sword.svg";
                 else if (page.type == 'place')
@@ -1191,8 +1193,12 @@ export class MonksEnhancedJournal {
 
                     doc = /^[a-zA-Z0-9]{16}$/.test(parts[0]) ? collection.get(parts[0]) : collection.getName(parts[0]);
                 } else if (type == "UUID") {
-                    if (async) doc = fromUuid(target, relativeTo);
-                    else {
+                    if (async) {
+                        try {
+                            doc = fromUuid(target, relativeTo);
+                        } catch (err) {
+                        }
+                    } else {
                         try {
                             doc = fromUuidSync(target, relativeTo);
                         } catch (err) {
@@ -1214,7 +1220,7 @@ export class MonksEnhancedJournal {
                         return a;
                     }
                 }
-                if (doc instanceof Promise) return doc.then(checkPermission)
+                if (doc instanceof Promise) return doc.then(checkPermission).catch((err) => { checkPermission(); })
                 else return checkPermission(doc);
             }
 
@@ -2118,6 +2124,8 @@ export class MonksEnhancedJournal {
         //CONFIG.TinyMCE.font_formats = CONFIG.TinyMCE.font_formats = (CONFIG.TinyMCE.font_formats ? CONFIG.TinyMCE.font_formats + ";" : "") + "Anglo Text=anglo_textregular;Lovers Quarrel=lovers_quarrelregular;Play=Play-Regular";
 
         tinyMCE.PluginManager.add('background', backgroundinit);
+        if (setting("add-create-link"))
+            tinyMCE.PluginManager.add('createlink', createlinkinit);
 
         // Preload fonts for polyglot so there isn't a delay in showing them, and possibly revealing something
         if (game.modules.get("polyglot")?.active && !isNewerVersion(game.modules.get("polyglot")?.version, "1.7.30")) {
@@ -2203,6 +2211,30 @@ export class MonksEnhancedJournal {
             $('.window-header .close', app).click();
         } else {
             //check to see if this is a tab
+        }
+    }
+
+    static async addRelationship(data) {
+        if (game.user.isGM) {
+            let original = await fromUuid(data.uuid);
+            let orgPage = original.pages.contents[0];
+            if (original.isOwner && orgPage.isOwner) {
+                MonksEnhancedJournal.fixType(orgPage);
+                let sheet = orgPage.sheet;
+                sheet.addRelationship({ id: data.relationship.id, uuid: data.relationship.uuid, hidden: data.hidden }, false);
+            }
+        }
+    }
+
+    static async deleteRelationship(data) {
+        if (game.user.isGM) {
+            let original = await fromUuid(data.uuid);
+            let orgPage = original.pages.contents[0];
+            if (original.isOwner && orgPage.isOwner) {
+                let pageData = duplicate(getProperty(orgPage, "flags.monks-enhanced-journal.relationships") || {});
+                pageData.findSplice(i => i.id == data.id || i._id == data.id);
+                orgPage.setFlag('monks-enhanced-journal', "relationships", pageData);
+            }
         }
     }
 
@@ -3139,7 +3171,7 @@ export class MonksEnhancedJournal {
             event.preventDefault();
             event.stopPropagation();
             let id = event.currentTarget.dataset.uuid;
-            $(`[name="monks-enhanced-journal.loot-entity"]`, html).val(id);
+            $(`[name="monks-enhanced-journal.loot-entity"]`, html).val(id).change();
 
             let name = await getEntityName(id);
 
@@ -3160,9 +3192,11 @@ export class MonksEnhancedJournal {
                 return "Adding new loot page to " + entity.name;
             else if (entity instanceof Folder)
                 return (entity.documentClass.documentName == "JournalEntry" ? "Creating new Journal Entry within " + entity.name + " folder" : "Creating Actor within " + entity.name + " folder");
-            else if (entity)
-                return `Creating ${(entity?.documentClass?.documentName || entity?.parent?.documentClass?.documentName) == "JournalEntry" ? "Journal Entry" : "Actor"} in the root folder`;
-            else
+            else if (id == undefined) {
+                let lootsheet = setting('loot-sheet');
+                let isLootActor = ['lootsheetnpc5e', 'merchantsheetnpc', 'item-piles'].includes(lootsheet);
+                return `Creating ${isLootActor ? "Actor" : "Journal Entry"} in the root folder`;
+            } else
                 return "Unknown";
         }
 
@@ -3477,6 +3511,14 @@ Hooks.on("renderSettingsConfig", (app, html, data) => {
         list.insertAfter(ctrl);
         ctrl.hide();
     }).change();
+
+    $('[name="monks-enhanced-journal.loot-entity"]', html).on('change', async () => {
+        let entity = $('[name="monks-enhanced-journal.loot-entity"]', html).val();
+
+        $('[name="monks-enhanced-journal.loot-name"]', html).closest('.form-group').toggle(entity.startsWith("Folder") || !entity);
+    }).change();
+
+    $('[name="monks-enhanced-journal.loot-name"]', html).val(i18n($('[name="monks-enhanced-journal.loot-name"]', html).val()));
 });
 
 Hooks.once("init", async function () {
@@ -3593,7 +3635,8 @@ Hooks.on('dropActorSheetData', (actor, sheet, data) => {
             if (cls && cls.itemDropped) {
                 cls.itemDropped.call(cls, data.itemId, actor, page).then((result) => {
                     if ((result?.quantity ?? 0) > 0) {
-                        let itemQty = getValue(data.data, quantityname());
+                        let itemQty = Number(getValue(data.data, quantityname()));
+                        if (isNaN(itemQty)) itemQty = 1;
                         setValue(data.data, quantityname(), result.quantity * itemQty);
                         setPrice(data.data, pricename(), result.price);
                         data.uuid = `${data.uuid}${data.rewardId ? `.Rewards.${data.rewardId}` : ""}.Items.${data.itemId}`;
@@ -3783,11 +3826,13 @@ Hooks.on("renderChatMessage", (message, html, data) => {
         $('.item-list .item-name .item-image', html).click(MonksEnhancedJournal.openRequestItem.bind(message, 'item'));
         $('.items-list .item-icon', html).click(MonksEnhancedJournal.openRequestItem.bind(message, 'item'));
 
+        /*
         if (game.modules.get("chat-portrait")?.active) {
             window.setTimeout(() => {
                 $('.items-list .items-header h3.item-name img', html).insertBefore($('.message-content .request-item > div > div > h4', html));
             }, 100);
         }
+        */
     }
 });
 

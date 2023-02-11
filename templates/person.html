@@ -137,9 +137,12 @@
                                     <span>{{this.name}}</span>
                                 </div>
 
-                                <div class="item-name item-offered">
+                                <div class="item-name item-offered flexcol">
                                     {{#each this.items}}
-                                    <span class="tag">{{this}}</span>
+                                    <div class="flexrow" style="width: 100%; line-height: 32px;">
+                                        <img class="item-image item-icon" src="{{this.img}}" />
+                                        <span class="tag">{{this.name}}</span>
+                                    </div>
                                     {{/each}}
                                 </div>
 

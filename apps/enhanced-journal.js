@@ -38,7 +38,7 @@ export class EnhancedJournal extends Application {
         //load up the last entry being shown
         this.object = object;
         if (object != undefined)
-            this.open(object, null, { anchor: options?.anchor });
+            this.open(object, options?.newtab, { anchor: options?.anchor });
 
         this._soundHook = Hooks.on("globalInterfaceVolumeChanged", (volume) => {
             for (let sound of Object.values(this._backgroundsound)) {
@@ -117,7 +117,7 @@ export class EnhancedJournal extends Application {
     async _render(force, options = {}) {
         let result = await super._render(force, options);
 
-        if (this.element) {
+        if (this.element.length) {
             this.renderDirectory().then((html) => {
                 MonksEnhancedJournal.updateDirectory(html, false);
             })
@@ -562,6 +562,10 @@ export class EnhancedJournal extends Application {
                         break;
                 }
 
+                if (ctrl.attr) {
+                    div.attr(ctrl.attr);
+                }
+
                 if (div != '') {
                     if (ctrl.visible === false)
                         div.hide();
@@ -761,7 +765,13 @@ export class EnhancedJournal extends Application {
         this.saveTabs();
 
         //this.updateHistory();
-        this.render(true, options);
+        if (this.rendered)
+            this.render(true, options);
+        else {
+            window.setTimeout(() => {
+                $(`.journal-tab[data-tabid="${tab.id}"]`, this.element).addClass("active").siblings().removeClass("active");
+            }, 100);
+        }
 
         this.updateRecent(tab.entity);
 
@@ -1182,13 +1192,11 @@ export class EnhancedJournal extends Application {
     }
 
     findMapEntry(event) {
-        let mainbar = event.currentTarget.closest('.mainbar');
-        let content = $(mainbar).next();
-        let id = $(content).attr('entity-id');
-        //find this id on the map
+        let pageId = $(event.currentTarget).attr('page-id');
+        let journalId = $(event.currentTarget).attr('journal-id');
 
         let note = canvas.notes.placeables.find(n => {
-            return n.document.entryId == id || n.document.pageId == id;
+            return n.document.entryId == pageId || n.document.pageId == pageId || (n.document.entryId == journalId && n.document.pageId == null);
         });
         canvas.notes.panToNote(note);
     }

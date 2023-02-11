@@ -366,7 +366,7 @@
     overflow: hidden;
 }
 
-.monks-enhanced-journal footer {
+.monks-enhanced-journal footer:not(.attribute-footer) {
     flex: 0 0 20px;
     line-height: 20px;
     font-size: 16px;
@@ -374,7 +374,7 @@
     border-top: 1px solid #C0C0C0;
 }
 
-.monks-enhanced-journal .collapse footer {
+.monks-enhanced-journal .collapse footer:not(.attribute-footer) {
     padding-right: 26px;
 }
 
@@ -1709,7 +1709,8 @@ height: fit-content;*/
     color: #333;
 }
 
-.monks-journal-sheet.sheet .items-list .item-name h3, .monks-journal-sheet.sheet .items-list .item-name h4 {
+.monks-journal-sheet.sheet .items-list .item-name h3, 
+.monks-journal-sheet.sheet .items-list .item-name h4 {
     margin: 0;
     white-space: nowrap;
     overflow: hidden;
@@ -1787,7 +1788,10 @@ height: fit-content;*/
     cursor: pointer;
 }
 
-.monks-journal-sheet.sheet .organization-container .offering-list .items-list .item .item-name .item-image.actor-icon, .monks-journal-sheet.sheet .person-container .offering-list .items-list .item .item-name .item-image.actor-icon {
+.monks-journal-sheet.sheet .organization-container .offering-list .items-list .item .item-name .item-image.actor-icon,
+.monks-journal-sheet.sheet .organization-container .offering-list .items-list .item .item-name .item-image.item-icon,
+.monks-journal-sheet.sheet .person-container .offering-list .items-list .item .item-name .item-image.actor-icon,
+.monks-journal-sheet.sheet .person-container .offering-list .items-list .item .item-name .item-image.item-icon {
     height: 32px;
     width: 32px;
     flex: 0 0 32px;
@@ -2775,9 +2779,20 @@ body:not(.system-pf2e) .monks-journal-sheet .item-properties .tag, .monks-journa
     box-shadow: inset 0px 0px 12px #6b3a0f87 !important;
 }
 
-.monks-enhanced-journal.request-item .items-list .item-name h4, .monks-enhanced-journal.request-sale .items-list .item-name h4 {
+.monks-enhanced-journal.request-item h4,
+.monks-enhanced-journal.request-sale h4 {
     height: 27px;
     line-height: 27px;
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.monks-enhanced-journal.request-item .chat-actor-icon,
+.monks-enhanced-journal.request-item .chat-shop-icon,
+.monks-enhanced-journal.request-sale .chat-actor-icon,
+.monks-enhanced-journal.request-sale .chat-shop-icon {
+    margin-right: 8px;
 }
 
 .monks-enhanced-journal .content .actor.sheet {

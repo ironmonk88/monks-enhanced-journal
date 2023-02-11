@@ -72,6 +72,8 @@ export class ShopSheet extends EnhancedJournalSheet {
         data.showrequest = (['confirm', 'free'].includes(purchasing) && !this.object.isOwner && game.user.character && hasGM);
         data.nocharacter = !game.user.isGM && !game.user.character;
 
+        data.showrarity = (game.system.id == "dnd5e" || game.system.id == "pf2e");
+
         let actorLink = this.object.getFlag('monks-enhanced-journal', 'actor');
         if (actorLink) {
             let actor = actorLink.id ? game.actors.find(a => a.id == actorLink.id) : await fromUuid(actorLink);
@@ -767,16 +769,16 @@ export class ShopSheet extends EnhancedJournalSheet {
         this.object.setFlag("monks-enhanced-journal", "actor", data.uuid);
     }
 
-    openActor(event) {
+    async openActor(event) {
         let actorLink = this.object.getFlag('monks-enhanced-journal', 'actor');
-        let actor = game.actors.get(actorLink.id || actorLink);
+        let actor = actorLink.id ? game.actors.get(actorLink.id) : await fromUuid(actorLink);
         if (!actor)
             return;
 
-        if (event.newtab == true || event.altKey)
+        if (event.newtab !== true || event.altKey)
             actor.sheet.render(true);
         else
-            this.open(actor);
+            this.open(actor, event);
     }
 
     removeActor() {
@@ -784,10 +786,10 @@ export class ShopSheet extends EnhancedJournalSheet {
         $('.actor-img', this.element).remove();
     }
 
-    importActorItems() {
+    async importActorItems() {
         let actorLink = this.object.getFlag('monks-enhanced-journal', 'actor');
         if (actorLink) {
-            let actor = game.actors.get(actorLink.id || actorLink);
+            let actor = actorLink.id ? game.actors.get(actorLink.id) : await fromUuid(actorLink);
 
             if (actor) {
                 let items = actor.items

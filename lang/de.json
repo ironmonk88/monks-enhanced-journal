@@ -312,7 +312,7 @@
   "MonksEnhancedJournal.ClearContents": "Inhalte löschen",
   "MonksEnhancedJournal.RollTables": "Würfeltabellen",
   "MonksEnhancedJournal.PopulateFromRollTable": "Aus Würfeltabelle füllen",
-  "MonksEnhancedJournal.LootEntry": "Beute Eintrag",
+  "MonksEnhancedJournal.LootEntry": "Beute Eintrag ({{#}})",
   "MonksEnhancedJournal.ItemAddedToActor": "Gegenstand {name} hinzugefügt",
   "MonksEnhancedJournal.GrantToActor": "gewähre <b>{name}</b>",
   "MonksEnhancedJournal.AreYouSureRemoveActor": "Möchtest Du diesen Akteur wirklich entfernen?",

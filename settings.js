@@ -6,6 +6,8 @@ export const registerSettings = function () {
 	// Register any custom module settings here
 	let modulename = "monks-enhanced-journal";
 
+	const debouncedReload = foundry.utils.debounce(function () { window.location.reload(); }, 500);
+
 	let rollingmodules = {
 		'monks-tokenbar': "Monk's TokenBar"
 	};
@@ -96,6 +98,15 @@ export const registerSettings = function () {
 		config: true,
 		default: false,
 		type: Boolean,
+	});
+
+	game.settings.register(modulename, "add-create-link", {
+		name: i18n("MonksEnhancedJournal.add-create-link.name"),
+		hint: i18n("MonksEnhancedJournal.add-create-link.hint"),
+		scope: "world",
+		default: false,
+		type: Boolean,
+		onChange: debouncedReload
 	});
 
 	game.settings.register(modulename, "use-runes", {
@@ -309,6 +320,14 @@ export const registerSettings = function () {
 		config: false,
 		default: "",
 		choices: lootfolder,
+		type: String,
+	});
+	game.settings.register(modulename, "loot-name", {
+		name: i18n("MonksEnhancedJournal.loot-name.name"),
+		hint: i18n("MonksEnhancedJournal.loot-name.hint"),
+		scope: "world",
+		config: true,
+		default: i18n("MonksEnhancedJournal.LootEntry"),
 		type: String,
 	});
 

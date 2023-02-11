@@ -34,7 +34,7 @@ export class MEJHelpers {
     static setValue(item, name, value = 1) {
         let prop = (item.system != undefined ? item.system : item);
         let data = getProperty(prop, name);
-        setProperty(prop, name, (data && data.hasOwnProperty("value") && !value.hasOwnProperty("value") ? { value: value } : value));
+        setProperty(prop, name, (data && data.hasOwnProperty("value") && !value.hasOwnProperty("value") ? Object.assign(data, { value: value }) : value));
     }
 
     static defaultCurrency() {
@@ -132,6 +132,8 @@ export class MEJHelpers {
     static setPrice(item, name, price) {
         if (game.system.id == "dnd5e" && isNewerVersion(game.system.version, "2.0.3")) {
             setValue(item, name, { value: price.value, denomination: price.currency });
+        } else if (game.system.id == "wfrp4e") {
+            setProperty(item, `system.price.${price.currency}`, price.value);
         } else {
             setValue(item, name, MEJHelpers.toDefaultCurrency(price));
         }

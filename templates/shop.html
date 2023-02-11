@@ -69,6 +69,7 @@
                     <ol class="items-list shop-items">
                         <li class="items-header flexrow">
                             <h3 class="item-name noborder flexrow" sort="name">{{localize 'MonksEnhancedJournal.Items'}}</h3>
+                            {{#if @root.showrarity}}<div class="item-controls item-rarity">{{localize 'MonksEnhancedJournal.Rarity'}}</div>{{/if}}
                             <div class="item-controls item-consumable owner-only">{{localize 'MonksEnhancedJournal.Consume'}}</div>
                             <div class="item-controls item-quantity" sort="quantity">{{localize 'MonksEnhancedJournal.Qty'}}</div>
                             <div class="item-controls item-price" sort="price">{{localize 'MonksEnhancedJournal.Price'}}</div>
@@ -96,6 +97,12 @@
                                         <div class="item-image item-icon" style="background-image: url('{{this.img}}')"></div>
                                         <h4>{{this.name}}{{#if (gt this.qtyof 1)}} <span class="groups-of">(in groups of {{this.qtyof}})</span>{{/if}}</h4>
                                     </div>
+
+                                    {{#if @root.showrarity}}
+                                    <div class="item-controls item-rarity">
+                                        <span style="text-transform: capitalize;">{{this.rarity}}</span>
+                                    </div>
+                                    {{/if}}
 
                                     <div class="item-controls item-consumable owner-only" style="text-align: center;flex: 0 0 70px;">
                                         <input type="checkbox" name="items.{{this.id}}.flags.monks-enhanced-journal.consumable" {{checked this.consumable}} style="display: none;" />

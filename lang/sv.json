@@ -311,7 +311,7 @@
   "MonksEnhancedJournal.ClearContents": "Rensa",
   "MonksEnhancedJournal.RollTables": "Tärningsslagstabeller",
   "MonksEnhancedJournal.PopulateFromRollTable": "Lägg in från en tärningsslagstabell",
-  "MonksEnhancedJournal.LootEntry": "Bytesanteckning",
+  "MonksEnhancedJournal.LootEntry": "Bytesanteckning ({{#}})",
   "MonksEnhancedJournal.ItemAddedToActor": "Föremål tillagt til {name}",
   "MonksEnhancedJournal.GrantToActor": "överlåt till <b>{name}</b>",
   "MonksEnhancedJournal.AreYouSureRemoveActor": "Är du säker på att du vill ta bort den här karaktären?",

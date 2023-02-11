@@ -233,6 +233,10 @@ export class EnhancedJournalSheet extends JournalPageSheet {
             }
         }
 
+        if (game.modules.get("polyglot")?.active) {
+            this.renderPolyglot(this.element);
+        }
+
         log('Subsheet rendering');
 
         this.updateStyle();
@@ -435,7 +439,8 @@ export class EnhancedJournalSheet extends JournalPageSheet {
             if (this.object.type == 'text' || this.object.type == 'journalentry' || this.object.type == 'oldentry' || setting("show-menubar")) {
                 options = foundry.utils.mergeObject(options, {
                     menubar: true,
-                    plugins: CONFIG.TinyMCE.plugins + ' background dcconfig anchor',
+                    contextmenu: 'link createlink',
+                    plugins: CONFIG.TinyMCE.plugins + ' createlink background dcconfig anchor',
                     toolbar: CONFIG.TinyMCE.toolbar + ' background dcconfig anchor'//,
                     //font_formats: "Andale Mono=andale mono,times; Arial=arial,helvetica,sans-serif; Arial Black=arial black,avant garde; Book Antiqua=book antiqua,palatino; Comic Sans MS=comic sans ms,sans-serif; Courier New=courier new,courier; Georgia=georgia,palatino; Helvetica=helvetica; Impact=impact,chicago; Oswald=oswald; Symbol=symbol; Tahoma=tahoma,arial,helvetica,sans-serif; Terminal=terminal,monaco; Times New Roman=times new roman,times; Trebuchet MS=trebuchet ms,geneva; Verdana=verdana,geneva; Webdings=webdings; Wingdings=wingdings,zapf dingbats;Anglo Text=anglo_textregular;Lovers Quarrel=lovers_quarrelregular;Play=Play-Regular"
                 });
@@ -941,16 +946,16 @@ export class EnhancedJournalSheet extends JournalPageSheet {
     _documentControls() {
         let ctrls = [];
         if (this.object.id)
-            ctrls.push({ id: 'locate', text: i18n("SIDEBAR.JumpPin"), icon: 'fa-crosshairs', conditional: game.user.isGM, callback: this.enhancedjournal.findMapEntry.bind(this) });
+            ctrls.push({ id: 'locate', text: i18n("SIDEBAR.JumpPin"), icon: 'fa-crosshairs', conditional: game.user.isGM, attr: { "page-id": this.object.id, "journal-id": this.object.parent.id }, callback: this.enhancedjournal.findMapEntry.bind(this) });
         if (this.fieldlist() != undefined)
             ctrls.push({ id: 'settings', text: i18n("MonksEnhancedJournal.EditFields"), icon: 'fa-cog', conditional: game.user.isGM, callback: this.onEditFields });
         return ctrls;
     }
 
-    open(document) {
+    open(document, event) {
         if (document) {
             if (this.enhancedjournal)
-                this.enhancedjournal.open(document, event.shiftKey);
+                this.enhancedjournal.open(document, (event.shiftKey || event.newtab));
             else {
                 let page = document;
                 if (document instanceof JournalEntry && document.pages.size == 1) {
@@ -1157,6 +1162,12 @@ export class EnhancedJournalSheet extends JournalPageSheet {
                 requests: requests
             };
 
+            if (game.system.id == "dnd5e") {
+                itemData.rarity = item.system.rarity;
+            } else if (game.system.id == "pf2e") {
+                itemData.rarity = i18n(CONFIG.PF2E.rarityTraits[item.system.traits.rarity]);
+            }
+
             if (game.user.isGM || this.object.isOwner || (flags.hide !== true && (flags.quantity !== 0 || setting('show-zero-quantity')))) {
                 let groupId = (!sort || sort == "name" ? this.slugify(item.type) : "");
                 if (groups[groupId] == undefined)
@@ -1230,7 +1241,7 @@ export class EnhancedJournalSheet extends JournalPageSheet {
                         item = itemActor.items.get(i.id);
                     }
 
-                    return `${itemActor.id != actor.id ? (itemActor.name || i.actorName) + ", " : ''}${i.qty > 1 ? i.qty + " " : ""}${item?.name || i.itemName}`;
+                    return { img: item?.img || i.img, name: `${itemActor.id != actor.id ? (itemActor.name || i.actorName) + ", " : ''}${i.qty > 1 ? i.qty + " " : ""}${item?.name || i.itemName}` };
                 })
             );
             return {
@@ -1617,7 +1628,13 @@ export class EnhancedJournalSheet extends JournalPageSheet {
 
                     numberof = await getDiceRoll(numberof);
 
-                    let items = (clear ? [] : that.object.getFlag('monks-enhanced-journal', itemtype) || []);
+                    let items = (clear ? [] : that.object.getFlag('monks-enhanced-journal', itemtype)) || [];
+                    if (that.object.getFlag('monks-enhanced-journal', "type") == "quest") {
+                        let rewardId = that.object.getFlag('monks-enhanced-journal', "reward");
+                        let rewards = that.object.getFlag('monks-enhanced-journal', "rewards");
+                        let reward = rewards.find(r => r.id == rewardId || r.active);
+                        items = reward.items;
+                    }
                     let currency = that.object.getFlag('monks-enhanced-journal', "currency") || {};
                     let currChanged = false;
 
@@ -1756,8 +1773,16 @@ export class EnhancedJournalSheet extends JournalPageSheet {
                         }
                     }
 
-                    if (items.length > 0)
-                        await that.object.setFlag('monks-enhanced-journal', itemtype, items);
+                    if (items.length > 0) {
+                        if (that.object.getFlag('monks-enhanced-journal', "type") == "quest") {
+                            let rewardId = that.object.getFlag('monks-enhanced-journal', "reward");
+                            let rewards = that.object.getFlag('monks-enhanced-journal', "rewards");
+                            let reward = rewards.find(r => r.id == rewardId || r.active);
+                            reward.items = items;
+                            await that.object.setFlag('monks-enhanced-journal', "rewards", rewards);
+                        } else
+                            await that.object.setFlag('monks-enhanced-journal', itemtype, items);
+                    }
                     if (currChanged)
                         await that.object.setFlag('monks-enhanced-journal', "currency", currency);
                 }
@@ -1796,9 +1821,13 @@ export class EnhancedJournalSheet extends JournalPageSheet {
             let journal = game.journal.get(id);
             if (journal && journal.pages.size > 0) {
                 let page = journal.pages.contents[0];
-                let data = duplicate(getProperty(page, "flags.monks-enhanced-journal.relationships") || {});
-                data.findSplice(i => i.id == this.object.id || i._id == this.object.id);
-                page.setFlag('monks-enhanced-journal', "relationships", data);
+                if (journal.isOwner && page.isOwner) {
+                    let data = duplicate(getProperty(page, "flags.monks-enhanced-journal.relationships") || {});
+                    data.findSplice(i => i.id == this.object.id || i._id == this.object.id);
+                    page.setFlag('monks-enhanced-journal', "relationships", data);
+                } else {
+                    MonksEnhancedJournal.emit("deleteRelationship", { uuid: journal.uuid, id: this.object.id, page: this.object.id });
+                }
             }
         }
     }
@@ -1976,14 +2005,27 @@ export class EnhancedJournalSheet extends JournalPageSheet {
         let collection = (EnhancedJournalSheet.isLootActor(lootSheet) ? game.actors : game.journal);
 
         let getLootableName = (entity) => {
-            //find the folder and find the next available 'Loot Entry (x)'
+            let lootname = i18n(setting("loot-name"));
+            if (lootname.indexOf('{{#}}') == -1)
+                lootname += " ({{#}})";
+            //find the folder and find the next available loot name
             let documents = (entity == undefined ? collection.filter(e => e.folder == undefined) : entity.contents || entity.pages || entity.parent.contents || entity.parent.pages);
-            let previous = documents.map((e, i) =>
-                parseInt(e.name.replace('Loot Entry ', '').replace('(', '').replace(')', '')) || (i + 1)
-            ).sort((a, b) => { return b - a; });
-            let num = (previous.length ? previous[0] + 1 : 1);
 
-            name = `${i18n("MonksEnhancedJournal.LootEntry")}${(num > 1 ? ` (${num})` : '')}`;
+            let idx = lootname.indexOf('{{#}}');
+            let start = lootname.substring(0, idx);
+            let end = lootname.substring(idx + 5);
+            let num = 0;
+            if (documents && documents.length) {
+                for (let doc of documents) {
+                    if ((doc.name.startsWith(start) || start == "") && (doc.name.endsWith(end) || end == "")) {
+                        let val = Number(doc.name.substr(start.length, doc.name.length - start.length - end.length));
+                        if (!isNaN(val))
+                            num = Math.max(num, val);
+                    }
+                }
+            }
+
+            name = lootname.replace("{{#}}", num + 1);
             return name;
         }
 
@@ -2216,9 +2258,13 @@ export class EnhancedJournalSheet extends JournalPageSheet {
             if (cascade) {
                 let original = await fromUuid(relationship.uuid);
                 let orgPage = original.pages.contents[0];
-                MonksEnhancedJournal.fixType(orgPage);
-                let sheet = orgPage.sheet;
-                sheet.addRelationship({ id: this.object.parent.id, uuid: this.object.parent.uuid, hidden: false }, false);
+                if (original.isOwner && orgPage.isOwner) {
+                    MonksEnhancedJournal.fixType(orgPage);
+                    let sheet = orgPage.sheet;
+                    sheet.addRelationship({ id: this.object.parent.id, uuid: this.object.parent.uuid, hidden: false }, false);
+                } else {
+                    MonksEnhancedJournal.emit("addRelationship", { uuid: relationship.uuid, relationship: { id: this.object.parent.id, uuid: this.object.parent.uuid }, page: this.object.id, hidden: false });
+                }
             }
         }
     }
@@ -2434,7 +2480,7 @@ export class EnhancedJournalSheet extends JournalPageSheet {
             var selectedText = selection.extractContents();
             let selectedHTML = $('<div>').append(selectedText);
             if (selectedHTML.html() != '') {
-                let title = $('h1,h2,h3,h4', selectedHTML).first().text() || i18n("MonksEnhancedJournal.ExtractedJournalEntry");
+                let title = $('h1,h2,h3,h4', selectedHTML).first().text().trim() || i18n("MonksEnhancedJournal.ExtractedJournalEntry");
 
                 //create a new Journal entry in the same folder as the current object
                 //set the content to the extracted text (selectedHTML.html()) and use the title

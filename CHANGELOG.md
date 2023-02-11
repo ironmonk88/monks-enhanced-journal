@@ -1,3 +1,43 @@
+# Version 10.14
+
+Fixed issues with opening MEJ with a new tab.
+
+Fixed issues trying to render when the enhanced journal element hasn't been created yet.
+
+Fixed issue trying to locate a map note when the note page hasn't been set.
+
+Added item icons to the offering dialog
+
+Fixed currency issues with systems that use a value with additional information.
+
+Fixed issues setting the price for items in wfrp4e.
+
+Fixed issues witht he autosave trying to re-open the journal entry when you've closed it.
+
+Updated the Note creation code to use the image from the Loot Entry if there is one.
+
+Fixed issues with creating a content link where the uuid is invalid.
+
+Added the option to right click selected text and have MEJ find an item with that name, and replace the selected text with the content link.
+
+Fixed issue with creating relationships when the player editing doesn't have write permissions on the secondary entry.
+
+Fixed issues with showing the name of the Loot Entry selected.
+
+Added the option to set a default loot name when creating new Loot Entries.
+
+Fixed issues with displaying polyglot text on MEJ entries when players aren't using the enhanced journal browser.
+
+Added item rarity to the Shop sheet.
+
+Fixed issue with filling Quest rewards from a Roll Table.
+
+Added notification when trying to create an offering, if the source isn't an actor.
+
+Fixed an issue when assigning loot from a Quest.
+
+Fixed issues when trying to open an actor. or import items from the shop owner context menu.
+
 # Version 10.12
 
 Fixed an issue with getting the price of an item in PF2E.

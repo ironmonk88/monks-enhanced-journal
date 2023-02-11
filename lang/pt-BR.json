@@ -1,4 +1,4 @@
-{ 
+{
   "MonksEnhancedJournal.Title": "Monk's Enhanced Journal",
   "MonksEnhancedJournal.BackTooltip": "",
   "MonksEnhancedJournal.ForwardTooltip": "",
@@ -125,7 +125,7 @@
   "MonksEnhancedJournal.Search": "Pesquisar",
   "MonksEnhancedJournal.PersonName": "Nome da Pessoa",
   "MonksEnhancedJournal.Role": "Função",
-  "MonksEnhancedJournal.Location":"Locatização",
+  "MonksEnhancedJournal.Location": "Locatização",
   "MonksEnhancedJournal.Notes": "Notas",
   "MonksEnhancedJournal.Race": "Raça",
   "MonksEnhancedJournal.Gender": "Genero",
@@ -313,7 +313,7 @@
   "MonksEnhancedJournal.ClearContents": "Limpar conteúdo",
   "MonksEnhancedJournal.RollTables": "Rolar tabelas",
   "MonksEnhancedJournal.PopulateFromRollTable": "Preencher com tabela rolável",
-  "MonksEnhancedJournal.LootEntry": "Resgistro de Pilhagem",
+  "MonksEnhancedJournal.LootEntry": "Resgistro de Pilhagem ({{#}})",
   "MonksEnhancedJournal.ItemAddedToActor": "Itens adicionados a {name}",
   "MonksEnhancedJournal.GrantToActor": "conceder a <b>{name}</b>",
   "MonksEnhancedJournal.AreYouSureRemoveActor": "Tem certeza de que deseja remover este ator?",
@@ -389,7 +389,7 @@
   "MonksEnhancedJournal.HideShowOffering": "Ocultar/Mostrar Proposta",
   "MonksEnhancedJournal.Selected": "Selecionado",
   "MonksEnhancedJournal.QuantityOfItems": "Quantidade de itens",
-  
+
   "MonksEnhancedJournal.msg.NoPlayersSelected": "Nenhum jogador selecionado para enviar esta Resgistro",
   "MonksEnhancedJournal.msg.CannotAddItemType": "Não é possível adicionar item deste tipo",
   "MonksEnhancedJournal.msg.YouDontHaveTokenPermissions": "Você não tem permissão para criar um novo Token para o ator {actorname}.",

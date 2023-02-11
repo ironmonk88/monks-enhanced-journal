@@ -144,6 +144,11 @@ export class OrganizationSheet extends EnhancedJournalSheet {
             this.addRelationship(data);
         } else if (data.type == 'Item') {
             let item = await fromUuid(data.uuid);
+            if (!(item?.parent instanceof Actor)) {
+                ui.notifications.warn("Offerings must come from an Actor");
+                return;
+            }
+
             new MakeOffering(this.object, this, {
                 offering: {
                     actor: {
