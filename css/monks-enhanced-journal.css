@@ -103,7 +103,7 @@
 }
 
 .monks-enhanced-journal .mainbar .bookmark-bar {
-    padding-left: 4px;
+    padding: 4px;
 }
 
 .monks-enhanced-journal.hide-bookmark .mainbar .bookmark-bar {
@@ -118,6 +118,10 @@
 
 .monks-enhanced-journal .collapse .tab-bar {
     padding-right: 30px;
+}
+
+.monks-enhanced-journal .tab-bar .tab-row {
+    padding-top: 4px;
 }
 
 .monks-enhanced-journal .tab-bar .journal-tab {
