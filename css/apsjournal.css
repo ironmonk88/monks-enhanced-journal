@@ -1382,11 +1382,6 @@ a.inline-roll i {
     box-shadow: 0px 0px 8px var(--color-apsj-background-dark-50);
 }
 
-.monks-journal-sheet .encounter-body {
-    background: url('/modules/monks-enhanced-journal/assets/apsjournal/parchment-bloody.webp') no-repeat center;
-    background-size: cover;
-}
-
 .monks-journal-sheet.sheet .sheet-navigation {
     color: var(--color-apsj-light-0);
     text-shadow: 1px 1px 2px var(--color-apsj-dark-0);
@@ -1486,12 +1481,6 @@ input[type='number'],
 
 .monks-journal-sheet.sheet .items-list > .item-list {
     color: var(--color-apsj-dark-0);
-}
-
-.monks-journal-sheet.sheet .loot-container,
-.monks-journal-sheet.sheet .organization-container {
-    background-image: url('/modules/monks-enhanced-journal/assets/apsjournal/parchment.webp');
-    background-size: cover;
 }
 
 .monks-journal-sheet.sheet .sheet-header .sheet-image {
@@ -1604,4 +1593,15 @@ input[type='number'],
 #MonksEnhancedJournal[background-image="parchment"] .sheet.journal-entry .sidebar,
 #MonksEnhancedJournal[background-image="parchment"] .monks-enhanced-journal.flexrow {
     background-image: var(--apsj-parchment-medium) !important;
+}
+
+#MonksEnhancedJournal[background-image="parchment"] .monks-journal-sheet.sheet .loot-container,
+#MonksEnhancedJournal[background-image="parchment"] .monks-journal-sheet.sheet .organization-container {
+    background-image: url('/modules/monks-enhanced-journal/assets/apsjournal/parchment.webp');
+    background-size: cover;
+}
+
+#MonksEnhancedJournal[background-image="parchment"] .monks-journal-sheet .encounter-body {
+    background: url('/modules/monks-enhanced-journal/assets/apsjournal/parchment-bloody.webp') no-repeat center;
+    background-size: cover;
 }
