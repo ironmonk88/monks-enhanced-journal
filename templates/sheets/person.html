@@ -24,11 +24,12 @@
                 </div>
             </section>
             {{#if (and actor canViewActor)}}
-            <div class="actor-img">
-                <div class="person-actor">{{localize 'MonksEnhancedJournal.Actor'}}</div>
-                <img src="{{actor.img}}" data-uuid="{{actor.uuid}}" data-document="Actor" onerror="$(this).hide();">
-                <div style="text-align: center;">{{actor.name}}</div>
-            </div>
+            <section class="flexcol actor-img-container">
+                <div class="actor-img">
+                    <img src="{{actor.img}}" data-uuid="{{actor.uuid}}" data-document="Actor" onerror="$(this).hide();">
+                </div>
+                <div class="actor-img-text">{{actor.name}}</div>
+            </section>
             {{/if}}
         </header>
         <nav class="sheet-navigation tabs" data-group="primary">

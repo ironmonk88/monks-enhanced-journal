@@ -217,7 +217,7 @@ export class QuestSheet extends EnhancedJournalSheet {
         $('.refill-all', html).click(this.refillItems.bind(this, 'all'));
 
         const actorOptions = this._getPersonActorContextOptions();
-        if (actorOptions) new ContextMenu($(html), ".actor-img", actorOptions);
+        if (actorOptions) new ContextMenu($(html), ".actor-img-container", actorOptions);
     }
 
     /*async _onSubmit(ev) {
@@ -653,12 +653,18 @@ export class QuestSheet extends EnhancedJournalSheet {
     openActor(event) {
         let actorLink = this.object.getFlag('monks-enhanced-journal', 'actor');
         let actor = game.actors.find(a => a.id == actorLink.id);
-        this.open(actor);
+        if (!actor)
+            return;
+
+        if (event.newtab == true || event.altKey)
+            actor.sheet.render(true);
+        else
+            this.open(actor, event);
     }
 
     removeActor() {
         this.object.unsetFlag('monks-enhanced-journal', 'actor');
-        $('.actor-img', this.element).remove();
+        $('.actor-img-container', this.element).remove();
     }
 
     _getPersonActorContextOptions() {
@@ -674,6 +680,15 @@ export class QuestSheet extends EnhancedJournalSheet {
                         content: i18n("MonksEnhancedJournal.ConfirmRemoveLink"),
                         yes: this.removeActor.bind(this)
                     });
+                }
+            },
+            ,
+            {
+                name: i18n("MonksEnhancedJournal.OpenActorSheet"),
+                icon: '<i class="fas fa-user fa-fw"></i>',
+                condition: () => game.user.isGM,
+                callback: li => {
+                    this.openActor.call(this, { newtab: true });
                 }
             }
         ];

@@ -125,7 +125,7 @@ export class ShopSheet extends EnhancedJournalSheet {
     activateListeners(html, enhancedjournal) {
         super.activateListeners(html, enhancedjournal);
 
-        $('.actor-img img', html).click(this.openActor.bind(this));
+        //$('.actor-img img', html).click(this.openActor.bind(this));
         $('.relationships .items-list h4', html).click(this.openRelationship.bind(this));
 
         //item
@@ -155,7 +155,7 @@ export class ShopSheet extends EnhancedJournalSheet {
         $('.open-player-config', html).on("click", () => { game.user.sheet.render(true) });
 
         const actorOptions = this._getPersonActorContextOptions();
-        if (actorOptions) new ContextMenu($(html), ".actor-img", actorOptions);
+        if (actorOptions) new ContextMenu($(html), ".actor-img-container", actorOptions);
     }
 
     _getSubmitData(updateData = {}) {
@@ -783,7 +783,7 @@ export class ShopSheet extends EnhancedJournalSheet {
 
     removeActor() {
         this.object.unsetFlag('monks-enhanced-journal', 'actor');
-        $('.actor-img', this.element).remove();
+        $('.actor-img-container', this.element).remove();
     }
 
     async importActorItems() {

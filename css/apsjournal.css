@@ -1483,18 +1483,6 @@ input[type='number'],
     color: var(--color-apsj-dark-0);
 }
 
-.monks-journal-sheet.sheet .sheet-header .sheet-image {
-    background-image: url('/modules/monks-enhanced-journal/assets/apsjournal/green-item.webp');
-    background-size: cover;
-    border: none !important;
-}
-
-.monks-journal-sheet.sheet .loot-container .sheet-header img.profile {
-    height: auto !important;
-    width: 130px !important;
-    margin: 15px;
-}
-
 .loot-character > .character-name {
     color: var(--color-apsj-dark-0);
 }

@@ -120,7 +120,7 @@ export class PersonSheet extends EnhancedJournalSheet {
     activateListeners(html, enhancedjournal) {
         super.activateListeners(html, enhancedjournal);
 
-        $('.journal-header .actor-img img', html).click(this.openActor.bind(this));
+        //$('.journal-header .actor-img img', html).click(this.openActor.bind(this));
         html.on('dragstart', ".actor-img img", TextEditor._onDragContentLink);
 
         //onkeyup="textAreaAdjust(this)" style="overflow:hidden"
@@ -132,7 +132,7 @@ export class PersonSheet extends EnhancedJournalSheet {
         $('.item-hide', html).on('click', this.alterItem.bind(this));
 
         const actorOptions = this._getPersonActorContextOptions();
-        if (actorOptions) new ContextMenu($(html), ".actor-img", actorOptions);
+        if (actorOptions) new ContextMenu($(html), ".actor-img-container", actorOptions);
 
         $('.relationships .items-list h4', html).click(this.openRelationship.bind(this));
         $('.offerings .items-list .actor-icon', html).click(this.openOfferingActor.bind(this));
@@ -266,12 +266,12 @@ export class PersonSheet extends EnhancedJournalSheet {
         if (event.newtab == true || event.altKey)
             actor.sheet.render(true);
         else
-            this.open(actor);
+            this.open(actor, event);
     }
 
     removeActor() {
         this.object.unsetFlag('monks-enhanced-journal', 'actor');
-        $('.actor-img', this.element).remove();
+        $('.actor-img-container', this.element).remove();
     }
 
     _getPersonActorContextOptions() {
