@@ -48,15 +48,15 @@ export class APSJ {
 				description: i18n(`APSJournal.block-${c}.description`),
 				content: await APSJ.getBlock(c),
 			}
-		})))/*.concat(await Promise.all(APSJ.dialogList.flatMap(async (c) => {
+		}))).concat(...(await Promise.all(APSJ.dialogList.flatMap(async (c) => {
 			return await Promise.all(["left", "right"].map(async (s) => {
 				return {
 					title: i18n(`APSJournal.block-dialogue-${c}-${s}.name`),
 					description: i18n('APSJournal.block-dialogue.description'),
 					content: await APSJ.getDialog(c, s)
 				};
-			}))
-		})))*/.concat(await Promise.all(APSJ.panelList.map(async (c) => {
+			}));
+		})))).concat(await Promise.all(APSJ.panelList.map(async (c) => {
 			return {
 				title: i18n(`APSJournal.panel-${c}.name`),
 				description: i18n(`APSJournal.panel-${c}.description`),
