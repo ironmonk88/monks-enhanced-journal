@@ -1,4 +1,8 @@
-﻿.monks-enhanced-journal:not(.category-filter) {
+﻿#MonksEnhancedJournal .window-content {
+    padding: 0px;
+}
+
+.monks-enhanced-journal:not(.category-filter) {
     height: 100%;
     flex-wrap: nowrap;
 }
