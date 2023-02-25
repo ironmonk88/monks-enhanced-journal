@@ -557,6 +557,11 @@
   "APSJournal.enable-parchment.name": "Enable Aged Parchment",
   "APSJournal.enable-parchment.hint": "Replace the default white parchment background with a more aged, brownish-yellow look.",
 
+  "APSJournal.background-image.name": "Background Image",
+  "APSJournal.background-image.hint": "Replace the default white parchment background",
+  "APSJournal.background-colour.name": "Background Colour",
+  "APSJournal.background-colour.hint": "Change the colour of the enhanced journal",
+
   "APSJournal.color-theme.name": "Color Theme",
   "APSJournal.color-theme-none.name": "None",
   "APSJournal.color-theme-blue.name": "Blue",
