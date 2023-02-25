@@ -11,7 +11,7 @@ export class LootSheet extends EnhancedJournalSheet {
     static get defaultOptions() {
         return mergeObject(super.defaultOptions, {
             title: i18n("MonksEnhancedJournal.loot"),
-            template: "modules/monks-enhanced-journal/templates/loot.html",
+            template: "modules/monks-enhanced-journal/templates/sheets/loot.html",
             dragDrop: [
                 { dragSelector: ".document.item", dropSelector: ".loot-container" },
                 { dragSelector: ".loot-items .item-list .item .item-name", dropSelector: "null" },

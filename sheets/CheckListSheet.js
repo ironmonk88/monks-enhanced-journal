@@ -19,7 +19,7 @@ export class CheckListSheet extends EnhancedJournalSheet {
     static get defaultOptions() {
         return mergeObject(super.defaultOptions, {
             title: i18n("MonksEnhancedJournal.checklist"),
-            template: "modules/monks-enhanced-journal/templates/checklist.html",
+            template: "modules/monks-enhanced-journal/templates/sheets/sheets/checklist.html",
             dragDrop: [
                 { dragSelector: ".checklist-item", dropSelector: ".checklist-list" },
                 { dragSelector: ".sheet-icon", dropSelector: "#board" }
@@ -277,7 +277,7 @@ export class CheckListSheet extends EnhancedJournalSheet {
         const title = label + (data.id && options.type == 'folder' ? ' : ' + data.name : '');
 
         // Render the entity creation form
-        const html = await renderTemplate(`modules/monks-enhanced-journal/templates/checklist${options.type}.html`, {
+        const html = await renderTemplate(`modules/monks-enhanced-journal/templates/sheets/checklist${options.type}.html`, {
             data: data,
             name: data.name || game.i18n.format("DOCUMENT.New", { type: options.type }),
             folder: data.folder,

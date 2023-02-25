@@ -19,6 +19,8 @@ import { backgroundinit } from "./plugins/background.plugin.js"
 import { createlinkinit } from "./plugins/createlink.plugin.js"
 import { NoteHUD } from "./apps/notehud.js"
 import { getValue, setValue, setPrice, MEJHelpers } from "./helpers.js";
+import { MEJFontHelper } from "./font-helper.js"
+import { APSJ } from "./apsjournal.js";
 
 export let debugEnabled = 0;
 
@@ -181,6 +183,9 @@ export class MonksEnhancedJournal {
 
         //MonksEnhancedJournal._oldSheetClass = CONFIG.JournalEntry.sheetClass;
         //CONFIG.JournalEntry.sheetClass = EnhancedJournalSheet;
+
+        MEJFontHelper.loadFonts();
+        //APSJ.init();
 
         if (!(CONFIG.TinyMCE.content_css instanceof Array))
             CONFIG.TinyMCE.content_css = [CONFIG.TinyMCE.content_css];
@@ -1562,6 +1567,28 @@ export class MonksEnhancedJournal {
         }
     }
 
+    static async cleanPageState() {
+        let tabs = (game.user.getFlag("monks-enhanced-journal", "tabs") || []).map(t => {
+            if (!t.entitId)
+                return null;
+            let parts = t.entityId.split(".");
+            return parts[parts.length - 1];
+        }).filter(t => !!t);
+        let pagestate = duplicate(game.user.getFlag("monks-enhanced-journal", "pagestate") || {});
+        let deleteIds = [];
+        for (let [k, v] of Object.entries(pagestate)) {
+            if (!tabs.includes(k))
+                deleteIds.push(k);
+        }
+        if (deleteIds.length) {
+            for (let id of deleteIds) {
+                delete pagestate[id];
+            }
+            await game.user.unsetFlag("monks-enhanced-journal", "pagestate");
+            await game.user.setFlag("monks-enhanced-journal", "pagestate", pagestate);
+        }
+    }
+
     static async fixPages() {
         for (let journal of game.journal) {
             if (getProperty(journal, "flags.monks-enhanced-journal.type") != undefined) {
@@ -2000,6 +2027,8 @@ export class MonksEnhancedJournal {
     static async ready() {
         game.socket.on(MonksEnhancedJournal.SOCKET, MonksEnhancedJournal.onMessage);
 
+        APSJ.init();
+
         if (game.system.id == 'pf2e') {
             MonksEnhancedJournal.pf2eCurrency = {};
             let pack = game.packs.get("pf2e.equipment-srd");
@@ -2081,6 +2110,8 @@ export class MonksEnhancedJournal {
                 } catch { }
             }
         }
+
+        MonksEnhancedJournal.cleanPageState();
 
         $('<div>').attr('id', 'slideshow-canvas').addClass('monks-journal-sheet flexrow').append($('<div>').addClass('slideshow-container flexcol playing').append($('<div>').addClass('slide-showing'))).append($('<div>').addClass('slide-padding')).appendTo($('body'));
         //new SlideshowWindow().render(true);
@@ -3204,11 +3235,11 @@ export class MonksEnhancedJournal {
             let result = [$('<li>').addClass('journal-item create-item').attr('data-uuid', folderID).html($('<div>').addClass('journal-title').toggleClass('selected', uuid == undefined).html("-- create entry here --")).click(selectItem.bind())];
             return result.concat((contents || [])
                 .filter(c => {
-                    return c instanceof JournalEntry && c.pages.size == 1 && getProperty(c.pages.contents[0], "flags.monks-enhanced-journal.type") == "loot"
+                    return (c instanceof JournalEntry && c.pages.size == 1 && getProperty(c.pages.contents[0], "flags.monks-enhanced-journal.type") == "loot") || (c instanceof Actor)
                 })
                 .sort((a, b) => { return a.sort < b.sort ? -1 : a.sort > b.sort ? 1 : 0; })
                 .map(e => {
-                    return $('<li>').addClass('journal-item flexrow').toggleClass('selected', uuid == e.pages.contents[0].uuid).attr('data-uuid', e.pages.contents[0].uuid).html($('<div>').addClass('journal-title').html(e.name)).click(selectItem.bind())
+                    return $('<li>').addClass('journal-item flexrow').toggleClass('selected', uuid == (e.pages?.contents[0].uuid || e.uuid)).attr('data-uuid', e.pages?.contents[0].uuid || e.uuid).html($('<div>').addClass('journal-title').html(e.name)).click(selectItem.bind())
                 }));
         }
 
@@ -3463,11 +3494,12 @@ export class MonksEnhancedJournal {
                     { id: "sp", name: i18n("MonksEnhancedJournal.currency.silver"), convert: 0.1 },
                     { id: "cp", name: i18n("MonksEnhancedJournal.currency.copper"), convert: 0.01 }
                 ];
-            case "age-system":
+            case "dsa5":
                 return [
-                    { id: "gp", name: i18n("MonksEnhancedJournal.currency.gold"), convert: 0 },
-                    { id: "sp", name: i18n("MonksEnhancedJournal.currency.silver"), convert: 0.1 },
-                    { id: "cp", name: i18n("MonksEnhancedJournal.currency.copper"), convert: 0.01 }
+                    { id: "Money-D", name: i18n("Money-D"), convert: 10 },
+                    { id: "Money-S", name: i18n("Money-S"), convert: 0 },
+                    { id: "Money-H", name: i18n("Money-H"), convert: 0.1 },
+                    { id: "Money-K", name: i18n("Money-K"), convert: 0.01 }
                 ];
             default:
             return [];

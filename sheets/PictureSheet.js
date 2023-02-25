@@ -9,7 +9,7 @@ export class PictureSheet extends EnhancedJournalSheet {
     static get defaultOptions() {
         return mergeObject(super.defaultOptions, {
             title: i18n("MonksEnhancedJournal.picture"),
-            template: "modules/monks-enhanced-journal/templates/picture.html"
+            template: "modules/monks-enhanced-journal/templates/sheets/picture.html"
         });
     }
 

@@ -93,7 +93,7 @@
 }
 
 .monks-enhanced-journal .mainbar .bookmark-bar {
-    margin-left: 4px;
+    padding-left: 4px;
 }
 
 .monks-enhanced-journal.hide-bookmark .mainbar .bookmark-bar {

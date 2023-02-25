@@ -1,6 +1,7 @@
 import { MonksEnhancedJournal, i18n } from "./monks-enhanced-journal.js"
 import { EditCurrency } from "./apps/editcurrency.js"
 import { EditPersonAttributes, EditPlaceAttributes } from "./apps/editattributes.js"
+import { APSJ } from "./apsjournal.js";
 
 export const registerSettings = function () {
 	// Register any custom module settings here
@@ -16,6 +17,22 @@ export const registerSettings = function () {
 		'true': "Sidebar and Enhanced Journal",
 		'mej': "Just Enhanced Journal",
 		'false': "Neither"
+	};
+
+	let backgroundImages = {
+		'none': "None",
+		'parchment': "Parchment"
+	};
+
+	let backgroundColour = {
+		'none': "None",
+		'blue': "Blue",
+		'cyan': "Cyan",
+		'green': "Green",
+		'orange': "Orange",
+		'purple': "Purple",
+		'red': "Red",
+		'yellow': "Yellow"
 	};
 
 	let lootsheetoptions = MonksEnhancedJournal.getLootSheetOptions();
@@ -43,6 +60,32 @@ export const registerSettings = function () {
 		icon: 'fas fa-place-of-worship',
 		restricted: true,
 		type: EditPlaceAttributes
+	});
+
+	game.settings.register(modulename, 'background-image', {
+		name: game.i18n.format('APSJournal.background-image.name'),
+		hint: game.i18n.format('APSJournal.background-image.hint'),
+		scope: 'world',
+		config: true,
+		default: "none",
+		choices: backgroundImages,
+		type: String,
+		onChange: (value) => {
+			$('#MonksEnhancedJournal').attr("background-image", value);
+		},
+	});
+
+	game.settings.register(modulename, 'background-colour', {
+		name: game.i18n.format('APSJournal.background-colour.name'),
+		hint: game.i18n.format('APSJournal.background-colour.hint'),
+		scope: 'world',
+		config: true,
+		default: "none",
+		choices: backgroundColour,
+		type: String,
+		onChange: (value) => {
+			APSJ.setTheme(value);
+		},
 	});
 
 	game.settings.register(modulename, "allow-player", {

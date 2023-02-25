@@ -1,0 +1,1607 @@
+/**
+* APSJournal Custom Properties
+**/
+
+:root {
+    --color-apsj-primary-light: rgb(188, 0, 0);
+    --color-apsj-primary: rgb(128, 0, 0);
+    --color-apsj-primary-dark: rgb(100, 0, 0);
+    --color-apsj-background-primary: rgba(128, 0, 0, 0.75);
+    --color-apsj-background-primary-dark: rgba(100, 0, 0, 0.75);
+    --color-apsj-border-primary-light: rgb(255, 0, 0);
+    --color-apsj-border-primary: rgb(160, 0, 0);
+    --color-apsj-border-primary-dark: rgb(140, 0, 0);
+    --color-apsj-light-0: rgb(255, 255, 255);
+    --color-apsj-light-1: rgb(238, 238, 238);
+    --color-apsj-light-2: rgb(221, 221, 221);
+    --color-apsj-light-3: rgb(204, 204, 204);
+    --color-apsj-light-4: rgb(187, 187, 187);
+    --color-apsj-light-5: rgb(170, 170, 170);
+    --color-apsj-light-6: rgb(153, 153, 153);
+    --color-apsj-light-7: rgb(136, 136, 136);
+    --color-apsj-dark-7: rgb(119, 119, 119);
+    --color-apsj-dark-6: rgb(102, 102, 102);
+    --color-apsj-dark-5: rgb(85, 85, 85);
+    --color-apsj-dark-4: rgb(68, 68, 68);
+    --color-apsj-dark-3: rgb(51, 51, 51);
+    --color-apsj-dark-2: rgb(34, 34, 34);
+    --color-apsj-dark-1: rgb(17, 17, 17);
+    --color-apsj-dark-0: rgb(0, 0, 0);
+    --color-apsj-background-cyan: rgba(7, 103, 144, 0.75);
+    --color-apsj-background-purple: rgba(52, 26, 255, 0.75);
+    --color-apsj-background-blue: rgba(18, 69, 170, 0.75);
+    --color-apsj-background-green: rgba(0, 128, 0, 0.75);
+    --color-apsj-background-yellow: rgba(214, 150, 0, 0.75);
+    --color-apsj-background-orange: rgba(255, 128, 0, 0.75);
+    --color-apsj-background-red: rgba(128, 0, 0, 0.75);
+    --color-apsj-background-light-0: rgba(255, 255, 255, 0.75);
+    --color-apsj-background-light-1: rgba(238, 238, 238, 0.75);
+    --color-apsj-background-light-2: rgba(221, 221, 221, 0.75);
+    --color-apsj-background-light-3: rgba(204, 204, 204, 0.75);
+    --color-apsj-background-light-4: rgba(187, 187, 187, 0.75);
+    --color-apsj-background-light-5: rgba(170, 170, 170, 0.75);
+    --color-apsj-background-light-6: rgba(153, 153, 153, 0.75);
+    --color-apsj-background-light-7: rgba(136, 136, 136, 0.75);
+    --color-apsj-background-dark-7: rgba(119, 119, 119, 0.75);
+    --color-apsj-background-dark-6: rgba(102, 102, 102, 0.75);
+    --color-apsj-background-dark-5: rgba(85, 85, 85, 0.75);
+    --color-apsj-background-dark-4: rgba(68, 68, 68, 0.75);
+    --color-apsj-background-dark-3: rgba(51, 51, 51, 0.75);
+    --color-apsj-background-dark-2: rgba(34, 34, 34, 0.75);
+    --color-apsj-background-dark-1: rgba(17, 17, 17, 0.75);
+    --color-apsj-background-dark-0: rgba(0, 0, 0, 0.75);
+    --color-apsj-background-light-50: rgba(255, 255, 255, 0.5);
+    --color-apsj-background-light-51: rgba(238, 238, 238, 0.5);
+    --color-apsj-background-light-52: rgba(221, 221, 221, 0.5);
+    --color-apsj-background-light-53: rgba(204, 204, 204, 0.5);
+    --color-apsj-background-light-54: rgba(187, 187, 187, 0.5);
+    --color-apsj-background-light-55: rgba(170, 170, 170, 0.5);
+    --color-apsj-background-light-56: rgba(153, 153, 153, 0.5);
+    --color-apsj-background-light-57: rgba(136, 136, 136, 0.5);
+    --color-apsj-background-dark-57: rgba(119, 119, 119, 0.5);
+    --color-apsj-background-dark-56: rgba(102, 102, 102, 0.5);
+    --color-apsj-background-dark-55: rgba(85, 85, 85, 0.5);
+    --color-apsj-background-dark-54: rgba(68, 68, 68, 0.5);
+    --color-apsj-background-dark-53: rgba(51, 51, 51, 0.5);
+    --color-apsj-background-dark-52: rgba(34, 34, 34, 0.5);
+    --color-apsj-background-dark-51: rgba(17, 17, 17, 0.5);
+    --color-apsj-background-dark-50: rgba(0, 0, 0, 0.5);
+    --color-apsj-box-shadow: rgba(0, 0, 0, 0.33);
+    --color-apsj-border-cyan: rgb(0, 136, 195);
+    --color-apsj-border-purple: rgb(120, 103, 255);
+    --color-apsj-border-blue: rgb(1, 86, 255);
+    --color-apsj-border-green: rgb(0, 192, 0);
+    --color-apsj-border-yellow: rgb(246, 190, 7);
+    --color-apsj-border-orange: rgb(255, 160, 0);
+    --color-apsj-border-red: rgb(160, 0, 0);
+    --color-apsj-border-cyan-dark: rgb(0, 106, 165);
+    --color-apsj-border-purple-dark: rgb(90, 73, 225);
+    --color-apsj-border-blue-dark: rgb(0, 56, 225);
+    --color-apsj-border-green-dark: rgb(0, 162, 0);
+    --color-apsj-border-yellow-dark: rgb(216, 160, 0);
+    --color-apsj-border-orange-dark: rgb(225, 130, 0);
+    --color-apsj-border-red-dark: rgb(130, 0, 0);
+    --color-apsj-theme-blue: rgba(18, 69, 170, 0.75);
+    --color-apsj-theme-cyan: rgba(7, 103, 144, 0.75);
+    --color-apsj-theme-green: rgba(0, 128, 0, 0.75);
+    --color-apsj-theme-none: rgba(0, 0, 0, 0, 0.75);
+    --color-apsj-theme-orange: rgba(255, 128, 0, 0.75);
+    --color-apsj-theme-purple: rgba(52, 26, 255, 0.75);
+    --color-apsj-theme-red: rgba(128, 0, 0, 0.75);
+    --color-apsj-theme-yellow: rgba(214, 150, 0, 0.75);
+    --font-apsj-awesome: 'FontAwesome';
+    --font-apsj-bookinsanity: 'Bookinsanity', serif;
+    --font-apsj-dungeon: 'DungeonDropCase', serif;
+    --font-apsj-modesto: 'Modesto Condensed', 'Palatino Linotype', serif;
+    --font-apsj-mreaves: 'MrEaves', serif;
+    --font-apsj-scalysans: 'ScalySans', sans-serif;
+    --font-apsj-scalycaps: 'ScalySansCaps', sans-serif;
+    --font-apsj-signika: 'Signika', sans-serif;
+    --apsj-parchment-aged: url('/modules/monks-enhanced-journal/assets/apsjournal/parchment.webp');
+    --apsj-parchment-medium: url('/modules/monks-enhanced-journal/assets/apsjournal/parchment-medium.webp');
+}
+
+/**
+* Color Themes
+**/
+
+:root.blue {
+    --color-apsj-primary-light: rgb(78, 129, 230);
+    --color-apsj-primary: rgb(18, 69, 170);
+    --color-apsj-primary-dark: rgb(0, 49, 150);
+    --color-apsj-background-primary: rgba(18, 69, 170, 0.75);
+    --color-apsj-background-primary-dark: rgba(0, 49, 150, 0.75);
+    --color-apsj-border-primary-light: rgb(61, 146, 255);
+    --color-apsj-border-primary: rgb(1, 86, 255);
+    --color-apsj-border-primary-dark: rgb(0, 66, 235);
+}
+
+:root.cyan {
+    --color-apsj-primary-light: rgb(67, 163, 204);
+    --color-apsj-primary: rgb(7, 103, 144);
+    --color-apsj-primary-dark: rgb(0, 83, 124);
+    --color-apsj-background-primary: rgba(7, 103, 144, 0.75);
+    --color-apsj-background-primary-dark: rgba(0, 83, 124, 0.75);
+    --color-apsj-border-primary-light: rgb(60, 196, 255);
+    --color-apsj-border-primary: rgb(0, 136, 195);
+    --color-apsj-border-primary-dark: rgb(0, 116, 175);
+}
+
+:root.green {
+    --color-apsj-primary-light: rgb(60, 188, 60);
+    --color-apsj-primary: rgb(0, 128, 0);
+    --color-apsj-primary-dark: rgb(0, 88, 0);
+    --color-apsj-background-primary: rgba(0, 128, 0, 0.75);
+    --color-apsj-background-primary-dark: rgba(0, 108, 0, 0.75);
+    --color-apsj-border-primary-light: rgb(60, 252, 60);
+    --color-apsj-border-primary: rgb(0, 192, 0);
+    --color-apsj-border-primary-dark: rgb(0, 172, 0);
+}
+
+:root.none {
+    --color-apsj-primary-light: rgb(20, 20, 20);
+    --color-apsj-primary: rgb(0, 0, 0);
+    --color-apsj-primary-dark: rgb(0, 0, 0);
+    --color-apsj-background-primary: rgba(255, 255, 255, 0);
+    --color-apsj-background-primary-dark: rgba(235, 235, 235, 0);
+    --color-apsj-border-primary-light: rgb(255, 255, 255);
+    --color-apsj-border-primary: rgb(255, 255, 255);
+    --color-apsj-border-primary-dark: rgb(235, 235, 235);
+}
+
+:root.orange {
+    --color-apsj-primary-light: rgb(255, 188, 60);
+    --color-apsj-primary: rgb(255, 128, 0);
+    --color-apsj-primary-dark: rgb(235, 108, 0);
+    --color-apsj-background-primary: rgba(255, 128, 0, 0.75);
+    --color-apsj-background-primary-dark: rgba(235, 108, 0, 0.75);
+    --color-apsj-border-primary-light: rgb(255, 220, 60);
+    --color-apsj-border-primary: rgb(255, 160, 0);
+    --color-apsj-border-primary-dark: rgb(235, 140, 0);
+}
+
+:root.purple {
+    --color-apsj-primary-light: rgb(112, 86, 255);
+    --color-apsj-primary: rgb(52, 26, 255);
+    --color-apsj-primary-dark: rgb(32, 6, 235);
+    --color-apsj-background-primary: rgba(52, 26, 255, 0.75);
+    --color-apsj-background-primary-dark: rgba(32, 6, 235, 0.75);
+    --color-apsj-border-primary-light: rgb(180, 163, 255);
+    --color-apsj-border-primary: rgb(120, 103, 255);
+    --color-apsj-border-primary-dark: rgb(100, 83, 235);
+}
+
+:root.yellow {
+    --color-apsj-primary-light: rgb(255, 210, 60);
+    --color-apsj-primary: rgb(214, 150, 0);
+    --color-apsj-primary-dark: rgb(194, 130, 0);
+    --color-apsj-background-primary: rgba(214, 150, 0, 0.75);
+    --color-apsj-background-primary-dark: rgba(194, 130, 0, 0.75);
+    --color-apsj-border-primary-light: rgb(255, 250, 67);
+    --color-apsj-border-primary: rgb(246, 190, 7);
+    --color-apsj-border-primary-dark: rgb(226, 170, 0);
+}
+
+/**
+* Core Style Overrides
+**/
+
+.editor-content table tbody tr td {
+    padding: 0 15px;
+}
+
+.editor-content table tbody tr td:first-child {
+    white-space: nowrap;
+}
+
+.editor-content blockquote {
+    margin-bottom: 1.5em;
+}
+
+.editor-content {
+    padding-right: 5px;
+    overflow-x: hidden;
+}
+
+li > .entity-link {
+    line-height: 1.75em;
+}
+
+table {
+    width: 90%;
+    margin: 1em 5%;
+}
+
+table thead,
+table tfoot {
+    color: var(--color-apsj-light-0);
+    background: var(--color-apsj-background-primary);
+    font-family: var(--font-apsj-scalycaps);
+    font-weight: 700;
+    text-shadow: 1px 1px 2px var(--color-apsj-dark-0);
+}
+
+table thead a.hyperlink,
+table tfoot a.hyperlink {
+    color: var(--color-apsj-border-yellow);
+}
+
+tbody tr td {
+    font-family: var(--font-apsj-scalysans);
+    font-weight: 400;
+}
+
+a.entity-link,
+a.content-link,
+a.inline-roll {
+    padding: 3px;
+    color: var(--color-apsj-light-0);
+    font-family: var(--font-apsj-scalysans);
+    font-weight: 700;
+    line-height: 1.5em;
+    border: 1px solid var(--color-apsj-dark-0);
+    border-radius: 0.35em;
+    background: linear-gradient( var(--color-apsj-primary), var(--color-apsj-primary-light), var(--color-apsj-primary-dark) );
+    text-shadow: 1px 1px 2px var(--color-apsj-dark-0);
+}
+
+a.entity-link i,
+a.content-link i,
+a.inline-roll i {
+    color: var(--color-apsj-light-0);
+}
+
+/**
+* V10 Journal Overrides
+**/
+
+.sheet.journal-entry .pages-list .directory-item.active {
+    background: var(--color-apsj-background-primary);
+    box-shadow: 0px 3px 15px var(--color-apsj-background-dark-50);
+}
+
+.sheet.journal-entry .pages-list .directory-item.active:first-of-type {
+    border-top: 1px solid var(--color-apsj-border-primary);
+}
+
+.sheet.journal-entry .pages-list .directory-item.active:last-of-type {
+    border-bottom: 1px solid var(--color-apsj-border-primary-dark);
+}
+
+.sheet.journal-entry .pages-list .directory-item:not(.active) {
+    background: var(--color-apsj-background-primary-dark);
+}
+
+.sheet.journal-entry .pages-list .directory-item:not(.active) {
+    border-top: 1px solid var(--color-apsj-border-primary);
+}
+
+.sheet.journal-entry .pages-list .directory-item.active + :not(.active),
+.sheet.journal-entry .pages-list .directory-item:not(.active) + .active {
+    border-top: 1px solid var(--color-apsj-border-primary-light);
+}
+
+.journal-sheet .journal-header .title {
+    font-family: var(--font-apsj-modesto);
+    font-weight: 700;
+    font-size: 4em;
+    padding: 5px;
+    height: 60px;
+    color: var(--color-apsj-light-0);
+    text-shadow: 1px 1px 2px var(--color-apsj-dark-0);
+    background: var(--color-apsj-background-primary);
+}
+
+/**
+* MEJ Overrides
+**/
+
+.monks-enhanced-journal .tab-bar .journal-tab.active {
+    background: rgba(255, 255, 240, 0.8) !important;
+}
+
+.monks-enhanced-journal .tab-bar .journal-tab.active:hover {
+    background: rgba(255, 255, 255, 1) !important;
+}
+
+.monks-journal-sheet.sheet .currency-group .form-fields input {
+    background: rgba(255, 255, 255, 0.6);
+}
+
+.monks-enhanced-journal .tab-bar.flexrow {
+    background-color: var(--color-apsj-background-primary);
+}
+
+.monks-enhanced-journal .directory-sidebar {
+    background: transparent !important;
+    border-left: 0px transparent;
+}
+
+#journal-directory li.journalentry .document-name {
+    background: var(--color-apsj-background-primary);
+    color: var(--color-apsj-light-0);
+}
+
+.directory .directory-item:last-child {
+    box-shadow: 0px 3px 15px var(--color-apsj-background-dark-50);
+}
+
+.monks-enhanced-journal .tab-bar .tab-button {
+    color: var(--color-apsj-dark-0);
+    opacity: 1 !important;
+}
+
+.monks-enhanced-journal .tab-bar .tab-button.sidebar-toggle,
+.monks-enhanced-journal .tab-bar .tab-button.tab-add,
+.monks-enhanced-journal .header-search.flexrow {
+    color: var(--color-apsj-light-0);
+    text-shadow: 2px 3px 5px rgba(0, 0, 0, 0.5);
+}
+
+.monks-enhanced-journal .mainbar .navigation {
+    background-color: rgba(0, 0, 0, 0.4);
+}
+
+.monks-enhanced-journal .mainbar .bookmark-bar {
+    background: var(--color-apsj-background-primary) !important;
+}
+
+.monks-enhanced-journal .mainbar .navigation .nav-button:hover,
+.monks-enhanced-journal
+.mainbar
+.bookmark-bar
+.bookmark-button.add-bookmark:hover {
+    background: rgba(255, 255, 255, 1) !important;
+}
+
+.monks-enhanced-journal .mainbar .navigation .nav-input,
+.monks-enhanced-journal .bookmark-bar .bookmark-button.add-bookmark:hover {
+    background: var(--color-apsj-background-light-50);
+}
+
+.monks-enhanced-journal .bookmark-bar .bookmark-button.add-bookmark,
+.monks-enhanced-journal .editor-edit {
+    background: rgba(255, 255, 240, 0.8);
+}
+
+.monks-enhanced-journal
+.sidebar-tab.directory
+.directory-item.journalentry
+.permissions {
+    line-height: 20px;
+}
+
+.monks-enhanced-journal .sidebar-directory .action-buttons button,
+.monks-enhanced-journal footer.navigation .nav-button.navigate {
+    background: var(--color-apsj-background-primary);
+    color: var(--color-apsj-light-0);
+    box-shadow: 0px 0px 8px var(--color-apsj-background-dark-50);
+}
+
+.monks-enhanced-journal .sidebar-directory .action-buttons button:hover,
+.monks-enhanced-journal footer.navigation .nav-button.navigate:hover {
+    color: var(--color-apsj-light-1);
+    box-shadow: 0 0 8px red;
+}
+
+.monks-enhanced-journal footer.navigation .nav-button.navigate.disabled,
+.monks-enhanced-journal footer.navigation .nav-button.navigate.disabled:hover {
+    background: var(--color-apsj-background-primary-dark);
+    color: var(--color-apsj-light-5);
+    box-shadow: 0px 0px 8px var(--color-apsj-background-dark-50);
+}
+
+/**
+* Stylish Text
+**/
+
+.apsj-title {
+    font-family: var(--font-apsj-modesto);
+    font-weight: 700;
+    font-size: 3em;
+}
+
+.sheet.journal-entry .journal-entry-page h1 {
+    font-family: var(--font-apsj-modesto);
+    font-weight: 700;
+    font-size: 3em;
+    border-bottom: 2px solid var(--color-apsj-border-primary-dark);
+}
+
+.apsj-h2 {
+    font-family: var(--font-apsj-scalycaps);
+    font-weight: 700;
+    font-size: 1.5em;
+    border-bottom: 2px solid;
+}
+
+.apsj-data {
+    font-family: var(--font-apsj-scalysans);
+    font-weight: 300;
+    font-size: 1em;
+}
+
+/**
+* Stylish Blocks
+**/
+
+.apsj-block {
+    margin: 1em;
+    padding: 1em;
+    width: 90%;
+}
+
+.apsj-dialogue {
+    margin: 1em 2em;
+}
+
+.apsj-block-contents {
+    display: flex;
+    flex: 1;
+    gap: 1em;
+    flex-wrap: wrap;
+}
+
+.apsj-block-contents > main {
+    flex: 4;
+}
+
+.apsj-block-contents > aside {
+    flex: 2;
+}
+
+.apsj-block h1 {
+    font-family: var(--font-apsj-modesto);
+    font-weight: 700;
+    text-shadow: 1px 1px 2px var(--color-apsj-dark-0);
+}
+
+.apsj-block h2,
+.apsj-block h3,
+.apsj-block h4,
+.apsj-block h5,
+.apsj-block h6 {
+    font-family: var(--font-apsj-mreaves);
+    font-weight: 700;
+    text-shadow: 1px 1px 2px var(--color-apsj-dark-0);
+}
+
+.apsj-block.apsj-card img,
+.apsj-block.apsj-scroll img {
+    border: none;
+    height: 150px;
+    width: auto;
+}
+
+.apsj-block.black-item img,
+.apsj-block.blue-item img,
+.apsj-block.cyan-item img,
+.apsj-block.green-item img,
+.apsj-block.orange-item img,
+.apsj-block.purple-item img,
+.apsj-block.red-item img,
+.apsj-block.yellow-item img {
+    border: none;
+    height: 180px;
+    width: auto;
+}
+
+.apsj-block.apsj-card,
+.apsj-block.purple-item {
+    color: var(--color-apsj-light-0);
+    border: 2px solid rgb(120, 103, 255);
+    border-radius: 0.5em;
+    background: url('/modules/monks-enhanced-journal/assets/apsjournal/purple-item-bg.webp') no-repeat center;
+    background-size: cover;
+    box-shadow: 0 0 5px var(--color-apsj-dark-0);
+}
+
+.apsj-card-aside {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: url('/modules/monks-enhanced-journal/assets/apsjournal/cards.webp') no-repeat center;
+    min-height: 270px;
+    min-width: 270px;
+}
+
+.apsj-purple-item {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: url('/modules/monks-enhanced-journal/assets/apsjournal/purple-item.webp') no-repeat center;
+    min-height: 270px;
+    min-width: 270px;
+}
+
+.apsj-block.apsj-card h1,
+.apsj-block.apsj-card h2,
+.apsj-block.apsj-card h3,
+.apsj-block.apsj-card h4,
+.apsj-block.apsj-card h5,
+.apsj-block.apsj-card h6,
+.apsj-block.purple-item h1,
+.apsj-block.purple-item h2,
+.apsj-block.purple-item h3,
+.apsj-block.purple-item h4,
+.apsj-block.purple-item h5,
+.apsj-block.purple-item h6 {
+    color: var(--color-apsj-light-0);
+    text-shadow: 1px 1px 2px var(--color-apsj-dark-0);
+    border-bottom: 2px solid rgb(120, 103, 255);
+}
+
+.apsj-block.apsj-card .apsj-text,
+.apsj-block.purple-item .apsj-text {
+    color: var(--color-apsj-light-0);
+}
+
+.apsj-block.apsj-card hr,
+.apsj-block.purple-item hr {
+    color: var(--color-apsj-border-blue);
+    text-shadow: 1px 1px 2px var(--color-apsj-dark-0);
+    border-bottom: 2px solid rgb(120, 103, 255);
+}
+
+.apsj-block.apsj-card a.entity-link,
+.apsj-block.apsj-card a.content-link,
+.apsj-block.apsj-card a.inline-roll,
+.apsj-block.purple-item a.entity-link,
+.apsj-block.purple-item a.content-link,
+.apsj-block.purple-item a.inline-roll {
+    color: var(--color-apsj-light-0);
+    border: 1px solid rgb(120, 103, 255);
+    text-shadow: 1px 1px 2px var(--color-apsj-dark-0);
+}
+
+.apsj-block.apsj-card a.entity-link i,
+.apsj-block.apsj-card a.content-link i,
+.apsj-block.apsj-card a.inline-roll i,
+.apsj-block.purple-item a.entity-link i,
+.apsj-block.purple-item a.content-link i,
+.apsj-block.purple-item a.inline-roll i {
+    color: var(--color-apsj-background-light-0);
+}
+
+.apsj-block.apsj-card a:hover,
+.apsj-block.purple-item a:hover {
+    text-shadow: 0 0 8px var(--color-apsj-border-blue);
+}
+
+.apsj-block.apsj-scroll,
+.apsj-block.green-item {
+    color: var(--color-apsj-light-0);
+    border: 2px solid var(--color-apsj-border-green);
+    border-radius: 0.5em;
+    background: url('/modules/monks-enhanced-journal/assets/apsjournal/green-item-bg.webp') no-repeat center;
+    background-size: cover;
+    box-shadow: 0 0 5px var(--color-apsj-dark-0);
+}
+
+.apsj-scroll-aside {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: url('/modules/monks-enhanced-journal/assets/apsjournal/scroll.webp') no-repeat center;
+    min-height: 270px;
+    min-width: 270px;
+}
+
+.apsj-green-item {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: url('/modules/monks-enhanced-journal/assets/apsjournal/green-item.webp') no-repeat center;
+    min-height: 270px;
+    min-width: 270px;
+}
+
+.apsj-block.apsj-scroll h1,
+.apsj-block.apsj-scroll h2,
+.apsj-block.apsj-scroll h3,
+.apsj-block.apsj-scroll h4,
+.apsj-block.apsj-scroll h5,
+.apsj-block.apsj-scroll h6,
+.apsj-block.green-item h1,
+.apsj-block.green-item h2,
+.apsj-block.green-item h3,
+.apsj-block.green-item h4,
+.apsj-block.green-item h5,
+.apsj-block.green-item h6 {
+    color: var(--color-apsj-light-0);
+    text-shadow: 1px 1px 2px var(--color-apsj-dark-0);
+    border-bottom: 2px solid var(--color-apsj-border-green);
+}
+
+.apsj-block.apsj-scroll .apsj-text,
+.apsj-block.green-item .apsj-text {
+    color: var(--color-apsj-light-0);
+}
+
+.apsj-block.apsj-scroll hr,
+.apsj-block.green-item hr {
+    color: var(--color-apsj-border-blue);
+    text-shadow: 1px 1px 2px var(--color-apsj-dark-0);
+    border-bottom: 2px solid var(--color-apsj-border-green);
+}
+
+.apsj-block.apsj-scroll a.entity-link,
+.apsj-block.apsj-scroll a.content-link,
+.apsj-block.apsj-scroll a.inline-roll,
+.apsj-block.green-item a.entity-link,
+.apsj-block.green-item a.content-link,
+.apsj-block.green-item a.inline-roll {
+    color: var(--color-apsj-light-0);
+    border: 1px solid var(--color-apsj-border-green);
+    text-shadow: 1px 1px 2px var(--color-apsj-dark-0);
+}
+
+.apsj-block.apsj-scroll a.entity-link i,
+.apsj-block.apsj-scroll a.content-link i,
+.apsj-block.apsj-scroll a.inline-roll i,
+.apsj-block.green-item a.entity-link i,
+.apsj-block.green-item a.content-link i,
+.apsj-block.green-item a.inline-roll i {
+    color: var(--color-apsj-background-light-0);
+}
+
+.apsj-block.apsj-scroll a:hover,
+.apsj-block.green-item a:hover {
+    text-shadow: 0 0 8px var(--color-apsj-border-green);
+}
+
+.apsj-block.black-item {
+    color: var(--color-apsj-light-0);
+    border: 2px solid var(--color-apsj-light-7);
+    border-radius: 0.5em;
+    background: url('/modules/monks-enhanced-journal/assets/apsjournal/black-item-bg.webp') no-repeat center;
+    background-size: cover;
+    box-shadow: 0 0 5px var(--color-apsj-dark-0);
+}
+
+.apsj-black-item {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: url('/modules/monks-enhanced-journal/assets/apsjournal/black-item.webp') no-repeat center;
+    min-height: 270px;
+    min-width: 270px;
+}
+
+.apsj-block.black-item h1,
+.apsj-block.black-item h2,
+.apsj-block.black-item h3,
+.apsj-block.black-item h4,
+.apsj-block.black-item h5,
+.apsj-block.black-item h6 {
+    color: var(--color-apsj-light-0);
+    text-shadow: 1px 1px 2px var(--color-apsj-dark-0);
+    border-bottom: 2px solid var(--color-apsj-light-7);
+}
+
+.apsj-block.black-item .apsj-text {
+    color: var(--color-apsj-light-0);
+}
+
+.apsj-block.black-item hr {
+    color: var(--color-apsj-border-light);
+    text-shadow: 1px 1px 2px var(--color-apsj-dark-0);
+    border-bottom: 2px solid var(--color-apsj-light-7);
+}
+
+.apsj-block.black-item a.entity-link,
+.apsj-block.black-item a.content-link,
+.apsj-block.black-item a.inline-roll {
+    color: var(--color-apsj-light-0);
+    border: 1px solid var(--color-apsj-light-7);
+    text-shadow: 1px 1px 2px var(--color-apsj-dark-0);
+}
+
+.apsj-block.black-item a.entity-link i,
+.apsj-block.black-item a.content-link i,
+.apsj-block.black-item a.inline-roll i {
+    color: var(--color-apsj-background-light-0);
+}
+
+.apsj-block.black-item a:hover {
+    text-shadow: 0 0 8px var(--color-apsj-light-7);
+}
+
+.apsj-block.blue-item {
+    color: var(--color-apsj-light-0);
+    border: 2px solid var(--color-apsj-border-blue);
+    border-radius: 0.5em;
+    background: url('/modules/monks-enhanced-journal/assets/apsjournal/blue-item-bg.webp') no-repeat center;
+    background-size: cover;
+    box-shadow: 0 0 5px var(--color-apsj-dark-0);
+}
+
+.apsj-blue-item {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: url('/modules/monks-enhanced-journal/assets/apsjournal/blue-item.webp') no-repeat center;
+    min-height: 270px;
+    min-width: 270px;
+}
+
+.apsj-block.blue-item h1,
+.apsj-block.blue-item h2,
+.apsj-block.blue-item h3,
+.apsj-block.blue-item h4,
+.apsj-block.blue-item h5,
+.apsj-block.blue-item h6 {
+    color: var(--color-apsj-light-0);
+    text-shadow: 1px 1px 2px var(--color-apsj-dark-0);
+    border-bottom: 2px solid var(--color-apsj-border-blue);
+}
+
+.apsj-block.blue-item .apsj-text {
+    color: var(--color-apsj-light-0);
+}
+
+.apsj-block.blue-item hr {
+    color: var(--color-apsj-border-blue);
+    text-shadow: 1px 1px 2px var(--color-apsj-dark-0);
+    border-bottom: 2px solid var(--color-apsj-border-blue);
+}
+
+.apsj-block.blue-item a.entity-link,
+.apsj-block.blue-item a.content-link,
+.apsj-block.blue-item a.inline-roll {
+    color: var(--color-apsj-light-0);
+    border: 1px solid var(--color-apsj-border-blue);
+    text-shadow: 1px 1px 2px var(--color-apsj-dark-0);
+}
+
+.apsj-block.blue-item a.entity-link i,
+.apsj-block.blue-item a.content-link i,
+.apsj-block.blue-item a.inline-roll i {
+    color: var(--color-apsj-background-light-0);
+}
+
+.apsj-block.blue-item a:hover {
+    text-shadow: 0 0 8px var(--color-apsj-border-blue);
+}
+
+.apsj-block.cyan-item {
+    color: var(--color-apsj-light-0);
+    border: 2px solid var(--color-apsj-border-cyan);
+    border-radius: 0.5em;
+    background: url('/modules/monks-enhanced-journal/assets/apsjournal/cyan-item-bg.webp') no-repeat center;
+    background-size: cover;
+    box-shadow: 0 0 5px var(--color-apsj-dark-0);
+}
+
+.apsj-cyan-item {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: url('/modules/monks-enhanced-journal/assets/apsjournal/cyan-item.webp') no-repeat center;
+    min-height: 270px;
+    min-width: 270px;
+}
+
+.apsj-block.cyan-item h1,
+.apsj-block.cyan-item h2,
+.apsj-block.cyan-item h3,
+.apsj-block.cyan-item h4,
+.apsj-block.cyan-item h5,
+.apsj-block.cyan-item h6 {
+    color: var(--color-apsj-light-0);
+    text-shadow: 1px 1px 2px var(--color-apsj-dark-0);
+    border-bottom: 2px solid var(--color-apsj-border-cyan);
+}
+
+.apsj-block.cyan-item .apsj-text {
+    color: var(--color-apsj-light-0);
+}
+
+.apsj-block.cyan-item hr {
+    color: var(--color-apsj-border-cyan);
+    text-shadow: 1px 1px 2px var(--color-apsj-dark-0);
+    border-bottom: 2px solid var(--color-apsj-border-cyan);
+}
+
+.apsj-block.cyan-item a.entity-link,
+.apsj-block.cyan-item a.content-link,
+.apsj-block.cyan-item a.inline-roll {
+    color: var(--color-apsj-light-0);
+    border: 1px solid var(--color-apsj-border-cyan);
+    text-shadow: 1px 1px 2px var(--color-apsj-dark-0);
+}
+
+.apsj-block.cyan-item a.entity-link i,
+.apsj-block.cyan-item a.content-link i,
+.apsj-block.cyan-item a.inline-roll i {
+    color: var(--color-apsj-background-light-0);
+}
+
+.apsj-block.cyan-item a:hover {
+    text-shadow: 0 0 8px var(--color-apsj-border-cyan);
+}
+
+.apsj-block.orange-item {
+    color: var(--color-apsj-light-0);
+    border: 2px solid var(--color-apsj-border-orange);
+    border-radius: 0.5em;
+    background: url('/modules/monks-enhanced-journal/assets/apsjournal/orange-item-bg.webp') no-repeat center;
+    background-size: cover;
+    box-shadow: 0 0 5px var(--color-apsj-dark-0);
+}
+
+.apsj-orange-item {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: url('/modules/monks-enhanced-journal/assets/apsjournal/orange-item.webp') no-repeat center;
+    min-height: 270px;
+    min-width: 270px;
+}
+
+.apsj-block.orange-item h1,
+.apsj-block.orange-item h2,
+.apsj-block.orange-item h3,
+.apsj-block.orange-item h4,
+.apsj-block.orange-item h5,
+.apsj-block.orange-item h6 {
+    color: var(--color-apsj-light-0);
+    text-shadow: 1px 1px 2px var(--color-apsj-dark-0);
+    border-bottom: 2px solid var(--color-apsj-border-orange);
+}
+
+.apsj-block.orange-item .apsj-text {
+    color: var(--color-apsj-light-0);
+}
+
+.apsj-block.orange-item hr {
+    color: var(--color-apsj-border-orange);
+    text-shadow: 1px 1px 2px var(--color-apsj-dark-0);
+    border-bottom: 2px solid var(--color-apsj-border-orange);
+}
+
+.apsj-block.orange-item a.entity-link,
+.apsj-block.orange-item a.content-link,
+.apsj-block.orange-item a.inline-roll {
+    color: var(--color-apsj-light-0);
+    border: 1px solid var(--color-apsj-border-orange);
+    text-shadow: 1px 1px 2px var(--color-apsj-dark-0);
+}
+
+.apsj-block.orange-item a.entity-link i,
+.apsj-block.orange-item a.content-link i,
+.apsj-block.orange-item a.inline-roll i {
+    color: var(--color-apsj-background-light-0);
+}
+
+.apsj-block.orange-item a:hover {
+    text-shadow: 0 0 8px var(--color-apsj-border-orange);
+}
+
+.apsj-block.red-item {
+    color: var(--color-apsj-light-0);
+    border: 2px solid var(--color-apsj-border-primary);
+    border-radius: 0.5em;
+    background: url('/modules/monks-enhanced-journal/assets/apsjournal/red-item-bg.webp') no-repeat center;
+    background-size: cover;
+    box-shadow: 0 0 5px var(--color-apsj-dark-0);
+}
+
+.apsj-red-item {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: url('/modules/monks-enhanced-journal/assets/apsjournal/red-item.webp') no-repeat center;
+    min-height: 270px;
+    min-width: 270px;
+}
+
+.apsj-block.red-item h1,
+.apsj-block.red-item h2,
+.apsj-block.red-item h3,
+.apsj-block.red-item h4,
+.apsj-block.red-item h5,
+.apsj-block.red-item h6 {
+    color: var(--color-apsj-light-0);
+    text-shadow: 1px 1px 2px var(--color-apsj-dark-0);
+    border-bottom: 2px solid var(--color-apsj-border-primary);
+}
+
+.apsj-block.red-item .apsj-text {
+    color: var(--color-apsj-light-0);
+}
+
+.apsj-block.red-item hr {
+    color: var(--color-apsj-border-primary);
+    text-shadow: 1px 1px 2px var(--color-apsj-dark-0);
+    border-bottom: 2px solid var(--color-apsj-border-primary);
+}
+
+.apsj-block.red-item a.entity-link,
+.apsj-block.red-item a.content-link,
+.apsj-block.red-item a.inline-roll {
+    color: var(--color-apsj-light-0);
+    border: 1px solid var(--color-apsj-border-primary);
+    text-shadow: 1px 1px 2px var(--color-apsj-dark-0);
+}
+
+.apsj-block.red-item a.entity-link i,
+.apsj-block.red-item a.content-link i,
+.apsj-block.red-item a.inline-roll i {
+    color: var(--color-apsj-background-light-0);
+}
+
+.apsj-block.red-item a:hover {
+    text-shadow: 0 0 8px var(--color-apsj-border-primary);
+}
+
+.apsj-block.yellow-item {
+    color: var(--color-apsj-light-0);
+    border: 2px solid var(--color-apsj-border-yellow);
+    border-radius: 0.5em;
+    background: url('/modules/monks-enhanced-journal/assets/apsjournal/yellow-item-bg.webp') no-repeat center;
+    background-size: cover;
+    box-shadow: 0 0 5px var(--color-apsj-dark-0);
+}
+
+.apsj-yellow-item {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: url('/modules/monks-enhanced-journal/assets/apsjournal/yellow-item.webp') no-repeat center;
+    min-height: 270px;
+    min-width: 270px;
+}
+
+.apsj-block.yellow-item h1,
+.apsj-block.yellow-item h2,
+.apsj-block.yellow-item h3,
+.apsj-block.yellow-item h4,
+.apsj-block.yellow-item h5,
+.apsj-block.yellow-item h6 {
+    color: var(--color-apsj-light-0);
+    text-shadow: 1px 1px 2px var(--color-apsj-dark-0);
+    border-bottom: 2px solid var(--color-apsj-border-yellow);
+}
+
+.apsj-block.yellow-item .apsj-text {
+    color: var(--color-apsj-light-0);
+}
+
+.apsj-block.yellow-item hr {
+    color: var(--color-apsj-border-yellow);
+    text-shadow: 1px 1px 2px var(--color-apsj-dark-0);
+    border-bottom: 2px solid var(--color-apsj-border-yellow);
+}
+
+.apsj-block.yellow-item a.entity-link,
+.apsj-block.yellow-item a.content-link,
+.apsj-block.yellow-item a.inline-roll {
+    color: var(--color-apsj-light-0);
+    border: 1px solid var(--color-apsj-border-yellow);
+    text-shadow: 1px 1px 2px var(--color-apsj-dark-0);
+}
+
+.apsj-block.yellow-item a.entity-link i,
+.apsj-block.yellow-item a.content-link i,
+.apsj-block.yellow-item a.inline-roll i {
+    color: var(--color-apsj-background-light-0);
+}
+
+.apsj-block.yellow-item a:hover {
+    text-shadow: 0 0 8px var(--color-apsj-border-yellow);
+}
+
+.apsj-block.apsj-encounter {
+    color: var(--color-apsj-light-0);
+    border: 2px solid var(--color-apsj-border-red);
+    border-radius: 0.5em;
+    background: url('/modules/monks-enhanced-journal/assets/apsjournal/parchment-bloody.webp') no-repeat;
+    background-size: cover;
+    box-shadow: 0 0 3px var(--color-apsj-dark-0);
+}
+
+.apsj-ra-icon {
+    float: left;
+    margin: 0 8px 0 -25px;
+}
+
+.apsj-block.apsj-read-aloud {
+    border: 2px solid var(--color-apsj-border-primary);
+    border-radius: 0.5em;
+    background: linear-gradient( var(--color-apsj-background-light-50), var(--color-apsj-background-dark-54) );
+    box-shadow: 0 0 5px var(--color-apsj-dark-0);
+}
+
+.apsj-ra-icon::before {
+    font-family: var(--font-apsj-awesome);
+    font-weight: 900;
+    font-size: xxx-large;
+    color: var(--color-apsj-primary);
+    text-shadow: 1px 1px 2px var(--color-apsj-dark-0);
+    content: '\f4ad';
+}
+
+.apsj-icon-right::before {
+    float: right;
+    margin: 0 -3.5em 0 0;
+    padding: 0 5px;
+}
+
+.apsj-icon-left::before {
+    float: left;
+    margin: 0 0 0 -3.5em;
+    padding: 0 5px;
+}
+
+.apsj-block.apsj-dialogue {
+    background: linear-gradient( var(--color-apsj-background-light-50), var(--color-apsj-background-dark-54) );
+    box-shadow: 0 0 5px var(--color-apsj-dark-0);
+}
+
+.apsj-block.apsj-dialogue.apsj-blue {
+    border: 3px solid var(--color-apsj-border-blue);
+    border-image-slice: 1;
+    border-width: 3px;
+    border-image-source: linear-gradient( to left, var(--color-apsj-border-blue), var(--color-apsj-background-blue) );
+}
+
+.apsj-icon-right.apsj-blue::before {
+    content: url('/modules/monks-enhanced-journal/assets/apsjournal/dialogue-icon-right-blue.webp');
+}
+
+.apsj-icon-left.apsj-blue::before {
+    content: url('/modules/monks-enhanced-journal/assets/apsjournal/dialogue-icon-left-blue.webp');
+}
+
+.apsj-block.apsj-dialogue.apsj-blue .apsj-h2 {
+    border-bottom: 2px solid var(--color-apsj-border-blue);
+    border-image-slice: 1;
+    border-width: 2px;
+    border-image-source: linear-gradient( to left, var(--color-apsj-border-blue), var(--color-apsj-background-blue) );
+}
+
+.apsj-block.apsj-dialogue.apsj-cyan {
+    border: 3px solid var(--color-apsj-border-cyan);
+    border-image-slice: 1;
+    border-width: 3px;
+    border-image-source: linear-gradient( to left, var(--color-apsj-border-cyan), var(--color-apsj-background-cyan) );
+}
+
+.apsj-icon-right.apsj-cyan::before {
+    content: url('/modules/monks-enhanced-journal/assets/apsjournal/dialogue-icon-right-cyan.webp');
+}
+
+.apsj-icon-left.apsj-cyan::before {
+    content: url('/modules/monks-enhanced-journal/assets/apsjournal/dialogue-icon-left-cyan.webp');
+}
+
+.apsj-block.apsj-dialogue.apsj-cyan .apsj-h2 {
+    border-bottom: 2px solid var(--color-apsj-border-cyan);
+    border-image-slice: 1;
+    border-width: 2px;
+    border-image-source: linear-gradient( to left, var(--color-apsj-border-cyan), var(--color-apsj-background-cyan) );
+}
+
+.apsj-block.apsj-dialogue.apsj-green {
+    border: 3px solid var(--color-apsj-border-green);
+    border-image-slice: 1;
+    border-width: 3px;
+    border-image-source: linear-gradient( to left, var(--color-apsj-border-green), var(--color-apsj-background-green) );
+}
+
+.apsj-icon-right.apsj-green::before {
+    content: url('/modules/monks-enhanced-journal/assets/apsjournal/dialogue-icon-right-green.webp');
+}
+
+.apsj-icon-left.apsj-green::before {
+    content: url('/modules/monks-enhanced-journal/assets/apsjournal/dialogue-icon-left-green.webp');
+}
+
+.apsj-block.apsj-dialogue.apsj-green .apsj-h2 {
+    border-bottom: 2px solid var(--color-apsj-border-green);
+    border-image-slice: 1;
+    border-width: 2px;
+    border-image-source: linear-gradient( to left, var(--color-apsj-border-green), var(--color-apsj-background-green) );
+}
+
+.apsj-block.apsj-dialogue.apsj-orange {
+    border: 3px solid var(--color-apsj-border-orange);
+    border-image-slice: 1;
+    border-width: 3px;
+    border-image-source: linear-gradient( to left, var(--color-apsj-border-orange), var(--color-apsj-background-orange) );
+}
+
+.apsj-icon-right.apsj-orange::before {
+    content: url('/modules/monks-enhanced-journal/assets/apsjournal/dialogue-icon-right-orange.webp');
+}
+
+.apsj-icon-left.apsj-orange::before {
+    content: url('/modules/monks-enhanced-journal/assets/apsjournal/dialogue-icon-left-orange.webp');
+}
+
+.apsj-block.apsj-dialogue.apsj-orange .apsj-h2 {
+    border-bottom: 2px solid var(--color-apsj-border-orange);
+    border-image-slice: 1;
+    border-width: 2px;
+    border-image-source: linear-gradient( to left, var(--color-apsj-border-orange), var(--color-apsj-background-orange) );
+}
+
+.apsj-block.apsj-dialogue.apsj-purple {
+    border: 3px solid var(--color-apsj-border-purple);
+    border-image-slice: 1;
+    border-width: 3px;
+    border-image-source: linear-gradient( to left, var(--color-apsj-border-purple), var(--color-apsj-background-purple) );
+}
+
+.apsj-icon-right.apsj-purple::before {
+    content: url('/modules/monks-enhanced-journal/assets/apsjournal/dialogue-icon-right-purple.webp');
+}
+
+.apsj-icon-left.apsj-purple::before {
+    content: url('/modules/monks-enhanced-journal/assets/apsjournal/dialogue-icon-left-purple.webp');
+}
+
+.apsj-block.apsj-dialogue.apsj-purple .apsj-h2 {
+    border-bottom: 2px solid var(--color-apsj-border-purple);
+    border-image-slice: 1;
+    border-width: 2px;
+    border-image-source: linear-gradient( to left, var(--color-apsj-border-purple), var(--color-apsj-background-purple) );
+}
+
+.apsj-block.apsj-dialogue.apsj-red {
+    border: 3px solid var(--color-apsj-border-red);
+    border-image-slice: 1;
+    border-width: 3px;
+    border-image-source: linear-gradient( to left, var(--color-apsj-border-red), var(--color-apsj-background-red) );
+}
+
+.apsj-icon-right.apsj-red::before {
+    content: url('/modules/monks-enhanced-journal/assets/apsjournal/dialogue-icon-right-red.webp');
+}
+
+.apsj-icon-left.apsj-red::before {
+    content: url('/modules/monks-enhanced-journal/assets/apsjournal/dialogue-icon-left-red.webp');
+}
+
+.apsj-block.apsj-dialogue.apsj-red .apsj-h2 {
+    border-bottom: 2px solid var(--color-apsj-border-red);
+    border-image-slice: 1;
+    border-width: 2px;
+    border-image-source: linear-gradient( to left, var(--color-apsj-border-red), var(--color-apsj-background-red) );
+}
+
+.apsj-block.apsj-dialogue.apsj-yellow {
+    border: 3px solid var(--color-apsj-border-yellow);
+    border-image-slice: 1;
+    border-width: 3px;
+    border-image-source: linear-gradient( to left, var(--color-apsj-border-yellow), var(--color-apsj-background-yellow) );
+}
+
+.apsj-icon-right.apsj-yellow::before {
+    content: url('/modules/monks-enhanced-journal/assets/apsjournal/dialogue-icon-right-yellow.webp');
+}
+
+.apsj-icon-left.apsj-yellow::before {
+    content: url('/modules/monks-enhanced-journal/assets/apsjournal/dialogue-icon-left-yellow.webp');
+}
+
+.apsj-block.apsj-dialogue.apsj-yellow .apsj-h2 {
+    border-bottom: 2px solid var(--color-apsj-border-yellow);
+    border-image-slice: 1;
+    border-width: 2px;
+    border-image-source: linear-gradient( to left, var(--color-apsj-border-yellow), var(--color-apsj-background-yellow) );
+}
+
+/**
+* Stylish Overlays
+**/
+
+.apsj-blue-overlay {
+    margin: 0;
+    padding: 10px;
+    background: linear-gradient( var(--color-apsj-border-blue), var(--color-apsj-background-blue) );
+    border: 2px solid var(--color-apsj-border-blue);
+    border-radius: 0.5em;
+    box-shadow: 0 0 5px var(--color-apsj-dark-0);
+}
+
+.apsj-cyan-overlay {
+    margin: 0;
+    padding: 10px;
+    background: linear-gradient( var(--color-apsj-border-cyan), var(--color-apsj-background-cyan) );
+    border: 2px solid var(--color-apsj-border-cyan);
+    border-radius: 0.5em;
+    box-shadow: 0 0 5px var(--color-apsj-dark-0);
+}
+
+.apsj-green-overlay {
+    margin: 0;
+    padding: 10px;
+    background: linear-gradient( var(--color-apsj-border-green), var(--color-apsj-background-green) );
+    border: 2px solid var(--color-apsj-border-green);
+    border-radius: 0.5em;
+    box-shadow: 0 0 5px var(--color-apsj-dark-0);
+}
+
+.apsj-light-overlay {
+    margin: 0;
+    padding: 10px;
+    color: var(--color-apsj-dark-0);
+    background: linear-gradient( var(--color-apsj-background-light-50), var(--color-apsj-background-dark-54) );
+    border: 2px solid var(--color-apsj-primary);
+    border-radius: 0.5em;
+    box-shadow: 0 0 5px var(--color-apsj-dark-0);
+}
+
+.apsj-light-overlay-bb {
+    margin: 0;
+    padding: 10px;
+    background: linear-gradient( var(--color-apsj-background-light-50), var(--color-apsj-background-dark-54) );
+    border: 2px solid var(--color-apsj-dark-0);
+    border-radius: 0.5em;
+    box-shadow: 0 0 5px var(--color-apsj-dark-0);
+}
+
+.apsj-orange-overlay {
+    margin: 0;
+    padding: 10px;
+    background: linear-gradient( var(--color-apsj-border-orange), var(--color-apsj-background-orange) );
+    border: 2px solid var(--color-apsj-border-orange);
+    border-radius: 0.5em;
+    box-shadow: 0 0 5px var(--color-apsj-dark-0);
+}
+
+.apsj-purple-overlay {
+    margin: 0;
+    padding: 10px;
+    background: linear-gradient( var(--color-apsj-border-purple), var(--color-apsj-background-purple) );
+    border: 2px solid var(--color-apsj-border-purple);
+    border-radius: 0.5em;
+    box-shadow: 0 0 5px var(--color-apsj-dark-0);
+}
+
+.apsj-red-overlay {
+    margin: 0;
+    padding: 10px;
+    background: linear-gradient( var(--color-apsj-border-red), var(--color-apsj-background-red) );
+    border: 2px solid var(--color-apsj-border-red);
+    border-radius: 0.5em;
+    box-shadow: 0 0 5px var(--color-apsj-dark-0);
+}
+
+.apsj-yellow-overlay {
+    margin: 0;
+    padding: 10px;
+    background: linear-gradient( var(--color-apsj-border-yellow), var(--color-apsj-background-yellow) );
+    border: 2px solid var(--color-apsj-border-yellow);
+    border-radius: 0.5em;
+    box-shadow: 0 0 5px var(--color-apsj-dark-0);
+}
+
+/**
+* Stylish Panels
+**/
+
+.apsj-panel {
+    width: 90%;
+    margin: 1em 5%;
+    padding: 6px 8px;
+    line-height: 20px;
+    border: 2px solid var(--color-apsj-light-0);
+    border-radius: 5px;
+    background: var(--color-apsj-background-dark-0);
+    box-shadow: 0px 3px 15px var(--color-apsj-box-shadow);
+    color: var(--color-apsj-light-0);
+    list-style: none;
+    font-family: var(--font-awesome);
+    font-weight: 900;
+    font-size: 1.25em;
+}
+
+.apsj-panel::before {
+    position: relative;
+    margin-right: 8px;
+    float: left;
+}
+
+.apsj-panel header {
+    margin: 0;
+    font-family: var(--font-apsj-scalycaps);
+    font-weight: 700;
+    font-size: 1.5em;
+}
+
+.apsj-panel header p {
+    margin-top: 0;
+}
+
+.apsj-panel.apsj-blue {
+    background: linear-gradient( var(--color-apsj-border-blue), var(--color-apsj-border-blue-dark) );
+}
+
+.apsj-panel.apsj-blue.with-icon::before {
+    content: '\f05a';
+}
+
+.apsj-panel.apsj-cyan {
+    background: linear-gradient( var(--color-apsj-border-cyan), var(--color-apsj-border-cyan-dark) );
+}
+
+.apsj-panel.apsj-cyan.with-icon::before {
+    content: '\f559';
+}
+
+.apsj-panel.apsj-green {
+    background: linear-gradient( var(--color-apsj-border-green), var(--color-apsj-border-green-dark) );
+}
+
+.apsj-panel.apsj-green.with-icon::before {
+    content: '\f51e';
+}
+
+.apsj-panel.apsj-orange {
+    background: linear-gradient( var(--color-apsj-border-orange), var(--color-apsj-border-orange-dark) );
+}
+
+.apsj-panel.apsj-orange.with-icon::before {
+    content: '\f78c';
+}
+
+.apsj-panel.apsj-purple {
+    background: linear-gradient( var(--color-apsj-border-purple), var(--color-apsj-border-purple-dark) );
+}
+
+.apsj-panel.apsj-purple.with-icon::before {
+    content: '\f0d0';
+}
+
+.apsj-panel.apsj-red {
+    background: linear-gradient( var(--color-apsj-border-red), var(--color-apsj-border-red-dark) );
+}
+
+.apsj-panel.apsj-red.with-icon::before {
+    content: '\f06a';
+}
+
+.apsj-panel.apsj-yellow {
+    background: linear-gradient( var(--color-apsj-border-yellow), var(--color-apsj-border-yellow-dark) );
+}
+
+.apsj-panel.apsj-yellow.with-icon::before {
+    content: '\f044';
+}
+
+/**
+* Stylish MEJ Sheets
+**/
+
+.monks-journal-sheet.sheet .items-list .items-header {
+    background: var(--color-apsj-background-primary) !important;
+    color: var(--color-apsj-light-0);
+    box-shadow: 0px 0px 8px var(--color-apsj-background-dark-50);
+}
+
+.monks-journal-sheet .encounter-body {
+    background: url('/modules/monks-enhanced-journal/assets/apsjournal/parchment-bloody.webp') no-repeat center;
+    background-size: cover;
+}
+
+.monks-journal-sheet.sheet .sheet-navigation {
+    color: var(--color-apsj-light-0);
+    text-shadow: 1px 1px 2px var(--color-apsj-dark-0);
+}
+
+.monks-journal-sheet .header-name,
+.monks-journal-sheet .header-name input {
+    color: var(--color-apsj-light-0) !important;
+    text-shadow: 1px 1px 2px var(--color-apsj-dark-0);
+}
+
+.monks-journal-sheet .header-name input {
+    font-family: var(--font-apsj-modesto);
+}
+
+.monks-journal-sheet .header-name input:hover {
+    background-color: var(--color-apsj-background-light-50);
+}
+
+.monks-enhanced-journal
+.sidebar-directory.directory
+.directory-header
+.header-search
+input {
+    background-color: var(--color-apsj-background-light-50);
+}
+
+.monks-enhanced-journal
+.sidebar-directory.directory
+.directory-header
+.header-search
+input:hover,
+.monks-enhanced-journal
+.sidebar-directory.directory
+.directory-header
+.header-search
+input:active,
+.monks-enhanced-journal
+.sidebar-directory.directory
+.directory-header
+.header-search
+input:focus {
+    background-color: var(--color-apsj-background-light-0);
+}
+
+.monks-journal-sheet .journal-subsheet .encounter-buttons > div {
+    color: var(--color-apsj-dark-0);
+    background: rgba(255, 255, 240, 0.8) !important;
+}
+
+.monks-journal-sheet .journal-subsheet .encounter-buttons > div:hover {
+    color: var(--color-apsj-dark-2);
+    background: rgba(255, 255, 255, 1) !important;
+}
+
+.monks-journal-sheet.sheet
+.journal-subsheet
+.items-list
+.item-controls.item-quantity
+input[type='text'],
+.monks-journal-sheet.sheet
+.journal-subsheet
+.items-list
+.item-controls.item-quantity
+input[type='number'],
+.monks-journal-sheet.sheet
+.journal-subsheet
+.items-list
+.item-controls.item-remaining
+input[type='number'],
+.monks-journal-sheet.sheet .items-list .item-from input[type='text'] {
+    background: rgba(255, 255, 240, 0.8);
+    border-color: var(--color-apsj-dark-3) !important;
+}
+
+.monks-journal-sheet.sheet .items-list .item-from:hover,
+.monks-journal-sheet.sheet .items-list .item-from:focus {
+    border-color: var(--color-apsj-dark-3) !important;
+    box-shadow: 0 0 8px red !important;
+}
+
+.monks-journal-sheet.sheet .items-list .item-controls a {
+    color: var(--color-apsj-light-0);
+    text-shadow: 1px 1px 2px var(--color-apsj-dark-0);
+}
+
+.monks-journal-sheet.sheet .tab.items .currency-group {
+    width: 100%;
+    background: var(--color-apsj-background-primary);
+    border: 2px groove #eeede0;
+}
+
+.monks-journal-sheet.sheet .tab.items .currency-group label {
+    color: var(--color-apsj-light-0);
+    text-shadow: 1px 1px 2px var(--color-apsj-dark-0);
+}
+
+.monks-journal-sheet.sheet .items-list > .item-list {
+    color: var(--color-apsj-dark-0);
+}
+
+.monks-journal-sheet.sheet .loot-container,
+.monks-journal-sheet.sheet .organization-container {
+    background-image: url('/modules/monks-enhanced-journal/assets/apsjournal/parchment.webp');
+    background-size: cover;
+}
+
+.monks-journal-sheet.sheet .sheet-header .sheet-image {
+    background-image: url('/modules/monks-enhanced-journal/assets/apsjournal/green-item.webp');
+    background-size: cover;
+    border: none !important;
+}
+
+.monks-journal-sheet.sheet .loot-container .sheet-header img.profile {
+    height: auto !important;
+    width: 130px !important;
+    margin: 15px;
+}
+
+.loot-character > .character-name {
+    color: var(--color-apsj-dark-0);
+}
+
+.monks-journal-sheet .header-name .header-search input {
+    background-color: rgba(255, 255, 245, 0.8);
+    border: var(--color-apsj-dark-0) 1px solid;
+    font-family: var(--font-apsj-signika);
+    color: var(--color-apsj-dark-3);
+    text-shadow: 0 0 0 rgba(255, 255, 245, 0.8);
+}
+
+.monks-journal-sheet .header-name .header-search i {
+    color: var(--color-apsj-dark-3);
+    text-shadow: 0 0 0 rgba(255, 255, 245, 0.8);
+}
+
+.monks-journal-sheet .header-name .header-search input:focus {
+    color: var(--color-apsj-dark-0) !important;
+}
+
+.monks-journal-sheet.sheet .checklist button {
+    background-color: var(--color-apsj-background-primary);
+    color: var(--color-apsj-light-0);
+}
+
+/**
+* Theme Switcher
+*/
+
+#theme-switcher {
+    position: relative;
+    left: -20px;
+    display: grid;
+    grid-gap: 10px;
+    padding: 10px;
+    border: 4px solid var(--color-apsj-light-0);
+    border-radius: 25px;
+    background-color: var(--color-apsj-background-dark-5);
+    box-shadow: 0 0 5px var(--color-apsj-dark-0);
+    z-index: 999;
+    width: 50px;
+}
+
+#theme-switcher div {
+    display: inline-block;
+    text-decoration: none;
+    color: #ffffff;
+    border: 2px solid var(--color-apsj-light-0);
+    border-radius: 50%;
+    padding-left: 20px;
+    font-size: 20px;
+    width: 20px;
+    height: 25px;
+    font-family: var(--font-apsj-scalycaps);
+}
+
+.ct-none {
+    background: var(--color-apsj-theme-none);
+}
+
+.ct-blue {
+    background: var(--color-apsj-theme-blue);
+}
+
+.ct-cyan {
+    background: var(--color-apsj-theme-cyan);
+}
+
+.ct-green {
+    background: var(--color-apsj-theme-green);
+}
+
+.ct-orange {
+    background: var(--color-apsj-theme-orange);
+}
+
+.ct-purple {
+    background: var(--color-apsj-theme-purple);
+}
+
+.ct-red {
+    background: var(--color-apsj-theme-red);
+}
+
+.ct-yellow {
+    background: var(--color-apsj-theme-yellow);
+}
+
+#MonksEnhancedJournal[background-image="parchment"] .sheet.journal-entry .journal-entry-content,
+#MonksEnhancedJournal[background-image="parchment"] .journal-sheet form.editable,
+#MonksEnhancedJournal[background-image="parchment"] .journal-sheet form.locked {
+    background-image: var(--apsj-parchment-aged);
+}
+
+#MonksEnhancedJournal[background-image="parchment"] .sheet.journal-entry .sidebar,
+#MonksEnhancedJournal[background-image="parchment"] .monks-enhanced-journal.flexrow {
+    background-image: var(--apsj-parchment-medium) !important;
+}

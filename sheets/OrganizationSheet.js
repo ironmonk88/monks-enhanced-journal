@@ -10,7 +10,7 @@ export class OrganizationSheet extends EnhancedJournalSheet {
     static get defaultOptions() {
         return mergeObject(super.defaultOptions, {
             title: i18n("MonksEnhancedJournal.organization"),
-            template: "modules/monks-enhanced-journal/templates/organization.html",
+            template: "modules/monks-enhanced-journal/templates/sheets/organization.html",
             tabs: [{ navSelector: ".tabs", contentSelector: ".sheet-body", initial: "description" }],
             dragDrop: [
                 { dropSelector: ".organization-container" },

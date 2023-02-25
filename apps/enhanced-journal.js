@@ -1026,7 +1026,7 @@ export class EnhancedJournal extends Application {
             if (newtab === true) {
                 //the journal is getting created
                 //lets see if we can find  tab with this entity?
-                let tab = this.tabs.find(t => t.entityId.endsWith(entity.id));
+                let tab = this.tabs.find(t => t.entityId?.endsWith(entity.id));
                 if (tab != undefined)
                     this.activateTab(tab, null, options);
                 else

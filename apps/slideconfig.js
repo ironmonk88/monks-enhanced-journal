@@ -14,7 +14,7 @@ export class SlideConfig extends FormApplication {
             id: "slide-config",
             classes: ["form", "slide-sheet"],
             title: i18n("MonksEnhancedJournal.SlideConfiguration"),
-            template: "modules/monks-enhanced-journal/templates/slideconfig.html",
+            template: "modules/monks-enhanced-journal/templates/sheets/slideconfig.html",
             width: 620
         });
     }

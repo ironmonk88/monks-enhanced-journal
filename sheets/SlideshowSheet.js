@@ -17,7 +17,7 @@ export class SlideshowSheet extends EnhancedJournalSheet {
     static get defaultOptions() {
         return mergeObject(super.defaultOptions, {
             title: i18n("MonksEnhancedJournal.slideshow"),
-            template: "modules/monks-enhanced-journal/templates/slideshow.html",
+            template: "modules/monks-enhanced-journal/templates/sheets/slideshow.html",
             tabs: [{ navSelector: ".tabs", contentSelector: ".sheet-body", initial: "entry-details" }],
             dragDrop: [
                 { dragSelector: ".slide", dropSelector: ".slide" },

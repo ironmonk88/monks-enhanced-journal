@@ -13,7 +13,7 @@ export class JournalEntrySheet extends DocumentSheet {
         let classes = defOptions.classes.concat(['monks-journal-sheet', 'monks-enhanced-journal', `${game.system.id}`]);
         return mergeObject(defOptions, {
             title: i18n("MonksEnhancedJournal.journalentry"),
-            template: "modules/monks-enhanced-journal/templates/journalentry.html",
+            template: "modules/monks-enhanced-journal/templates/sheets/journalentry.html",
             classes: classes,
             scrollY: [".journal-pages"]
         });

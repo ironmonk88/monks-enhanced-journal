@@ -10,7 +10,7 @@ export class PersonSheet extends EnhancedJournalSheet {
     static get defaultOptions() {
         return mergeObject(super.defaultOptions, {
             title: i18n("MonksEnhancedJournal.person"),
-            template: "modules/monks-enhanced-journal/templates/person.html",
+            template: "modules/monks-enhanced-journal/templates/sheets/person.html",
             tabs: [{ navSelector: ".tabs", contentSelector: ".sheet-body", initial: "description" }],
             dragDrop: [
                 { dragSelector: ".document.actor", dropSelector: ".person-container" },

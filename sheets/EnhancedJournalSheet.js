@@ -440,8 +440,9 @@ export class EnhancedJournalSheet extends JournalPageSheet {
                 options = foundry.utils.mergeObject(options, {
                     menubar: true,
                     contextmenu: 'link createlink',
-                    plugins: CONFIG.TinyMCE.plugins + ' createlink background dcconfig anchor',
-                    toolbar: CONFIG.TinyMCE.toolbar + ' background dcconfig anchor'//,
+                    plugins: CONFIG.TinyMCE.plugins + ' createlink background dcconfig template anchor',
+                    toolbar: CONFIG.TinyMCE.toolbar + ' background dcconfig template anchor',
+                    templates: CONFIG.TinyMCE.templates
                     //font_formats: "Andale Mono=andale mono,times; Arial=arial,helvetica,sans-serif; Arial Black=arial black,avant garde; Book Antiqua=book antiqua,palatino; Comic Sans MS=comic sans ms,sans-serif; Courier New=courier new,courier; Georgia=georgia,palatino; Helvetica=helvetica; Impact=impact,chicago; Oswald=oswald; Symbol=symbol; Tahoma=tahoma,arial,helvetica,sans-serif; Terminal=terminal,monaco; Times New Roman=times new roman,times; Trebuchet MS=trebuchet ms,geneva; Verdana=verdana,geneva; Webdings=webdings; Wingdings=wingdings,zapf dingbats;Anglo Text=anglo_textregular;Lovers Quarrel=lovers_quarrelregular;Play=Play-Regular"
                 });
             }
@@ -579,6 +580,12 @@ export class EnhancedJournalSheet extends JournalPageSheet {
                 {
                     let coin = actor.items.find(i => { return i.isCoinage && i.system.price.value[denomination] == 1 });
                     coinage = (coin && coin.system.quantity); //price.value[denomination]);
+                }
+                break;
+            case 'dsa5':
+                {
+                    let coin = actor.items.find(i => { return i.type == "money" && i.name == denomination });
+                    coinage = (coin && coin.system.quantity.value);
                 }
                 break;
             case 'wfrp4e':
@@ -744,6 +751,16 @@ export class EnhancedJournalSheet extends JournalPageSheet {
                 let coinage = actor.items.find(i => { return i.type == "currency" && i.name == currency });
                 if (coinage) {
                     updates[`system.quantity`] = v;
+                    promises.push(coinage.update(updates));
+                }
+            }
+            return Promise.all(promises);
+        } else if (game.system.id == 'dsa5') {
+            let promises = [];
+            for (let [k, v] of Object.entries(changes)) {
+                let coinage = actor.items.find(i => { return i.type == "money" && i.name == k });
+                if (coinage) {
+                    updates[`system.quantity`] = { value: v };
                     promises.push(coinage.update(updates));
                 }
             }
@@ -2004,29 +2021,34 @@ export class EnhancedJournalSheet extends JournalPageSheet {
         let lootentity = setting('loot-entity');
         let collection = (EnhancedJournalSheet.isLootActor(lootSheet) ? game.actors : game.journal);
 
-        let getLootableName = (entity) => {
+        let getLootableName = (entity, source) => {
             let lootname = i18n(setting("loot-name"));
-            if (lootname.indexOf('{{#}}') == -1)
-                lootname += " ({{#}})";
+
             //find the folder and find the next available loot name
             let documents = (entity == undefined ? collection.filter(e => e.folder == undefined) : entity.contents || entity.pages || entity.parent.contents || entity.parent.pages);
 
-            let idx = lootname.indexOf('{{#}}');
-            let start = lootname.substring(0, idx);
-            let end = lootname.substring(idx + 5);
-            let num = 0;
-            if (documents && documents.length) {
-                for (let doc of documents) {
-                    if ((doc.name.startsWith(start) || start == "") && (doc.name.endsWith(end) || end == "")) {
-                        let val = Number(doc.name.substr(start.length, doc.name.length - start.length - end.length));
-                        if (!isNaN(val))
-                            num = Math.max(num, val);
+            let idx = lootname.indexOf('{{name}}');
+            if (idx > -1) {
+                lootname = lootname.replace("{{name}}", source.name);
+            }
+            idx = lootname.indexOf('{{#}}');
+            if (idx > -1) {
+                let start = lootname.substring(0, idx).trim();
+                let end = lootname.substring(idx + 5).trim();
+                let num = 0;
+                if (documents && documents.length) {
+                    for (let doc of documents) {
+                        if ((doc.name.startsWith(start) || start == "") && (doc.name.endsWith(end) || end == "")) {
+                            let val = Number(doc.name.substr(start.length, doc.name.length - start.length - end.length));
+                            if (!isNaN(val))
+                                num = Math.max(num || 0, val);
+                        }
                     }
                 }
-            }
 
-            name = lootname.replace("{{#}}", num + 1);
-            return name;
+                lootname = lootname.replace("{{#}}", !isNaN(num) ? num + 1 : "");
+            }
+            return lootname;
         }
 
         let newitems = items.map(i => {
@@ -2035,8 +2057,10 @@ export class EnhancedJournalSheet extends JournalPageSheet {
             return (getProperty(item, "flags.monks-enhanced-journal.remaining") > 0 ? item : null);
         }).filter(i => i);
 
-        if (newitems.length == 0)
-            return ui.notifications.warn(i18n("MonksEnhancedJournal.msg.NoItemsToAssign"));
+        if (newitems.length == 0) {
+            ui.notifications.warn(i18n("MonksEnhancedJournal.msg.NoItemsToAssign"));
+            return items;
+        }
 
         let entity;
         try {
@@ -2046,7 +2070,7 @@ export class EnhancedJournalSheet extends JournalPageSheet {
         if (entity == undefined || entity instanceof Folder || entity instanceof JournalEntry) {
             //create the entity in the correct Folder
             if (name == undefined || name == '')
-                name = getLootableName(entity);
+                name = getLootableName(entity, this);
 
             if ((entity instanceof Folder || entity == undefined) && collection.documentName == "JournalEntry") {
                 entity = await JournalEntry.create({ folder: entity, name: name, ownership: { 'default': CONST.DOCUMENT_OWNERSHIP_LEVELS.OBSERVER } }, { render: false });
@@ -2064,8 +2088,10 @@ export class EnhancedJournalSheet extends JournalPageSheet {
             }
         }
 
-        if (!entity)
-            return ui.notifications.warn(i18n("MonksEnhancedJournal.msg.CouldNotFindLootEntity"));
+        if (!entity) {
+            ui.notifications.warn(i18n("MonksEnhancedJournal.msg.CouldNotFindLootEntity"));
+            return items;
+        }
 
         if (clear) {
             if (EnhancedJournalSheet.isLootActor(lootSheet)) {

@@ -14,7 +14,7 @@ export class QuestSheet extends EnhancedJournalSheet {
     static get defaultOptions() {
         return mergeObject(super.defaultOptions, {
             title: i18n("MonksEnhancedJournal.quest"),
-            template: "modules/monks-enhanced-journal/templates/quest.html",
+            template: "modules/monks-enhanced-journal/templates/sheets/quest.html",
             tabs: [{ navSelector: ".tabs", contentSelector: ".sheet-body", initial: "description" }],
             dragDrop: [
                 { dragSelector: ".document.actor", dropSelector: ".quest-container" },

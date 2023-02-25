@@ -12,7 +12,7 @@ export class SlideText extends FormApplication {
             id: "slide-text",
             classes: ["form", "slide-sheet"],
             title: i18n("MonksEnhancedJournal.SlideText"),
-            template: "modules/monks-enhanced-journal/templates/slidetext.html",
+            template: "modules/monks-enhanced-journal/templates/sheets/slidetext.html",
             width: 350,
             submitOnChange: true
         });

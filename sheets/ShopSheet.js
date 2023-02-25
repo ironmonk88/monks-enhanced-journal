@@ -15,7 +15,7 @@ export class ShopSheet extends EnhancedJournalSheet {
     static get defaultOptions() {
         return mergeObject(super.defaultOptions, {
             title: i18n("MonksEnhancedJournal.shop"),
-            template: "modules/monks-enhanced-journal/templates/shop.html",
+            template: "modules/monks-enhanced-journal/templates/sheets/shop.html",
             tabs: [{ navSelector: ".tabs", contentSelector: ".sheet-body", initial: "description" }],
             dragDrop: [
                 { dragSelector: ".document.actor", dropSelector: ".shop-container" },

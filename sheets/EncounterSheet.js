@@ -13,7 +13,7 @@ export class EncounterSheet extends EnhancedJournalSheet {
     static get defaultOptions() {
         return mergeObject(super.defaultOptions, {
             title: i18n("MonksEnhancedJournal.encounter"),
-            template: "modules/monks-enhanced-journal/templates/encounter.html",
+            template: "modules/monks-enhanced-journal/templates/sheets/encounter.html",
             tabs: [{ navSelector: ".tabs", contentSelector: ".sheet-body", initial: "description" }],
             dragDrop: [
                 { dragSelector: ".document.actor", dropSelector: ".encounter-body" },
