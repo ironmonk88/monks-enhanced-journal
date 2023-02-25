@@ -2306,7 +2306,7 @@ export class EnhancedJournalSheet extends JournalPageSheet {
         if (!journal.testUserPermission(game.user, "LIMITED"))
             return ui.notifications.error("You don't have permissions to view this document");
 
-        this.open(journal);
+        this.open(journal, event);
     }
 
     static async createScrollFromSpell(itemData) {
