@@ -213,7 +213,6 @@ export class QuestSheet extends EnhancedJournalSheet {
 
         //$('.item-relationship .item-field', html).on('change', this.alterRelationship.bind(this));
 
-        $('.items-header', html).on("click", this.collapseItemSection.bind(this));
         $('.refill-all', html).click(this.refillItems.bind(this, 'all'));
 
         const actorOptions = this._getPersonActorContextOptions();

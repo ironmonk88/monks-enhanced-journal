@@ -1,0 +1,44 @@
+<form id="document-create" autocomplete="off">
+    {{#if hasFolders}}
+    <div class="form-group">
+        <label>{{localize 'DOCUMENT.Folder'}}</label>
+        <div class="form-fields">
+            <select name="folder">
+                <option value=""></option>
+                {{selectOptions folders selected=data.folder nameAttr="id" labelAttr="name"}}
+            </select>
+        </div>
+    </div>
+    {{/if}}
+
+    <div class="form-group">
+        <label>Title</label>
+        <div class="form-fields">
+            <input type="text" name="title" value="{{data.title}}" />
+        </div>
+    </div>
+
+    <div class="form-group">
+        <div class="form-fields">
+            <textarea name="text" placeholder="{{localize 'DOCUMENT.New' type='Entry'}}" required style="height:120px;">{{data.text}}</textarea>
+        </div>
+    </div>
+
+    {{#if (or (eq hasNumber "count") (eq hasNumber "full"))}}
+    <div class="form-group">
+        <label>Count</label>
+        <div class="form-fields">
+            <input type="number" name="count" style="max-width:100px;text-align: right;" value="{{data.count}}" />
+        </div>
+    </div>
+    {{/if}}
+
+    {{#if (eq hasNumber "full")}}
+    <div class="form-group">
+        <label>Max</label>
+        <div class="form-fields">
+            <input type="number" name="max" style="max-width: 100px; text-align: right;" value="{{data.max}}" />
+        </div>
+    </div>
+    {{/if}}
+</form>

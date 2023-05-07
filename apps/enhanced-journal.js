@@ -2,7 +2,6 @@ import { makeid } from "../monks-enhanced-journal.js";
 import { MonksEnhancedJournal, log, i18n, error, setting } from "../monks-enhanced-journal.js"
 import { EnhancedJournalSheet } from "../sheets/EnhancedJournalSheet.js"
 import { JournalEntrySheet } from "../sheets/JournalEntrySheet.js"
-import { SelectPlayer } from "./selectplayer.js";
 
 export class EnhancedJournal extends Application {
     tabs = [];
@@ -116,6 +115,12 @@ export class EnhancedJournal extends Application {
 
     async _render(force, options = {}) {
         let result = await super._render(force, options);
+
+        if (setting('background-image') != 'none') {
+            $(this.element).attr("background-image", setting('background-image'));
+        } else {
+            $(this.element).removeAttr("background-image");
+        }
 
         if (this.element.length) {
             this.renderDirectory().then((html) => {
@@ -287,6 +292,9 @@ export class EnhancedJournal extends Application {
                 journalEntryPageHeader: "templates/journal/parts/page-header.html",
                 journalEntryPageFooter: "templates/journal/parts/page-footer.html"
             });
+            if (this.subsheet.sheetTemplates) {
+                await loadTemplates(this.subsheet.sheetTemplates);
+            }
             let html = await renderTemplate(this.subsheet.template, templateData);
 
             this.subdocument = $(html).get(0);
@@ -1055,13 +1063,13 @@ export class EnhancedJournal extends Application {
 
     expandSidebar() {
         this._collapsed = false;
-        $('.monks-enhanced-journal', this.element).removeClass('collapse');
+        $('.enhanced-journal', this.element).removeClass('collapse');
         $('.sidebar-toggle i', this.element).removeClass('fa-caret-left').addClass('fa-caret-right');
     }
 
     collapseSidebar() {
         this._collapsed = true;
-        $('.monks-enhanced-journal', this.element).addClass('collapse');
+        $('.enhanced-journal', this.element).addClass('collapse');
         $('.sidebar-toggle i', this.element).removeClass('fa-caret-right').addClass('fa-caret-left');
     }
 

@@ -2,7 +2,7 @@ import { registerSettings } from "./settings.js";
 import { EnhancedJournal } from "./apps/enhanced-journal.js"
 import { SlideshowWindow } from "./apps/slideshow-window.js"
 import { ObjectiveDisplay } from "./apps/objective-display.js"
-import { CheckListSheet } from "./sheets/CheckListSheet.js"
+import { ListSheet, CheckListSheet, PollListSheet, ProgressListSheet } from "./sheets/ListSheet.js"
 import { EncounterSheet } from "./sheets/EncounterSheet.js"
 import { PersonSheet } from "./sheets/PersonSheet.js"
 import { PictureSheet } from "./sheets/PictureSheet.js"
@@ -80,7 +80,7 @@ export class MonksEnhancedJournal {
 
     static getDocumentTypes() {
         return {
-            checklist: CheckListSheet,
+            list: ListSheet,
             encounter: EncounterSheet,
             event: EventSheet,
             organization: OrganizationSheet,
@@ -109,7 +109,7 @@ export class MonksEnhancedJournal {
             organization: "MonksEnhancedJournal.organization",
             shop: "MonksEnhancedJournal.shop",
             loot: "MonksEnhancedJournal.loot",
-            checklist: "MonksEnhancedJournal.checklist",
+            list: "MonksEnhancedJournal.list",
             journalentry: "MonksEnhancedJournal.journalentry"
         };
     }
@@ -1701,6 +1701,17 @@ export class MonksEnhancedJournal {
         }
     }
 
+    static async fixChecklist() {
+        if (setting('fix-checklist')) {
+            for (let journal of game.journal) {
+                if (journal.pages.size == 1 && (getProperty(journal.pages.contents[0], "flags.monks-enhanced-journal.type") || getProperty(journal, "flags.monks-enhanced-journal.type")) == "checklist") {
+                    let page = journal.pages.contents[0];
+                    await page.update({ flags: { "monks-enhanced-journal": { type: "list" }, core: { sheetClass: "monks-enhanced-journal.CheckListSheet" } } });
+                }
+            }
+        }
+    }
+
     static registerSheetClasses() {
         let types = MonksEnhancedJournal.getDocumentTypes();
         let labels = MonksEnhancedJournal.getTypeLabels();
@@ -1720,6 +1731,21 @@ export class MonksEnhancedJournal {
             types: ["journalentry"],
             makeDefault: false,
             label: "Text and Image"
+        });
+        DocumentSheetConfig.registerSheet(JournalEntryPage, "monks-enhanced-journal", CheckListSheet, {
+            types: ["list"],
+            makeDefault: false,
+            label: "Checklist"
+        });
+        DocumentSheetConfig.registerSheet(JournalEntryPage, "monks-enhanced-journal", PollListSheet, {
+            types: ["list"],
+            makeDefault: false,
+            label: "Poll"
+        });
+        DocumentSheetConfig.registerSheet(JournalEntryPage, "monks-enhanced-journal", ProgressListSheet, {
+            types: ["list"],
+            makeDefault: false,
+            label: "Progress"
         });
 
         game.system.documentTypes.JournalEntryPage = game.system.documentTypes.JournalEntryPage.concat(Object.keys(types)).sort();
@@ -2109,6 +2135,12 @@ export class MonksEnhancedJournal {
                     game.settings.set("monks-enhanced-journal", "fix-journals", false);
                 } catch { }
             }
+            if (setting("fix-checklist")) {
+                try {
+                    MonksEnhancedJournal.fixChecklist();
+                    //game.settings.set("monks-enhanced-journal", "fix-checklist", false);
+                } catch { }
+            }
         }
 
         MonksEnhancedJournal.cleanPageState();
@@ -2189,7 +2221,7 @@ export class MonksEnhancedJournal {
             case 'shop': return 'fa-dolly-flatbed';
             case 'loot': return 'fa-donate';
             case 'poi': return 'fa-map-marker-alt';
-            case 'checklist': return 'fa-list';
+            case 'list': return 'fa-list';
             default:
                 return 'fa-book-open';
         }
@@ -2881,6 +2913,30 @@ export class MonksEnhancedJournal {
         }
     }
 
+    static async vote(data) {
+        if (game.user.isGM) {
+            let entry = await fromUuid(data.listId);
+            if (entry) {
+                let items = duplicate(getProperty(entry, "flags.monks-enhanced-journal.items"));
+                let item = items.find(i => i.id == data.itemId);
+
+                if (item) {
+                    if ((item.players || []).includes(data.userId)) {
+                        item.players = item.players.filter(p => p != data.userId);
+                        item.count--;
+                    } else {
+                        item.players = (item.players || []);
+                        item.players.push(data.userId);
+                        item.count++;
+                        //+++ check to see if you're allowed multiple votes, otherwise remove any other votes by this user in the group it's in.
+                    }
+
+                    await entry.update({ "flags.monks-enhanced-journal.items": items });
+                }
+            }
+        }
+    }
+
     static async acceptItem(status) {
         let message = this;
 
@@ -3376,6 +3432,7 @@ export class MonksEnhancedJournal {
                 type = object.parent?.flags['monks-enhanced-journal']?.type;
             }
             type = (type == 'base' || type == 'oldentry' ? 'journalentry' : type);
+            type = (type == 'checklist' ? 'list' : type);
 
             /*
             if (game.modules.get('_document-sheet-registrar')?.active) {
@@ -3417,7 +3474,7 @@ export class MonksEnhancedJournal {
     static get defaultCurrencies() {
         switch (game.system.id) {
             case "sw5e":
-                return [{ id: "gc", name: i18n("MonksEnhancedJournal.currency.galacticcredit"), convert: 0 }, { id: "cr", name: "Credit", convert: 0 }];
+                return [{ id: "gc", name: i18n("MonksEnhancedJournal.currency.galacticcredit"), convert: 0 }];
             case "sfrpg":
                 return [{ id: "upb", name: i18n("MonksEnhancedJournal.currency.upb"), convert: 1 }, { id: "cr", name: "Credit", convert: 0 }];
             case "swade":
@@ -3857,27 +3914,11 @@ Hooks.on("renderChatMessage", (message, html, data) => {
         $('.chat-shop-icon', html).click(MonksEnhancedJournal.openRequestItem.bind(message, 'shop')).attr('onerror', "$(this).attr('src', 'modules/monks-enhanced-journal/assets/shop.png');");
         $('.item-list .item-name .item-image', html).click(MonksEnhancedJournal.openRequestItem.bind(message, 'item'));
         $('.items-list .item-icon', html).click(MonksEnhancedJournal.openRequestItem.bind(message, 'item'));
-
-        /*
-        if (game.modules.get("chat-portrait")?.active) {
-            window.setTimeout(() => {
-                $('.items-list .items-header h3.item-name img', html).insertBefore($('.message-content .request-item > div > div > h4', html));
-            }, 100);
-        }
-        */
     }
 });
 
 Hooks.on('canvasInit', () => {
     canvas.hud.note = new NoteHUD();
-});
-
-Hooks.on("renderActorDirectory", (app, html, data) => {
-    $(`li[data-document-id="${setting("loot-entity")}"] h4`, html).append(
-        $('<div>').addClass('assign-icon').attr('title', i18n("MonksEnhancedJournal.AssignItemsToThisActor")).append(
-            $('<i>').addClass('fas fa-suitcase')
-        )
-    );
 });
 
 Hooks.on("getActorDirectoryEntryContext", (html, entries) => {

@@ -460,4 +460,11 @@ export const registerSettings = function () {
 		type: Boolean,
 		config: false
 	});
+
+	game.settings.register(modulename, "fix-checklist", {
+		scope: "world",
+		default: true,
+		type: Boolean,
+		config: false
+	});
 }

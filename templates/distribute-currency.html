@@ -1,64 +1,65 @@
 <div class="distribute-container">
-    <form autocomplete="off" onsubmit="event.preventDefault();" style="flex-grow: 0;">
+    <form autocomplete="off" onsubmit="event.preventDefault();">
         <p class="notes">{{localize 'MonksEnhancedJournal.msg.ClearTheValueToRemoveCharacterFromSplit'}}</p>
 
-        <div class="form-group">
-            <label>
-                {{localize 'MonksEnhancedJournal.Currency'}}
-            </label>
-            <div class="form-fields" style="flex-wrap:nowrap;">
-                {{#each currencies}}
-                <input type="text" class="currency-amount" data-currency="{{this.id}}" name="currency.{{this.id}}" placeholder="0" value="{{lookup ../currency this.id}}" data-dtype="Number" />
-                {{/each}}
-            </div>
-            <div class="item-control"></div>
-        </div>
-
-        <ol class="items-list">
-            <li class="items-header flexrow">
+        <div class="items-list">
+            <ul class="item-list">
+                <li class="item flexrow" data-id="{{this.id}}" draggable="false">
+                    <h3 class="item-name noborder flexrow">{{localize "MonksEnhancedJournal.Currency"}}</h3>
+                    {{#each currencies}}
+                    <div class="item-detail">
+                        <input type="text" class="currency-amount" data-currency="{{this.id}}" name="currency.{{this.id}}" placeholder="0" value="{{lookup ../currency this.id}}" data-dtype="Number" />
+                    </div>
+                    {{/each}}
+                    <div class="item-controls"></div>
+                </li>
+            </ul>
+            <div class="item-header flexrow">
                 <h3 class="item-name noborder flexrow"></h3>
-                <a class="item-control split" title="{{localize 'MonksEnhancedJournal.SplitBetweenPlayers'}}">
+                <a class="item-control text split" title="{{localize 'MonksEnhancedJournal.SplitBetweenPlayers'}}">
                     <i class="fas fa-dollar-sign"></i> {{localize 'MonksEnhancedJournal.Split'}}
                 </a>
-                <a class="item-control reset" title="{{localize 'MonksEnhancedJournal.ResetAllTheValues'}}">
+                <a class="item-control text reset" title="{{localize 'MonksEnhancedJournal.ResetAllTheValues'}}">
                     <i class="fas fa-trash"></i> {{localize 'MonksEnhancedJournal.Clear'}}
                 </a>
-            </li>
-        </ol>
-
-        <ol class="items-list">
-            <li class="items-header flexrow">
+            </div>
+            <div class="item-header flexrow">
                 <h3 class="item-name noborder flexrow">{{localize 'MonksEnhancedJournal.Character'}}</h3>
                 {{#each currencies}}
-                <div class="item-controls">{{localize this.name}}</div>
+                <div class="item-detail">{{localize this.name}}</div>
                 {{/each}}
-                <div class="item-control"></div>
-            </li>
+                <div class="item-controls"></div>
+            </div>
             <ul class="item-list">
                 {{#each characters}}
                 <li class="item flexrow" data-id="{{this.id}}" draggable="false">
                     <div class="item-name flexrow">
-                        <div class="item-image item-icon" style="background-image: url('{{this.img}}')" title="{{this.name}}"></div>
+                        <img class="item-image" src="{{this.img}}" title="{{this.name}}" />
+                        <h4>{{this.name}}</h4>
                     </div>
 
                     {{#each @root.currencies}}
-                    <input type="number" class="player-amount" data-currency="{{this.id}}" data-character="{{../id}}" charactername="character.{{../id}}.currency.{{this.id}}" placeholder="-" value="{{lookup ../currency this.id}}" data-dtype="Number" />
+                    <div class="item-detail">
+                        <input type="number" class="player-amount" data-currency="{{this.id}}" data-character="{{../id}}" charactername="character.{{../id}}.currency.{{this.id}}" placeholder="-" value="{{lookup ../currency this.id}}" data-dtype="Number" />
+                    </div>
                     {{/each}}
 
-                    <a class="item-control assign" data-character="{{this.id}}" title="{{localize 'MonksEnhancedJournal.msg.AssignRemainderToCharacter'}}">
-                        <i class="fas fa-dollar-sign"></i> {{localize 'MonksEnhancedJournal.Assign'}}
-                    </a>
+                    <div class="item-controls">
+                        <a class="assign" data-character="{{this.id}}" title="{{localize 'MonksEnhancedJournal.msg.AssignRemainderToCharacter'}}">
+                            <i class="fas fa-dollar-sign"></i> {{localize 'MonksEnhancedJournal.Assign'}}
+                        </a>
+                    </div>
                 </li>
                 {{/each}}
             </ul>
-            <li class="items-header flexrow">
+            <div class="item-header flexrow">
                 <h3 class="item-name noborder flexrow">{{localize 'MonksEnhancedJournal.Totals'}}</h3>
                 {{#each currencies}}
-            <div class="item-controls total-amount{{#if (gt (lookup ../totals this.id) 0)}} more{{/if}}{{#if (lt (lookup ../totals this.id) 0)}} less{{/if}}" data-currency="{{this.id}}" name="totalcurrency.{{this.id}}">{{lookup ../totals this.id}}</div>
+                <div class="item-detail total-amount{{#if (gt (lookup ../totals this.id) 0)}} more{{/if}}{{#if (lt (lookup ../totals this.id) 0)}} less{{/if}}" data-currency="{{this.id}}" name="totalcurrency.{{this.id}}">{{lookup ../totals this.id}}</div>
                 {{/each}}
-                <div class="item-control"></div>
-            </li>
-        </ol>
+                <div class="item-controls"></div>
+            </div>
+        </div>
         <button type="submit" name="submit" value="1"><i class="far fa-save"></i> {{localize "MonksEnhancedJournal.Distribute"}}</button>
     </form>
 </div>

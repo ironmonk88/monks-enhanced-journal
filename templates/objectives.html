@@ -1,4 +1,4 @@
-<form class="objectives" autocomplete="off" onsubmit="event.preventDefault();">
+<form class="objectives flexcol" autocomplete="off" onsubmit="event.preventDefault();">
     <div class="form-group">
         <label for="content">{{localize 'MonksEnhancedJournal.Name'}}</label>
         <div class="form-fields">
@@ -26,7 +26,7 @@
             <input type="number" name="required" value="{{object.required}}" />
         </div>
     </div>
-    <div style="border:1px solid #000;">
+    <div class="editor-container">
         {{editor enrichedText target="content" editable=true button=true owner=owner}}
     </div>
     <button type="submit" name="submit" value="1"><i class="far fa-save"></i> {{localize "MonksEnhancedJournal.Update"}}</button>

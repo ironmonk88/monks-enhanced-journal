@@ -143,8 +143,9 @@ export class TextImageEntrySheet extends TextEntrySheet {
     }
 
     removePicture() {
-        $('[data-edit="src"]').css({ opacity: 0 });
-        this.object.update({ img: '' });
+        $('[data-edit="src"]', this.element).css({ opacity: 0 });
+        $('.instruction', this.element).show();
+        this.object.update({ src: '' });
     }
 
     async render(data) {

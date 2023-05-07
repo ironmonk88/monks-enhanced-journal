@@ -16,8 +16,8 @@ export class EncounterSheet extends EnhancedJournalSheet {
             template: "modules/monks-enhanced-journal/templates/sheets/encounter.html",
             tabs: [{ navSelector: ".tabs", contentSelector: ".sheet-body", initial: "description" }],
             dragDrop: [
-                { dragSelector: ".document.actor", dropSelector: ".encounter-body" },
-                { dragSelector: ".document.item", dropSelector: ".encounter-body" },
+                { dragSelector: ".document.actor", dropSelector: ".encounter-container" },
+                { dragSelector: ".document.item", dropSelector: ".encounter-container" },
                 { dragSelector: ".encounter-monsters .item-list .item .item-image", dropSelector: "null" },
                 { dragSelector: ".encounter-items .item-list .item .item-name", dropSelector: "null" },
                 //{ dragSelector: ".create-encounter", dropSelector: "null" },
@@ -108,12 +108,6 @@ export class EncounterSheet extends EnhancedJournalSheet {
     activateListeners(html, enhancedjournal) {
         super.activateListeners(html, enhancedjournal);
 
-        /*
-        new ResizeObserver(function (obs) {
-                log('resize observer', obs);
-                $(obs[0].target).toggleClass('condensed', obs[0].contentRect.width < 1100);
-        }).observe($('.encounter-content', html).get(0));*/
-
         //monster
         $('.monster-icon', html).click(this.clickItem.bind(this));
         $('.monster-delete', html).on('click', $.proxy(this._deleteItem, this));
@@ -144,7 +138,6 @@ export class EncounterSheet extends EnhancedJournalSheet {
         $('.roll-table', html).click(this.rollTable.bind(this, "actors", false));
         $('.item-name h4', html).click(this._onItemSummary.bind(this));
 
-        $('.items-header', html).on("click", this.collapseItemSection.bind(this));
         $('.refill-all', html).click(this.refillItems.bind(this, 'all'));
     }
 
@@ -292,13 +285,6 @@ export class EncounterSheet extends EnhancedJournalSheet {
                 ui.notifications.warn(i18n("MonksEnhancedJournal.msg.CannotAddItemType"));
             }
         }
-    }
-
-    clickItem(event) {
-        let target = event.currentTarget;
-        let li = target.closest('li');
-        event.currentTarget = li;
-        TextEditor._onClickContentLink(event);
     }
 
     createDC() {

@@ -148,8 +148,6 @@ export class ShopSheet extends EnhancedJournalSheet {
 
         //$('.item-relationship .item-field', html).on('change', this.alterRelationship.bind(this));
 
-        $('.items-header', html).on("click", this.collapseItemSection.bind(this));
-
         $('[sort]', html).on("click", this.alterSort.bind(this));
 
         $('.open-player-config', html).on("click", () => { game.user.sheet.render(true) });

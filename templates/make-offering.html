@@ -1,33 +1,55 @@
 <form class="flexcol">
     <div class="flexcol make-offer-container">
         <p class="notes" style="flex: 0 0 20px;">Drop an Actor or an Item here to select which character is making the offering</p>
-        <div class="form-group currency-group">
-            <div class="form-fields" style="flex-wrap:nowrap;">
-                <img class="actor-icon" src="{{actor.img}}" />
-                <h3 class="noborder">{{actor.name}}</h3>
-                <label style="white-space:nowrap;">Private Offer</label>
-                <input type="checkbox" class="private" {{checked private}} />
+        <div class="document-details">
+            <div class="form-group">
+                <div class="form-fields" style="flex-wrap:nowrap;">
+                    <img class="actor-icon" src="{{actor.img}}" />
+                    <h3 class="noborder">{{actor.name}}</h3>
+                    <label style="white-space:nowrap;">Private Offer</label>
+                    <input type="checkbox" class="private" {{checked private}} />
+                </div>
             </div>
         </div>
         {{#if currency}}
-        <div class="form-group currency-group">
-            <div class="form-fields" style="flex-wrap:nowrap;">
+        <div class="items-list currency-group">
+            <div class="item-header flexrow">
+                <h3 class="item-name noborder">{{localize 'MonksEnhancedJournal.Currency'}}</h3>
+            </div>
+            <div class="flexrow form-fields">
                 {{#each currency}}
                 <label>{{localize this.name}}</label>
-                <input type="text" placeholder="0" class="currency-field" name="{{this.id}}" value="{{lookup @root.coins this.id}}" data-dtype="Number" />
+                <input type="text" class="currency-field" name="{{this.id}}" placeholder="0" value="{{lookup @root.coins this.id}}" data-dtype="Number" />
                 {{/each}}
             </div>
         </div>
         {{/if}}
-        <div class="offering-items flexrow">
-            {{#each items}}
-            <div class="offering-item" data-id="{{this.id}}">
-                <img src="{{this.img}}" title="{{this.name}}" />
-                {{#if (gt this.qty 1)}}<div class="offering-qty">{{this.qty}}</div>{{/if}}
+        <div class="items-list offering-items">
+            <div class="item-header flexrow">
+                <h3 class="item-name noborder">{{localize 'MonksEnhancedJournal.Items'}}</h3>
+                <div class="item-detail">
+                    {{localize 'MonksEnhancedJournal.Quantity'}}
+                </div>
+                <div class="item-controls"></div>
             </div>
-            {{else}}
-            <div class="instruction">Drag items here, from a player's inventory, to make an offer</div>
-            {{/each}}
+            <ol class="item-list">
+                {{#each items}}
+                <li class="item offering-item flexrow" data-id="{{this.id}}">
+                    <h3 class="item-name noborder flexrow">
+                        <img class="item-image" src="{{this.img}}" />
+                        {{this.name}}
+                    </h3>
+                    <div class="item-detail">
+                        <div class="offering-qty">{{this.qty}}</div>
+                    </div>
+                    <div class="item-controls">
+                        <a class="item-control item-delete" title="{{localize 'MonksEnhancedJournal.RemoveOffering'}}"><i class="fas fa-trash"></i></a>
+                    </div>
+                </li>
+                {{else}}
+                <li class="instruction">Drag items here, from a player's inventory, to make an offer</li>
+                {{/each}}
+            </ol>
         </div>
     </div>
     <div class="offering-buttons flexrow" style="flex: 0 0 30px;">

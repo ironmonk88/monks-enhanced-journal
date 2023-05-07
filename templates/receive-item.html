@@ -1,16 +1,16 @@
 <div class="monks-enhanced-journal request-item item-card monks-journal-sheet sheet">
     <div class="flexrow">
         <div class="flexrow">
-            <img src="{{actor.img}}" class="chat-actor-icon" />
+            <img src="{{actor.img}}" class="reqest-chat-icon chat-actor-icon" />
             <h4>{{actor.name}}</h4>
         </div>
     </div>
-    <ol class="items-list receive-items" style="overflow-y: visible;">
-        <li class="items-header flexrow">
+    <div class="items-list receive-items" style="overflow-y: visible;">
+        <div class="item-header flexrow">
             <h3 class="item-name noborder flexrow">{{localize 'MonksEnhancedJournal.Items'}}</h3>
 
-            <div class="item-controls item-quantity">{{localize 'MonksEnhancedJournal.Qty'}}</div>
-        </li>
+            <div class="item-detail item-quantity">{{localize 'MonksEnhancedJournal.Qty'}}</div>
+        </div>
 
         <ol class="item-list" style="overflow-y: visible;">
             {{#each items}}
@@ -20,11 +20,11 @@
                     <h4>{{this.name}}</h4>
                 </div>
 
-                <div class="item-controls item-quantity">
+                <div class="item-detail item-quantity">
                     <span>{{this.quantity}}</span>
                 </div>
             </li>
             {{/each}}
         </ol>
-    </ol>
+    </div>
 </div>

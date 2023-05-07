@@ -72,7 +72,14 @@ export class LootSheet extends EnhancedJournalSheet {
             let actor = game.actors.get(a);
             if (actor) {
                 let user = game.users.find(u => u.character?.id == actor.id);
-                return { id: actor.id, name: actor.name, img: actor.img, color: user?.color, letter: user?.name[0], username: user?.name };
+                return {
+                    id: actor.id,
+                    name: actor.name,
+                    img: actor.img,
+                    color: user?.color,
+                    letter: user?.name[0],
+                    username: user?.name
+                };
             }
         }).filter(a => !!a);
 
@@ -118,8 +125,6 @@ export class LootSheet extends EnhancedJournalSheet {
         $('.loot-character', html).dblclick(this.openActor.bind(this));
 
         $('.configure-permissions', html).click(this.configure.bind(this));
-
-        $('.items-header', html).on("click", this.collapseItemSection.bind(this));
 
         const actorOptions = this._getActorContextOptions();
         if (actorOptions) new ContextMenu($(html), ".loot-character", actorOptions);
@@ -320,10 +325,11 @@ export class LootSheet extends EnhancedJournalSheet {
                         //let actorItem = item.actor.items.get(data.data._id);
                         let quantity = getValue(item, quantityname());
                         if (result.quantity >= quantity)
-                            item.delete();
+                            await item.delete();
                         else {
-                            let newQty = quantity - result.quantity;
-                            item.update({ quantity: newQty });
+                            let update = { system: {} };
+                            update.system[quantityname()] = quantity - result.quantity;
+                            await item.update(update);
                         }
                     }
                 }

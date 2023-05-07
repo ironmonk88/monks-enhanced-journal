@@ -1,0 +1,15 @@
+<li class="list-item document item flexrow" data-document-id="{{this.data.id}}">
+    <div class="flexcol">
+        <h3 class="noborder" style="text-align:center;">{{this.data.title}}</h3>
+        <div>{{this.data.text}}</div>
+        {{#unless this.noprogress}}
+        <div class="flexrow">
+            {{#if @root.owner}}<button type="button" class="progress-button decrease"><i class="fas fa-minus"></i></button>{{/if}}
+            <div class="progress" style="margin-top: 1px;">
+                <div class="progress-bar" style="width:{{this.percent}}%"></div>
+            </div>
+            {{#if @root.owner}}<button type="button" class="progress-button increase"><i class="fas fa-plus"></i></button>{{/if}}
+        </div>
+        {{/unless}}
+    </div>
+</li>

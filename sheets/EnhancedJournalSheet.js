@@ -1,6 +1,5 @@
 ﻿import { setting, i18n, format, log, warn, makeid, MonksEnhancedJournal, quantityname, pricename, currencyname } from "../monks-enhanced-journal.js";
 import { EditFields } from "../apps/editfields.js";
-import { SelectPlayer } from "../apps/selectplayer.js";
 import { EditSound } from "../apps/editsound.js";
 import { MakeOffering } from "../apps/make-offering.js";
 import { getValue, setValue, setPrice, MEJHelpers } from "../helpers.js";
@@ -70,7 +69,7 @@ export class EnhancedJournalSheet extends JournalPageSheet {
         return foundry.utils.mergeObject(defOptions, {
             id: "enhanced-journal-sheet",
             title: i18n("MonksEnhancedJournal.NewTab"),
-            template: "modules/monks-enhanced-journal/templates/blank.html",
+            template: "modules/monks-enhanced-journal/templates/sheets/blank.html",
             classes: classes,
             dragDrop: [ { dragSelector: "null", dropSelector: ".blank-body" } ],
             popOut: true,
@@ -206,6 +205,12 @@ export class EnhancedJournalSheet extends JournalPageSheet {
 
         await super._render(force, options);
 
+        if (setting('background-image') != 'none') {
+            $(this.element).attr("background-image", setting('background-image'));
+        } else {
+            $(this.element).removeAttr("background-image");
+        }
+
         if (this.enhancedjournal)
             this._minimized = oldMinimize;
         else if (!this.object.isOwner && ["base", "journalentry"].includes(this.type) && (this.options.sheetMode || this._sheetMode) === "image" && this.object.img) {
@@ -306,6 +311,7 @@ export class EnhancedJournalSheet extends JournalPageSheet {
         html.find('img[data-edit],div.picture-img').click(this._onEditImage.bind(this));
 
         $('.play-journal-sound', html).prop("disabled", false).click(this.toggleSound.bind(this));
+        $('.item-header.collapsible', html).on("click", this.collapseItemSection.bind(this));
 
         if (enhancedjournal) {
             html.find('.new-link').click(async (event) => {
@@ -929,7 +935,7 @@ export class EnhancedJournalSheet extends JournalPageSheet {
                 $(event.currentTarget).attr('src', path).css({ backgroundImage: `url(${path})` });
                 $('img[data-edit="src"]', this.element).css({ opacity: '' });
                 $('.tab.picture .instruction', this.element).hide();
-                $('.picture-area .instruction', this.element).hide();
+                $('.sheet-body .instruction', this.element).hide();
                 this._onSubmit(event, { preventClose: true });
             },
             top: this.position.top + 40,
@@ -1133,6 +1139,8 @@ export class EnhancedJournalSheet extends JournalPageSheet {
         for (let item of items) {
             if (!item)
                 continue;
+            if (item.data && !item.system)
+                item = item.data;
             let requests = (Object.entries(getProperty(item, "flags.monks-enhanced-journal.requests") || {})).map(([k, v]) => {
                 if (!v)
                     return null;
@@ -1893,7 +1901,7 @@ export class EnhancedJournalSheet extends JournalPageSheet {
     }*/
 
     checkForChanges() {
-        return this.editors?.content?.active && this.editors?.content?.mce?.isDirty();
+        return this.editors?.["text.content"]?.active && this.editors?.["text.content"]?.mce?.isDirty();
     }
 
     async close(options) {
@@ -1937,58 +1945,6 @@ export class EnhancedJournalSheet extends JournalPageSheet {
         await this.submit();
         return Journal.showDialog(this.object);
     }
-
-    /*
-    async _onShowPlayers(event) {
-        if (!event.data?.hasOwnProperty("users")) {
-            let type = this.type;
-            let showpic = event?.data?.options?.showpic || $('.fullscreen-image', this.element).is(':visible') || ((type == 'journalentry' || type == 'oldentry') && $('.tab.picture', this.element).hasClass('active'))
-            new SelectPlayer(this, { showpic: showpic }).render(true);
-        } else {
-            let users = event.data.users;
-            let options = event.data.options;
-
-            let object = event.data?.object || this.object;
-
-            if (users != undefined)
-                users = users.filter(u => u.selected);
-            //if we havn't picked anyone to show this to, then exit
-            if (users instanceof Array && users.length == 0)
-                return;
-
-            if (!object.isOwner) throw new Error(i18n("MonksEnhancedJournal.msg.YouMayOnlyRequestToShowThoseYouOwn"));
-
-            let args = {
-                title: object.name,
-                uuid: object.uuid,
-                users: (users != undefined ? users.map(u => u.id) : users),
-                showid: makeid()
-            }
-            if (options?.showpic || object?.flags["monks-enhanced-journal"]?.type == 'picture')
-                args.image = object.img;
-
-            if (!object.img && !object.content && ["base", "journalentry"].includes(object.type))
-                return ui.notifications.warn(i18n("MonksEnhancedJournal.msg.CannotShowNoContent"));
-
-            MonksEnhancedJournal.emit("showEntry", args);
-
-            ui.notifications.info(format("MonksEnhancedJournal.MsgShowPlayers", {
-                title: object.name,
-                which: (users == undefined ? 'all players' : users.map(u => u.name).join(', '))
-            }) + (options?.showpic || object?.flags["monks-enhanced-journal"]?.type == 'picture' ? ', click <a onclick="game.MonksEnhancedJournal.journal.cancelSend(\'' + args.showid + '\', ' + options?.showpic + ');event.preventDefault();">here</a> to cancel' : ''));
-
-            if (options?.updatepermission) {
-                let ownership = {};
-                Object.assign(ownership, object.ownership);
-                if (users == undefined)
-                    ownership["default"] = CONST.DOCUMENT_OWNERSHIP_LEVELS.OBSERVER;
-                else {
-                    users.forEach(user => { ownership[user.id] = CONST.DOCUMENT_OWNERSHIP_LEVELS.OBSERVER; });
-                }
-                object.update({ ownership: ownership });
-            }
-        }
-    }*/
 
     _getSubmitData(updateData = {}) {
         const data = super._getSubmitData(updateData);
@@ -2348,27 +2304,25 @@ export class EnhancedJournalSheet extends JournalPageSheet {
         let header = $(event.currentTarget);
         let ul = header.next();
 
-        if (ul.prop("tagName") == "UL") {
-            let that = this;
-            if (header.hasClass("collapsed")) {
-                header.removeClass("collapsed");
-                return new Promise(resolve => {
-                    ul.slideDown(200, () => {
-                        //icon.removeClass("fa-caret-down").addClass("fa-caret-up");
-                        that.object._itemList[header.data("id")] = false;
-                        return resolve(false);
-                    });
+        let that = this;
+        if (header.hasClass("collapsed")) {
+            header.removeClass("collapsed");
+            return new Promise(resolve => {
+                ul.slideDown(200, () => {
+                    //icon.removeClass("fa-caret-down").addClass("fa-caret-up");
+                    that.object._itemList[header.data("id")] = false;
+                    return resolve(false);
                 });
-            } else {
-                header.addClass("collapsed");
-                return new Promise(resolve => {
-                    ul.slideUp(200, () => {
-                        //icon.removeClass("fa-caret-up").addClass("fa-caret-down");
-                        that.object._itemList[header.data("id")] = true;
-                        return resolve(true);
-                    });
+            });
+        } else {
+            header.addClass("collapsed");
+            return new Promise(resolve => {
+                ul.slideUp(200, () => {
+                    //icon.removeClass("fa-caret-up").addClass("fa-caret-down");
+                    that.object._itemList[header.data("id")] = true;
+                    return resolve(true);
                 });
-            }
+            });
         }
     }
 
@@ -2573,5 +2527,19 @@ export class EnhancedJournalSheet extends JournalPageSheet {
             return;
 
         actor.sheet.render(true);
+    }
+
+    clickItem(event) {
+        let target = event.currentTarget;
+        let li = target.closest('li');
+        let id = li.dataset.id;
+
+        let itemData = (getProperty(this.object, "flags.monks-enhanced-journal.items") || []).find(i => i._id == id);
+        if (itemData) {
+            let cls = game.items.documentClass;
+            let item = new cls(itemData);
+            if (item.displayCard)
+                item.displayCard();
+        }
     }
 }

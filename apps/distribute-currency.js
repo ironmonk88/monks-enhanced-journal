@@ -32,7 +32,7 @@ export class DistributeCurrency extends FormApplication {
     static get defaultOptions() {
         return mergeObject(super.defaultOptions, {
             id: "distribute-currency",
-            classes: ["distribute-currency", "monks-journal-sheet", "sheet"],
+            classes: ["distribute-currency", "monks-journal-sheet", "dialog"],
             title: i18n("MonksEnhancedJournal.DistributeCurrency"),
             template: "modules/monks-enhanced-journal/templates/distribute-currency.html",
             width: 600,

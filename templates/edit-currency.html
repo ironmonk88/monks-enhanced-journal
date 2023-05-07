@@ -1,21 +1,21 @@
-<div class="monks-enhanced-journal flexcol editcurrency">
+<div class="monks-journal-sheet sheet flexcol editcurrency">
     <form>
         <p class="notes">{{localize 'MonksEnhancedJournal.msg.SetTheConversionToZero'}}</p>
         <div class="dialog-content">
-            <ol class="items-list">
-                <li class="items-header flexrow" style="position: relative;">
-                    <div class="item-controls" style="margin-left: 8px;">{{localize 'MonksEnhancedJournal.Code'}}</div>
+            <div class="items-list">
+                <div class="item-header flexrow">
+                    <div class="item-detail" style=" text-align:left;padding-left:8px">{{localize 'MonksEnhancedJournal.Code'}}</div>
                     <div class="item-name">{{localize 'MonksEnhancedJournal.Name'}}</div>
-                    <div class="item-controls" style="text-align: right;">{{localize 'MonksEnhancedJournal.Convert'}}</div>
-                    <div class="item-controls flexrow" style="text-align: center;">
-                        <a class="item-control item-add"><i class="fas fa-plus"></i> {{localize 'MonksEnhancedJournal.Add'}}</a>
+                    <div class="item-detail">{{localize 'MonksEnhancedJournal.Convert'}}</div>
+                    <div class="item-controls flexrow">
+                        <a class="item-control text item-add"><i class="fas fa-plus"></i> {{localize 'MonksEnhancedJournal.Add'}}</a>
                     </div>
-                </li>
+                </div>
 
                 <ol class="item-list">
                     {{#each currency}}
-                    <li class="item flexrow" data-id="{{this.id}}" style="position:relative;">
-                        <div class="item-controls" style="text-align:center;">
+                    <li class="item flexrow" data-id="{{this.id}}">
+                        <div class="item-detail" style="text-align:left;">
                             <input type="text" name="id" autocomplete="off" value="{{this.id}}" />
                         </div>
 
@@ -23,17 +23,17 @@
                             <input type="text" name="name" autocomplete="off" value="{{this.name}}" />
                         </div>
 
-                        <div class="item-controls">
-                            <input type="number" name="convert" class="currency-conversion" autocomplete="off" style="text-align: right;" value="{{this.convert}}" />
+                        <div class="item-detail">
+                            <input type="number" name="convert" class="currency-conversion" style="text-align: right;padding-right: 8px;" autocomplete="off" value="{{this.convert}}" />
                         </div>
 
-                        <div class="item-controls flexrow" style="text-align:center;">
+                        <div class="item-controls flexrow">
                             <a class="item-control item-delete"><i class="fas fa-trash"></i></a>
                         </div>
                     </li>
                     {{/each}}
                 </ol>
-            </ol>
+            </div>
         </div>
         <footer class="sheet-footer flexrow">
             <button type="button" name="submit">

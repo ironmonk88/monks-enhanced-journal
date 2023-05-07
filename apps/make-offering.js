@@ -24,7 +24,7 @@ export class MakeOffering extends FormApplication {
     static get defaultOptions() {
         return mergeObject(super.defaultOptions, {
             id: "make-offering",
-            classes: ["form", "make-offering"],
+            classes: ["form", "make-offering", "monks-journal-sheet", "dialog"],
             title: i18n("MonksEnhancedJournal.MakeOffering"),
             template: "modules/monks-enhanced-journal/templates/make-offering.html",
             dragDrop: [
@@ -40,7 +40,7 @@ export class MakeOffering extends FormApplication {
 
         data.private = this.offering.hidden;
 
-        data.currency = MonksEnhancedJournal.currencies.map(c => { return { id: c.id, name: c.name }; });
+        data.currency = MonksEnhancedJournal.currencies.filter(c => c.convert != null).map(c => { return { id: c.id, name: c.name }; });
 
         data.coins = this.offering.currency;
         data.items = (this.offering.items || []).map(i => {
@@ -144,24 +144,8 @@ export class MakeOffering extends FormApplication {
     activateListeners(html) {
         super.activateListeners(html);
 
-        let that = this;
-        new ContextMenu($(html), ".offering-item", [
-            {
-                name: "Remove Offering",
-                icon: '<i class="fas fa-trash"></i>',
-                callback: li => {
-                    const id = li.data("id");
-                    Dialog.confirm({
-                        title: `Remove Offering Item`,
-                        content: "Are you sure you want to remove this item from the offering?",
-                        yes: () => {
-                            that.offering.items.findSplice(i => i.id == id);
-                            that.render();
-                        }
-                    });
-                }
-            }
-        ]);
+        $('.actor-icon', html).on("dblclick", this.openActor.bind(this));
+        $('.item-delete', html).on("click", this.removeOffering.bind(this));
 
         $('.cancel-offer', html).on("click", this.close.bind(this));
         $('.private', html).on("change", (event) => {
@@ -170,5 +154,27 @@ export class MakeOffering extends FormApplication {
         $('.currency-field', html).on("blur", (event) => {
             this.offering.currency[$(event.currentTarget).attr("name")] = parseInt($(event.currentTarget).val() || 0);
         });
+    }
+
+    removeOffering(event) {
+        let that = this;
+        const id = event.currentTarget.closest(".item").dataset.id;
+        Dialog.confirm({
+            title: `Remove offering Item`,
+            content: "Are you sure you want to remove this item from the offering?",
+            yes: () => {
+                that.offering.items.findSplice(i => i.id == id);
+                that.render();
+            }
+        });
+    }
+
+    async openActor() {
+        try {
+            let actor = game.actors.get(this.offering?.actor?.id);
+            if (actor) {
+                actor.sheet.render(true);
+            }
+        } catch {}
     }
 }

@@ -1,26 +1,26 @@
 <div class="monks-enhanced-journal flexcol editattributes monks-journal-sheet sheet">
     <form>
         <div class="dialog-content">
-            <ol class="items-list">
-                <li class="items-header flexrow" style="position: relative;">
+            <div class="items-list">
+                <div class="item-header flexrow" style="position: relative;">
                     <div class="item-controls"></div>
-                    <div class="item-name">{{localize 'MonksEnhancedJournal.Code'}}</div>
+                    <div class="item-detail" style="text-align:left;">{{localize 'MonksEnhancedJournal.Code'}}</div>
                     <div class="item-name">{{localize 'MonksEnhancedJournal.Name'}}</div>
-                    <div class="item-controls">{{localize 'MonksEnhancedJournal.Hidden'}}</div>
-                    <div class="item-controls">{{localize 'MonksEnhancedJournal.Full'}}</div>
-                    <div class="item-controls flexrow" style="text-align: center;">
-                        <a class="item-control item-add"><i class="fas fa-plus"></i> {{localize 'MonksEnhancedJournal.Add'}}</a>
+                    <div class="item-detail">{{localize 'MonksEnhancedJournal.Hidden'}}</div>
+                    <div class="item-detail">{{localize 'MonksEnhancedJournal.Full'}}</div>
+                    <div class="item-controls flexrow" buttons="2">
+                        <a class="item-control text item-add"><i class="fas fa-plus"></i> {{localize 'MonksEnhancedJournal.Add'}}</a>
                     </div>
-                </li>
+                </div>
 
-                <ol class="item-list" style="padding-left: 0px; max-height: 500px; overflow-y: auto;">
+                <ol class="item-list" style="max-height: 500px;">
                     {{#each fields}}
-                    <li class="item flexrow" data-id="{{this.id}}" style="position:relative;">
+                    <li class="item flexrow" data-id="{{this.id}}">
                         <div class="item-controls">
                             <i class="fas fa-bars reorder" style="cursor:ns-resize;"></i>
                         </div>
 
-                        <div class="item-name">
+                        <div class="item-detail" style="text-align:left;">
                             <input type="text" name="id" autocomplete="off" value="{{this.id}}" />
                         </div>
 
@@ -28,21 +28,21 @@
                             <input type="text" name="name" autocomplete="off" value="{{this.name}}" />
                         </div>
 
-                        <div class="item-controls">
+                        <div class="item-detail">
                             <input type="checkbox" name="hidden" {{checked this.hidden}} />
                         </div>
 
-                        <div class="item-controls">
+                        <div class="item-detail">
                             <input type="checkbox" name="full" {{checked this.full}} />
                         </div>
 
-                        <div class="item-controls flexrow">
+                        <div class="item-controls flexrow" buttons="2">
                             <a class="item-control item-delete"><i class="fas fa-trash"></i></a>
                         </div>
                     </li>
                     {{/each}}
                 </ol>
-            </ol>
+            </div>
         </div>
         <footer class="sheet-footer flexrow">
             <button type="button" name="submit">
