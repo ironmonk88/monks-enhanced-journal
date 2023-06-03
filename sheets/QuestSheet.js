@@ -14,7 +14,7 @@ export class QuestSheet extends EnhancedJournalSheet {
     static get defaultOptions() {
         return mergeObject(super.defaultOptions, {
             title: i18n("MonksEnhancedJournal.quest"),
-            template: "modules/monks-enhanced-journal/templates/quest.html",
+            template: "modules/monks-enhanced-journal/templates/sheets/quest.html",
             tabs: [{ navSelector: ".tabs", contentSelector: ".sheet-body", initial: "description" }],
             dragDrop: [
                 { dragSelector: ".document.actor", dropSelector: ".quest-container" },
@@ -39,18 +39,19 @@ export class QuestSheet extends EnhancedJournalSheet {
             failed: "MonksEnhancedJournal.queststatus.failed"
         };
 
-        data.objectives = duplicate(this.object.flags["monks-enhanced-journal"].objectives || [])?.filter(o => {
+        data.objectives = await Promise.all(duplicate(this.object.flags["monks-enhanced-journal"].objectives || [])?.filter(o => {
             return this.object.isOwner || o.available;
-        }).map(o => {
+        }).map(async (o) => {
             let counter = { counter: ($.isNumeric(o.required) ? (o.done || 0) + '/' + o.required : '') };
-            
-            if (!this.object.isOwner) {
-                let content = $("<div>").html(o.content);
-                $("section.secret", content).remove();
-                o.content = content[0].innerHTML;
-            }
+
+            o.content = await TextEditor.enrichHTML(o.content, {
+                relativeTo: this.object,
+                secrets: this.object.isOwner,
+                async: true
+            })
+
             return mergeObject(o, counter);
-        });
+        }));
 
         data.useobjectives = setting('use-objectives');
         data.canxp = game.modules.get("monks-tokenbar")?.active && this.object.isOwner;
@@ -213,11 +214,10 @@ export class QuestSheet extends EnhancedJournalSheet {
 
         //$('.item-relationship .item-field', html).on('change', this.alterRelationship.bind(this));
 
-        $('.items-header', html).on("click", this.collapseItemSection.bind(this));
         $('.refill-all', html).click(this.refillItems.bind(this, 'all'));
 
         const actorOptions = this._getPersonActorContextOptions();
-        if (actorOptions) new ContextMenu($(html), ".actor-img", actorOptions);
+        if (actorOptions) new ContextMenu($(html), ".actor-img-container", actorOptions);
     }
 
     /*async _onSubmit(ev) {
@@ -653,12 +653,18 @@ export class QuestSheet extends EnhancedJournalSheet {
     openActor(event) {
         let actorLink = this.object.getFlag('monks-enhanced-journal', 'actor');
         let actor = game.actors.find(a => a.id == actorLink.id);
-        this.open(actor);
+        if (!actor)
+            return;
+
+        if (event.newtab == true || event.altKey)
+            actor.sheet.render(true);
+        else
+            this.open(actor, event);
     }
 
     removeActor() {
         this.object.unsetFlag('monks-enhanced-journal', 'actor');
-        $('.actor-img', this.element).remove();
+        $('.actor-img-container', this.element).remove();
     }
 
     _getPersonActorContextOptions() {
@@ -674,6 +680,15 @@ export class QuestSheet extends EnhancedJournalSheet {
                         content: i18n("MonksEnhancedJournal.ConfirmRemoveLink"),
                         yes: this.removeActor.bind(this)
                     });
+                }
+            },
+            ,
+            {
+                name: i18n("MonksEnhancedJournal.OpenActorSheet"),
+                icon: '<i class="fas fa-user fa-fw"></i>',
+                condition: () => game.user.isGM,
+                callback: li => {
+                    this.openActor.call(this, { newtab: true });
                 }
             }
         ];

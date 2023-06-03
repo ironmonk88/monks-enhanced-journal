@@ -2,7 +2,6 @@ import { MonksEnhancedJournal, log, i18n, setting } from "../monks-enhanced-jour
 
 let CreateLinkPlugin = {
     init : function(editor, text) {
-        
         editor.ui.registry.addMenuItem('createlink', {
             icon: 'document-properties',
             text: 'Find Document',

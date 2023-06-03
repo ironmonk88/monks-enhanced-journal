@@ -17,7 +17,7 @@ export class SlideshowSheet extends EnhancedJournalSheet {
     static get defaultOptions() {
         return mergeObject(super.defaultOptions, {
             title: i18n("MonksEnhancedJournal.slideshow"),
-            template: "modules/monks-enhanced-journal/templates/slideshow.html",
+            template: "modules/monks-enhanced-journal/templates/sheets/slideshow.html",
             tabs: [{ navSelector: ".tabs", contentSelector: ".sheet-body", initial: "entry-details" }],
             dragDrop: [
                 { dragSelector: ".slide", dropSelector: ".slide" },
@@ -137,7 +137,7 @@ export class SlideshowSheet extends EnhancedJournalSheet {
     async _render(force, options = {}) {
         await super._render(force, options);
 
-        if (this.object.testUserPermission(game.user, "OBSERVER", { exact: true }) || options.play) {
+        if (!this.object.testUserPermission(game.user, "OWNER") || options.play) {
             this.playSlideshow();
         }
     }
@@ -385,7 +385,7 @@ export class SlideshowSheet extends EnhancedJournalSheet {
                 }).then((sound) => {
                     this.object.sound = sound;
                     MonksEnhancedJournal.sounds.push(sound);
-                    sound._mejvolume = volume;
+                    sound.effectiveVolume = volume;
                     return sound;
                 });
             }
@@ -557,7 +557,7 @@ export class SlideshowSheet extends EnhancedJournalSheet {
                             }).then((sound) => {
                                 that.object.slidesound = sound;
                                 MonksEnhancedJournal.sounds.push(sound);
-                                sound._mejvolume = volume;
+                                sound.effectiveVolume = volume;
                                 return sound;
                             });
                         }
@@ -581,7 +581,7 @@ export class SlideshowSheet extends EnhancedJournalSheet {
                     }).then((sound) => {
                         that.object.slidesound = sound;
                         MonksEnhancedJournal.sounds.push(sound);
-                        sound._mejvolume = volume;
+                        sound.effectiveVolume = volume;
                         return sound;
                     });
                 }

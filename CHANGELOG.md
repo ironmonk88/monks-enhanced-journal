@@ -1,3 +1,103 @@
+# Version 10.15
+
+Added integration with Monks Sound Enhancement to use the Sound Effects volume if it's available.
+
+Added the option to drag a Journal onto the tab bar to open it.
+
+Fixed issue with opening a Journal Entry not going to the correct anchor.
+
+Fixed issue where the Journal sheet would always open to the anchor regardless of where you've scrolled to in the document.
+
+Fixed issue where pressing enter in the Journal name text field was causing Foundry to reload.
+
+Added the option to hold down the shift key when clicking on a tab to close a tab.
+
+Added the option to hold down the alt key when clicking a tab to open a tab out of the enhaced browser.
+
+Fixed issue with the enhanced browser title not changing if the active tab is open and the name changes.
+
+Added a tooltip to the collapse and expand button for the sidebar directory.
+
+Added the option to drag and drop reorder tabs.
+
+Fixed issue with opening Actors in the enhanced browser.
+
+Updated the checklist page to instead just be a generic list page, with 4 options to change the sheet into.  Regular list, checklist, progress list, and poll list.
+
+Fixed issue with objectives not showing the secrets properly.
+
+Added the option to transfer currency back to a loot sheet, or for players to grab a specific amount.
+
+Added integration with Arius Planeswalker's Stylish Journal, so all the goodness from that module comes included in Enhanced Journal.
+
+Completely redid the css files to support variables and to standardise it to make it a lot easier to alter.  When other systems and modules need to make changes to the MEJ styling.
+
+Removed an conflict notification message when using Starfinder.
+
+Added the option to display journal images to a chat message.
+
+Fixed issue with how journal anchors are slugified.
+
+Reduced the permission levels needed to view an inline content link.
+
+Added a details tab to the shop sheet.  Which now includes an open and close time.  And a log of items that have been purchased.
+
+Added world clock integration so shops can now open and close automatically based on the time in game.
+
+Fixed issue with selling an item back to a shop if there were multiple GMs logged in.
+
+Fixed an issue with dropping items onto an actor sheet if the system doesn't support dropping items onto an actor sheet.
+
+Fixed an issue where selling an item back to a shop wasn't setting the value according the the sell back price.
+
+Fixed an issue with Not config not updating the page dropdown properly when a journal was picked.
+
+Added a field on the Note config to accept an anchor for the page.
+
+Fixed an issue where MEJ pages were showing the pages dropdown in the Note Config.
+
+Fixed issue with Polyglot.
+
+Fixed issue with MATT integration.
+
+Added the option to generate the shop or person name randomly.  Person names will also generate based on the race in the Race field on the sheet.
+
+Fixed issue in the Encounter sheet when actors no longer exist.  It will now indicate that they don't exist, so you're not confused when they're not generated with the encounter.
+
+Fixed issue with not being able to clear an image from an MEJ sheet.  You can now shift click it to remove it.
+
+Added the option to pan and zoom a picture page or a Text and Picture page.  Hold the Ctrl Key down and use the mouse wheel to zoom, or click and drag while holding the ctrl key pan.
+
+Fixed currency in the cypher system.
+
+Added integration with Monks Sound Enhancement to show the journal page sound on the playlist tab.
+
+Fixed issue with items that aren't identified showing as identified in the Loot or Shop sheets.
+
+Fixed issue when rarity doesn't exist.
+
+Fixed issue with offerings showing a broken image, and being clear about the quantity added. 
+
+And made it clear when an offering is no longer active.
+
+Added the option to only clear items that aren't locked in a shop.  You can hold the ctrl key down to clear them all.
+
+Fixed issue where offering item image disappears once an offering is accepted.
+
+Added the option to change the name of a Person sheet when an actor is linked to it.
+
+Fixed issue with quest objectives not rendering the inline links properly.
+
+Added the option to drop another shop sheet onto a shop to have it either replace or add items to the store.  Making it a little easier to populate from a known set of items.
+
+Added the option with roll tables to either keep everything, only keep the locked items, or replace everything.
+
+Fixed issue dragging a folder of items into a shop or loot sheet.
+
+Added the option to drop a tab onto the chat window to create a chat card with a link to the journal.
+
+Added permissions to individual list items so you can reveal items on a per user basis.
+
 # Version 10.14
 
 Fixed issues with opening MEJ with a new tab.

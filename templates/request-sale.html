@@ -1,53 +1,55 @@
 <div class="monks-enhanced-journal request-item request-sale item-card monks-journal-sheet sheet">
     <div class="flexrow" style="align-items: center; flex-grow: 0;">
-        <img src="{{actor.img}}" class="chat-actor-icon" />
+        <img src="{{actor.img}}" class="reqest-chat-icon chat-actor-icon" />
         <h4 style="margin-bottom:0px;">{{actor.name}}</h4>
     </div>
     <div class="flexrow" style="align-items: center; flex-grow: 0;">
-        <img src="{{shop.img}}" class="chat-shop-icon" />
+        <img src="{{shop.img}}" class="reqest-chat-icon chat-shop-icon" />
         <h4 style="margin-bottom:0px;">{{shop.name}}</h4>
     </div>
 
-    <ol class="items-list sell-items">
-        <li class="items-header flexrow">
+    <div class="items-list sell-items">
+        <div class="item-header flexrow">
             <h3 class="item-name noborder flexrow">{{localize 'MonksEnhancedJournal.Items'}}</h3>
-        </li>
-        {{#each items}}
-        <li class="item flexrow" data-id="{{this._id}}">
-            <img src="{{this.img}}" class="item-icon" />
-            <h4>{{this.name}}</h4>
-        </li>
-        <li class="item flexrow" data-id="{{this._id}}">
-            <div class="item-name flexrow">
-                <h4>{{localize 'MonksEnhancedJournal.Quantity'}}{{#if this.flags.monks-enhanced-journal.maxquantity}} <i><small>(Max {{this.flags.monks-enhanced-journal.maxquantity}})</small></i>{{/if}}</h4>
-            </div>
+        </div>
+        <ol class="item-list">
+            {{#each items}}
+            <li class="item flexrow" data-id="{{this._id}}">
+                <img src="{{this.img}}" class="reqest-chat-icon item-icon" />
+                <h4>{{this.name}}</h4>
+            </li>
+            <li class="item flexrow" data-id="{{this._id}}">
+                <div class="item-name flexrow">
+                    <h4>{{localize 'MonksEnhancedJournal.Quantity'}}{{#if this.flags.monks-enhanced-journal.maxquantity}} <i><small>(Max {{this.flags.monks-enhanced-journal.maxquantity}})</small></i>{{/if}}</h4>
+                </div>
 
-            <div class="item-quantity flexrow" style="flex: 0 0 70px;">
-                <input class="gm-only" type="number" min="0" max="{{this.flags.monks-enhanced-journal.maxquantity}}" step="1" data-dtype="Number" name="flags.monks-enhanced-journal.quantity" value="{{this.flags.monks-enhanced-journal.quantity}}" style="text-align:right;" />
-                <span class="player-only" style="text-align: right; padding-right: 4px;">{{this.flags.monks-enhanced-journal.quantity}}</span>
-            </div>
-        </li>
-        <li class="item flexrow" data-id="{{this._id}}">
-            <div class="item-name flexrow">
-                <h4>{{localize 'MonksEnhancedJournal.Price'}}</h4>
-            </div>
+                <div class="item-quantity flexrow" style="flex: 0 0 70px;">
+                    <input class="gm-only" type="number" min="0" max="{{this.flags.monks-enhanced-journal.maxquantity}}" step="1" data-dtype="Number" name="flags.monks-enhanced-journal.quantity" value="{{this.flags.monks-enhanced-journal.quantity}}" style="text-align:right;" />
+                    <span class="player-only" style="text-align: right; padding-right: 4px;">{{this.flags.monks-enhanced-journal.quantity}}</span>
+                </div>
+            </li>
+            <li class="item flexrow" data-id="{{this._id}}">
+                <div class="item-name flexrow">
+                    <h4>{{localize 'MonksEnhancedJournal.Price'}}</h4>
+                </div>
 
-            <div class="item-price flexrow" style="flex: 0 0 70px;">
-                <input class="gm-only" type="text" name="flags.monks-enhanced-journal.sell" value="{{this.flags.monks-enhanced-journal.sell}} {{this.flags.monks-enhanced-journal.currency}}" style="text-align:right;" />
-                <span class="player-only" style="text-align: right; padding-right: 4px;">{{this.flags.monks-enhanced-journal.sell}} {{this.flags.monks-enhanced-journal.currency}}</span>
-            </div>
-        </li>
-        <li class="item flexrow" data-id="{{this._id}}" style="border-top: 1px solid #FFFFFF;">
-            <div class="item-name flexrow">
-                <h4 style="font-weight:bold;">{{localize 'MonksEnhancedJournal.Total'}}</h4>
-            </div>
+                <div class="item-price flexrow" style="flex: 0 0 70px;">
+                    <input class="gm-only" type="text" name="flags.monks-enhanced-journal.sell" value="{{this.flags.monks-enhanced-journal.sell}} {{this.flags.monks-enhanced-journal.currency}}" style="text-align:right;" />
+                    <span class="player-only" style="text-align: right; padding-right: 4px;">{{this.flags.monks-enhanced-journal.sell}} {{this.flags.monks-enhanced-journal.currency}}</span>
+                </div>
+            </li>
+            <li class="item flexrow" data-id="{{this._id}}" style="border-top: 1px solid #FFFFFF;">
+                <div class="item-name flexrow">
+                    <h4 style="font-weight:bold;">{{localize 'MonksEnhancedJournal.Total'}}</h4>
+                </div>
 
-            <div class="item-total flexrow">
-                <span style="text-align: right; padding-right: 4px;">{{this.flags.monks-enhanced-journal.total}} {{this.flags.monks-enhanced-journal.currency}}</span>
-            </div>
-        </li>
-        {{/each}}
-    </ol>
+                <div class="item-total flexrow">
+                    <span style="text-align: right; padding-right: 4px;">{{this.flags.monks-enhanced-journal.total}} {{this.flags.monks-enhanced-journal.currency}}</span>
+                </div>
+            </li>
+            {{/each}}
+        </ol>
+    </div>
     <div class="gm-only flexrow request-buttons">
         <button type="button" class="request-accept"><i class="fas fa-check"></i> {{localize 'MonksEnhancedJournal.Offer'}}</button>
         <button type="button" class="request-reject"><i class="fas fa-times"></i> {{localize 'MonksEnhancedJournal.Reject'}}</button>

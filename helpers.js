@@ -31,10 +31,10 @@ export class MEJHelpers {
         return value ?? defvalue;
     }
 
-    static setValue(item, name, value = 1) {
+    static setValue(item, name, value = 1, options = {}) {
         let prop = (item.system != undefined ? item.system : item);
         let data = getProperty(prop, name);
-        setProperty(prop, name, (data && data.hasOwnProperty("value") && !value.hasOwnProperty("value") ? Object.assign(data, { value: value }) : value));
+        setProperty(prop, name, (data && data.hasOwnProperty("value") && !value.hasOwnProperty("value") && !options.overwrite ? Object.assign(data, { value: value }) : value));
     }
 
     static defaultCurrency() {
@@ -134,6 +134,10 @@ export class MEJHelpers {
             setValue(item, name, { value: price.value, denomination: price.currency });
         } else if (game.system.id == "wfrp4e") {
             setProperty(item, `system.price.${price.currency}`, price.value);
+        } else if (game.system.id == "pf2e") {
+            let value = {};
+            value[price.currency] = price.value;
+            setValue(item, name, { value: value }, {overwrite: true});
         } else {
             setValue(item, name, MEJHelpers.toDefaultCurrency(price));
         }

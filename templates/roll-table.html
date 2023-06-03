@@ -29,7 +29,11 @@
     {{/if}}
     <div class="form-group">
         <label>{{localize 'MonksEnhancedJournal.ClearItems'}}</label>
-        <input name="clear" type="checkbox" />
+        <select name="clear">
+            <option value="none">{{localize 'MonksEnhancedJournal.KeepItems'}}</option>
+            <option value="notlocked">{{localize 'MonksEnhancedJournal.NotLocked'}}</option>
+            <option value="all">{{localize 'MonksEnhancedJournal.ClearEverything'}}</option>
+        </select>
     </div>
     <div class="form-group">
         <label>{{localize 'MonksEnhancedJournal.DuplicateItems'}}</label>

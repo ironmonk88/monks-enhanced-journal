@@ -1,6 +1,6 @@
-<div class="monks-enhanced-journal flexrow{{#if collapsed}} collapse{{/if}}">
-    <div class="body flexcol">
-        <div class="mainbar flexcol">
+<div class="enhanced-journal flexrow{{#if collapsed}} collapse{{/if}}">
+    <section class="enhanced-journal-body flexcol">
+        <header class="enhanced-journal-header flexcol">
             <div class="tab-bar flexrow">
                 <div class="tab-row flexrow">
                     {{#each tabs}}
@@ -11,7 +11,7 @@
                     {{/each}}
                     <div class="tab-button tab-add"><i class="fas fa-plus"></i></div>
                 </div>
-                <div class="tab-button sidebar-toggle"><i class="fas {{#if collapsed}}fa-caret-left{{else}}fa-caret-right{{/if}}"></i></div>
+                <div class="tab-button sidebar-toggle" data-tooltip="{{#if collapsed}}{{localize 'MonksEnhancedJournal.ExpandDirectory'}}{{else}}{{localize 'MonksEnhancedJournal.CollapseDirectory'}}{{/if}}"><i class="fas {{#if collapsed}}fa-caret-left{{else}}fa-caret-right{{/if}}"></i></div>
             </div>
             <div class="bookmark-bar flexrow">
                 <div class="bookmark-button add-bookmark" title="{{localize 'MonksEnhancedJournal.AddBookmark'}}"><i class="fas fa-star"></i></div>
@@ -23,15 +23,15 @@
                 <div class="nav-button history back-button{{#unless canBack}} disabled{{/unless}}" title="{{localize 'MonksEnhancedJournal.Back'}}" data-history="back"><i class="fas fa-chevron-left"></i></div>
                 <div class="nav-button history forward-button{{#unless canForward}} disabled{{/unless}}" title="{{localize 'MonksEnhancedJournal.Forward'}}" data-history="forward"><i class="fas fa-chevron-right"></i></div>
                 <hr class="vertical" />
-                <div class="toggle-menu nav-button" action="toggleCollapse" title="Collapse Sidebar" style="margin-left: 4px;"><i class="fas fa-list"></i> <span></span></div>
+                <div class="toggle-menu nav-button" action="toggleCollapse" data-tooltip="{{localize 'JOURNAL.ViewCollapse'}}" style="margin-left: 4px;"><i class="fas fa-list"></i> <span></span></div>
                 <div class="button-group flexrow" id="journal-buttons"></div>
             </div>
-        </div>
+        </header>
         <div class="content flexcol editable">
             <section>
             </section>
         </div>
-        <footer class="flexrow navigation">
+        <footer class="flexrow navigation enhanced-journal-footer">
             <div class="navigate-prev nav-button navigate" title=""><i class="fas fa-angle-double-left"></i> <i class="fas fa-book-open"></i></div>
             <div class="page-prev nav-button navigate"><i class="fas fa-chevron-left"></i> <i class="fas fa-page"></i></div>
             <div class="flexrow" style="justify-content:center;">
@@ -40,6 +40,6 @@
             <div class="page-next nav-button navigate"><i class="fas fa-page"></i> <i class="fas fa-chevron-right"></i></div>
             <div class="navigate-next nav-button navigate" title=""><i class="fas fa-book-open"></i> <i class="fas fa-angle-double-right"></i></div>
         </footer>
-    </div>
+    </section>
     <div class="directory-sidebar"></div>
 </div>

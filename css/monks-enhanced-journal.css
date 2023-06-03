@@ -1,21 +1,165 @@
-﻿.monks-enhanced-journal:not(.category-filter) {
+﻿:root {
+    --mej-light-0: 255, 255, 255;
+    --mej-light-1: 238, 238, 238;
+    --mej-light-2: 221, 221, 221;
+    --mej-light-3: 204, 204, 204;
+    --mej-light-4: 187, 187, 187;
+    --mej-light-5: 170, 170, 170;
+    --mej-light-6: 153, 153, 153;
+    --mej-light-7: 136, 136, 136;
+    --mej-dark-7: 119, 119, 119;
+    --mej-dark-6: 102, 102, 102;
+    --mej-dark-5: 85, 85, 85;
+    --mej-dark-4: 68, 68, 68;
+    --mej-dark-3: 51, 51, 51;
+    --mej-dark-2: 34, 34, 34;
+    --mej-dark-1: 17, 17, 17;
+    --mej-dark-0: 0, 0, 0;
+    --mej-cream: rgba(255, 255, 240, 0.8);
+    --mej-font-family: 'Modesto Condensed', 'Palatino Linotype', serif;
+    --mej-background: url(../../../ui/parchment.jpg) repeat;
+    --mej-header-border-color: rgb(192, 192, 192);
+    --mej-header-background: rgb(220, 220, 220);
+    --mej-header-color: var(--color-text-dark-primary);
+    --mej-header-tab-color: var(--mej-header-color);
+    --mej-header-tab-btn-color: rgb(103, 102, 99);
+    --mej-header-tab-background: rgba(255, 255, 240, 0.5);
+    --mej-header-tab-border: 1px solid rgb(181, 179, 164);
+    --mej-header-tab-active: rgba(255, 255, 255, 0.9);
+    --mej-header-tab-hover: inherit;
+    --mej-header-tab-active-hover: inherit;
+    --mej-header-bookmark-color: var(--mej-header-color);
+    --mej-header-bookmark-background: rgba(255, 255, 255, 0.3);
+    --mej-header-bookmark-border: rgb(192, 192, 192);
+    --mej-header-bookmark-hover: rgba(0, 0, 0, 0.1);
+    --mej-header-add-bookmark-background: var(--mej-header-bookmark-background);
+    --mej-header-add-bookmark-border: var(--mej-header-bookmark-border);
+    --mej-header-add-bookmark-color: var(--mej-header-bookmark-color);
+    --mej-header-add-bookmark-hover: var(--mej-header-bookmark-hover);
+    --mej-header-nav-color: var(--mej-header-color);
+    --mej-header-nav-background: rgb(233, 231, 225);
+    --mej-header-nav-btn-background: var(--mej-cream);
+    --mej-header-nav-btn-border: rgb(192, 192, 192);
+    --mej-header-nav-btn-disabled: rgb(136, 136, 136);
+    --mej-header-nav-btn-background-disabled: inherit;
+    --mej-header-nav-btn-border-disabled: inherit;
+    --mej-header-nav-btn-background-hover: var(--mej-header-nav-btn-background);
+    --mej-header-nav-input-border: rgb(122, 121, 113);
+    --mej-header-nav-input-background: rgba(0, 0, 0, 0.05);
+    --mej-header-nav-input-color: rgb(25, 24, 19);
+    --mej-header-nav-input-focus-background: rgba(255, 255, 250, 0.4);
+    --mej-header-nav-input-focus-border: rgb(192, 192, 192);
+    --mej-header-nav-input-error-background: rgba(255, 0, 0, 0.1);
+    --mej-header-nav-vertical-line: rgb(238, 237, 224);
+    --mej-footer-color: var(--color-text-dark-primary);
+    --mej-footer-background: rgb(233, 231, 225);
+    --mej-footer-border: rgb(192, 192, 192);
+    --mej-footer-btn-background: var(--mej-cream);
+    --mej-footer-btn-background-hover: var(--mej-footer-btn-background);
+    --mej-footer-btn-border: rgb(192, 192, 192);
+    --mej-footer-btn-disabled: rgb(136, 136, 136);
+    --mej-footer-btn-background-disabled: inherit;
+    --mej-footer-btn-border-disabled: inherit;
+    --mej-sheet-color: var(--color-text-dark-primary);
+    --mej-sheet-header-border: rgb(120, 46, 34);
+    --mej-sheet-header-input-color: var(--color-text-dark-primary);
+    --mej-sheet-header-input-border: 1px solid rgb(122, 121, 113);
+    --mej-sheet-header-input-background: rgba(0, 0, 0, 0.05);
+    --mej-sheet-header-label-color: rgb(75, 74, 68);
+    --mej-sheet-header-button-color: var(--primary-font);
+    --mej-sheet-header-button-background: rgba(0, 0, 0, 0.1);
+    --mej-sheet-header-detail-input-color: rgb(25, 24, 19);
+    --mej-sheet-detailed-header-border: rgb(238, 237, 224);
+    --mej-sheet-tab-color: var(--mej-sheet-color);
+    --mej-sheet-tab-color-hover: inherit;
+    --mej-sheet-tab-color-active: var(--mej-sheet-tab-color);
+    --mej-sheet-tab-background: rgba(255, 255, 255, 0.3);
+    --mej-sheet-tab-bottom-border: rgb(238, 237, 224);
+    --mej-sheet-tab-border: 3px solid rgb(181, 179, 164);
+    --mej-sheet-tab-border-active: rgb(68, 25, 26);
+    --mej-sheet-tab-border-items: rgb(187, 178, 114);
+    --mej-sheet-page-control-color: var(--mej-sheet-color);
+    --mej-sheet-page-control-background: rgb(192, 192, 192);
+    --mej-sheet-details-section-border: rgb(238, 237, 224);
+    --mej-sheet-input-border: 1px solid rgb(122, 121, 113);
+    --mej-sheet-input-background: rgba(0, 0, 0, 0.05);
+    --mej-itemlist-background: rgba(0, 0, 0, 0.05);
+    --mej-itemlist-colour: rgb(122, 121, 113);
+    --mej-itemlist-border: rgb(238, 237, 224);
+    --mej-itemlist-item-border: rgb(201, 199, 184);
+    --mej-itemlist-item-name: rgb(25, 24, 19);
+    --mej-itemlist-item-content: rgb(51, 51, 51);
+    --mej-itemlist-item-disabled: rgb(128, 128, 128);
+    --mej-itemlist-alternate-row: rgba(255, 255, 255, 0.3);
+    --mej-itemlist-control-background: rgba(255, 255, 255, 0.4);
+    --mej-itemlist-control-border: rgb(192, 192, 192);
+    --mej-objective-background: rgba(47, 80, 132, 0.8);
+    --mej-objective-border: rgb(92, 135, 185);
+    --mej-objective-color: rgb(240, 240, 224);
+    --mej-objective-header-background: rgba(255, 255, 255, 0.2);
+    --mej-objective-header-border: rgba(255, 255, 255, 0.3);
+    --mej-objective-item-border: rgba(255, 255, 255, 0.2);
+    --mej-quest-status-default: rgb(128, 128, 128);
+    --mej-quest-status-available: rgb(47, 150, 180);
+    --mej-quest-status-inprogress: rgb(248, 148, 6);
+    --mej-quest-status-completed: rgb(81, 163, 81);
+    --mej-quest-status-failed: rgb(189, 54, 47);
+    --mej-slideshow-add-slide: rgba(0, 0, 0, 0.2);
+    --mej-slideshow-duration-border: rgb(0, 24, 74);
+    --mej-slideshow-duration-background: rgba(0, 0, 0, 0.5);
+    --mej-slideshow-duration-bar: rgb(28, 66, 250);
+    --mej-slideshow-duration-color: rgb(255, 255, 255);
+    --mej-list-progress-border: rgb(178, 195, 255);
+    --mej-list-progress-background: rgb(93, 73, 255);
+    --mej-request-card-border: rgb(255, 255, 255);
+    --mej-request-card-img-border: 1px solid #c0c0c0;
+    --mej-active-color: rgb(255, 100, 0);
+    --mej-instruction: rgb(128, 128, 128);
+    --mej-icon-background: rgba(236, 233, 223, 1);
+    --mej-icon-shadow: rgba(0, 0, 0, 0.4);
+    --mej-icon-outline: rgba(0, 0, 0, 0.4);
+    --mej-blank-color: rgba(0, 0, 0, 0.5);
+    --mej-blank-recent-background: rgba(255, 255, 255, 0.3);
+    --mej-blank-recent-border: rgba(255, 255, 255, 0.5);
+    --mej-blank-link-hover: rgba(0, 0, 0, 0.8);
+    --mej-sidebar-background: url(../../../ui/parchment.jpg) repeat;
+    --mej-sidebar-button-background: rgba(0, 0, 0, 0.1);
+    --mej-sidebar-button-border: rgb(238, 237, 224);
+    --mej-sidebar-input-border: rgb(192, 192, 192);
+    --mej-sidebar-input-background: var(--mej-cream);
+    --mej-sidebar-label-color: var(--mej-sheet-color);
+    --mej-sidebar-folder-border-collapsed: rgb(139, 138, 131);
+    --mej-sidebar-folder-border: rgb(116, 115, 109);
+    --mej-sidebar-folder-background-collapsed: rgb(154, 154, 147);
+    --mej-sidebar-folder-background: rgb(133, 131, 124);
+    --mej-sidebar-folder-color-collapsed: rgb(51, 51, 51);
+    --mej-sidebar-folder-context-color: var(--color-text-dark-primary);
+    --mej-sidebar-subfolder-border: rgb(156, 154, 148);
+    --mej-sidebar-document-color: var(--color-text-dark-primary);
+    --mej-sidebar-document-border-top: rgb(195, 193, 182);
+    --mej-sidebar-document-border-botom: rgb(154, 152, 144);
+    --mej-adventure-toc-background: url(../../../ui/denim075.png) repeat;
+    --mej-adventure-toc-item-background: rgba(0, 0, 0, 0.4);
+    --mej-adventure-toc-border-highlight: var(--color-border-highlight);
+    --mej-sheet-button-background: rgb(192, 192, 192);
+    --mej-sheet-button-color: var(--mej-sheet-color);
+    --mej-context-x: 0px;
+    --mej-context-y: 0px;
+}
+
+.monks-enhanced-journal .window-content {
+    padding: 0px !important;
+    background: var(--mej-background) !important;
+}
+
+/*
+.monks-enhanced-journal:not(.category-filter) {
     height: 100%;
     flex-wrap: nowrap;
 }
+*/
 
-.monks-enhanced-journal.sheet .window-content {
-    padding: 0px;
-}
-
-.window-app.image-popout.monks-enhanced-journal.sheet .window-content {
-    background: rgba(0, 0, 0, 0.1);
-}
-
-.window-app.image-popout.monks-enhanced-journal.sheet .header-name,
-.window-app.image-popout.monks-enhanced-journal.sheet .header-name button.play-journal-sound:not(.active) {
-    color: #fff;
-}
-
+/* Highlight the sheet item on the title bar */
 .monks-enhanced-journal > header a.subsheet {
     background: rgba(255, 255, 255, 0.1);
     margin-left: 0px;
@@ -31,26 +175,366 @@
     padding-right: 4px;
 }
 
-.monks-enhanced-journal .directory-sidebar {
-    flex: 0 0 300px;
-    width: 300px;
-    height: 100%;
-    background: url(../../../ui/parchment.jpg) repeat;
-    border-left: 1px solid rgba(0, 0, 0, 0.1);
-    transition: width 0.5s, flex 0.5s;
+.monks-enhanced-journal > header a.polyglot-button {
+    display: none;
 }
 
-.monks-enhanced-journal .collapse .directory-sidebar {
-    flex: 0 0 0px;
-    width: 0px;
+/* Styling if a journal entry is shown as an image popout */
+.window-app.image-popout.monks-enhanced-journal.sheet .window-content {
+    background: rgba(0, 0, 0, 0.1);
 }
 
-.monks-enhanced-journal .body {
+.window-app.image-popout.monks-enhanced-journal.sheet .header-name,
+.window-app.image-popout.monks-enhanced-journal.sheet .header-name button.play-journal-sound:not(.active) {
+    color: #fff;
+}
+
+/* Enhanced Journal styles */
+.monks-enhanced-journal .enhanced-journal {
     height: 100%;
     width: 100%;
     margin-top: 0px;
 }
 
+/* Header */
+.monks-enhanced-journal .enhanced-journal-header {
+    background-color: var(--mej-header-background);
+    flex-grow: 0;
+}
+
+.monks-enhanced-journal .enhanced-journal-header > * {
+    flex: 0 0 30px;
+    border-bottom: 1px solid var(--mej-header-border-color);
+}
+
+/* Tab Bar */
+.monks-enhanced-journal .tab-bar {
+    position: relative;
+    transition: padding-right 0.5s;
+    padding: 4px 2px 0px 4px;
+    flex: 0 0 34px;
+    color: var(--mej-header-tab-color);
+}
+
+.monks-enhanced-journal.condensed .tab-bar {
+    display: none;
+}
+
+.monks-enhanced-journal .enhanced-journal.collapse .enhanced-journal-header .tab-bar {
+    padding-right: 30px;
+}
+
+.monks-enhanced-journal .enhanced-journal.collapse .enhanced-journal-header .tab-bar #context-menu {
+    left: var(--mej-context-x);
+    width: 225px;
+}
+
+.monks-enhanced-journal .tab-bar .tab-row {
+    padding-top: 1px;
+}
+
+.monks-enhanced-journal .tab-bar .journal-tab {
+    max-width: 150px;
+    height: 100%;
+    padding: 4px;
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+    line-height: 20px;
+    background: var(--mej-header-tab-background);
+    border: var(--mej-header-tab-border);
+    position: relative;
+    font-family: 'Signika', sans-serif;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    cursor: pointer;
+    flex-wrap: nowrap;
+    font-size: var(--font-size-14);
+}
+
+.monks-enhanced-journal .tab-bar .journal-tab.active,
+.monks-enhanced-journal .tab-bar .journal-tab:last-child {
+    flex: 0 0 150px;
+}
+
+.monks-enhanced-journal .tab-bar .journal-tab .tab-content {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.monks-enhanced-journal .tab-bar .journal-tab:hover {
+    box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.2);
+    background-color: var(--mej-header-tab-hover);
+}
+
+.monks-enhanced-journal .tab-bar .journal-tab.active {
+    font-weight: bold;
+    background-color: var(--mej-header-tab-active);
+    outline: none;
+}
+
+.monks-enhanced-journal .tab-bar .tab-button {
+    flex: 0 0 30px;
+    text-align: center;
+    line-height: 30px;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 18px;
+    color: var(--mej-header-tab-btn-color);
+}
+
+.monks-enhanced-journal .tab-bar .tab-button:hover {
+    opacity: 0.9;
+    text-shadow: 0 0 8px red;
+}
+
+.monks-enhanced-journal .enhanced-journal .enhanced-journal-header .tab-bar .tab-button.sidebar-toggle {
+    float: left;
+    position: absolute;
+    top: 4px;
+    right: -32px;
+    font-size: 20px;
+    width: 30px;
+    transition: right 0.5s;
+}
+
+.monks-enhanced-journal .enhanced-journal.collapse .enhanced-journal-header .tab-bar .tab-button.sidebar-toggle {
+    right: 0px;
+    top: 4px;
+}
+
+.monks-enhanced-journal .tab-bar .close {
+    flex: 0 0 10px;
+    opacity: 0.6;
+    cursor: pointer;
+    justify-content: flex-end;
+    align-content: flex-end;
+    padding-left: 2px;
+}
+
+.monks-enhanced-journal .tab-bar .close:hover {
+    opacity: 0.8;
+}
+
+/* Bookmark bar */
+.monks-enhanced-journal .enhanced-journal-header .bookmark-bar {
+    padding-left: 2px;
+    flex: 0 0 36px;
+    color: var(--mej-header-bookmark-color);
+}
+
+.monks-enhanced-journal.condensed .enhanced-journal-header .tab-bar {
+    display: none;
+}
+
+.monks-enhanced-journal.hide-bookmark .enhanced-journal-header .bookmark-bar {
+    display: none;
+}
+
+.monks-enhanced-journal .enhanced-journal-header .bookmark-bar .bookmark-button {
+    height: 28px;
+    border-radius: 28px;
+    margin-left: 4px;
+    margin-top: 4px;
+    line-height: 27px;
+    padding: 0px 10px;
+    font-size: 14px;
+    cursor: pointer;
+    flex-wrap: nowrap;
+    flex-grow: 0;
+    white-space: nowrap;
+    border: 1px solid var(--mej-header-bookmark-border);
+    background: var(--mej-header-bookmark-background);
+}
+
+.monks-enhanced-journal .enhanced-journal-header .bookmark-bar .bookmark-button.add-bookmark {
+    border-radius: 4px;
+    flex: 0 0 24px;
+    height: 24px;
+    margin-top: 6px;
+    font-size: 16px;
+    padding-left: 2px;
+    line-height: 22px;
+    text-overflow: clip;
+    margin-left: 2px;
+    overflow: hidden;
+    border: 1px solid var(--mej-header-add-bookmark-border);
+    background: var(--mej-header-add-bookmark-background);
+    color: var(--mej-header-add-bookmark-color);
+}
+
+.monks-enhanced-journal .enhanced-journal-header .bookmark-bar .bookmark-button > div {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    width: 100%;
+}
+
+.monks-enhanced-journal .enhanced-journal-header .bookmark-bar .bookmark-button:not(.add-bookmark) i {
+    margin-top: 4px;
+    margin-right: 2px;
+}
+
+.monks-enhanced-journal .enhanced-journal-header .bookmark-bar .bookmark-button:hover {
+    background: var(--mej-header-bookmark-hover);
+}
+
+.monks-enhanced-journal .enhanced-journal-header .bookmark-bar .bookmark-button.add-bookmark:hover {
+    background: var(--mej-header-add-bookmark-hover);
+}
+/* Navigation bar */
+.monks-enhanced-journal .enhanced-journal-header .navigation {
+    color: var(--mej-header-nav-color);
+    background: var(--mej-header-nav-background);
+    padding: 2px;
+}
+
+.monks-enhanced-journal .enhanced-journal-header .navigation hr.vertical {
+    height: 100%;
+    width: 1px;
+    border-right: 2px groove var(--mej-header-nav-vertical-line);
+    flex: 0 0 1px;
+    margin: 0px 2px;
+}
+
+.monks-enhanced-journal .enhanced-journal-header .navigation .button-group {
+    justify-content: flex-end;
+    flex-wrap: nowrap;
+}
+
+.monks-enhanced-journal .enhanced-journal-header .navigation .nav-button {
+    flex: 0 0 24px;
+    text-align: center;
+    line-height: 24px;
+    font-size: 14px;
+    margin-right: 4px;
+    width: 24px;
+    height: 24px;
+    border-radius: 4px;
+    border: 1px solid var(--mej-header-nav-btn-border);
+    margin-top: 1px;
+    background: var(--mej-header-nav-btn-background);
+}
+
+.monks-enhanced-journal .enhanced-journal-header .navigation .nav-button:not(.disabled):hover {
+    box-shadow: 0 0 5px red;
+    cursor: pointer;
+    background: var(--mej-header-nav-btn-background-hover);
+}
+
+.monks-enhanced-journal .enhanced-journal-header .navigation .nav-button.disabled {
+    color: var(--mej-header-nav-btn-disabled);
+    background: var(--mej-header-nav-btn-background-disabled);
+    border-color: var(--mej-header-nav-btn-border-disabled);
+}
+
+.monks-enhanced-journal .enhanced-journal-header .navigation .nav-input {
+    margin-right: 4px !important;
+    margin-top: 1px;
+    height: 25px !important;
+    border-radius: 4px;
+    flex: 0 0 200px;
+    border: 1px solid var(--mej-header-nav-input-border);
+    background: var(--mej-header-nav-input-background);
+    color: var(--mej-header-nav-input-color);
+}
+
+.monks-enhanced-journal .enhanced-journal-header .navigation .nav-input:focus {
+    background: var(--mej-header-nav-input-focus-background);
+    border: 1px solid var(--mej-header-nav-input-focus-border);
+}
+
+.monks-enhanced-journal .enhanced-journal-header .navigation .nav-text {
+    flex-shrink: 1;
+    flex-basis: auto;
+    flex-grow: 0;
+    padding: 4px;
+    font-size: 12px;
+    line-height: 10px;
+}
+
+/*
+.monks-enhanced-journal .enhanced-journal-header .navigation .title input {
+    font-size: 18px;
+    text-align: center;
+    border: 0px;
+    background: transparent;
+}
+*/
+
+.monks-enhanced-journal .enhanced-journal-header .navigation .search.error {
+    background-color: var(--mej-header-nav-input-error-background);
+}
+
+.monks-enhanced-journal .enhanced-journal-header .navigation .button-group .nav-text i.fa-search {
+    padding-top: 4px;
+}
+
+.monks-enhanced-journal .enhanced-journal-header .navigation #context-menu li {
+    text-align: left;
+}
+
+/* Footer */
+.monks-enhanced-journal .enhanced-journal-footer {
+    color: var(--mej-footer-color);
+    background-color: var(--mej-footer-background);
+    padding: 2px;
+    flex: 0 0 20px;
+    line-height: 20px;
+    font-size: 16px;
+    padding: 5px 6px;
+    border-top: 1px solid var(--mej-footer-border);
+}
+
+.monks-enhanced-journal .enhanced-journal-footer .nav-button {
+    flex: 0 0 24px;
+    text-align: center;
+    line-height: 24px;
+    font-size: 14px;
+    margin-right: 4px;
+    width: 24px;
+    height: 24px;
+    border-radius: 4px;
+    border: 1px solid var(--mej-footer-btn-border);
+    margin-top: 1px;
+    background: var(--mej-footer-btn-background);
+}
+
+.monks-enhanced-journal .enhanced-journal-footer .nav-button.navigate {
+    flex: 0 0 50px;
+}
+
+.monks-enhanced-journal .enhanced-journal-footer .nav-button.navigate i:first-child {
+    margin-right: 4px;
+}
+
+.monks-enhanced-journal .enhanced-journal-footer .nav-button:not(.disabled):hover {
+    box-shadow: 0 0 5px red;
+    cursor: pointer;
+    background: var(--mej-footer-btn-background-hover);
+    text-shadow: 0 0 8px red;
+}
+
+.monks-enhanced-journal .enhanced-journal-footer .nav-button.disabled {
+    color: var(--mej-footer-btn-disabled);
+    background: var(--mej-footer-btn-background-disabled);
+    border-color: var(--mej-footer-btn-border-disabled);
+}
+
+.monks-enhanced-journal .enhanced-journal.collapse .enhanced-journal-footer {
+    padding-right: 26px;
+}
+
+.monks-enhanced-journal .content[document-type='actor'] + .enhanced-journal-footer {
+    display: none;
+}
+
+/* Enhanced Browser content */
+.monks-enhanced-journal .enhanced-journal-body {
+    height: 100%;
+    /*overflow: hidden; Can't be hidden due to the sidebar toggle*/
+}
 .monks-enhanced-journal .content {
     height: 100%;
     overflow: hidden;
@@ -58,8 +542,13 @@
     width: 100%;
 }
 
+.monks-enhanced-journal .enhanced-journal .enhanced-journal-body .content[document-type='actor'] form {
+    overflow-y: auto;
+}
+
 .monks-enhanced-journal .content > section {
     height: 100%;
+    overflow: hidden;
 }
 
 .monks-enhanced-journal .content > section.kanka-journal {
@@ -79,313 +568,50 @@
     min-width: unset;
 }
 
-.monks-enhanced-journal .mainbar {
-    flex: 0 0 90px;
-}
-
-.monks-enhanced-journal.hide-bookmark .mainbar {
-    flex: 0 0 60px;
-}
-
-.monks-enhanced-journal .mainbar > div {
-    flex: 0 0 30px;
-    border-bottom: 1px solid #C0C0C0;
-}
-
-.monks-enhanced-journal .mainbar .bookmark-bar {
-    margin-left: 4px;
-}
-
-.monks-enhanced-journal.hide-bookmark .mainbar .bookmark-bar {
+.monks-enhanced-journal .enhanced-journal .journal-subsheet .window-resizable-handle {
     display: none;
 }
 
-.monks-enhanced-journal .tab-bar {
-    position: relative;
-    transition: padding-right 0.5s;
-    padding: 2px 2px 0px 2px;
-}
-
-.monks-enhanced-journal .collapse .tab-bar {
-    padding-right: 30px;
-}
-
-.monks-enhanced-journal .tab-bar .journal-tab {
-    max-width: 150px;
+/* Sidebar */
+.monks-enhanced-journal .directory-sidebar {
+    flex: 0 0 300px;
+    width: 300px;
     height: 100%;
-    padding: 4px;
-    border-top-left-radius: 4px;
-    border-top-right-radius: 4px;
-    line-height: 20px;
-    background: rgba(255, 255, 240, 0.5);
-    border: 1px solid #b5b3a4;
-    position: relative;
-    font-family: "Signika", sans-serif;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    cursor: pointer;
-    flex-wrap: nowrap;
-    font-size: var(--font-size-14);
+    background: var(--mej-sidebar-background);
+    border-left: 1px solid var(--mej-header-border-color);
+    transition: width 0.5s, flex 0.5s;
 }
 
-.monks-enhanced-journal .tab-bar .journal-tab.active,
-.monks-enhanced-journal .tab-bar .journal-tab:last-child {
-    flex: 0 0 150px;
+.monks-enhanced-journal.condensed .directory-sidebar {
+    display: none;
 }
 
-.monks-enhanced-journal .tab-bar .tab-button {
-    flex: 0 0 30px;
-    text-align: center;
-    line-height: 30px;
-    font-weight: bold;
-    cursor: pointer;
-    font-size: 18px;
-    opacity: 0.6;
+.monks-enhanced-journal .enhanced-journal.collapse .directory-sidebar {
+    flex: 0 0 0px;
+    width: 0px;
 }
 
-.monks-enhanced-journal .tab-bar .tab-button:hover {
-    opacity: 0.9;
-    text-shadow: 0 0 8px red;
+#journal .document-name > i,
+#journal-directory .document-name > i {
+    margin-right: 8px;
+    margin-left: 4px;
+    flex: 0 0 15px;
 }
 
-.monks-enhanced-journal .tab-bar .tab-button.sidebar-toggle {
-    float: left;
-    position: absolute;
-    top: 3px;
-    right: -34px;
-    font-size: 20px;
-    width: 30px;
-    transition: right 0.5s;
-}
-
-.monks-enhanced-journal .collapse .tab-bar .tab-button.sidebar-toggle {
-    right: 0px;
-    top: 2px;
-}
-
-.monks-enhanced-journal .sidebar-directory .action-buttons {
+.monks-enhanced-journal .sidebar-directory.directory .action-buttons {
     padding-left: 30px;
+}
+
+.monks-enhanced-journal .sidebar-directory.directory .directory-header .header-actions.action-buttons button {
+    line-height: 24px;
+    background: var(--mej-sidebar-button-background);
+    border: 2px groove var(--mej-sidebar-button-border);
 }
 
 .monks-enhanced-journal .sidebar-directory.directory .directory-header .header-search input {
     height: var(--form-field-height);
-}
-
-.monks-enhanced-journal .tab-bar .journal-tab .tab-content {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.monks-enhanced-journal .tab-bar .journal-tab:hover {
-    box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.2);
-}
-
-.monks-enhanced-journal .tab-bar .journal-tab.active {
-    font-weight: bold;
-    background-color: #fff;
-    outline: none;
-    /*box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.4);*/
-    /*position:relative;*/
-}
-
-/*
-.monks-enhanced-journal .tab-bar .journal-tab.active .tab-content:before {
-    position: absolute;
-    content: ' ';
-    width: 10px;
-    height: 10px;
-    bottom: -1px;
-    left: -11px;
-    background: radial-gradient(circle at top left,transparent 9px, #b5b3a4 10px);
-}
-
-.monks-enhanced-journal .tab-bar .journal-tab.active .tab-content:after {
-    position: absolute;
-    content: ' ';
-    width: 10px;
-    height: 10px;
-    bottom: -1px;
-    right: -11px;
-    background: radial-gradient(circle at top right,transparent 9px, #b5b3a4 10px);
-}*/
-
-.monks-enhanced-journal .tab-bar .close {
-    flex: 0 0 10px;
-    opacity: 0.6;
-    cursor: pointer;
-    justify-content: flex-end;
-    align-content: flex-end;
-    padding-left: 2px;
-}
-
-.monks-enhanced-journal .tab-bar .close:hover {
-    opacity: 0.8;
-}
-
-.monks-enhanced-journal .mainbar .navigation {
-    padding: 2px;
-    background: rgba(255, 255, 255, 0.3);
-}
-
-.monks-enhanced-journal .mainbar .navigation hr.vertical {
-    height: 100%;
-    width: 1px;
-    border-right: 1px solid #C0C0C0;
-    flex: 0 0 1px;
-    margin: 0px 2px;
-}
-
-.monks-enhanced-journal .mainbar .navigation .button-group {
-    /*
-    flex-shrink: 1;
-    flex-basis: auto;
-    flex-grow: 0;*/
-    justify-content: flex-end;
-}
-
-.monks-enhanced-journal .mainbar .navigation .nav-button,
-.monks-enhanced-journal footer.navigation .nav-button {
-    flex: 0 0 24px;
-    text-align: center;
-    line-height: 24px;
-    font-size: 14px;
-    margin-right: 4px;
-    width: 24px;
-    height: 24px;
-    border-radius: 4px;
-    border: 1px solid #C0C0C0;
-    /*overflow: hidden;*/
-    margin-top: 1px;
-    background: rgba(255, 255, 240, 0.8);
-}
-
-.wfrp4e.monks-enhanced-journal footer.navigation .nav-button {
-    color: #111;
-}
-
-.monks-enhanced-journal footer.navigation .nav-button.navigate {
-    flex: 0 0 50px;
-}
-
-.monks-enhanced-journal footer.navigation .nav-button.navigate i:first-child {
-    margin-right: 4px;
-}
-
-.monks-enhanced-journal .mainbar .navigation .nav-button:not(.disabled):hover,
-.monks-enhanced-journal footer.navigation .nav-button:not(.disabled):hover {
-    box-shadow: 0 0 5px red;
-    cursor: pointer;
-}
-
-.monks-enhanced-journal footer.navigation .nav-button:not(.disabled):hover {
-    text-shadow: 0 0 8px red;
-}
-
-.monks-enhanced-journal .mainbar .navigation .nav-button.disabled,
-.monks-enhanced-journal footer.navigation .nav-button.disabled {
-    color: #888;
-}
-
-.monks-enhanced-journal .mainbar .navigation .nav-input {
-    margin-right: 4px !important;
-    margin-top: 1px;
-    height: 25px !important;
-}
-
-.monks-enhanced-journal .mainbar .navigation .nav-input:focus {
-    background: rgba(255, 255, 240, 0.8);
-    border: 1px solid #C0C0C0;
-}
-
-.monks-enhanced-journal .mainbar .navigation .nav-text {
-    flex-shrink: 1;
-    flex-basis: auto;
-    flex-grow: 0;
-    padding: 4px;
-}
-
-.monks-enhanced-journal .mainbar .navigation .title input {
-    font-size: 18px;
-    text-align: center;
-    border: 0px;
-    background: transparent;
-}
-
-.monks-enhanced-journal .mainbar .navigation .title input:focus {
-    border: 1px solid #7a7971;
-    background: rgba(0, 0, 0, 0.05);
-}
-
-.monks-enhanced-journal .mainbar .navigation input {
-    border-radius: 4px;
-    flex: 0 0 200px;
-}
-
-.monks-enhanced-journal .bookmark-bar .bookmark-button {
-    height: 24px;
-    border-radius: 28px;
-    margin-left: 4px;
-    margin-top: 2px;
-    line-height: 24px;
-    padding: 0px 8px;
-    font-size: 14px;
-    cursor: pointer;
-    flex-wrap: nowrap;
-    flex-grow: 0;
-    white-space: nowrap;
-}
-
-.monks-enhanced-journal .bookmark-bar .bookmark-button > div {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    width: 100%;
-}
-
-.monks-enhanced-journal .bookmark-bar .bookmark-button:not(.add-bookmark) i {
-    margin-top: 4px;
-    margin-right: 2px;
-}
-
-.monks-enhanced-journal .bookmark-bar .bookmark-button:hover {
-    background-color: rgba(0, 0, 0, 0.1);
-}
-
-.monks-enhanced-journal .bookmark-bar .bookmark-button.add-bookmark {
-    border-radius: 4px;
-    flex: 0 0 24px;
-    margin-top: 2px;
-    font-size: 16px;
-    padding-left: 2px;
-    line-height: 22px;
-    border: 1px solid #C0C0C0;
-    text-overflow: clip;
-    margin-left: 0px;
-    overflow: hidden;
-}
-
-.monks-enhanced-journal footer:not(.attribute-footer) {
-    flex: 0 0 20px;
-    line-height: 20px;
-    font-size: 16px;
-    padding: 5px 6px;
-    border-top: 1px solid #C0C0C0;
-}
-
-.monks-enhanced-journal .collapse footer:not(.attribute-footer) {
-    padding-right: 26px;
-}
-
-.monks-enhanced-journal .tab.notes textarea.trim-textarea {
-    resize: none;
-    width: calc(100% - 4px);
-    height: calc(100% - 6px);
-}
-
-.monks-enhanced-journal .content[document-type="actor"] + footer {
-    display: none;
+    border: 1px solid var(--mej-sidebar-input-border);
+    background: var(--mej-sidebar-input-background);
 }
 
 .monks-enhanced-journal .directory-sidebar > section {
@@ -393,24 +619,84 @@
     height: 100%;
 }
 
-.monks-enhanced-journal .directory-sidebar > section .directory-list {
-    /*height: calc(100% - 75px);*/
+.monks-enhanced-journal .directory-sidebar > section .directory-header {
+    background-color: var(--mej-header-background);
+    border-bottom: 1px solid var(--mej-header-border-color);
+    color: var(--mej-sidebar-label-color);
+    margin-bottom: 0px;
+    padding-bottom: 3px;
 }
 
-#journal-directory li.journalentry,
-#journal-directory li.journalentrypage {
+.monks-enhanced-journal .sidebar-directory .directory-item.active {
+    background: #cfcdc2;
+}
+
+.monks-enhanced-journal .sidebar-directory .directory-list .directory-item {
+    align-items: flex-start;
+    justify-content: flex-start;
+}
+
+.monks-enhanced-journal .sidebar-directory li.folder > .folder-header {
+    border-top: 1px solid var(--mej-sidebar-folder-border-collapsed);
+    border-bottom: none;
+    width: 100%;
+    background: var(--mej-sidebar-folder-background-collapsed);
+    flex: 1;
+    color: var(--color-text-light-highlight);
+}
+
+.monks-enhanced-journal .sidebar-directory li.folder:not(.collapsed) > .folder-header {
+    border-top: 1px solid var(--mej-sidebar-folder-border);
+    background: var(--mej-sidebar-folder-background);
+}
+
+.monks-enhanced-journal .sidebar-directory li.folder.collapsed > .folder-header:not(.customcolor) {
+    color: var(--mej-sidebar-folder-color-collapsed);
+}
+
+.monks-enhanced-journal .sidebar-directory li.folder .folder-header.context {
+    border-top: 1px solid var(--mej-active-color);
+    border-bottom: 1px solid var(--mej-active-color);
+}
+
+.monks-enhanced-journal .sidebar-directory li.folder .folder-header.context,
+.monks-enhanced-journal .sidebar-directory li.folder .folder-header.context h3 {
+    color: var(--mej-sidebar-folder-context-color);
+}
+
+.monks-enhanced-journal .sidebar-directory .subdirectory {
+    border-left: 4px solid var(--mej-sidebar-subfolder-border);
+    border-bottom: 4px solid var(--mej-sidebar-subfolder-border);
+    margin-bottom: 0px;
+    width: 100%;
+}
+
+/*
+.monks-enhanced-journal .sidebar-directory .journalentry.folder .subdirectory {
+    border-left-color: rgba(0, 0, 0, 0.1);
+    border-bottom-color: rgba(0, 0, 0, 0.1);
+}
+
+.monks-enhanced-journal .sidebar-directory .subdirectory .subdirectory {
+    margin-bottom: 0px;
+}
+    */
+
+.monks-enhanced-journal .sidebar-directory .subdirectory .folder {
+    border-left: 6px solid transparent;
+    border-color: transparent;
+}
+
+.monks-enhanced-journal .sidebar-directory li.journalentry,
+.monks-enhanced-journal .sidebar-directory li.journalentrypage {
     line-height: 32px;
-    border-top: 1px solid rgba(0, 0, 0, 0.1);
-    border-bottom: 1px solid rgba(0, 0, 0, 0.3);
-    border-left: 1px solid rgba(0, 0, 0, 0.3)
-}
-
-#journal-directory li.journalentry:not(.folder) .document-name {
-    margin: 0 0.25em;
+    border-top: 1px solid var(--mej-sidebar-document-border-top);
+    border-bottom: 1px solid var(--mej-sidebar-document-border-botom);
+    color: var(--mej-sidebar-document-color);
 }
 
 #journal li.journalentry .document-name,
-#journal-directory li.journalentry .document-name {
+.monks-enhanced-journal .sidebar-directory li.journalentry .document-name {
     flex-wrap: nowrap;
     align-items: center;
     display: flex;
@@ -418,1516 +704,49 @@
     justify-content: flex-start;
 }
 
+/*
+.monks-enhanced-journal .sidebar-directory.sidebar-tab .directory-list .document.selected {
+    background: rgba(0, 0, 0, 0.03);
+}
+
+.monks-enhanced-journal .sidebar-directory.sidebar-tab .directory-list .document.selected h4 {
+    font-weight: bold;
+}
+    */
+
+.monks-enhanced-journal .sidebar-directory li.journalentry:not(.folder) .document-name {
+    margin: 0 0.25em;
+}
+
 #journal li.journalentry[status] .document-name i,
-#journal-directory li.journalentry[status] .document-name i {
+.monks-enhanced-journal .sidebar-directory li.journalentry[status] .document-name i {
     margin-left: 1px;
 }
 
 #journal li.journalentry[status] .document-name,
-#journal-directory li.journalentry[status] .document-name {
-    border-left: 0.45em solid #808080;
+.monks-enhanced-journal .sidebar-directory li.journalentry[status] .document-name {
+    border-left: 0.45em solid var(--mej-quest-status-default);
     margin-left: 0px;
 }
 
-#journal li.journalentry[status="available"] .document-name,
-#journal-directory li.journalentry[status="available"] .document-name {
-    border-left-color: #2f96b4;
+#journal li.journalentry[status='available'] .document-name,
+.monks-enhanced-journal .sidebar-directory li.journalentry[status='available'] .document-name {
+    border-left-color: var(--mej-quest-status-available);
 }
 
-#journal li.journalentry[status="inprogress"] .document-name,
-#journal-directory li.journalentry[status="inprogress"] .document-name {
-    border-left-color: #f89406;
+#journal li.journalentry[status='inprogress'] .document-name,
+.monks-enhanced-journal .sidebar-directory li.journalentry[status='inprogress'] .document-name {
+    border-left-color: var(--mej-quest-status-inprogress);
 }
 
-#journal li.journalentry[status="completed"] .document-name,
-#journal-directory li.journalentry[status="completed"] .document-name {
-    border-left-color: #51a351;
+#journal li.journalentry[status='completed'] .document-name,
+.monks-enhanced-journal .sidebar-directory li.journalentry[status='completed'] .document-name {
+    border-left-color: var(--mej-quest-status-completed);
 }
 
-#journal li.journalentry[status="failed"] .document-name,
-#journal-directory li.journalentry[status="failed"] .document-name {
-    border-left-color: #bd362f;
-}
-
-#journal-directory .directory-item.active {
-    background: #cfcdc2;
-}
-
-#journal-directory .directory-list .directory-item {
-    align-items: flex-start;
-    justify-content: flex-start;
-}
-
-#journal-directory li.folder > .folder-header {
-    background: rgba(0, 0, 0, 0.3);
-    flex: 1;
-}
-
-#journal-directory li.folder:not(.collapsed) > .folder-header {
-    background: rgba(0, 0, 0, 0.4);
-}
-
-/*#journal-directory li.folder .folder-header h3,
-#journal-directory li.folder > .folder-header .create-folder,
-#journal-directory li.folder > .folder-header .create-document {
-    color: #333;
-}*/
-
-#journal-directory li.folder > .folder-header,
-#journal-directory li.folder.collapsed > .folder-header {
-    border-top: 1px solid rgba(0, 0, 0, 0.1);
-    border-bottom: none;
-    width: 100%;
-}
-
-#journal-directory li.folder.collapsed > .folder-header:not(.customcolor),
-#journal-directory li.folder.collapsed > .folder-header .create-folder,
-#journal-directory li.folder.collapsed > .folder-header .create-document {
-    color: #333;
-}
-
-#journal-directory li.folder.collapsed .folder-header.customcolor {
-    color: #FFF;
-}
-
-#journal-directory li.folder.collapsed .folder-header.customcolor.context {
-    color: var(--color-text-dark-primary);
-}
-
-#journal-directory li.folder.collapsed > .folder-header.customcolor .create-folder,
-#journal-directory li.folder.collapsed > .folder-header.customcolor .create-document {
-    color: #CCC;
-}
-
-#journal-directory li.folder.collapsed > .folder-header.customcolor.context .create-folder,
-#journal-directory li.folder.collapsed > .folder-header.customcolor.context .create-document {
-    color: var(--color-text-dark-secondary);
-}
-
-#journal-directory .subdirectory {
-    border-left: 4px solid rgba(0, 0, 0, 0.3);
-    border-bottom: 4px solid rgba(0, 0, 0, 0.3);
-    margin-bottom: 0px;
-    width: 100%;
-}
-
-#journal-directory .journalentry.folder .subdirectory {
-    border-left-color: rgba(0, 0, 0, 0.1);
-    border-bottom-color: rgba(0, 0, 0, 0.1);
-}
-
-#journal-directory .subdirectory .subdirectory {
-    /*border-left: 4px solid rgba(0, 0, 0, 0.3);*/
-    margin-bottom: 0px;
-}
-
-#journal-directory .subdirectory .folder {
-    border-left: 6px solid transparent;
-    border-color: transparent;
-}
-
-#journal-directory .sidebar-tab .directory-list .document {
-    border: none;
-}
-
-#journal-directory .sidebar-tab .directory-list .document.selected {
-    background: rgba(0, 0, 0, 0.03);
-}
-
-#journal-directory .sidebar-tab .directory-list .document.selected h4 {
-    font-weight: bold;
-}
-
-.monks-journal-sheet {
-    height: 100%;
-}
-
-.monks-journal-sheet .journal-message {
-    margin: auto;
-    text-align: center;
-    font-size: 18px;
-    font-weight: bold;
-    margin-top: 40px;
-}
-
-.monks-journal-sheet > form {
-    padding: 0px;
-    overflow: hidden;
-}
-
-/*
-.journal-sheet .monks-enhanced-journal .content[document-type="oldentry"] form,
-.journal-sheet .monks-enhanced-journal .content[document-type="journalentry"] form {
-    padding: 0px 8px;
-}*/
-.monks-journal-sheet .content[document-type="actor"] form {
-    overflow-y: auto;
-}
-
-.monks-journal-sheet .content form:not(.journal-header) {
-    height: 100%;
-}
-/*
-.monks-enhanced-journal .content form .editor{
-    height:100% !important;
-    overflow:visible;
-}*/
-/*
-.monks-enhanced-journal .content form div[role="application"] {
-    height: 100% !important;
-}*/
-/*
-.monks-journal-sheet .header-name .find-map-token {
-    flex: 0 0 36px;
-    height: 36px;
-    width: 36px;
-    font-size: 20px;
-    line-height: 36px;
-    text-align: center;
-    cursor: pointer;
-}*/
-.monks-journal-sheet .header-name {
-    font-size: 24px;
-}
-
-.monks-journal-sheet .header-name input {
-    background: none;
-    border: 1px solid transparent !important;
-    font-size: 32px !important;
-    height: 36px !important;
-    color: var(--color-text-dark-primary);
-}
-
-.wfrp4e.monks-enhanced-journal .monks-journal-sheet .header-name input {
-    color: #111;
-}
-
-.wfrp4e.monks-enhanced-journal .monks-journal-sheet .header-name input::placeholder {
-    color: #888
-}
-
-.wfrp4e.monks-enhanced-journal .monks-journal-sheet.sheet .shop-container .item-list > li input {
-    color: #111;
-}
-
-.monks-journal-sheet .header-name .header-search {
-    font-size: 14px;
-}
-
-.monks-journal-sheet .header-name .create-folder, .monks-journal-sheet .header-name .create-item {
-    flex: 0 0 130px;
-}
-
-.monks-journal-sheet.image-popout.dark .header-name input {
-    color: #fff;
-}
-
-.monks-journal-sheet .encounter-body {
-    height: 100%;
-}
-
-.monks-journal-sheet .encounter-body.flexcol {
-    height: 100%;
-    overflow-y: auto;
-}
-
-.monks-journal-sheet .encounter-body.flexrow {
-    flex-flow: row-reverse;
-}
-
-.monks-journal-sheet .encounter-body .encounter-content {
-    height: 100%;
-    overflow-y: auto;
-}
-/*
-.monks-enhanced-journal .encounter-body .encounter-content.condensed {
-    overflow-y: auto;
-}
-
-.monks-enhanced-journal .encounter-body .encounter-content:not(.condensed) {
-    display: flex;
-    flex-direction: row-reverse;
-    flex-wrap: nowrap;
-}
-
-.monks-enhanced-journal .encounter-body .encounter-content:not(.condensed) > * {
-    height: 100%;
-    overflow-y: auto;
-    flex:1;
-}*/
-.monks-journal-sheet .encounter-body .encounter-content > * {
-    flex-grow: 0;
-}
-
-.monks-journal-sheet .encounter-content .items-list .item .item-name .item-image.monster-icon {
-    cursor: pointer;
-    flex: 0 0 60px;
-    height: 60px;
-    background-size: 60px;
-    border: none;
-    margin-right: 5px;
-    background-size: contain;
-}
-
-.monks-journal-sheet .encounter-body .encounter-content .item-controls {
-    flex: 0 0 22px;
-}
-
-.monks-journal-sheet .encounter-body .encounter-content .encounter-dcs .item-controls, .monks-journal-sheet .encounter-body .encounter-content .encounter-traps .item-controls {
-    flex: 0 0 44px;
-}
-
-.monks-journal-sheet .journal-body {
-    height: 100%;
-    overflow: hidden;
-}
-
-.monks-journal-sheet .journal-body .journal-content {
-    height: 100%;
-    overflow-y: auto;
-}
-/*
-.monks-enhanced-journal .journal-body .journal-content .editor {
-    overflow: visible;
-    max-height: unset;
-    height: fit-content;
-}*/
-/*
-.monks-journal-sheet .content[document-type="journalentry"] .sheet-navigation,
-.monks-journal-sheet .content[document-type="journalentry"] .tab.picture{
-    display: none;
-}*/
-.monks-journal-sheet .person-container, .monks-journal-sheet .place-container, .monks-journal-sheet .organization-container, .monks-journal-sheet .shop-container, .monks-journal-sheet .loot-container, .monks-journal-sheet .poi-container, .monks-journal-sheet .event-container {
-    height: 100%;
-}
-
-.monks-journal-sheet.sheet header.sheet-header {
-    flex: 0 0 162px;
-    border-bottom: 2px groove #eeede0;
-    margin: 0px;
-}
-
-.monks-journal-sheet.sheet .sheet-header .header-details h1 {
-    height: 45px;
-}
-
-.monks-journal-sheet.sheet .sheet-header .header-details {
-    font-family: "Modesto Condensed", "Palatino Linotype", serif;
-    font-size: var(--font-size-20);
-    font-weight: 700;
-}
-
-.monks-journal-sheet.sheet .sheet-header .h1 {
-    flex: 1;
-    border-bottom: none;
-    height: 60px;
-    margin: 0;
-    padding: 5px;
-}
-
-.monks-journal-sheet.sheet .sheet-header h1 input {
-    font-size: 32px !important;
-    height: 36px !important;
-    margin: 8px;
-}
-
-.monks-journal-sheet.sheet .form-group label {
-    flex: 2;
-    color: #4b4a44;
-    font-weight: bold;
-}
-
-.age-system .monks-journal-sheet.sheet .form-group label {
-    font-size: 16px;
-}
-
-.monks-journal-sheet.sheet .sheet-navigation {
-    flex: 0 0 30px !important;
-    margin-bottom: 5px;
-    font-family: "Modesto Condensed", "Palatino Linotype", serif;
-    font-size: 20px;
-    font-weight: 700;
-}
-
-.monks-journal-sheet.sheet .sheet-navigation .item {
-    height: 30px !important;
-    line-height: 32px;
-    margin: 0 24px;
-    border-bottom: 3px solid #b5b3a4;
-    max-width: 150px;
-}
-
-.monks-journal-sheet.sheet .sheet-navigation .item.hasitems {
-    border-bottom-color: #bbb272;
-}
-
-.monks-journal-sheet.sheet .sheet-navigation .item.active {
-    border-bottom: 3px solid #44191A;
-}
-
-.monks-journal-sheet.sheet .sheet-body {
-    flex: 1;
-    overflow: hidden;
-    height: calc(100% - 75px);
-}
-
-.monks-journal-sheet.sheet .sheet-body.half-size {
-    height: calc(100% - 200px);
-}
-
-.age-system .monks-journal-sheet.sheet .sheet-body.half-size {
-    height: calc(100% - 210px);
-}
-
-.monks-journal-sheet.sheet .loot-container .sheet-body.half-size {
-    height: calc(100% - 165px);
-}
-
-.monks-journal-sheet.sheet .editor {
-    overflow: visible;
-    /*max-height: fit-content;
-height: fit-content;*/
-    height: 100%;
-}
-
-.monks-journal-sheet.sheet .editor .editor-content {
-    overflow-y: visible;
-    height: unset;
-    min-height: calc(100% - 8px);
-    padding: 2px;
-}
-
-.monks-journal-sheet.sheet .editor .tox-tinymce {
-    height: 100% !important;
-}
-
-.monks-journal-sheet.sheet .editor {
-    min-height: 100%;
-}
-
-.monks-journal-sheet.sheet .editor.tinymce {
-    margin: 0px;
-}
-
-.monks-journal-sheet.sheet .encounter .editor {
-    min-height: 350px;
-}
-
-.monks-journal-sheet.sheet .tab {
-    height: 100% !important;
-    overflow-y: auto !important;
-    align-content: flex-start;
-}
-
-.monks-journal-sheet.sheet .tab .tab-inner {
-    height: 100%;
-    overflow-y: auto !important;
-    align-content: flex-start;
-    position: relative;
-}
-
-.monks-journal-sheet.sheet header.sheet-header.journal-header {
-    align-items: flex-start;
-}
-
-.monks-journal-sheet.sheet .person-container, .monks-journal-sheet.sheet .place-container, .monks-journal-sheet.sheet .quest-container, .monks-journal-sheet.sheet .organization-container, .monks-journal-sheet.sheet .shop-container, .monks-journal-sheet.sheet .loot-container, .monks-journal-sheet.sheet .poi-container, .monks-journal-sheet.sheet .event-container {
-    height: 100%;
-    padding: 4px;
-}
-
-.monks-journal-sheet.sheet .sheet-header .sheet-image {
-    flex: 0 0 160px;
-    max-width: 160px;
-    height: 160px;
-    position: relative;
-    border: none;
-    border-right: 2px groove #eeede0;
-    margin-right: 6px;
-}
-
-.monks-journal-sheet.sheet .person-container .sheet-header img.profile, .monks-journal-sheet.sheet .place-container .sheet-header img.profile, .monks-journal-sheet.sheet .quest-container .sheet-header img.profile, .monks-journal-sheet.sheet .organization-container .sheet-header img.profile, .monks-journal-sheet.sheet .poi-container .sheet-header img.profile, .monks-journal-sheet.sheet .event-container .sheet-header img.profile, .monks-journal-sheet.sheet .shop-container .sheet-header img.profile, .monks-journal-sheet.sheet .loot-container .sheet-header img.profile {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    max-width: 100%;
-    border: 0px;
-    background-repeat: no-repeat;
-    background-position: center;
-    background-size: contain;
-}
-
-.monks-journal-sheet.sheet .person-container .sheet-header .header-details .form-group label, .monks-journal-sheet.sheet .place-container .sheet-header .header-details .form-group label, .monks-journal-sheet.sheet .quest-container .sheet-header .header-details .form-group label, .monks-journal-sheet.sheet .poi-container .sheet-header .header-details .form-group label, .monks-journal-sheet.sheet .event-container .sheet-header .header-details .form-group label, .monks-journal-sheet.sheet .organization-container .sheet-header .header-details .form-group label, .monks-journal-sheet.sheet .shop-container .sheet-header .header-details .form-group label, .monks-journal-sheet.sheet .loot-container .sheet-header .header-details .form-group label {
-    max-width: 175px;
-}
-
-.monks-journal-sheet.sheet .person-container .sheet-header .header-details .form-group, .monks-journal-sheet.sheet .place-container .sheet-header .header-details .form-group, .monks-journal-sheet.sheet .quest-container .sheet-header .header-details .form-group, .monks-journal-sheet.sheet .poi-container .sheet-header .header-details .form-group, .monks-journal-sheet.sheet .event-container .sheet-header .header-details .form-group, .monks-journal-sheet.sheet .organization-container .sheet-header .header-details .form-group, .monks-journal-sheet.sheet .shop-container .sheet-header .header-details .form-group, .monks-journal-sheet.sheet .loot-container .sheet-header .header-details .form-group {
-    margin: 4px 8px 0px 0px;
-}
-
-.monks-journal-sheet.sheet .tab.entry-details .details-section, .monks-journal-sheet.sheet .tab.description .details-section, .monks-journal-sheet.sheet .tab.rewards .form-group {
-    font-family: "Modesto Condensed", "Palatino Linotype", serif;
-    font-size: var(--font-size-20);
-    font-weight: 700;
-    padding: 5px 15px;
-    margin: 0px;
-}
-
-.monks-journal-sheet.sheet .tab.rewards .currency-group .form-group, .monks-journal-sheet.sheet .tab.entry-details .details-section .form-group, .monks-journal-sheet.sheet .tab.items .currency-group, .monks-journal-sheet.sheet .tab.offerings .currency-group {
-    flex-grow: 0 !important;
-    margin: 4px 8px 0px 0px;
-}
-
-.monks-journal-sheet.sheet .tab.items .currency-group,
-.monks-journal-sheet.sheet .loot-container .currency-group {
-    padding: 0px 4px;
-    font-size: var(--font-size-12);
-}
-
-.monks-journal-sheet.sheet .currency-group .form-fields input {
-    flex: 2;
-    text-align: right;
-    max-width: 60px;
-}
-
-.monks-journal-sheet.sheet .currency-group .form-fields label {
-    max-width: 80px;
-}
-
-.loot-container .currency-group label {
-    font-weight: bold;
-    padding-top: 2px;
-    max-width: 75px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.loot-container .currency-group label:not(:first-child) {
-    padding-left: 10px;
-}
-
-.loot-container .currency-group input {
-    max-width: 75px;
-}
-
-.monks-journal-sheet.sheet .tab.entry-details .details-section label, .monks-journal-sheet.sheet .tab.description .details-section label, .monks-journal-sheet.sheet .tab.rewards .form-group label {
-    flex: 1;
-    max-width: 175px;
-}
-
-.monks-journal-sheet.sheet .person-container .document-details, .monks-journal-sheet.sheet .place-container .document-details {
-    background: var(--faintest-color);
-    border-radius: 5px;
-    padding: 8px;
-    margin-bottom: 5px;
-    position: relative;
-    flex: 1;
-    font-size: var(--font-size-14);
-}
-
-.monks-journal-sheet.sheet .person-container .document-details ul, .monks-journal-sheet.sheet .place-container .document-details ul {
-    margin: 0;
-    padding: 0;
-    display: flex;
-    gap: 4px;
-    flex: 1;
-    flex-wrap: wrap;
-    list-style: none;
-}
-
-.monks-journal-sheet.sheet .person-container .document-details ul li, .monks-journal-sheet.sheet .place-container .document-details ul li {
-    display: flex;
-    flex: 0 0 215px;
-}
-
-.monks-journal-sheet.sheet .person-container .tab.entry-details .details-section .document-details ul li label, .monks-journal-sheet.sheet .place-container .tab.entry-details .details-section .document-details ul li label {
-    flex: 0 0 60px;
-}
-/*
-.journal-header input[type="text"] {
-    background: none;
-    border: 1px solid transparent;
-    height: 40px;
-    margin: 10px 0;
-}
-
-.journal-header input[type="text"]:hover,
-.journal-header input[type="text"]:focus {
-    border: 1px solid #111;
-    box-shadow: 0 0 8px red;
-}*/
-.monks-journal-sheet.sheet .quest-container .reward-container {
-    height: 100%;
-    overflow-y: auto;
-}
-
-#journal .document-name > i, #journal-directory .document-name > i {
-    margin-right: 8px;
-    margin-left: 4px;
-    flex: 0 0 15px;
-}
-
-.monks-journal-sheet .picture-container {
-    width: 100%;
-    justify-content: center;
-    position: relative;
-    overflow: hidden;
-}
-
-.monks-journal-sheet .picture-container img, .monks-journal-sheet .slide .slide-image, #slideshow-canvas .slide .slide-image {
-    height: 100%;
-    width: 100%;
-    object-fit: contain;
-    border: 0px;
-    z-index: 1;
-    position: absolute;
-    top: 0px;
-    left: 0px;
-}
-
-.monks-journal-sheet .picture-img {
-    background-size: contain;
-    background-repeat: no-repeat;
-    background-position: center;
-    height: 100%;
-    width: 100%;
-    border: 0px;
-    z-index: 1;
-    position: absolute;
-    top: 0px;
-    left: 0px;
-}
-
-.monks-journal-sheet .picture-container .img-background {
-    position: absolute;
-    height: 100%;
-    width: 100%;
-    top: 0px;
-    left: 0px;
-    z-index: 0;
-    overflow: hidden;
-    background-position: center;
-    background-repeat: no-repeat;
-    background-size: cover;
-    -webkit-filter: blur(3px);
-    -moz-filter: blur(3px);
-    -o-filter: blur(3px);
-    -ms-filter: blur(3px);
-    filter: blur(3px);
-    opacity: 0.4;
-}
-
-.monks-journal-sheet .slideshow-container {
-    height: 100%;
-    position: relative;
-}
-
-.monks-journal-sheet .slideshow-container .slideshow-buttons {
-    flex-grow: 0;
-    padding-top: 10px;
-    padding-left: 8px;
-    font-size: 18px;
-    flex-wrap: nowrap;
-}
-
-.monks-journal-sheet .slideshow-container .slideshow-buttons .nav-button {
-    cursor: pointer;
-    padding-right: 8px;
-}
-/*
-.monks-journal-sheet .slideshow-container .slideshow-settings {
-    overflow: hidden;
-    flex: 0 0 72px;
-    padding: 0px 8px;
-    transition: flex 0.3s ease-out;
-}
-
-.monks-journal-sheet .slideshow-container.playing .slideshow-settings {
-    flex: 0 0 0px;
-}*/
-.monks-journal-sheet .slideshow-container.playing .sheet-navigation, .monks-journal-sheet .slideshow-container.playing .tab.entry-details {
-    display: none;
-}
-
-.monks-journal-sheet .slideshow-container.playing .tab.slides {
-    display: block;
-}
-
-.monks-journal-sheet .slideshow-container .slide-details {
-    padding: 8px;
-}
-
-.monks-journal-sheet .slideshow-container .slide-details > * {
-    flex-grow: 0;
-    margin: 2px;
-}
-
-.monks-journal-sheet .slideshow-container:not(.playing) .slide-showing {
-    flex: 1;
-    opacity: 0;
-    transition: opacity 0.3s ease-out;
-}
-
-.monks-journal-sheet .slideshow-container.playing .slide-showing, #slideshow-canvas .slideshow-container.playing .slide-showing {
-    opacity: 1;
-    z-index: 1;
-    height: calc(100% - 35px);
-    width: 100%;
-    position: relative;
-    overflow: hidden;
-    perspective: 2000px;
-    -webkit-perspective: 2000px;
-    flex: 1;
-}
-
-.monks-journal-sheet .slideshow-container .slideshow-body-outer {
-    display: flex;
-    overflow: hidden;
-    max-height: 100%;
-    position: absolute;
-    top: 0px;
-    bottom: 0px;
-    width: 100%;
-    transition: top 0.3s ease-out;
-    z-index: 10;
-}
-
-.monks-journal-sheet .slideshow-container.playing .slideshow-body-outer {
-    top: calc(100% - 85px);
-}
-
-.monks-journal-sheet .slideshow-container .slideshow-body {
-    max-height: 100%;
-    width: 100%;
-    scroll-behavior: smooth;
-    transition: padding 0.3s ease-out;
-}
-
-.monks-journal-sheet .slideshow-container:not(.playing) .slideshow-body {
-    overflow-y: auto;
-    padding: 8px;
-}
-
-.monks-journal-sheet .slideshow-container.playing .slideshow-body {
-    overflow-x: auto;
-    padding: 0px calc(50% - 50px);
-    white-space: nowrap;
-}
-
-.monks-journal-sheet .slideshow-container .slide {
-    padding: 8px;
-    width: 200px;
-    height: 150px;
-    display: inline-block;
-    position: relative;
-    transition: width 0.3s ease-out, height 0.3s ease-out;
-}
-
-.monks-journal-sheet .slideshow-container .add-slide {
-    padding: 8px;
-    width: 200px;
-    height: 150px;
-    display: inline-block;
-    position: relative;
-    border: 1px dashed rgba(0, 0, 0, 0.2);
-    text-align: center;
-    font-size: 48px;
-    color: rgba(0, 0, 0, 0.2);
-    vertical-align: top;
-    line-height: 130px;
-    font-weight: bold;
-    border-radius: 4px;
-    cursor: pointer;
-}
-
-.monks-journal-sheet .slideshow-container.playing .slide {
-    height: 75px;
-    width: 100px;
-    padding: 0px 8px;
-}
-
-.slideshow-container .slide-inner {
-    width: 100%;
-    height: 100%;
-    position: relative;
-    border: 1px solid #C0C0C0;
-    border-radius: 4px;
-}
-
-.monks-journal-sheet .slideshow-container.playing .slide:first-child {
-    margin-left: 0px;
-}
-
-.monks-journal-sheet .slideshow-container.playing .slide:last-child {
-    margin-right: 0px;
-}
-
-.monks-journal-sheet .slideshow-container .slide-showing .slide, #slideshow-canvas .slideshow-container .slide-showing .slide {
-    width: 100%;
-    height: 100%;
-    position: absolute;
-    top: 0px;
-    left: 0px;
-    margin: 0px;
-    z-index: 5;
-}
-
-.monks-journal-sheet .slideshow-container .slide-showing .slide.loading, #slideshow-canvas .slideshow-container .slide-showing .slide.loading {
-    display: none;
-}
-
-.monks-journal-sheet .slideshow-container .slide-showing .slide:last-child, #slideshow-canvas .slideshow-container .slide-showing .slide:last-child {
-    z-index: 10;
-}
-
-.monks-journal-sheet .slideshow-container.playing .add-slide {
-    display: none;
-}
-
-.monks-journal-sheet .slideshow-container.playing .slide.active {
-    border: 1px solid red;
-    border-bottom: 1px solid #ff6400;
-    box-shadow: 0 0 10px #ff6400;
-}
-
-.monks-journal-sheet .slideshow-container.playing .slideshow-body .slide:not(.active) {
-    opacity: 0.6;
-}
-
-.monks-journal-sheet .slideshow-container.playing .slideshow-body .slide:not(.active):hover {
-    opacity: 0.8;
-}
-
-.monks-journal-sheet .slideshow-container.playing #context-menu {
-    display: none;
-}
-
-.monks-journal-sheet .slide .slide-image {
-    position: relative;
-    z-index: 10;
-}
-
-.monks-journal-sheet .slide-background, #slideshow-canvas .slide-background {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    top: 0px;
-    left: 0px;
-    z-index: 0;
-    overflow: hidden;
-}
-
-.monks-journal-sheet .slide-background > div, #slideshow-canvas .slide-background > div {
-    width: 100%;
-    height: 100%;
-    background-position: center;
-    background-size: cover;
-    background-repeat: no-repeat;
-    -webkit-filter: blur(3px);
-    -moz-filter: blur(3px);
-    -o-filter: blur(3px);
-    -ms-filter: blur(3px);
-    filter: blur(3px);
-    object-fit: cover;
-}
-
-#slideshow-display {
-    /*
-    left: 12% !important;
-    top: 12% !important;
-    width: 75% !important;
-    height: 75% !important;*/
-    display: none !important;
-}
-
-#slideshow-display .window-header a {
-    display: none;
-}
-
-#slideshow-display .window-content {
-    overflow-y: hidden;
-    height: calc(100% - 31px);
-}
-
-#slideshow-canvas {
-    position: absolute;
-    left: 0px;
-    top: 0px;
-    width: 100%;
-    height: 100%;
-    z-index: 1;
-    display: none;
-    background-color: #000;
-}
-
-#slideshow-canvas:not(.fullscreen) {
-    pointer-events: none;
-}
-
-#slideshow-canvas.fullscreen {
-    z-index: 9999;
-}
-
-#slideshow-canvas .slide-padding {
-    flex: 0 0 305px;
-    background-color: #000;
-}
-
-#slideshow-canvas.fullscreen .slide-padding {
-    flex: 0 0 0px !important;
-}
-
-#slideshow-display.active {
-    display: block !important;
-}
-
-#slideshow-canvas.active {
-    display: flex !important;
-}
-
-.slide-config .slide .slide-inner {
-    width: 600px;
-    height: 400px;
-    flex: 0 0 400px;
-    margin: auto;
-    margin-bottom: 10px;
-    cursor: crosshair;
-    overflow: hidden;
-    position: relative;
-}
-
-.monks-journal-sheet .slide .slide-textarea {
-    z-index: 20;
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
-    font-size: 6.9px;
-}
-
-.slide-config .slide .slide-textarea {
-    font-size: 18px;
-}
-
-.monks-journal-sheet .slide .slide-textarea .slide-text {
-    position: absolute;
-    float: left;
-    color: #ffffff;
-    padding: 4px;
-    border-radius: 2px;
-    overflow: hidden;
-}
-
-.monks-journal-sheet .slideshow.playing .slideshow-body .slide .slide-textarea .slide-text {
-    padding: 2px;
-    font-size: 2.8px;
-    white-space: normal;
-}
-
-.slide-config .slide .slide-textarea .slide-text {
-    border: 2px solid rgba(238, 142, 38, 0.5);
-    border-radius: 10px;
-    padding: 10px;
-}
-
-.monks-journal-sheet .slide-showing .slide .slide-textarea .slide-text {
-    border-radius: 15px;
-    padding: 10px;
-}
-
-.slide-config .slide-textarea .slide-text.selected {
-    border: 2px solid #ee8e26;
-    box-shadow: 1px 1px 1px #000000, -1px -1px 1px #000000;
-}
-
-.slide-config .slide-textarea .slide-hud {
-    position: absolute;
-    display: none;
-    pointer-events: none;
-    z-index: 10;
-}
-
-.slide-config .slide-textarea .mover {
-    width: 14px;
-    height: 14px;
-    border-radius: 100%;
-    background: #ee8e26;
-    border: 2px solid #000000;
-    position: absolute;
-    margin-left: -4px;
-    margin-top: -4px;
-    cursor: move;
-    pointer-events: auto;
-}
-
-.slide-config .slide-textarea .text-create {
-    position: absolute;
-    border: 2px solid #ee8e26;
-}
-
-.monks-journal-sheet .slideshow-container.playing .slide-showing .duration {
-    position: absolute;
-    width: 100%;
-    height: 20px;
-    top: 10px;
-    z-index: 20;
-    text-align: center;
-    border: 1px solid #00184a;
-    background-color: rgba(0, 0, 0, 0.5);
-}
-
-.monks-journal-sheet .slideshow-container.playing .slide-showing .duration:empty {
-    display: none;
-}
-
-.monks-journal-sheet .slideshow-container.playing .slide-showing .duration .duration-bar {
-    position: absolute;
-    float: left;
-    top: 0px;
-    left: 0px;
-    border-right: 1px solid #00184a;
-    background-color: #1c42fa;
-    width: 0%;
-    height: 100%;
-    opacity: 0.5;
-}
-
-.monks-journal-sheet .slideshow-container.playing .slide-showing .duration .duration-label {
-    color: #FFFFFF;
-    text-shadow: 1px 1px 6px #000;
-    margin-top: 2px;
-}
-
-.monks-journal-sheet .header-name {
-    flex: 0 0 30px !important;
-    border-bottom: 2px solid #782e22;
-    z-index: 1;
-    padding-left: 8px;
-}
-
-.monks-journal-sheet.condensed .tab-bar, .monks-journal-sheet.condensed .bookmark-bar, .monks-journal-sheet.condensed .directory-sidebar {
-    display: none;
-}
-
-.monks-journal-sheet.condensed .mainbar {
-    flex: 0 0 30px;
-}
-
-.monks-journal-sheet.sheet .items-list .item .item-name .item-image {
-    background-repeat: no-repeat;
-    background-position: center;
-    background-size: contain;
-}
-
-.monks-journal-sheet.sheet .editor .tox-toolbar-overlord {
-    background-color: rgba(255, 255, 255, 0.4);
-}
-
-.monks-journal-sheet.sheet .editor .tox-tinymce .tox-menubar button {
-    height: 15px;
-}
-
-.slide-sheet .form-header, .slideshow-container .form-header {
-    border-top: 1px solid #b5b3a4;
-    border-bottom: 1px solid #f0f0e0;
-    margin-bottom: 5px;
-    padding: 0;
-}
-
-.slide-sheet .form-header h3, .slideshow-container .form-header h3 {
-    line-height: 28px;
-    margin: 0;
-    border-top: 1px solid #f0f0e0;
-    border-bottom: 1px solid #b5b3a4;
-}
-
-.slide-sheet form .form-group .form-fields > label {
-    flex: 1;
-    text-align: right;
-    font-size: 13px;
-}
-
-.monks-journal-sheet.sheet form .form-group .form-fields button {
-    flex: 0;
-    margin: -2px 0;
-    line-height: 22px;
-}
-
-.monks-journal-sheet.sheet form .reward-container .form-group .form-fields button {
-    height: 27px;
-    margin: 0px;
-    border-top-left-radius: 0px;
-    border-bottom-left-radius: 0px;
-}
-
-.monks-journal-sheet.sheet .item-detail {
-    text-align: center;
-}
-
-.monks-journal-sheet.sheet .items-list .item .item-name.rollable .item-image {
-    background-image: url("../../../icons/svg/d20-grey.svg");
-}
-
-.monks-journal-sheet.sheet .items-list .item .item-name.rollable:hover .item-image {
-    background-image: url("../../../icons/svg/d20-grey.svg") !important;
-}
-
-.monks-journal-sheet.sheet .items-list .item .item-name.rollable .item-image:hover {
-    background-image: url("../../../icons/svg/d20-black.svg") !important;
-}
-
-.monks-journal-sheet .polyglot-button {
-    display: none;
-}
-
-.monks-journal-sheet .directory .directory-header .header-search input {
-    height: 26px;
-    border: 1px solid #c0c0c0;
-    background: rgba(255, 255, 240, 0.8);
-}
-
-.monks-journal-sheet .directory .directory-header .header-actions button {
-    line-height: 24px;
-}
-
-.monks-journal-sheet .mainbar .navigation .search.error {
-    background-color: rgba(255, 0, 0, 0.1);
-}
-
-.monks-journal-sheet .journal-subsheet[editable="false"] .editor-edit {
-    display: none !important;
-}
-
-.select-player .inactive {
-    color: #808080;
-}
-/*
-#slideshow-display header h4{
-    display:none;
-}*/
-#slideshow-display .window-resizable-handle {
-    z-index: 3;
-}
-
-.monks-journal-sheet.sheet .quest-container .items-list.objective-items li:nth-child(even) {
-    background-color: rgba(255, 255, 255, 0.3);
-}
-
-.monks-journal-sheet.sheet .quest-container .items-list.objective-items li.item {
-    padding: 5px;
-}
-/*
-.monks-journal-sheet.sheet .quest-container .items-list.objective-items .input-x {
-    position: absolute;
-    color: #ffffff;
-    font-size: 35px;
-    left: 6px;
-    width: 18px;
-    height: 18px;
-    top: 4px;
-    background-color: #666666;
-    line-height: 18px;
-    display: none;
-    pointer-events:none;
-}
-
-.monks-journal-sheet.sheet .quest-container .items-list.objective-items input.failed + .input-x {
-    display: inline-block;
-}*/
-#objective-display {
-    display: none;
-    background: rgba(47, 80, 132, 0.8);
-    border: 1px solid #5c87b9;
-    padding: 6px 8px;
-    border-radius: 5px;
-    box-shadow: 0 0 10px #000;
-    color: #f0f0e0;
-}
-
-#objective-display.minimized {
-    padding: 0px;
-}
-
-#objective-display.active {
-    display: inline-block;
-}
-
-#objective-display:empty {
-    display: none;
-}
-
-#objective-display header {
-    font-size: 16px;
-    border-radius: 4px;
-    padding: 4px;
-    background-color: rgba(255, 255, 255, 0.2);
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    line-height: 24px;
-}
-
-#objective-display header > :not(h4) {
-    display: none !important;
-}
-
-#objective-display .window-content {
-    background: none;
-    color: #f0f0e0;
-    padding: 0px;
-}
-
-#objective-display .window-content > ul {
-    list-style-type: none;
-    margin: 0.6em;
-    padding: 0;
-}
-
-#objective-display ul {
-    list-style-type: none;
-}
-/*
-#objective-display ul ul li {
-    max-height: 50px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}*/
-#objective-display ul ul li:not(:last-child) {
-    padding-bottom: 4px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-    margin-bottom: 4px;
-}
-
-#objective-display .window-content > ul > li {
-    padding: 4px;
-}
-
-#objective-display .window-content > ul > li:not(:last-child) {
-    border-bottom: 1px solid #fff;
-}
-
-#objective-display .window-content > ul > li:nth-child(even) {
-    background-color: rgba(255, 255, 255, 0.1);
-}
-
-#objective-display ul ul li:before {
-    left: 20px;
-    text-decoration: none;
-    display: inline-block;
-    width: 10px;
-    position: absolute;
-}
-
-#objective-display ul ul li[completed='false']:before {
-    content: '•';
-}
-
-#objective-display ul ul li[completed='true']:before {
-    content: '✓';
-}
-
-#objective-display ul ul li[completed='true'] {
-    text-decoration: line-through;
-}
-
-#objective-display .window-resizable-handle {
-    right: -1px;
-}
-
-#objective-display .objective-list > li[status] .quest-name {
-    border-bottom: 2px solid #808080;
-    width: 100%;
-    border-left: 2px solid #808080;
-    padding-left: 4px;
-}
-
-#objective-display .objective-list > li[status="available"] .quest-name {
-    border-color: #2f96b4;
-}
-
-#objective-display .objective-list > li[status="inprogress"] .quest-name {
-    border-color: #f89406;
-}
-
-#objective-display .objective-list > li[status="completed"] .quest-name {
-    border-color: #51a351;
-}
-
-#objective-display .objective-list > li[status="failed"] .quest-name {
-    border-color: #bd362f;
-}
-
-.monks-journal-sheet.sheet .recent-link, .monks-journal-sheet.sheet .new-link {
-    cursor: pointer;
-    opacity: 0.8;
-    padding: 4px;
-}
-
-.monks-journal-sheet.sheet .recent-link:hover, .monks-journal-sheet.sheet .new-link:hover {
-    opacity: 1;
-}
-
-.monks-journal-sheet.sheet .items-list {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    color: #7a7971;
-    overflow-y: hidden;
-    height: 100%;
-}
-
-.system-pf2e .monks-enhanced-journal.request-item.item-card {
-    padding-bottom: 8px;
-}
-
-.monks-journal-sheet.sheet .loot-container .items-list.loot-characters .items-list {
-    overflow-y: hidden;
-    height: 80px;
-    overflow-x: auto;
-    flex-wrap: nowrap;
-}
-
-.monks-journal-sheet.sheet .items-list > .item-list {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    overflow-y: auto;
-    scrollbar-width: thin;
-    height: calc(100% - 35px);
-}
-
-.monks-journal-sheet.sheet .items-list .item-name {
-    flex: 2;
-    margin: 0;
-    overflow: hidden;
-    font-size: var(--font-size-14);
-    text-align: left;
-    align-items: center;
-}
-
-.monks-journal-sheet.sheet .items-list .item-content {
-    color: #333;
-}
-
-.monks-journal-sheet.sheet .items-list .item-name h3, 
-.monks-journal-sheet.sheet .items-list .item-name h4 {
-    margin: 0;
-    white-space: nowrap;
-    overflow: hidden;
-}
-
-.monks-journal-sheet.sheet .shop-container .items-list .item-name h4, .monks-journal-sheet.sheet .loot-container .items-list .item-name h4 {
-    cursor: pointer;
-}
-
-.monks-journal-sheet.sheet .items-list .item-controls {
-    flex: 0 0 80px;
-    justify-content: space-between;
-}
-
-.monks-journal-sheet.sheet .offering-list .items-list .item-controls {
-    flex: 0 0 45px;
-}
-
-.monks-journal-sheet.sheet.editattributes .items-list .item-controls {
-    flex: 0 0 45px;
-    text-align: center;
-}
-
-.monks-journal-sheet.sheet .journal-subsheet .objective-items .item-list > li > div:first-child {
-    width: 100%;
-    border-bottom: 1px solid #782e22;
-}
-
-.monks-journal-sheet.sheet .journal-subsheet .items-list .item-controls {
-    align-items: center;
-}
-
-.monks-journal-sheet.sheet .journal-subsheet .items-list .item-controls .request-item:disabled {
-    cursor: no-drop;
-}
-
-.monks-journal-sheet.sheet .items-list .item-controls a {
-    font-size: 12px;
-    text-align: center;
-    padding: 0px !important;
-    margin: 0px;
-}
-
-.monks-journal-sheet.sheet .items-list .item-controls a.active, .monks-journal-sheet.sheet .items-list .item-controls input[type="checkbox"]:checked + .item-action, .monks-journal-sheet.sheet .items-list .item-controls input[type="checkbox"]:checked + .item-hide, .monks-journal-sheet.sheet .items-list .item-controls input[type="checkbox"]:checked + .item-private {
-    color: #ff6400;
-}
-
-.monks-journal-sheet.sheet .items-list .item {
-    align-items: center;
-    padding: 0 2px;
-    border-bottom: 1px solid #c9c7b8;
-}
-
-.monks-journal-sheet.sheet .items-list .item:last-child {
-    border-bottom: none;
-}
-
-.monks-journal-sheet.sheet .items-list .item .item-name {
-    color: #191813;
-}
-
-.monks-journal-sheet.sheet .items-list .item .item-name .item-image {
-    flex: 0 0 30px;
-    height: 30px;
-    background-size: 30px;
-    border: none;
-    margin-right: 5px;
-}
-
-.monks-journal-sheet.sheet .place-container .items-list .item .item-name .item-image, .monks-journal-sheet.sheet .person-container .items-list .item .item-name .item-image, .monks-journal-sheet.sheet .shop-container .relationships .items-list .item .item-name .item-image, .monks-journal-sheet.sheet .organization-container .items-list .item .item-name .item-image, .monks-journal-sheet.sheet .poi-container .items-list .item .item-name .item-image, .monks-journal-sheet.sheet .event-container .items-list .item .item-name .item-image, .monks-journal-sheet.sheet .quest-container .relationships .items-list .item .item-name .item-image {
-    flex: 0 0 70px;
-    height: 70px;
-    width: 70px;
-    object-fit: contain;
-    cursor: pointer;
-}
-
-.monks-journal-sheet.sheet .organization-container .offering-list .items-list .item .item-name .item-image.actor-icon,
-.monks-journal-sheet.sheet .organization-container .offering-list .items-list .item .item-name .item-image.item-icon,
-.monks-journal-sheet.sheet .person-container .offering-list .items-list .item .item-name .item-image.actor-icon,
-.monks-journal-sheet.sheet .person-container .offering-list .items-list .item .item-name .item-image.item-icon {
-    height: 32px;
-    width: 32px;
-    flex: 0 0 32px;
-}
-
-.monks-journal-sheet.sheet .items-list .item.received.empty .item-name .item-image {
-    filter: grayscale(100%);
-    opacity: 0.7;
-}
-
-.monks-journal-sheet.sheet .shop-container .item-list > li input, .monks-journal-sheet.sheet .loot-container .item-list > li input, .monks-journal-sheet.sheet .person-container .items-list > li input, .monks-journal-sheet.sheet .place-container .items-list > li input, .monks-journal-sheet.sheet .organization-container .items-list > li input, .monks-journal-sheet.sheet .poi-container .items-list > li input, .monks-journal-sheet.sheet .event-container .items-list > li input, .monks-journal-sheet.sheet .quest-container .items-list > li input, .monks-journal-sheet.sheet .distribute-container .item-list > li input {
-    border-color: transparent;
-}
-
-.monks-journal-sheet.sheet .shop-container .item-list > li input:hover, .monks-journal-sheet.sheet .loot-container .item-list > li input:hover, .monks-journal-sheet.sheet .person-container .items-list > li input:hover, .monks-journal-sheet.sheet .place-container .items-list > li input:hover, .monks-journal-sheet.sheet .organization-container .items-list > li input:hover, .monks-journal-sheet.sheet .poi-container .items-list > li input:hover, .monks-journal-sheet.sheet .event-container .items-list > li input:hover, .monks-journal-sheet.sheet .quest-container .items-list > li input:hover, .monks-journal-sheet.sheet .distribute-container .item-list > li input:hover {
-    border-color: unset;
-}
-
-.monks-journal-sheet.sheet .encounter-body .item-list .item .item-summary, .monks-journal-sheet.sheet .quest-container .item-list .item .item-summary, .monks-journal-sheet.sheet .shop-container .item-list .item .item-summary, .monks-journal-sheet.sheet .loot-container .item-list .item .item-summary {
-    flex: 0 0 100%;
-    padding: .5rem;
-    border-top: 1px solid var(--faint-color);
-    font-size: var(--font-size-12);
-}
-
-.monks-journal-sheet.sheet .items-list .items-header {
-    height: 28px;
-    margin: 2px 0;
-    padding: 0;
-    align-items: center;
-    background: rgba(0, 0, 0, 0.05);
-    border: 2px groove #eeede0;
-    font-weight: bold;
-}
-
-.monks-journal-sheet.sheet .items-list .items-header > *,
-#journal-editcurrency .items-list .items-header > * {
-    font-size: var(--font-size-12);
-    text-align: center;
-}
-
-.monks-journal-sheet.sheet .items-list .items-header h3,
-#journal-editcurrency .items-list .items-header h3 {
-    padding-left: 5px;
-    font-family: "Modesto Condensed", "Palatino Linotype", serif;
-    font-weight: 700;
-    text-align: left;
-    font-size: var(--font-size-16);
-}
-
-.monks-journal-sheet.sheet .items-list .items-header .item-count {
-    display: none;
-    margin-left: 10px;
-    font-size: var(--font-size-14);
-}
-
-.monks-journal-sheet.sheet .items-list .items-header.collapsed .item-count {
-    display: inline-block;
-}
-
-.monks-journal-sheet.sheet .items-list .item .item-name.item-received {
-    flex: 0 0 auto;
-    color: #808080;
-}
-/*
-.monks-journal-sheet .dropdown {
-    width: 200px;
-    border: 1px solid #C0C0C0;
-    border-radius: 4px;
-    background: #FFFFFF;
-    z-index: 9999;
-    position: absolute;
-    text-align: left;
-    list-style-image: none;
-    list-style: none;
-    padding: 5px 10px;
-    margin-top: 0px;
-}*/
-.monks-journal-sheet.pf2e.journal-sheet form select {
-    width: unset;
-    margin: 0px;
-}
-
-.monks-journal-sheet.pf2e form .npc-body {
-    margin-top: 0px;
-}
-
-.actor-img {
-    flex: 0 0 80px;
-    max-width: 80px;
-    height: 160px;
-    object-fit: contain;
-    object-position: top center;
-    font-size: 15px;
-    padding: 4px;
-    border-left: 2px groove #eeede0;
-}
-
-.sheet header.sheet-header .actor-img img {
-    width: 80px;
-    height: 80px;
-    object-fit: contain;
-    border: none;
-    cursor: pointer;
-}
-
-.monks-journal-sheet.sheet .items-list .item-assigned {
-    text-align: center;
-}
-
-.monks-journal-sheet.pf1.journal-sheet .folder-header, .monks-journal-sheet.pf1.journal-sheet .subdirectory {
-    width: 100%;
-}
-
-.sidebar-tab.directory .directory-item.journalentry {
-    position: relative;
-}
-
-.sheet.journal-entry .pages-list .page-heading {
-    position: relative;
-}
-
-.monks-enhanced-journal .sheet.journal-entry .pages-list .directory-item.active {
-    background-color: rgba(0, 0, 0, 0.4);
-}
-
-.sheet.journal-entry .pages-list .page-heading .page-ownership {
-    width: unset;
-    position: absolute;
-    top: 0px;
-    right: 0px;
-    pointer-events: all;
-    cursor: pointer;
-}
-
-.sheet.journal-entry .pages-list .page-heading .page-ownership.none {
+#journal li.journalentry[status='failed'] .document-name,
+.monks-enhanced-journal .sidebar-directory li.journalentry[status='failed'] .document-name {
+    border-left-color: var(--mej-quest-status-failed);
 }
 
 .sidebar-tab.directory .directory-item.journalentry .permissions {
@@ -1942,7 +761,7 @@ height: fit-content;*/
     line-height: 14px;
 }
 
-#journal-directory .directory-item.journalentry .permissions {
+.monks-enhanced-journal .sidebar-directory .directory-item.journalentry .permissions {
     background-color: rgba(255, 255, 255, 0.5);
 }
 
@@ -1955,7 +774,188 @@ height: fit-content;*/
     display: none;
 }
 
-.sidebar-tab.directory .directory-item.journalentry .permissions div, .pages-list .page-heading .page-ownership div {
+.sidebar-tab.directory .directory-item.journalentry .permissions div {
+    width: 14px;
+    height: 14px;
+    display: inline-block;
+    border-radius: 100%;
+    text-align: center;
+    color: #000;
+    font-weight: 700;
+    background: #97dff4;
+    border: 1px solid #000;
+    margin-right: 2px;
+    text-shadow: none;
+}
+.sidebar-tab.directory .directory-item.journalentry .permissions i + div,
+.sidebar-tab.directory .directory-item.journalentry .permissions i + i {
+    margin-left: 5px;
+}
+
+.sidebar-tab.directory .directory-item.folder .default-type {
+    flex: 0 0 20px;
+}
+
+.monks-enhanced-journal li.folder > .folder-header .create-button .fa-plus {
+    padding-left: 2px;
+}
+
+.directory .directory-item.journalentry.folder > .document-name {
+    margin-left: 0px;
+    background: rgba(255, 255, 255, 0.1);
+    width: 100%;
+}
+
+.directory .directory-item.journalentry.folder > .document-name > i {
+    cursor: pointer;
+}
+
+.directory .directory-item.journalentry.folder.collapsed > .document-name {
+    background: rgba(0, 0, 0, 0.3);
+}
+
+.monks-enhanced-journal .sidebar-directory .directory-item.journalentry.folder > .document-name {
+    background: rgba(0, 0, 0, 0.1);
+}
+
+.sidebar-tab.directory .directory-item.journalentry {
+    position: relative;
+}
+
+/* -----------------Foundry changes----------------------- */
+.dialog p.notes {
+    font-size: var(--font-size-12);
+    line-height: var(--line-height-16);
+    color: var(--color-text-dark-secondary);
+    margin: 3px 0;
+}
+
+/* Inline links */
+a.journal-link {
+    background: #ddd;
+    padding: 1px 4px;
+    border: 1px solid #4b4a44;
+    border-radius: 2px;
+    white-space: nowrap;
+    word-break: break-all;
+    color: var(--color-text-dark-primary);
+    position: relative;
+    padding-left: 16px;
+    text-decoration: none;
+}
+
+a.journal-link::before {
+    content: '\f02e';
+    font-family: 'Font Awesome 5 Free';
+    font-weight: 900;
+    left: 3px;
+    top: 3px;
+    position: absolute;
+    color: #7a7971;
+}
+
+a.journal-link:hover {
+    text-shadow: none;
+}
+
+a.picture-link {
+    background: #ddd;
+    padding: 1px 4px;
+    border: 1px solid #4b4a44;
+    border-radius: 2px;
+    white-space: nowrap;
+    word-break: break-all;
+}
+
+/*
+a.picture-link i,
+a.inline-request-roll i {
+    color: #7a7971;
+}
+    */
+
+a.picture-link.broken {
+    background: rgba(255, 0, 0, 0.05);
+    border: 1px dashed red;
+}
+
+span.unknown-link {
+    background: #ddd;
+    padding: 1px 4px;
+    border: 1px solid var(--color-border-dark-tertiary);
+    border-radius: 2px;
+    white-space: nowrap;
+    word-break: break-all;
+}
+
+#actors .directory-list li.directory-item.actor {
+    position: relative;
+}
+
+.inline-roll-styling a.content-link,
+.inline-roll-styling a.picture-link,
+.inline-roll-styling a.inline-request-roll,
+.inline-roll-styling a.tile-trigger-link {
+    color: var(--color-text-hyperlink);
+    background: transparent;
+    padding: 0px;
+    border: 0px;
+}
+
+.inline-roll-styling a.content-link i,
+.inline-roll-styling a.picture-link i,
+.inline-roll-styling a.inline-request-roll i,
+.inline-roll-styling a.tile-trigger-link i {
+    color: var(--color-text-hyperlink);
+}
+
+/* Show to Players */
+.journal-show-dialog .show-to-players {
+    display: grid;
+    grid-template-columns: 33% 33% 33%;
+}
+
+.journal-show-dialog .show-to-players > label {
+    text-align: left;
+}
+
+.journal-show-dialog input[type='radio'] {
+    display: none;
+}
+
+.journal-show-dialog input[type='radio']:disabled + label {
+    color: var(--color-text-dark-inactive);
+}
+
+.journal-show-dialog input[type='radio']:checked + label {
+    color: var(--color-text-hyperlink);
+}
+
+.journal-show-dialog input[type='radio']:not(:disabled) + label:hover {
+    cursor: pointer;
+    text-shadow: 0 0 8px red;
+}
+
+/* Journal Table of Contents */
+.sheet.journal-entry.monks-journal-sheet .directory-list {
+    margin: 0px;
+    padding: 0px;
+}
+
+.sheet.journal-entry .pages-list .page-heading {
+    position: relative;
+}
+
+.sheet.journal-entry .pages-list .page-heading .page-ownership {
+    width: unset;
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    pointer-events: all;
+    cursor: pointer;
+}
+
+.sheet.journal-entry .pages-list .page-heading .page-ownership div {
     width: 14px;
     height: 14px;
     display: inline-block;
@@ -1969,73 +969,106 @@ height: fit-content;*/
     text-shadow: none;
 }
 
-.pages-list .page-heading .page-ownership div {
+.sheet.journal-entry .pages-list .page-heading .page-ownership div {
     font-weight: normal;
     font-size: 10px;
     line-height: 12px;
 }
 
-.sidebar-tab.directory .directory-item.journalentry .permissions i + div, .sidebar-tab.directory .directory-item.journalentry .permissions i + i, .pages-list .page-heading .page-ownership i + div {
+.sheet.journal-entry .pages-list .page-heading .page-ownership i + div {
     margin-left: 5px;
 }
 
-.sidebar-tab.directory .directory-item.folder .default-type {
-    flex: 0 0 20px;
+.sheet.journal-entry .journal-entry-page header h1 {
+    margin: 0px;
 }
 
-.monks-journal-sheet.sheet button.assign-xp {
-    order: 99;
+.sheet.journal-entry .pages-list .page-icon {
+    margin-right: 4px;
 }
 
-.monks-journal-sheet.sheet .editor-content .polyglot-container {
-    background-color: rgba(255, 180, 0, 0.25);
-    text-align: center;
-    display: inline-block;
-    margin-bottom: 2px;
-    position: relative;
+.sheet.journal-entry .pages-list .directory-item {
+    align-items: flex-start;
 }
 
-.monks-journal-sheet.sheet .editor-content .polyglot-container:before {
+.sheet.journal-entry .pages-list .directory-item.active:first-of-type {
+    border-top: 1px solid var(--mej-adventure-toc-border-highlight);
+}
+
+.sheet.journal-entry .pages-list .directory-item.active:last-of-type {
+    border-bottom: 1px solid var(--mej-adventure-toc-border-highlight);
+}
+
+.sheet.journal-entry .pages-list .directory-item:not(.active) + .active {
+    border-top: 1px solid var(--mej-adventure-toc-border-highlight);
+}
+
+.sheet.journal-entry .pages-list .directory-item.active + :not(.active) {
+    border-top: 1px solid var(--mej-adventure-toc-border-highlight);
+}
+
+/*
+.sheet.journal-entry .pages-list .directory-item.active:last-of-type,
+.sheet.journal-entry .pages-list .directory-item.active:first-of-type {
+    border-top: 1px solid var(--color-border-dark);
+}
+
+.sheet.journal-entry .pages-list .directory-item:not(.active) + .active {
+    border-bottom: 1px solid var(--color-border-dark-3);
+}
+    */
+
+/*
+.sheet.journal-entry .pages-list .directory-item.active + :not(.active) {
+    border-top: 1px solid var(--color-border-dark);
+}
+*/
+
+.sheet.journal-entry .pages-list .directory-item:last-child,
+.sheet.journal-entry .pages-list .directory-item:first-child {
+    border-bottom: 1px solid transparent;
+}
+
+/*
+.sheet.journal-entry .pages-list .directory-item.active {
+    background: rgba(92, 135, 185, 0.2);
+}
+    */
+
+.sheet.journal-entry .pages-list .directory-item.active {
+    background-color: var(--mej-adventure-toc-item-background);
+}
+
+.monks-enhanced-journal .enhanced-journal .journal-sheet-container .sidebar .directory-header,
+.monks-enhanced-journal .enhanced-journal .journal-sheet-container .sidebar .action-buttons,
+.monks-enhanced-journal .enhanced-journal .journal-sheet-container .window-resizable-handle {
     display: none;
-    position: absolute;
-    bottom: 100%;
-    left: 4px;
-    content: attr(data-lang-text);
-    border-top-left-radius: 4px;
-    border-top-right-radius: 4px;
-    border: 1px solid #C0C0C0;
-    color: #ffffff;
-    background-color: rgba(0, 0, 0, 0.6);
-    padding: 1px 4px;
-    font-size: 10px;
-    min-width: 40px;
 }
 
-.monks-journal-sheet.sheet .editor-content .polyglot-container:hover:before {
-    display: block;
+.monks-enhanced-journal .enhanced-journal .journal-sheet-container .sidebar.directory {
+    background: var(--mej-adventure-toc-background);
 }
 
-.monks-journal-sheet.sheet .editor-content .polyglot-container span.polyglot-journal {
-    background-color: transparent;
+.monks-enhanced-journal .enhanced-journal .sheet.journal-entry .journal-sheet-container {
+    width: unset !important;
+    height: unset !important;
+    left: unset !important;
+    pointer-events: all !important;
 }
 
-.monks-journal-sheet.sheet .editor-content .polyglot-container .polyglot-journal {
-    display: none;
-    position: absolute;
+.monks-enhanced-journal .enhanced-journal .sheet.journal-entry .journal-entry-content {
+    border: 0px;
+    background: var(--mej-background);
+}
+
+.sheet.journal-entry .no-file-notification {
     width: 100%;
-    top: 50%;
-    transform: translateY(-50%);
-    float: left;
+    text-align: center;
+    padding: 10px;
+    color: var(--tertiary-color);
 }
 
-.monks-journal-sheet.sheet .editor-content .polyglot-container.translate .polyglot-journal {
-    display: inline-block;
-}
-
-.monks-journal-sheet.sheet .editor-content .polyglot-container.translate .polyglot-scramble {
-    visibility: hidden;
-}
-
+/* Select with Folders */
 .journal-select {
     position: relative;
     width: 100%;
@@ -2048,26 +1081,10 @@ height: fit-content;*/
 }
 
 .journal-select:focus {
-    box-shadow: 0 0 5px #FF0000;
+    box-shadow: 0 0 5px #ff0000;
     outline: none;
 }
-/*
-.journal-select:after {
-    content: "\f078";
-    position: absolute;
-    right: 0px;
-    top: 0px;
-    font-family: "Font Awesome 5 Free";
-    -webkit-font-smoothing: antialiased;
-    display: inline-block;
-    font-style: normal;
-    font-variant: normal;
-    text-rendering: auto;
-    height: 100%;
-    width: 20px;
-    text-align: center;
-    line-height: 24px;
-}*/
+
 .journal-select > div > span {
     line-height: 26px !important;
     overflow: hidden;
@@ -2109,7 +1126,8 @@ height: fit-content;*/
     max-height: 250px;
 }
 
-.journal-select.open .journal-list, .journal-list.open {
+.journal-select.open .journal-list,
+.journal-list.open {
     display: block;
 }
 
@@ -2148,9 +1166,10 @@ height: fit-content;*/
     color: #333333;
 }
 
-.journal-list .journal-item:not(.folder):hover, .journal-list .journal-item.selected {
+.journal-list .journal-item:not(.folder):hover,
+.journal-list .journal-item.selected {
     background-color: #1e90ff;
-    color: #FFF;
+    color: #fff;
 }
 
 .journal-list .journal-item.folder > .journal-title {
@@ -2163,8 +1182,8 @@ height: fit-content;*/
 }
 
 .journal-list .subfolder {
-    border-left: 4px solid #C0C0C0;
-    border-bottom: 4px solid #C0C0C0;
+    border-left: 4px solid #c0c0c0;
+    border-bottom: 4px solid #c0c0c0;
 }
 
 .journal-list .subfolder .journal-item {
@@ -2176,7 +1195,7 @@ height: fit-content;*/
 }
 
 .journal-list .journal-item.folder.collapse .journal-title i.fa-folder-open:before {
-    content: "\f07b";
+    content: '\f07b';
 }
 
 .journal-list .journal-item.folder.collapse > ul {
@@ -2188,1351 +1207,4 @@ height: fit-content;*/
     margin-top: 0px;
     list-style-type: none;
     margin-bottom: 0px;
-}
-
-.select-player .options {
-    margin: 0px -7px;
-    padding: 5px 7px;
-    background-color: rgba(255, 255, 255, 0.5);
-}
-
-.select-player .user-list {
-    border-top: 2px groove #eeede0;
-    margin-top: 0px;
-    padding-top: 5px;
-}
-
-a.journal-link {
-    background: #DDD;
-    padding: 1px 4px;
-    border: 1px solid #4b4a44;
-    border-radius: 2px;
-    white-space: nowrap;
-    word-break: break-all;
-    color: var(--color-text-dark-primary);
-    position: relative;
-    padding-left: 16px;
-    text-decoration: none;
-}
-
-a.journal-link::before {
-    content: "\f02e";
-    font-family: "Font Awesome 5 Free";
-    font-weight: 900;
-    left: 3px;
-    top: 3px;
-    position: absolute;
-    color: #7a7971;
-}
-
-a.journal-link:hover {
-    text-shadow: none;
-}
-
-.polyglot-journal.sizing {
-    position: absolute;
-    white-space: nowrap;
-}
-
-.monks-journal-sheet .journal-subsheet:not(.gm) .gm-only {
-    display: none;
-}
-
-.monks-journal-sheet .journal-subsheet:not(.owner) .owner-only {
-    display: none;
-}
-
-.monks-journal-sheet .journal-subsheet div[data-tab="picture"] #context-menu {
-    top: calc(50% - 33px);
-    left: calc(50% - 100px);
-    max-width: 200px;
-}
-
-.monks-journal-sheet .journal-subsheet .shop-owner, .monks-journal-sheet .journal-subsheet .quest-source, .monks-journal-sheet .journal-subsheet .person-actor {
-    flex: 0 0 30px;
-    white-space: nowrap;
-    overflow: hidden;
-    font-size: 12px;
-    text-align: center;
-    border-radius: 4px;
-    background: rgba(0, 0, 0, 0.05);
-    border: 2px groove #eeede0;
-}
-
-.monks-journal-sheet .journal-subsheet .encounter-buttons {
-    flex-shrink: 1;
-    flex-grow: 0;
-    flex-wrap: nowrap;
-}
-
-.monks-journal-sheet .journal-subsheet .encounter-buttons > div {
-    width: 22px;
-    flex: 0 0 22px;
-    height: 22px;
-    border-radius: 2px;
-    border: 1px solid #C0C0C0;
-    text-align: center;
-    cursor: pointer;
-    background: rgba(255, 255, 255, 0.4);
-    line-height: 22px;
-    margin-right: 2px;
-}
-
-.monks-journal-sheet .header-name .sheet-icon {
-    flex: 0 0 30px;
-    line-height: 32px;
-    margin-top: 0px;
-}
-
-.monks-journal-sheet .header-details .sheet-icon {
-    flex: 0 0 20px;
-    font-size: 20px;
-    height: 20px;
-    margin-top: 18px;
-}
-
-.monks-enhanced-journal.request-item img {
-    width: 30px;
-    height: 30px;
-    flex: 0 0 30px;
-}
-
-.monks-enhanced-journal.request-item h4 {
-    margin-left: 8px;
-}
-
-.monks-enhanced-journal.request-item .item-list .item-controls {
-    text-align: center;
-}
-
-.monks-enhanced-journal.request-item .request-buttons {
-    margin-top: 8px;
-    flex: 0 0 30px;
-}
-
-.monks-enhanced-journal.request-item .card-footer {
-    padding: 3px 0 0;
-    border-top: 2px groove #FFF;
-}
-
-.monks-enhanced-journal.request-item .card-footer:empty {
-    display: none;
-}
-
-.monks-enhanced-journal.request-item .card-footer span {
-    border-right: 2px groove #FFF;
-    padding: 0 3px 0 0;
-    font-size: 10px;
-}
-
-.monks-enhanced-journal.request-item .card-footer span:last-child {
-    border-right: none;
-    padding-right: 0;
-}
-
-.monks-journal-sheet .checklist-list {
-    padding-left: 0px;
-}
-
-.monks-journal-sheet .checklist-list .document.item {
-    padding: 6px;
-    line-height: 24px;
-}
-
-.monks-journal-sheet .checklist-list .document.item:nth-child(even) {
-    background-color: rgba(0, 0, 0, 0.1);
-}
-
-.monks-journal-sheet .checklist-list .create-folder, .monks-journal-sheet .checklist-list .create-item {
-    flex: 0 0 20px;
-}
-
-.monks-journal-sheet .checklist-list .folder header {
-    border-left: 1px solid #000;
-    border-right: 1px solid #000;
-}
-
-.monks-journal-sheet .checklist-list .checklist-item h3 {
-    margin-bottom: 0px;
-}
-
-.monks-journal-sheet .checklist-list .checklist-item.checked h3 {
-    text-decoration: line-through;
-}
-
-.monks-journal-sheet .checklist-list .subdirectory {
-    padding-left: 20px;
-    margin-bottom: 5px;
-    border-left: 4px solid #808080;
-}
-
-.monks-journal-sheet .checklist-list {
-    height: 100%;
-    overflow: auto;
-}
-
-.monks-journal-sheet .checklist-list .subdirectory .folder {
-    border-left: 0px;
-}
-
-.monks-journal-sheet .checklist-list li.folder > .folder-header {
-    background: rgba(0, 0, 0, 0.3);
-    color: #fff;
-}
-
-.monks-journal-sheet .checklist-list li.folder.collapsed > .folder-header {
-    background: rgba(0, 0, 0, 0.5);
-}
-
-a.picture-link {
-    background: #DDD;
-    padding: 1px 4px;
-    border: 1px solid #4b4a44;
-    border-radius: 2px;
-    white-space: nowrap;
-    word-break: break-all;
-}
-
-a.picture-link i, a.inline-request-roll i {
-    color: #7a7971;
-}
-
-a.picture-link.broken {
-    background: rgba(255, 0, 0, 0.05);
-    border: 1px dashed red;
-}
-
-.monks-journal-sheet .instruction {
-    text-align: center;
-    height: 40%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.monks-journal-sheet li.instruction {
-    height: 100px;
-}
-
-.monks-enhanced-journal .mainbar .navigation .button-group .nav-text i.fa-search {
-    padding-top: 4px;
-}
-
-.monks-enhanced-journal .mainbar .navigation #context-menu li {
-    text-align: left;
-}
-
-.d35ecustom .monks-enhanced-journal .content .sheet.monks-journal-sheet {
-    border: 0px;
-}
-
-.d35ecustom .monks-enhanced-journal .content .sheet.monks-journal-sheet input[name="name"] {
-    height: 32px;
-}
-
-.sfrpg.monks-enhanced-journal .tab-bar .tab-button.sidebar-toggle, .sw5e.monks-enhanced-journal .tab-bar .tab-button.sidebar-toggle {
-    top: -4px;
-}
-
-.sfrpg.monks-enhanced-journal .directory-sidebar, .sw5e.monks-enhanced-journal .directory-sidebar {
-    margin-top: -8px;
-    margin-right: -8px;
-    height: calc(100% + 16px);
-}
-
-.sfrpg.monks-enhanced-journal .directory .action-buttons button, .sw5e.monks-enhanced-journal .directory .action-buttons button {
-    line-height: 20px;
-}
-
-.fallout.monks-enhanced-journal .window-content {
-    background: url(../../../ui/parchment.jpg) repeat;
-    color: var(--color-text-dark-primary);
-}
-
-.wfrp4e.monks-enhanced-journal .directory .directory-header .header-search {
-    padding-left: 8px;
-}
-
-.wfrp4e.monks-enhanced-journal .tab-bar .tab-button.sidebar-toggle {
-    right: -38px;
-    color: #dadada;
-}
-
-.wfrp4e.monks-enhanced-journal .collapse .tab-bar .tab-button.sidebar-toggle {
-    right: 0px;
-}
-
-.wfrp4e.monks-enhanced-journal .directory-sidebar > section .directory-list {
-    margin-left: 8px;
-    padding-right: 0px;
-    margin-right: 0px;
-}
-
-.wfrp4e.monks-enhanced-journal .directory-sidebar #journal-directory .directory-list .directory-item {
-    padding: 3px 3px;
-    border: 3px groove #564d3a;
-    box-shadow: 0 0 6px #000 inset;
-    line-height: normal;
-    background: #000000b5;
-    font-family: var(--actor-input-font-family);
-    font-size: 16px;
-    font-weight: var(--actor-input-font-weight);
-    color: #dadada;
-    text-shadow: 1px 1px 2px black;
-    margin-left: 0px;
-}
-
-.wfrp4e.monks-enhanced-journal .directory-sidebar #journal-directory .directory-list .directory-item h3 i {
-    display: inline-block;
-}
-
-.wfrp4e.monks-enhanced-journal #journal-directory li.folder.collapsed > .folder-header .create-document {
-    color: #dadada;
-}
-
-.wfrp4e.monks-enhanced-journal #journal-directory li.folder:not(.collapsed) > .folder-header {
-    background: rgba(255, 255, 255, 0.2);
-}
-
-.wfrp4e.monks-enhanced-journal .directory-sidebar #journal-directory li.folder.collapsed > .folder-header:not(.customcolor) {
-    color: #dadada;
-}
-
-.wfrp4e.monks-enhanced-journal .directory-sidebar #journal-directory .directory-list .directory-item.journalentry {
-    line-height: 19px;
-}
-
-.wfrp4e.monks-enhanced-journal .directory-sidebar {
-    background: url(../../../systems/wfrp4e/ui/sidebar.webp) repeat;
-    background-position-y: 45px;
-}
-
-.wfrp4e.monks-enhanced-journal.app.window-app .window-content {
-    padding: 0px 0px 3px 0px;
-    color: #111;
-}
-
-.wfrp4e.monks-enhanced-journal .content {
-    background: url(../../../systems/wfrp4e/ui/frames/parchment-texture.webp);
-    border-width: 10px;
-    border-image: url(../../../systems/wfrp4e/ui/frames/window-app-journal-sheet-content.webp) 5 repeat;
-    border-image-slice: 25;
-    border-image-width: 25px;
-    border-image-outset: 0px 0px 0px 0px;
-}
-
-.wfrp4e.monks-enhanced-journal .content > section {
-    padding-left: 4px;
-}
-
-.wfrp4e.monks-enhanced-journal .tab-bar .journal-tab {
-    background: url(../../../systems/wfrp4e/ui/sidebar_button-background_red.webp) repeat;
-    color: #dadada;
-    font-family: CaslonAntique;
-}
-
-.wfrp4e.monks-enhanced-journal .directory .action-buttons button {
-    background: url(../../../systems/wfrp4e/ui/sidebar_button-background_red.webp) repeat;
-    color: #dadada;
-    font-family: CaslonAntique;
-    border: 1px solid black;
-    border-image: url(../../../systems/wfrp4e/ui/footer-button.webp) 10 repeat;
-    border-image-width: 4px;
-    border-image-outset: 0px;
-    box-shadow: 4px 4px 1px #00000085;
-    background-origin: padding-box;
-    text-shadow: 0px 0px 1px #00000063;
-}
-
-.wfrp4e.monks-enhanced-journal .mainbar .navigation .nav-input {
-    background: url(../../../systems/wfrp4e/ui/frames/parchment-texture.webp);
-    box-shadow: inset 0 0 10px #000000;
-    border: 2px groove #564d3a;
-    border-image: url(../../../systems/wfrp4e/ui/chat-controls-border.webp) 4 repeat;
-    border-image-width: 4px;
-    border-image-outset: 1px;
-    font-family: var(--actor-input-font-family);
-    font-size: var(--actor-input-font-family);
-    font-weight: var(--actor-input-font-weight);
-    color: var(--actor-input-color);
-    text-align: left;
-}
-
-.wfrp4e.monks-enhanced-journal .mainbar .bookmark-bar {
-    color: #f0f0e0;
-}
-
-.wfrp4e.monks-enhanced-journal .monks-enhanced-journal footer {
-    border-image: url(../../../systems/wfrp4e/ui/frames/hotkeybox.webp) 21 repeat;
-    border-image-slice: 6 6 6 6 fill;
-    border-image-width: 6px 6px 6px 6px;
-    border-image-outset: 0px 0px 0px 0px;
-    border-radius: 0px;
-    padding-top: 2px;
-    padding-bottom: 2px;
-    color: #dadada;
-}
-
-.wfrp4e.monks-enhanced-journal .monks-enhanced-journal footer > div:hover {
-    text-shadow: 0 0 8px #ff9f00 !important;
-}
-
-.system-wfrp4e #journal-editcurrency .dialog-content,
-.system-wfrp4e #edit-attributes .dialog-content {
-    background: url(../../../systems/wfrp4e/ui/frames/parchment-texture.webp);
-}
-
-.-emu-layout body.-emu .monks-journal-sheet.journal-sheet.sheet.window-app .window-content form.sheet-body.flexcol {
-    flex-direction: column;
-    flex-wrap: nowrap;
-}
-
-.-emu-layout body.-emu .monks-journal-sheet.journal-sheet.sheet.window-app .window-content .editor-edit {
-    top: 0px;
-    right: 4px;
-}
-
-#actors .directory-list li.directory-item.actor {
-    position: relative;
-}
-
-.assign-icon {
-    position: absolute;
-    top: 4px;
-    right: 6px;
-    height: 16px;
-    line-height: 1px;
-}
-
-.rippers-ui.monks-enhanced-journal .sidebar-directory .directory-list .document {
-    text-shadow: 1px 2px white;
-}
-
-.pf2e.monks-enhanced-journal .journal-sheet form select {
-    display: inline-block;
-    margin-top: 0px;
-}
-
-.monks-enhanced-journal .nav-button.convert #context-menu {
-    margin-left: -60px;
-}
-
-.monks-enhanced-journal .actor-img #context-menu {
-    margin-left: -70px;
-}
-
-.monks-enhanced-journal .checklist #context-menu {
-    max-width: 200px;
-}
-
-.monks-journal-sheet .window-resizable-handle {
-    z-index: 100;
-}
-
-.monks-journal-sheet a[disabled] {
-    pointer-events: none;
-}
-
-.monks-journal-sheet .loot-player {
-    width: 14px;
-    line-height: 12px;
-    font-size: 10px;
-    text-align: center;
-    color: #000;
-    font-weight: 700;
-    background: #97dff4;
-    border: 1px solid #000;
-    border-radius: 8px;
-    display: inline-block;
-}
-
-.monks-journal-sheet .loot-character .loot-player {
-    position: absolute;
-    top: 2px;
-    left: 2px;
-}
-
-.loot-character {
-    height: 78px;
-    flex: 0 0 60px;
-    margin: 0 8px;
-    width: 60px;
-    position: relative;
-    text-align: center;
-}
-
-.sheet header.sheet-header .loot-character > img {
-    width: 60px;
-    height: 60px;
-    object-fit: contain;
-    border: 0px;
-    border-radius: 4px;
-}
-
-.loot-character > .character-name {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    width: 100%;
-}
-
-.monks-journal-sheet.sheet .items-list.loot-characters {
-    margin-top: 5px;
-    font-size: 14px;
-}
-
-.loot-characters .items-list .items-list {
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    width: 100%;
-}
-
-.monks-journal-sheet .loot-character #context-menu {
-    top: 50%;
-}
-
-.monks-journal-sheet.sheet .items-list .item.empty .item-name .item-image {
-    filter: grayscale(100%);
-    opacity: 0.7;
-}
-
-.monks-enhanced-journal.request-item.item-card .items-list.reward-items {
-    overflow-y: unset;
-}
-
-.monks-enhanced-journal.request-item button.active {
-    color: #ff6400;
-}
-
-.monks-enhanced-journal.request-item button:disabled {
-    color: #C0C0C0;
-}
-
-.monks-journal-sheet.sheet .items-list .item-from {
-    flex: 0 0 150px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    align-items: start;
-    text-align: left;
-}
-
-.monks-journal-sheet .loot-items .request-players {
-    margin: 0;
-    padding: 0;
-    text-align: center;
-}
-
-.monks-journal-sheet .loot-items .item-grant {
-    text-align: center;
-}
-
-body:not(.system-pf2e) .monks-journal-sheet .item-properties .tag, .monks-journal-sheet .offering-items .tag {
-    display: inline-block;
-    margin: 0 2px 0 0;
-    padding: 0 3px;
-    font-size: var(--font-size-10);
-    line-height: 16px;
-    border: 1px solid #999;
-    border-radius: 3px;
-    background: rgba(0, 0, 0, 0.05);
-}
-
-.tox.tox-tinymce-aux {
-    width: 0px;
-}
-
-.monks-journal-sheet.sheet .distribute-container input, .monks-journal-sheet.sheet .distribute-container a.split, .monks-journal-sheet.sheet .distribute-container a.assign, .monks-journal-sheet.sheet .distribute-container .item-control {
-    flex: 0 0 80px;
-    text-align: center;
-    margin-right: 0px;
-}
-
-.monks-journal-sheet.sheet .distribute-container a.split {
-    font-size: 12px;
-    text-align: center;
-    color: #7a7971;
-}
-
-.monks-journal-sheet.sheet .distribute-container a.assign {
-    font-size: 12px;
-}
-
-#distribute-currency {
-    height: unset;
-}
-
-.wfrp4e .tox .tox-menubar {
-    background-color: transparent;
-}
-
-.wfrp4e .tox-tinymce .tox-menubar button {
-    background: none !important;
-    border-image: none !important;
-    color: black !important;
-    width: auto !important;
-    opacity: 1;
-    font-size: var(--font-size-12) !important;
-    height: 26px !important;
-    margin: 2px 2px 2px 2px !important;
-    font-style: normal;
-    font-family: "Signika", sans-serif !important;
-    box-shadow: inset 0px 0px 12px #6b3a0f87 !important;
-}
-
-.monks-enhanced-journal.request-item h4,
-.monks-enhanced-journal.request-sale h4 {
-    height: 27px;
-    line-height: 27px;
-    margin: 0;
-    white-space: nowrap;
-    overflow: hidden;
-}
-
-.monks-enhanced-journal.request-item .chat-actor-icon,
-.monks-enhanced-journal.request-item .chat-shop-icon,
-.monks-enhanced-journal.request-sale .chat-actor-icon,
-.monks-enhanced-journal.request-sale .chat-shop-icon {
-    margin-right: 8px;
-}
-
-.monks-enhanced-journal .content .actor.sheet {
-    min-height: 100%;
-    max-height: 100%;
-}
-
-.monks-enhanced-journal .content .actor.sheet > form {
-    height: 100%;
-}
-
-.monks-enhanced-journal .content .actor.sheet > form .tab {
-    height: 100%;
-}
-
-.monks-enhanced-journal .content .actor.sheet > form .tab.attributes {
-    overflow-y: auto;
-}
-
-.monks-enhanced-journal.pf2e .tab[data-tab="picture"].active {
-    display: block;
-}
-
-.monks-enhanced-journal.demonlord .tab-bar .tab-button.tab-add {
-    color: #FFFFFF;
-}
-
-.monks-enhanced-journal.demonlord .bookmark-bar {
-    color: #FFFFFF;
-}
-
-.monks-enhanced-journal.demonlord .bookmark-bar .bookmark-button {
-    background-color: rgba(255, 255, 255, 0.2);
-}
-
-.monks-enhanced-journal.demonlord .bookmark-bar .bookmark-button:hover {
-    background-color: rgba(255, 255, 255, 0.5);
-}
-
-.monks-enhanced-journal.demonlord .header-name > i {
-    line-height: 1px;
-    flex: 0 0 35px;
-    top: 18px;
-    text-align: center;
-    position: relative;
-}
-
-.monks-enhanced-journal.demonlord .monks-journal-sheet.sheet .sheet-navigation.tabs {
-    color: #000;
-}
-
-.monks-enhanced-journal.demonlord .window-content {
-    background-size: auto 92px, cover;
-}
-
-.monks-enhanced-journal.hide-bookmark.demonlord .window-content {
-    background-size: auto 62px, cover;
-}
-
-.monks-enhanced-journal.demonlord .tab.description {
-    display: none;
-}
-
-.monks-enhanced-journal.demonlord .tab.description.active {
-    display: block;
-}
-
-.monks-enhanced-journal.demonlord .tab.notes textarea.trim-textarea {
-    height: calc(100% - 6px);
-}
-
-.monks-enhanced-journal.demonlord .collapse .tab-bar .tab-button.sidebar-toggle {
-    color: #fff;
-}
-
-.monks-enhanced-journal.l5r5e .window-content .monks-enhanced-journal {
-    padding: 0px;
-}
-
-.edit-currency .items-list {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    overflow-y: auto;
-    scrollbar-width: thin;
-    color: #7a7971;
-}
-
-.edit-currency .items-list .item-list {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-}
-
-.edit-currency .items-list .item-name {
-    flex: 2;
-    margin: 0;
-    overflow: hidden;
-    text-align: left;
-    align-items: center;
-}
-
-.edit-currency .items-list .item-content {
-    color: #333;
-}
-
-.edit-currency .items-list .item-controls {
-    flex: 0 0 80px;
-    justify-content: space-between;
-}
-
-.edit-currency .items-list .items-header {
-    height: 28px;
-    margin: 2px 0;
-    padding: 0;
-    align-items: center;
-    background: rgba(0, 0, 0, 0.05);
-    border: 2px groove #eeede0;
-    font-weight: bold;
-}
-
-.edit-currency .items-list .items-header > * {
-    font-size: 12px;
-}
-
-.edit-currency .items-list input {
-    height: calc(100% - 2px);
-    border: 1px solid transparent;
-    background: rgba(0, 0, 0, 0.05);
-    color: #191813;
-}
-
-.edit-currency .items-list input:hover {
-    border: 1px solid #111;
-}
-
-.objective-sheet .objectives .editor-content {
-    height: 200px;
-}
-
-.monks-enhanced-journal.shadowrun5e .content, .monks-enhanced-journal.shadowrun5e .journal-subsheet.flexcol > *, .monks-enhanced-journal.shadowrun5e .tab-inner:not(.slide-details).flexcol > *, .monks-enhanced-journal.shadowrun5e .content.flexcol > *, .monks-enhanced-journal.shadowrun5e .loot-container .loot-items, .monks-enhanced-journal.shadowrun5e .checklist-list {
-    flex: 1;
-}
-
-button.play-journal-sound {
-    flex: 0 0 30px;
-    height: 30px;
-    width: 30px;
-    border: none;
-    font-size: 18px;
-    line-height: 28px;
-    padding: 0px 3px;
-    cursor: pointer;
-    box-shadow: none;
-    color: var(--primary-font);
-    background: rgba(0, 0, 0, 0.1);
-    border-radius: 3px;
-}
-
-.monks-journal-sheet .header-details button.play-journal-sound {
-    margin-top: 10px;
-}
-
-.monks-journal-sheet .header-details button.play-journal-sound.loading {
-    padding-top: 1px;
-    padding-left: 5px;
-}
-
-.monks-journal-sheet .header-name button.play-journal-sound {
-    margin-top: 3px;
-}
-
-button.play-journal-sound.active {
-    border: 1px solid #ff6400;
-    color: #bc8c4a;
-}
-
-monks-journal-sheet.journal-sheet form select {
-    padding: 3px;
-}
-
-.rpg-styled-ui.monks-journal-sheet.journal-sheet form select {
-    display: inline-block;
-    color: #191813;
-    background: rgba(0, 0, 0, 0.05);
-}
-
-.monks-journal-sheet.journal-sheet form select:hover {
-    border: 1px solid #111;
-    box-shadow: 0 0 8px red;
-}
-
-.system-alienrpg .monks-enhanced-journal footer {
-    flex: 0 0 20px;
-}
-
-.system-alienrpg .monks-enhanced-journal .bookmark-bar {
-    color: #eee;
-}
-
-.system-alienrpg .monks-enhanced-journal .directory-sidebar > section {
-    color: #eee;
-}
-
-.system-alienrpg .monks-enhanced-journal .window-content {
-    padding: 0px;
-}
-
-.system-alienrpg .monks-enhanced-journal .tab-bar .tab-button.sidebar-toggle {
-    color: #eee;
-}
-
-.system-alienrpg .monks-journal-sheet .header-name input {
-    color: var(--alientextjournal);
-}
-
-.system-alienrpg .alienrpg.monks-enhanced-journal #context-menu {
-    width: 100%;
-    height: max-content;
-    min-width: 150px;
-    max-width: 360px;
-    position: absolute;
-    left: 0;
-    background: #23221d;
-    border: 1px solid var(--color-border-dark);
-    border-radius: 5px;
-    color: var(--color-text-light-1);
-    z-index: calc(var(--z-index-app) + 1);
-}
-
-.system-alienrpg .alienrpg.monks-enhanced-journal #context-menu.expand-down {
-    top: calc(100% + 2px);
-}
-
-.system-alienrpg .alienrpg.monks-enhanced-journal #context-menu.expand-up {
-    bottom: calc(100% + 2px);
-}
-
-.system-alienrpg .alienrpg.monks-enhanced-journal #context-menu ol.context-items {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-}
-
-.system-alienrpg .alienrpg.monks-enhanced-journal #context-menu li.context-item {
-    padding: 0 5px;
-    line-height: 32px;
-    font-size: var(--font-size-14);
-}
-
-.system-alienrpg .alienrpg.monks-enhanced-journal #context-menu li.context-item > i {
-    margin-right: 5px;
-}
-
-.forbidden-lands.monks-enhanced-journal h1 input[name="name"] {
-    text-align: left;
-}
-
-.forbidden-lands.monks-enhanced-journal .directory-list .directory-item h3 {
-    text-align: left;
-}
-
-.forbidden-lands.monks-enhanced-journal .monks-journal-sheet.sheet .sheet-navigation .item.active {
-    color: #44191A;
-}
-
-.forbidden-lands.monks-enhanced-journal .monks-journal-sheet .header-name input {
-    font-size: 28px !important;
-}
-
-.mta.monks-enhanced-journal .tab-bar .journal-tab .tab-content {
-    color: #000;
-}
-
-.mta.monks-enhanced-journal .monks-journal-sheet .header-name input {
-    color: #fff;
-}
-
-.mta.monks-enhanced-journal .mainbar .navigation .nav-button {
-    color: #808080;
-}
-
-.mta.monks-enhanced-journal .directory-sidebar {
-    color: #000;
-}
-
-.mta.monks-enhanced-journal .monks-enhanced-journal .sidebar-toggle {
-    color: #000;
-}
-
-.mta.monks-enhanced-journal .monks-enhanced-journal.collapse .sidebar-toggle {
-    color: #C0C0C0;
-}
-
-.mta.monks-enhanced-journal .header-name button {
-    background: rgba(255, 255, 240, 0.8);
-}
-
-.mta.monks-enhanced-journal .items-list .items-header {
-    background: rgba(255, 255, 240, 0.8);
-}
-
-.mta.monks-enhanced-journal .monks-journal-sheet.journal-sheet form select {
-    color: darkslategray;
-}
-
-.mta.monks-enhanced-journal .monks-journal-sheet .slideshow-container .add-slide {
-    border-color: rgba(255, 255, 255, 0.2);
-    color: rgba(255, 255, 255, 0.2);
-}
-
-#make-offering .actor-icon {
-    width: 60px;
-    height: 60px;
-    flex: 0 0 60px;
-    object-fit: contain;
-}
-
-#make-offering .instruction {
-    text-align: center;
-    line-height: 60px;
-    color: #808080;
-}
-
-#make-offering .currency-group {
-    flex: 0 0 30px;
-}
-
-#make-offering .currency-group > input {
-    max-width: 80px;
-}
-
-#make-offering .currency-group > label {
-    max-width: 100px;
-}
-
-#make-offering .offering-items {
-    min-height: 60px;
-    flex-grow: 0;
-    margin-bottom: 8px;
-}
-
-#make-offering .offering-item {
-    position: relative;
-    flex-grow: 0;
-    height: 60px;
-    width: 60px;
-    flex: 0 0 60px;
-    margin-right: 4px;
-}
-
-#make-offering .offering-item img {
-    height: 100%;
-    width: 60px;
-    object-fit: contain;
-}
-
-#make-offering .offering-item .offering-qty {
-    position: absolute;
-    top: 0px;
-    right: 0px;
-    border: 1px solid #000;
-    border-radius: 4px;
-    text-align: center;
-    background: rgba(0, 0, 0, 0.8);
-    color: #fff;
-    padding: 2px 8px;
-}
-
-.monks-enhanced-journal li.folder > .folder-header .create-button .fa-plus {
-    padding-left: 2px;
-}
-
-.kult-divinity-lost.monks-enhanced-journal .monks-journal-sheet.sheet input[name="name"] {
-    color: #968c6a;
-}
-
-.kult-divinity-lost.monks-enhanced-journal .monks-journal-sheet.sheet .form-group label {
-    color: #968c6a;
-}
-
-.kult-divinity-lost.monks-enhanced-journal .monks-journal-sheet.sheet .items-list .item .item-name {
-    color: #968c6a;
-}
-
-.kult-divinity-lost.monks-enhanced-journal .monks-enhanced-journal .tab-bar .journal-tab {
-    background: rgba(34, 32, 33, 0.5);
-    border: 1px solid #b5b3a4;
-    font-family: "IM Fell Pica DW";
-}
-
-.kult-divinity-lost.monks-enhanced-journal .monks-enhanced-journal .tab-bar .journal-tab.active {
-    background-color: #000000;
-}
-
-.kult-divinity-lost.monks-enhanced-journal .tox.tox-tinymce .tox-edit-area__iframe {
-    background: #391c18;
-    border-top: 1px solid #968c6a;
-}
-
-.kult-divinity-lost.monks-enhanced-journal .monks-journal-sheet.sheet .editor .tox-toolbar-overlord {
-    background-color: #391c18;
-}
-
-.kult-divinity-lost.monks-enhanced-journal .tox :not(rect) {
-    background-color: #391c18;
-    color: #968c6a;
-}
-
-.kult-divinity-lost.monks-enhanced-journal .tox .tox-tbtn__select-label {
-    background-color: #00000000;
-}
-
-.kult-divinity-lost.monks-enhanced-journal .tox .tox-tbtn__select-chevron {
-    background-color: #42160f;
-}
-
-.kult-divinity-lost.monks-enhanced-journal .tox .tox-split-button svg {
-    background-color: #391c18;
-}
-
-.kult-divinity-lost.monks-enhanced-journal .tox .tox-split-button .tox-tbtn {
-    background-color: #391c18;
-}
-
-.kult-divinity-lost.monks-enhanced-journal textarea {
-    color: #968c6a;
-}
-
-.kult-divinity-lost.monks-enhanced-journal .monks-journal-sheet.sheet .recent-link, .kult-divinity-lost.monks-enhanced-journal .monks-journal-sheet.sheet .new-link {
-    color: #968c6a;
-}
-
-.vaesen.monks-enhanced-journal .monks-enhanced-journal .content, .vaesen.monks-enhanced-journal .monks-enhanced-journal .content .sheet.journal-sheet {
-    width: 100%;
-    max-width: 100%;
-}
-
-.vaesen.monks-enhanced-journal .monks-journal-sheet .header-name input {
-    filter: none;
-}
-
-.cyphersystem.monks-enhanced-journal .monks-journal-sheet.sheet .items-list .item-name, .cyphersystem.monks-enhanced-journal .monks-journal-sheet.sheet .items-list .item-name h3, .cyphersystem.monks-enhanced-journal .monks-journal-sheet.sheet .items-list .item-name h4 {
-    text-indent: 0px;
-}
-
-.wwn.monks-enhanced-journal .monks-journal-sheet .items-list .items-header.collapsed {
-    display: flex;
-}
-
-.dark-mode .monks-enhanced-journal .tab-bar .journal-tab .tab-content {
-    color: #111;
-}
-
-.dark-mode .monks-enhanced-journal .monks-journal-sheet.sheet .items-list .item .item-name {
-    color: var(--5edark-rgb-text-white);
-}
-
-.dark-mode .monks-journal-sheet.sheet .items-list .items-header {
-    border-color: var(--5edark-rgb-border-grey--alt);
-}
-
-.TheWitcherTRPG.monks-enhanced-journal .monks-journal-sheet.sheet .tab.description {
-    margin: 0px;
-}
-
-.TheWitcherTRPG.monks-enhanced-journal .monks-journal-sheet.sheet .tab.description .editor {
-    border: none;
-}
-
-.swnr.monks-enhanced-journal .window-content .journal-entry-content h1:not(.noborder) {
-    font-size: 2em;
-    border-bottom: 2px solid var(--color-underline-header);
-}
-
-.swnr.monks-enhanced-journal .window-content .journal-entry-content h2:not(.noborder) {
-    font-size: 1.5em;
-    border-bottom: 1px solid var(--color-underline-header);
-}
-
-.swnr.monks-enhanced-journal .window-content .journal-entry-content h3:not(.noborder) {
-    font-size: 1.25em;
-    border-bottom: 1px solid var(--color-underline-header);
-}
-
-.swnr.monks-enhanced-journal .window-content .header-actions.action-buttons button {
-    line-height: 20px;
-}
-
-.mausritter.monks-enhanced-journal .monks-journal-sheet.sheet .items-list .item {
-    height: unset;
-}
-
-span.unknown-link {
-    background: #DDD;
-    padding: 1px 4px;
-    border: 1px solid var(--color-border-dark-tertiary);
-    border-radius: 2px;
-    white-space: nowrap;
-    word-break: break-all;
-}
-
-.inline-roll-styling .journal-sheet.monks-journal-sheet a.content-link {
-    color: var(--color-text-hyperlink);
-    background: transparent;
-    padding: 0px;
-    border: 0px;
-}
-
-.inline-roll-styling .journal-sheet.monks-journal-sheet a.content-link i {
-    color: var(--color-text-hyperlink);
-}
-
-.portrait-image {
-    width: 200px;
-    height: 200px;
-    object-fit: contain;
-    float: left;
-    margin-right: 10px;
-    margin-bottom: 10px;
-    background: #eee;
-}
-/*
-.journal-body .header-name .toggle-toc {
-    flex: 0 0 30px;
-    transition: flex 1s;
-    overflow: hidden;
-}
-
-.journal-menu:not(.collapsed) + .journal-body .header-name .toggle-toc {
-    flex: 0 0 0px;
-}
-    */
-.journal-menu header {
-    flex: 0 0 30px;
-    font-size: 16px;
-    text-align: center;
-    line-height: 30px;
-    border-bottom: 1px solid #C0C0C0;
-    background: rgba(0, 0, 0, 0.05);
-}
-
-.journal-menu header a {
-    flex: 0 0 30px;
-}
-/*
-.journal-body .sheet-icon {
-    flex: 0 0 25px;
-    height: 20px;
-    margin-top: 8px;
-    font-size: 18px;
-}*/
-.page-link:not(.disabled):hover {
-    text-shadow: 0 0 8px red;
-    cursor: pointer;
-}
-
-.page-delete {
-    flex: 0 0 30px;
-    opacity: 0.2;
-    font-size: 18px;
-    margin-top: 6px;
-}
-
-.page-delete:hover {
-    text-shadow: 0 0 8px red;
-    cursor: pointer;
-    opacity: 1;
-}
-
-.journal-pages {
-    height: 100%;
-    overflow-y: auto;
-}
-
-.journal-image {
-    width: 100%;
-    object-position: center;
-    object-fit: contain;
-}
-
-.image-caption {
-    text-align: center;
-    width: 100%;
-    color: var(--color-text-dark-4);
-}
-
-.show-to-players {
-    display: grid;
-    grid-template-columns: 33% 33% 33%;
-}
-
-.show-to-players > label {
-    text-align: left;
-}
-
-.journal-show-dialog input[type="radio"] {
-    display: none;
-}
-
-.journal-show-dialog input[type="radio"]:disabled + label {
-    color: var( --color-text-dark-inactive);
-}
-
-.journal-show-dialog input[type="radio"]:checked + label {
-    color: var( --color-text-hyperlink);
-}
-
-.journal-show-dialog input[type="radio"]:not(:disabled) + label:hover {
-    cursor: pointer;
-    text-shadow: 0 0 8px red;
-}
-
-.directory .directory-item.journalentry.folder > .document-name {
-    margin-left: 0px;
-    background: rgba(255, 255, 255, 0.1);
-    width: 100%;
-}
-
-.directory .directory-item.journalentry.folder > .document-name > i {
-    cursor: pointer;
-}
-
-.directory .directory-item.journalentry.folder.collapsed > .document-name {
-    background: rgba(0, 0, 0, 0.3);
-}
-
-#journal-directory .directory-item.journalentry.folder > .document-name {
-    background: rgba(0, 0, 0, 0.1);
-}
-
-.journal-menu {
-    flex: 0 0 300px;
-    transition: flex 1s;
-    overflow: hidden;
-    height: 100%;
-}
-
-.journal-menu.collapsed {
-    flex: 0 0 0px;
-}
-
-.journal-menu .journal-menu-content {
-    width: 300px;
-    height: 100%;
-    overflow: hidden;
-}
-
-.journal-menu .journal-menu-content .pin-toc.active {
-    color: var( --color-text-hyperlink);
-}
-
-.sheet.journal-entry.monks-journal-sheet .directory-list {
-    margin: 0px;
-    padding: 0px;
-}
-
-.monks-journal-sheet.sheet.journal-entry .journal-menu:not(.collapsed) {
-    padding-right: 8px;
-    border-right: 1px solid #C0C0C0;
-    margin-right: 8px;
-}
-
-.monks-journal-sheet.sheet.journal-entry .journal-entry-page header h1 {
-    margin: 0px;
-}
-
-.monks-journal-sheet.sheet.journal-entry .pages-list .page-icon {
-    margin-right: 4px;
-}
-
-.monks-journal-sheet.sheet.journal-entry .pages-list .directory-item.active:last-of-type, .monks-journal-sheet.sheet.journal-entry .pages-list .directory-item.active:first-of-type {
-    border-top: 1px solid var(--color-border-dark);
-}
-
-.monks-journal-sheet.sheet.journal-entry .pages-list .directory-item:not(.active) + .active {
-    border-bottom: 1px solid var(--color-border-dark-3);
-}
-
-.monks-journal-sheet.sheet.journal-entry .pages-list .directory-item.active + :not(.active) {
-    border-top: 1px solid var(--color-border-dark);
-}
-
-.monks-journal-sheet.sheet.journal-entry .pages-list .directory-item:last-child, .monks-journal-sheet.sheet.journal-entry .pages-list .directory-item:first-child {
-    border-bottom: 1px solid transparent;
-}
-
-.monks-journal-sheet.sheet.journal-entry .pages-list .directory-item.active {
-    background: rgba(92, 135, 185, 0.2);
-}
-
-.groups-of {
-    font-size: 12px;
-    font-style: italic;
-}
-
-#MonksEnhancedJournal .journal-sheet-container .sidebar .directory-header, #MonksEnhancedJournal .journal-sheet-container .sidebar .action-buttons, #MonksEnhancedJournal .journal-sheet-container .window-resizable-handle, #MonksEnhancedJournal .journal-subsheet .window-resizable-handle {
-    display: none;
-}
-
-#MonksEnhancedJournal .journal-sheet-container .sidebar.directory {
-    background: url(../../../ui/denim075.png) repeat;
-}
-
-#MonksEnhancedJournal .sheet.journal-entry .journal-sheet-container {
-    width: unset !important;
-    height: unset !important;
-    left: unset !important;
-    pointer-events: all !important;
-}
-
-#MonksEnhancedJournal .sheet.journal-entry .journal-entry-content {
-    border: 0px;
-}
-
-#MonksEnhancedJournal .sheet.journal-entry .no-file-notification {
-    width: 100%;
-    text-align: center;
-    padding: 10px;
-    color: var(--tertiary-color);
-}
-
-.no-character-alert {
-    background: rgba(214, 150, 0, 0.8);
-    border: 1px solid var(--color-level-warning);
-    margin-bottom: 0.5em;
-    padding: 6px 8px;
-    line-height: 20px;
-    border-radius: 5px;
-    box-shadow: 0 0 10px var(--color-shadow-dark);
-    color: var(--color-text-light-1);
-    font-size: var(--font-size-14);
-    text-shadow: 1px 1px black;
-    flex: 0 0 33px;
-}
-
-.no-character-alert a {
-    color: var(--color-text-hyperlink);
-}
-
-.monks-enhanced-journal .editor-edit {
-    z-index: 100;
 }

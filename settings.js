@@ -1,6 +1,7 @@
 import { MonksEnhancedJournal, i18n } from "./monks-enhanced-journal.js"
 import { EditCurrency } from "./apps/editcurrency.js"
 import { EditPersonAttributes, EditPlaceAttributes } from "./apps/editattributes.js"
+import { APSJ } from "./apsjournal.js";
 
 export const registerSettings = function () {
 	// Register any custom module settings here
@@ -16,6 +17,48 @@ export const registerSettings = function () {
 		'true': "Sidebar and Enhanced Journal",
 		'mej': "Just Enhanced Journal",
 		'false': "Neither"
+	};
+
+	let backgroundImages = {
+		'none': "None",
+		'darkParchment': "Parchment - Dark",
+		'parchment': "Parchment - Light",
+		"marbleWhite": "Marble - White",
+		"metalBrushed": "Metal - Brushed",
+		"paperCotton": "Paper - Cotton",
+		"paperCrumpled": "Paper - Crumpled",
+		"paperCrumpledYellowed": "Paper - Crumpled Yellowed",
+		"paperRecycled": "Paper - Recycled",
+		"paperRice": "Paper - Rice",
+		"woodAlpine": "Wood - Alpine",
+		"woodPine": "Wood - Pine"
+	};
+
+	let sidebarImages = {
+		'none': "None",
+		"granite": "Granite",
+		"marbleWhite": "Marble - White",
+		"metalBrushed": "Metal - Brushed",
+		"metalGalvanized": "Metal - Galvanized",
+		'darkParchment': "Parchment - Dark",
+		'parchment': "Parchment - Light",
+		'darkLeather': "Leather - Dark",
+		'leather': "Leather - Light",
+		"woodAlpine": "Wood - Alpine",
+		"woodCottagePine": "Wood - Cottage Pine",
+		"woodPine": "Wood - Pine",
+	};
+
+	let backgroundColour = {
+		'none': "None",
+		'clear': "Clear",
+		'red': "Red",
+		'orange': "Orange",
+		'yellow': "Yellow",
+		'green': "Green",
+		'cyan': "Cyan",
+		'blue': "Blue",
+		'purple': "Purple"
 	};
 
 	let lootsheetoptions = MonksEnhancedJournal.getLootSheetOptions();
@@ -43,6 +86,45 @@ export const registerSettings = function () {
 		icon: 'fas fa-place-of-worship',
 		restricted: true,
 		type: EditPlaceAttributes
+	});
+
+	game.settings.register(modulename, 'background-colour', {
+		name: i18n('APSJournal.background-colour.name'),
+		hint: i18n('APSJournal.background-colour.hint'),
+		scope: 'client',
+		config: true,
+		default: "none",
+		choices: backgroundColour,
+		type: String,
+		onChange: (value) => {
+			APSJ.setTheme(value);
+		},
+	});
+
+	game.settings.register(modulename, 'background-image', {
+		name: i18n('APSJournal.background-image.name'),
+		hint: i18n('APSJournal.background-image.hint'),
+		scope: 'client',
+		config: true,
+		default: "none",
+		choices: backgroundImages,
+		type: String,
+		onChange: (value) => {
+			$('#MonksEnhancedJournal').attr("background-image", value);
+		},
+	});
+
+	game.settings.register(modulename, 'sidebar-image', {
+		name: i18n('APSJournal.sidebar-image.name'),
+		hint: i18n('APSJournal.sidebar-image.hint'),
+		scope: 'client',
+		config: true,
+		default: "none",
+		choices: sidebarImages,
+		type: String,
+		onChange: (value) => {
+			$('#MonksEnhancedJournal').attr("sidebar-image", value);
+		},
 	});
 
 	game.settings.register(modulename, "allow-player", {
@@ -342,7 +424,8 @@ export const registerSettings = function () {
 		scope: "world",
 		config: false,
 		default: [
-			{ id: 'race', name: "MonksEnhancedJournal.Race", hidden: false, full: false },
+			{ id: 'race', name: "MonksEnhancedJournal.Race", hidden: true, full: false },
+			{ id: 'ancestry', name: "MonksEnhancedJournal.Ancestry", hidden: false, full: false },
 			{ id: 'gender', name: "MonksEnhancedJournal.Gender", hidden: true, full: false },
 			{ id: 'age', name: "MonksEnhancedJournal.Age", hidden: false, full: false },
 			{ id: 'eyes', name: "MonksEnhancedJournal.Eyes", hidden: false, full: false },
@@ -412,6 +495,20 @@ export const registerSettings = function () {
 	});
 
 	game.settings.register(modulename, "fix-journals", {
+		scope: "world",
+		default: true,
+		type: Boolean,
+		config: false
+	});
+
+	game.settings.register(modulename, "fix-checklist", {
+		scope: "world",
+		default: true,
+		type: Boolean,
+		config: false
+	});
+
+	game.settings.register(modulename, "fix-person", {
 		scope: "world",
 		default: true,
 		type: Boolean,

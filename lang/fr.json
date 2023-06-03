@@ -114,7 +114,6 @@
   "MonksEnhancedJournal.AudioFile": "Fichier Audio",
   "MonksEnhancedJournal.Convert": "Convertir",
   "MonksEnhancedJournal.LocateMapEncounter": "Trouver note sur la Carte",
-  "MonksEnhancedJournal.SelectPlayer": "Sélectionner Joueur",
   "MonksEnhancedJournal.Show": "Montrer",
   "MonksEnhancedJournal.ShowAll": "Montrer à tous",
   "MonksEnhancedJournal.CreateObjective": "Créer Objectif",
@@ -192,7 +191,7 @@
   "MonksEnhancedJournal.ConfirmRemovePicture": "Êtes-vous sûr de vouloir supprimer cette Image ?",
   "MonksEnhancedJournal.ConfirmRemoveLink": "Êtes-vous sûr de vouloir supprimer un lien vers cet Acteur ?",
   "MonksEnhancedJournal.CannotPlayNoSlides": "Impossible d'afficher un Slideshow sans slides",
-  "MonksEnhancedJournal.SearchChecklist": "Chercher Checklist",
+  "MonksEnhancedJournal.SearchList": "Chercher Liste",
   "MonksEnhancedJournal.CreateEntry": "Créer une Entrée",
   "MonksEnhancedJournal.ChatBubble": "Montrer en tant que Bulle de Chat",
 
@@ -220,7 +219,7 @@
   "MonksEnhancedJournal.quest": "Quête",
   "MonksEnhancedJournal.encounter": "Rencontre",
   "MonksEnhancedJournal.shop": "Magasin",
-  "MonksEnhancedJournal.checklist": "Checklist",
+  "MonksEnhancedJournal.list": "Liste",
 
   "MonksEnhancedJournal.purchasing.locked": "MJ Uniquement",
   "MonksEnhancedJournal.purchasing.confirm": "Demander l'achat",

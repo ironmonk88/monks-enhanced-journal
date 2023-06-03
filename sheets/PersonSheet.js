@@ -10,7 +10,7 @@ export class PersonSheet extends EnhancedJournalSheet {
     static get defaultOptions() {
         return mergeObject(super.defaultOptions, {
             title: i18n("MonksEnhancedJournal.person"),
-            template: "modules/monks-enhanced-journal/templates/person.html",
+            template: "modules/monks-enhanced-journal/templates/sheets/person.html",
             tabs: [{ navSelector: ".tabs", contentSelector: ".sheet-body", initial: "description" }],
             dragDrop: [
                 { dragSelector: ".document.actor", dropSelector: ".person-container" },
@@ -87,6 +87,8 @@ export class PersonSheet extends EnhancedJournalSheet {
             offerings: data.offerings?.length
         }
 
+        data.hasRollTables = !!game.packs.get("monks-enhanced-journal.person-names");
+
         return data;
     }
 
@@ -120,8 +122,10 @@ export class PersonSheet extends EnhancedJournalSheet {
     activateListeners(html, enhancedjournal) {
         super.activateListeners(html, enhancedjournal);
 
-        $('.journal-header .actor-img img', html).click(this.openActor.bind(this));
+        //$('.journal-header .actor-img img', html).click(this.openActor.bind(this));
         html.on('dragstart', ".actor-img img", TextEditor._onDragContentLink);
+
+        $(".generate-name", html).click(this.generateName.bind(this));
 
         //onkeyup="textAreaAdjust(this)" style="overflow:hidden"
         $('.document-details textarea', html).keyup(this.textAreaAdjust.bind(this));
@@ -132,7 +136,7 @@ export class PersonSheet extends EnhancedJournalSheet {
         $('.item-hide', html).on('click', this.alterItem.bind(this));
 
         const actorOptions = this._getPersonActorContextOptions();
-        if (actorOptions) new ContextMenu($(html), ".actor-img", actorOptions);
+        if (actorOptions) new ContextMenu($(html), ".actor-img-container", actorOptions);
 
         $('.relationships .items-list h4', html).click(this.openRelationship.bind(this));
         $('.offerings .items-list .actor-icon', html).click(this.openOfferingActor.bind(this));
@@ -253,7 +257,11 @@ export class PersonSheet extends EnhancedJournalSheet {
         let actor = await this.getItemData(data);
 
         if (actor) {
-            this.object.setFlag("monks-enhanced-journal", "actor", actor);
+            await this.object.update({
+                name: actor.name,
+                src: actor.img
+            });
+            await this.object.setFlag("monks-enhanced-journal", "actor", actor);
         }
     }
 
@@ -266,12 +274,12 @@ export class PersonSheet extends EnhancedJournalSheet {
         if (event.newtab == true || event.altKey)
             actor.sheet.render(true);
         else
-            this.open(actor);
+            this.open(actor, event);
     }
 
     removeActor() {
         this.object.unsetFlag('monks-enhanced-journal', 'actor');
-        $('.actor-img', this.element).remove();
+        $('.actor-img-container', this.element).remove();
     }
 
     _getPersonActorContextOptions() {
@@ -298,5 +306,39 @@ export class PersonSheet extends EnhancedJournalSheet {
                 }
             }
         ];
+    }
+
+    async generateName() {
+        let pack = game.packs.get("monks-enhanced-journal.person-names");
+        await pack.getDocuments();
+
+        let race = getProperty(this.object, "flags.monks-enhanced-journal.attributes.race.value") || getProperty(this.object, "flags.monks-enhanced-journal.attributes.ancestry.value") || "Human"
+
+        let firstName = "";
+        let secondName = "";
+
+        let nosecond = false;
+        let first = pack.contents.find(c => c.name.toLowerCase() == (`${race} First Name`).toLowerCase());
+        if (!first) {
+            first = pack.contents.find(c => c.name.toLowerCase() == (`${race} Name`).toLowerCase());
+            if (!first)
+                first = first = pack.contents.find(c => c.name == "Human First Name");
+            else
+                nosecond = true;
+        }
+
+        if (first) firstName = await first.draw({ displayChat: false });
+            
+        let second = "";
+        if (!nosecond) {
+            second = pack.contents.find(c => c.name.toLowerCase() == (`${race} Last name`).toLowerCase());
+            if (!second)
+                second = pack.contents.find(c => c.name == "Human Last Name");
+        }
+
+        if (second) secondName = await second.draw({ displayChat: false });
+
+        if (firstName || secondName)
+            $('[name="name"]', this.element).val(`${firstName ? firstName.results[0].text : ""}${firstName && secondName ? " " : ""}${secondName ? secondName.results[0].text : ""}`).change();
     }
 }

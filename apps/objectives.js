@@ -23,8 +23,8 @@ export class Objectives extends FormApplication {
 
         //this._convertFormats(data);
         data.enrichedText = await TextEditor.enrichHTML(data.object.content, {
-            relativeTo: this.object,
-            secrets: this.object.isOwner,
+            relativeTo: this.journalentry.object,
+            secrets: this.journalentry.object.isOwner,
             async: true
         });
 

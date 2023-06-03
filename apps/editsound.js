@@ -1,4 +1,4 @@
-import { MonksEnhancedJournal, log, error, i18n, setting, makeid } from "../monks-enhanced-journal.js";
+import { MonksEnhancedJournal, log, error, i18n, setting, makeid, getVolume } from "../monks-enhanced-journal.js";
 
 export class EditSound extends FormApplication {
     constructor(object, sound, options) {
@@ -33,8 +33,8 @@ export class EditSound extends FormApplication {
         if (this.soundfile) {
             let oldData = this.object.getFlag('monks-enhanced-journal', 'sound');
             if (oldData.volume != data.sound.volume) {
-                this.soundfile._mejvolume = data.sound.volume;
-                this.soundfile.volume = data.sound.volume * game.settings.get("core", "globalInterfaceVolume");
+                this.soundfile.effectiveVolume = data.sound.volume;
+                this.soundfile.volume = data.sound.volume * getVolume();
             }
             if (oldData.loop != data.sound.loop)
                 this.soundfile.loop = data.sound.loop;

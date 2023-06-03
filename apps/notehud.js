@@ -54,6 +54,14 @@ export class NoteHUD extends BasePlaceableHUD {
         event.preventDefault();
 
         let document = this.object.document.page || this.entry;
+        if (document instanceof JournalEntryPage) {
+            let type = getProperty(document, "flags.monks-enhanced-journal.type");
+            if (type == "base" || type == "oldentry") type = "journalentry";
+            let types = MonksEnhancedJournal.getDocumentTypes();
+            if (types[type]) {
+                document = this.entry;
+            }
+        }
 
         let ownership = {};
         Object.assign(ownership, document.ownership);

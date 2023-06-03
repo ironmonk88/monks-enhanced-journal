@@ -10,7 +10,7 @@ export class OrganizationSheet extends EnhancedJournalSheet {
     static get defaultOptions() {
         return mergeObject(super.defaultOptions, {
             title: i18n("MonksEnhancedJournal.organization"),
-            template: "modules/monks-enhanced-journal/templates/organization.html",
+            template: "modules/monks-enhanced-journal/templates/sheets/organization.html",
             tabs: [{ navSelector: ".tabs", contentSelector: ".sheet-body", initial: "description" }],
             dragDrop: [
                 { dropSelector: ".organization-container" },
@@ -65,7 +65,7 @@ export class OrganizationSheet extends EnhancedJournalSheet {
         //$('.item-relationship .item-field', html).on('change', this.alterRelationship.bind(this));
 
         const actorOptions = this._getPersonActorContextOptions();
-        if (actorOptions) new ContextMenu($(html), ".actor-img", actorOptions);
+        if (actorOptions) new ContextMenu($(html), ".actor-img-container", actorOptions);
 
         $('.item-private', html).on('click', this.alterItem.bind(this));
         $('.make-offering', html).on('click', this.makeOffer.bind(this));
@@ -187,12 +187,12 @@ export class OrganizationSheet extends EnhancedJournalSheet {
         if (event.newtab == true || event.altKey)
             actor.sheet.render(true);
         else
-            this.open(actor);
+            this.open(actor, event);
     }
 
     removeActor() {
         this.object.unsetFlag('monks-enhanced-journal', 'actor');
-        $('.actor-img', this.element).remove();
+        $('.actor-img-container', this.element).remove();
     }
 
     _getPersonActorContextOptions() {

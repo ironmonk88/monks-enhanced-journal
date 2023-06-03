@@ -136,6 +136,10 @@ html {
     height: fit-content;
 }
 
+.mce-content-body img {
+    object-fit: contain;
+}
+
 /*
 .mce-content-body {
     height:100%;

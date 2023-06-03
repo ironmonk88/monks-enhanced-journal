@@ -13,11 +13,11 @@ export class EncounterSheet extends EnhancedJournalSheet {
     static get defaultOptions() {
         return mergeObject(super.defaultOptions, {
             title: i18n("MonksEnhancedJournal.encounter"),
-            template: "modules/monks-enhanced-journal/templates/encounter.html",
+            template: "modules/monks-enhanced-journal/templates/sheets/encounter.html",
             tabs: [{ navSelector: ".tabs", contentSelector: ".sheet-body", initial: "description" }],
             dragDrop: [
-                { dragSelector: ".document.actor", dropSelector: ".encounter-body" },
-                { dragSelector: ".document.item", dropSelector: ".encounter-body" },
+                { dragSelector: ".document.actor", dropSelector: ".encounter-container" },
+                { dragSelector: ".document.item", dropSelector: ".encounter-container" },
                 { dragSelector: ".encounter-monsters .item-list .item .item-image", dropSelector: "null" },
                 { dragSelector: ".encounter-items .item-list .item .item-name", dropSelector: "null" },
                 //{ dragSelector: ".create-encounter", dropSelector: "null" },
@@ -45,6 +45,20 @@ export class EncounterSheet extends EnhancedJournalSheet {
             this.object.unsetFlag("monks-enhanced-journal", "monsters");
         }
 
+        data.actors = await Promise.all((data.data.flags["monks-enhanced-journal"].actors || []).map(async (ea) => {
+            let result = duplicate(ea);
+            let actor = await EnhancedJournalSheet.getDocument(ea);
+
+            if (actor) {
+                result.name = actor.name;
+                result.img = actor.img;
+            } else {
+                result.failed = true
+            }
+
+            return result;
+        }));
+
         let safeGet = function (container, value) {
             if (config == undefined) return;
             if (config[container] == undefined) return;
@@ -63,7 +77,7 @@ export class EncounterSheet extends EnhancedJournalSheet {
                         data.label = 'Invalid';
                     else {
                         let [type, value] = dc.attribute.split(':');
-                        data.label = safeGet('abilities', value) || safeGet('skills', value) || safeGet('scores', value) || safeGet('atributos', value) || safeGet('pericias', value) || value;
+                        data.label = safeGet('attributes', value) ||safeGet('abilities', value) || safeGet('skills', value) || safeGet('scores', value) || safeGet('atributos', value) || safeGet('pericias', value) || value;
                         data.label = i18n(data.label);
                     }
                 }
@@ -108,12 +122,6 @@ export class EncounterSheet extends EnhancedJournalSheet {
     activateListeners(html, enhancedjournal) {
         super.activateListeners(html, enhancedjournal);
 
-        /*
-        new ResizeObserver(function (obs) {
-                log('resize observer', obs);
-                $(obs[0].target).toggleClass('condensed', obs[0].contentRect.width < 1100);
-        }).observe($('.encounter-content', html).get(0));*/
-
         //monster
         $('.monster-icon', html).click(this.clickItem.bind(this));
         $('.monster-delete', html).on('click', $.proxy(this._deleteItem, this));
@@ -144,7 +152,6 @@ export class EncounterSheet extends EnhancedJournalSheet {
         $('.roll-table', html).click(this.rollTable.bind(this, "actors", false));
         $('.item-name h4', html).click(this._onItemSummary.bind(this));
 
-        $('.items-header', html).on("click", this.collapseItemSection.bind(this));
         $('.refill-all', html).click(this.refillItems.bind(this, 'all'));
     }
 
@@ -292,13 +299,6 @@ export class EncounterSheet extends EnhancedJournalSheet {
                 ui.notifications.warn(i18n("MonksEnhancedJournal.msg.CannotAddItemType"));
             }
         }
-    }
-
-    clickItem(event) {
-        let target = event.currentTarget;
-        let li = target.closest('li');
-        event.currentTarget = li;
-        TextEditor._onClickContentLink(event);
     }
 
     createDC() {
@@ -463,11 +463,14 @@ export class EncounterSheet extends EnhancedJournalSheet {
             this.setFlag('monks-enhanced-journal', 'tokens', tokenids);
 
             let that = this;
-            window.setTimeout(function () {
+            window.setTimeout(async function () {
                 EncounterSheet.selectEncounter.call(that);
                 if (options.combat) {
-                    canvas.tokens.toggleCombat();
+                    let combatants = await canvas.tokens.toggleCombat();
                     ui.sidebar.activateTab("combat");
+                    if (combatants.length) {
+                        combatants[0].combat.setFlag("monks-enhanced-journal", "encounterid", that.id);
+                    }
                 }
             }, 500);
         }

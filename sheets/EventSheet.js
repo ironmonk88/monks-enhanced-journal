@@ -9,7 +9,7 @@ export class EventSheet extends EnhancedJournalSheet {
     static get defaultOptions() {
         return mergeObject(super.defaultOptions, {
             title: i18n("MonksEnhancedJournal.Event"),
-            template: "modules/monks-enhanced-journal/templates/event.html",
+            template: "modules/monks-enhanced-journal/templates/sheets/event.html",
             tabs: [{ navSelector: ".tabs", contentSelector: ".sheet-body", initial: "description" }],
             dragDrop: [
                 { dropSelector: ".event-container" },

@@ -9,7 +9,7 @@ export class PlaceSheet extends EnhancedJournalSheet {
     static get defaultOptions() {
         return mergeObject(super.defaultOptions, {
             title: i18n("MonksEnhancedJournal.place"),
-            template: "modules/monks-enhanced-journal/templates/place.html",
+            template: "modules/monks-enhanced-journal/templates/sheets/place.html",
             tabs: [{ navSelector: ".tabs", contentSelector: ".sheet-body", initial: "description" }],
             dragDrop: [
                 { dragSelector: ".document.actor", dropSelector: ".place-container" },

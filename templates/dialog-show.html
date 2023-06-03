@@ -37,6 +37,10 @@
                 <input type="radio" id="show-as-notitle" value="notitle" name="showAs" {{#unless hasImage}} disabled{{/unless}} {{checked (eq showAs "notitle")}}>
                 <label for="show-as-notitle"><i class="fas fa-image-slash"></i> Image <span style="font-size: 10px">/no title</span></label>
             </div>
+            <div class="radio">
+                <input type="radio" id="show-as-chatmessage" value="chatmessage" name="showAs" {{#unless hasImage}} disabled{{/unless}} {{checked (eq showAs "chatmessage")}}>
+                <label for="show-as-chatmessage"><i class="fas fa-comment"></i> Chat</label>
+            </div>
         </div>
     </div>
 

@@ -1,6 +1,7 @@
 import { setting, i18n, format, log, makeid, MonksEnhancedJournal, quantityname, pricename, currencyname } from "../monks-enhanced-journal.js";
 import { EnhancedJournalSheet } from "../sheets/EnhancedJournalSheet.js";
 import { DistributeCurrency } from "../apps/distribute-currency.js";
+import { TransferCurrency } from "../apps/transfer-currency.js";
 import { getValue, setValue, MEJHelpers } from "../helpers.js";
 
 export class LootSheet extends EnhancedJournalSheet {
@@ -11,7 +12,7 @@ export class LootSheet extends EnhancedJournalSheet {
     static get defaultOptions() {
         return mergeObject(super.defaultOptions, {
             title: i18n("MonksEnhancedJournal.loot"),
-            template: "modules/monks-enhanced-journal/templates/loot.html",
+            template: "modules/monks-enhanced-journal/templates/sheets/loot.html",
             dragDrop: [
                 { dragSelector: ".document.item", dropSelector: ".loot-container" },
                 { dragSelector: ".loot-items .item-list .item .item-name", dropSelector: "null" },
@@ -72,7 +73,14 @@ export class LootSheet extends EnhancedJournalSheet {
             let actor = game.actors.get(a);
             if (actor) {
                 let user = game.users.find(u => u.character?.id == actor.id);
-                return { id: actor.id, name: actor.name, img: actor.img, color: user?.color, letter: user?.name[0], username: user?.name };
+                return {
+                    id: actor.id,
+                    name: actor.name,
+                    img: actor.img,
+                    color: user?.color,
+                    letter: user?.name[0],
+                    username: user?.name
+                };
             }
         }).filter(a => !!a);
 
@@ -80,6 +88,8 @@ export class LootSheet extends EnhancedJournalSheet {
         data.showrequest = !game.user.isGM;
 
         data.players = players.join(", ");
+
+        data.canTransferCurrency = true;
 
         return data;
     }
@@ -109,6 +119,7 @@ export class LootSheet extends EnhancedJournalSheet {
 
         $('.clear-items', html).click(this.clearAllItems.bind(this));
         $('.split-money', html).click(this.splitMoney.bind(this));
+        $('.transfer-currency', html).click(this.transferCurrency.bind(this));
         $('.add-players', html).click(this.addPlayers.bind(this));
         $('.roll-table', html).click(this.rollTable.bind(this, "items", true));
 
@@ -118,8 +129,6 @@ export class LootSheet extends EnhancedJournalSheet {
         $('.loot-character', html).dblclick(this.openActor.bind(this));
 
         $('.configure-permissions', html).click(this.configure.bind(this));
-
-        $('.items-header', html).on("click", this.collapseItemSection.bind(this));
 
         const actorOptions = this._getActorContextOptions();
         if (actorOptions) new ContextMenu($(html), ".loot-character", actorOptions);
@@ -148,6 +157,10 @@ export class LootSheet extends EnhancedJournalSheet {
         }
 
         new DistributeCurrency(actors, currency, this).render(true, { focus: true });
+    }
+
+    transferCurrency() {
+        new TransferCurrency(this.object, this).render(true, { focus: true });
     }
 
     async doSplitMoney(characters, remainder){
@@ -239,6 +252,8 @@ export class LootSheet extends EnhancedJournalSheet {
         }
 
         if (data.type == 'Item') {
+            let hasGM = (game.users.find(u => u.isGM && u.active) != undefined);
+
             let entry;
             try {
                 entry = await fromUuid(data.from);
@@ -263,14 +278,19 @@ export class LootSheet extends EnhancedJournalSheet {
                         let itemQty = getValue(itemData, quantityname(), 1);
                         setValue(itemData, quantityname(), result.quantity * itemQty);
                         let sheet = actor.sheet;
-                        sheet._onDropItem({ preventDefault: () => { } }, { type: "Item", uuid: `${this.object.uuid}.Items.${item._id}`, data: itemData });
-                        //actor.createEmbeddedDocuments("Item", [itemData]);
+                        if (sheet._onDropItem)
+                            sheet._onDropItem({ preventDefault: () => { } }, { type: "Item", uuid: `${this.object.uuid}.Items.${item._id}`, data: itemData });
+                        else
+                            actor.createEmbeddedDocuments("Item", [itemData]);
 
                         if (entry)
                             this.constructor.purchaseItem.call(this.constructor, entry, data.data._id, result.quantity, { actor });
                     }
                 }
             } else {
+                if (!this.object.isOwner && !hasGM) {
+                    return ui.notifications.warn("Cannot drop items on this sheet without a GM logged in");
+                }
                 let item = await this.getDocument(data);
                 let max = getValue(item, quantityname(), null);
                 if (!entry && !item.actor?.id)
@@ -292,7 +312,7 @@ export class LootSheet extends EnhancedJournalSheet {
                     setProperty(itemData, "flags.monks-enhanced-journal.quantity", result.quantity);
                     setValue(itemData, quantityname(), 1);
 
-                    if (game.user.isGM) {
+                    if (game.user.isGM || this.object.isOwner) {
                         this.addItem({ data: itemData });
                     } else {
                         MonksEnhancedJournal.emit("addItem",
@@ -303,11 +323,10 @@ export class LootSheet extends EnhancedJournalSheet {
                     }
 
                     //is this transferring from another journal entry?
-
                     if (entry) {
-                        if(game.user.isGM)
+                        if (game.user.isGM)
                             this.constructor.purchaseItem.call(this.constructor, entry, data.data._id, result.quantity, { chatmessage: false });
-                        else
+                        else {
                             MonksEnhancedJournal.emit("purchaseItem",
                                 {
                                     shopid: entry.uuid,
@@ -316,14 +335,16 @@ export class LootSheet extends EnhancedJournalSheet {
                                     quantity: result.quantity,
                                     chatmessage: false
                                 });
+                        }
                     } else if (item.actor) {
                         //let actorItem = item.actor.items.get(data.data._id);
                         let quantity = getValue(item, quantityname());
                         if (result.quantity >= quantity)
-                            item.delete();
+                            await item.delete();
                         else {
-                            let newQty = quantity - result.quantity;
-                            item.update({ quantity: newQty });
+                            let update = { system: {} };
+                            update.system[quantityname()] = quantity - result.quantity;
+                            await item.update(update);
                         }
                     }
                 }
@@ -337,6 +358,7 @@ export class LootSheet extends EnhancedJournalSheet {
                 for (let item of folder.contents) {
                     if (item instanceof Item) {
                         let itemData = item.toObject();
+                        setProperty(itemData, "flags.monks-enhanced-journal.quantity", 1);
                         await this.addItem({data: itemData });
                     }
                 }
@@ -376,7 +398,7 @@ export class LootSheet extends EnhancedJournalSheet {
         }
 
         let hasGM = (game.users.find(u => u.isGM && u.active) != undefined);
-        if (!hasGM) {
+        if (!(this.object.isOwner && this.object.flags['monks-enhanced-journal'].purchasing == 'free') && !hasGM) {
             ui.notifications.warn(i18n("MonksEnhancedJournal.msg.CannotTakeLootWithoutGM"));
             return false;
         }
@@ -410,16 +432,23 @@ export class LootSheet extends EnhancedJournalSheet {
                 let itemQty = getValue(itemData, quantityname(), 1);
                 setValue(itemData, quantityname(), result.quantity * itemQty);
                 let sheet = actor.sheet;
-                sheet._onDropItem({ preventDefault: () => { } }, { type: "Item", uuid: `${this.object.uuid}.Items.${item._id}`, data: itemData });
-                //actor.createEmbeddedDocuments("Item", [itemData]);
-                MonksEnhancedJournal.emit("purchaseItem",
-                    {
-                        shopid: this.object.uuid,
-                        itemid: item._id,
-                        actorid: actor.id,
-                        user: game.user.id,
-                        quantity: result.quantity
-                    });
+                if (sheet._onDropItem)
+                    sheet._onDropItem({ preventDefault: () => { } }, { type: "Item", uuid: `${this.object.uuid}.Items.${item._id}`, data: itemData });
+                else
+                    actor.createEmbeddedDocuments("Item", [itemData]);
+
+                if (this.object.isOwner) {
+                    this.constructor.purchaseItem.call(this.constructor, this.object, item._id, result.quantity, { chatmessage: false });
+                } else {
+                    MonksEnhancedJournal.emit("purchaseItem",
+                        {
+                            shopid: this.object.uuid,
+                            itemid: item._id,
+                            actorid: actor.id,
+                            user: game.user.id,
+                            quantity: result.quantity
+                        });
+                }
             }
         }
     }
@@ -454,8 +483,10 @@ export class LootSheet extends EnhancedJournalSheet {
             let itemQty = getValue(itemData, quantityname(), 1);
             setValue(itemData, quantityname(), result.quantity * itemQty);
             let sheet = actor.sheet;
-            sheet._onDropItem({ preventDefault: () => { } }, { type: "Item", uuid: `${this.object.uuid}.Items.${item._id}`, data: itemData });
-            //actor.createEmbeddedDocuments("Item", [itemData]);
+            if (sheet._onDropItem)
+                sheet._onDropItem({ preventDefault: () => { } }, { type: "Item", uuid: `${this.object.uuid}.Items.${item._id}`, data: itemData });
+            else
+                actor.createEmbeddedDocuments("Item", [itemData]);
 
             await this.constructor.purchaseItem.call(this.constructor, this.object, id, result.quantity, { actor, user });
         } else if (result?.quantity === 0) {
@@ -486,6 +517,7 @@ export class LootSheet extends EnhancedJournalSheet {
                 setProperty(update, "system.equipped", false);
             }
             items.push(mergeObject(itemData, update));
+            this.object.flags["monks-enhanced-journal"].items = items;
             await this.object.setFlag('monks-enhanced-journal', 'items', items);
             return true;
         }
