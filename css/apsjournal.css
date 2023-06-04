@@ -570,6 +570,7 @@
 :root[mejtheme] .monks-journal-sheet.sheet .list button:hover {
     background: rgb(var(--mej-light-2));
 }
+
 /**
 * Stylish Text
 **/
@@ -577,6 +578,30 @@
     font-family: var(--mej-font-family);
     font-weight: 700;
     font-size: 3em;
+}
+
+.apsj-heading {
+    font-family: var(--apsj-font-mreaves);
+    font-weight: 700;
+    font-size: 2.5em;
+}
+
+.apsj-data-heading {
+    font-family: var(--apsj-font-scalycaps);
+    font-weight: 700;
+    font-size: 2em;
+}
+
+.apsj-data {
+    font-family: var(--apsj-font-scalysans);
+    font-weight: 300;
+    font-size: 1em;
+}
+
+.apsj-text {
+    font-family: var(--apsj-font-bookinsanity);
+    font-weight: 700;
+    font-size: 1em;
 }
 
 .sheet.journal-entry .journal-entry-page h1 {
@@ -591,12 +616,6 @@
     font-weight: 700;
     font-size: 1.5em;
     border-bottom: 2px solid;
-}
-
-.apsj-data {
-    font-family: var(--apsj-font-scalysans);
-    font-weight: 300;
-    font-size: 1em;
 }
 
 /**
@@ -647,7 +666,7 @@
 .apsj-block.apsj-card img,
 .apsj-block.apsj-scroll img {
     border: none;
-    height: 150px;
+    height: 130px;
     width: auto;
 }
 
@@ -660,7 +679,7 @@
 .apsj-block.red-item img,
 .apsj-block.yellow-item img {
     border: none;
-    height: 180px;
+    height: 150px;
     width: auto;
 }
 
