@@ -522,7 +522,11 @@ export class EnhancedJournalSheet extends JournalPageSheet {
                 MonksEnhancedJournal.fixType(page);
                 let type = getProperty(page, "flags.monks-enhanced-journal.type");
                 if (!relationships[type])
-                    relationships[type] = { type: type, name: type && game.i18n.translations.MonksEnhancedJournal[type?.toLowerCase()] ? i18n(`MonksEnhancedJournal.${type?.toLowerCase()}`) : i18n("MonksEnhancedJournal.Unknown"), documents: [] };
+                    relationships[type] = {
+                        type: type,
+                        name: type && (game.i18n.translations.MonksEnhancedJournal || game.i18n._fallback.MonksEnhancedJournal || {})[type?.toLowerCase()] ? i18n(`MonksEnhancedJournal.${type?.toLowerCase()}`) : i18n("MonksEnhancedJournal.Unknown"),
+                        documents: []
+                    };
 
                 if (relationships[type].documents.some(r => r.id == item.id && r.uuid == item.uuid))
                     continue;

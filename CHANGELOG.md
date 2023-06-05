@@ -1,3 +1,11 @@
+# Version 10.16
+
+Fixing an issue with the rendering Journal Entry Page hook when not viewing MEJ Journal pages.
+
+Fixed issue with the sidebar directory repositioning when the window is reduced past a certain size.
+
+Fixed issue with MEJ pages showing as blank.
+
 # Version 10.15
 
 Added integration with Monks Sound Enhancement to use the Sound Effects volume if it's available.
