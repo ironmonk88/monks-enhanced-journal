@@ -10,6 +10,7 @@
     --apsj-cyan-light: rgb(112, 217, 255);
     --apsj-blue-light: rgb(41, 126, 255);
     --apsj-purple-light: rgb(144, 65, 233);
+	--apsj-black-light: rgb(64, 64, 64);
 
     --apsj-red: rgb(160, 0, 0);
     --apsj-orange: rgb(255, 128, 0);
@@ -18,6 +19,7 @@
     --apsj-cyan: rgb(72, 177, 224);
     --apsj-blue: rgb(1, 86, 255);
     --apsj-purple: rgb(104, 25, 193);
+	--apsj-black: rgb(32, 32, 32);
 
     --apsj-red-dark: rgb(120, 0, 0);
     --apsj-orange-dark: rgb(215, 88, 0);
@@ -26,6 +28,7 @@
     --apsj-cyan-dark: rgb(32, 137, 184);
     --apsj-blue-dark: rgb(0, 46, 215);
     --apsj-purple-dark: rgb(64, 0, 153);
+	--apsj-black-dark: rgb(0, 0, 0);
 
     --apsj-font-awesome: 'FontAwesome';
     --apsj-font-bookinsanity: 'Bookinsanity', serif;
@@ -156,6 +159,14 @@
     --mej-sidebar-document-color: rgb(var(--mej-light-0));
 }
 
+:root[mejtheme='black'] {
+    --apsj-primary-color: 32, 32, 32;
+    --apsj-primary-color-light: 64, 64, 64;
+    --apsj-primary-color-dark: 0, 0, 0;
+    --apsj-primary-color-bright: 96, 96, 96;
+    --mej-sidebar-document-color: rgb(var(--mej-light-0));
+}
+
 /**
 * Core Style Overrides
 **/
@@ -278,6 +289,10 @@
     --mej-background: url('/modules/monks-enhanced-journal/assets/apsjournal/parchment-medium.webp') repeat;
 }
 
+.monks-enhanced-journal[background-image='marbleBlack'] {
+    --mej-background: url('/modules/monks-enhanced-journal/assets/apsjournal/marble-black.webp') repeat;
+}
+
 .monks-enhanced-journal[background-image='marbleWhite'] {
     --mej-background: url('/modules/monks-enhanced-journal/assets/apsjournal/marble-white.webp') repeat;
 }
@@ -306,6 +321,18 @@
     --mej-background: url('/modules/monks-enhanced-journal/assets/apsjournal/paper-rice.webp') repeat;
 }
 
+.monks-enhanced-journal[background-image='solidBlack'] {
+    --mej-background: url('/modules/monks-enhanced-journal/assets/apsjournal/solid-black.webp') repeat;
+}
+
+.monks-enhanced-journal[background-image='solidGrey'] {
+    --mej-background: url('/modules/monks-enhanced-journal/assets/apsjournal/solid-grey.webp') repeat;
+}
+
+.monks-enhanced-journal[background-image='solidWhite'] {
+    --mej-background: url('/modules/monks-enhanced-journal/assets/apsjournal/solid-white.webp') repeat;
+}
+
 .monks-enhanced-journal[background-image='woodAlpine'] {
     --mej-background: url('/modules/monks-enhanced-journal/assets/apsjournal/wood-alpine.webp') repeat;
 }
@@ -318,6 +345,12 @@
 .monks-enhanced-journal[sidebar-image='granite'] {
     --mej-sidebar-background: url('/modules/monks-enhanced-journal/assets/apsjournal/granite.webp') repeat;
     --mej-adventure-toc-background: url('/modules/monks-enhanced-journal/assets/apsjournal/granite.webp') repeat;
+    --mej-sidebar-document-color: rgb(var(--mej-light-0));
+}
+
+.monks-enhanced-journal[sidebar-image='marbleBlack'] {
+    --mej-sidebar-background: url('/modules/monks-enhanced-journal/assets/apsjournal/marble-black.webp') repeat;
+    --mej-adventure-toc-background: url('/modules/monks-enhanced-journal/assets/apsjournal/marble-black.webp') repeat;
     --mej-sidebar-document-color: rgb(var(--mej-light-0));
 }
 
@@ -361,6 +394,24 @@
     --mej-sidebar-background: url('/modules/monks-enhanced-journal/assets/apsjournal/leather.webp') repeat;
     --mej-adventure-toc-background: url('/modules/monks-enhanced-journal/assets/apsjournal/leather.webp') repeat;
     --mej-sidebar-document-color: rgb(var(--mej-light-0));
+}
+
+.monks-enhanced-journal[sidebar-image='solidBlack'] {
+    --mej-sidebar-background: url('/modules/monks-enhanced-journal/assets/apsjournal/solid-black.webp') repeat;
+    --mej-adventure-toc-background: url('/modules/monks-enhanced-journal/assets/apsjournal/solid-black.webp') repeat;
+    --mej-sidebar-document-color: rgb(var(--mej-light-0));
+}
+
+.monks-enhanced-journal[sidebar-image='solidGrey'] {
+    --mej-sidebar-background: url('/modules/monks-enhanced-journal/assets/apsjournal/solid-grey.webp') repeat;
+    --mej-adventure-toc-background: url('/modules/monks-enhanced-journal/assets/apsjournal/solid-grey.webp') repeat;
+    --mej-sidebar-document-color: rgb(var(--mej-dark-0));
+}
+
+.monks-enhanced-journal[sidebar-image='solidWhite'] {
+    --mej-sidebar-background: url('/modules/monks-enhanced-journal/assets/apsjournal/solid-white.webp') repeat;
+    --mej-adventure-toc-background: url('/modules/monks-enhanced-journal/assets/apsjournal/solid-white.webp') repeat;
+    --mej-sidebar-document-color: rgb(var(--mej-dark-0));
 }
 
 .monks-enhanced-journal[sidebar-image='woodAlpine'] {
@@ -570,6 +621,7 @@
 :root[mejtheme] .monks-journal-sheet.sheet .list button:hover {
     background: rgb(var(--mej-light-2));
 }
+
 /**
 * Stylish Text
 **/
@@ -577,6 +629,30 @@
     font-family: var(--mej-font-family);
     font-weight: 700;
     font-size: 3em;
+}
+
+.apsj-heading {
+    font-family: var(--apsj-font-mreaves);
+    font-weight: 700;
+    font-size: 2.5em;
+}
+
+.apsj-data-heading {
+    font-family: var(--apsj-font-scalycaps);
+    font-weight: 700;
+    font-size: 2em;
+}
+
+.apsj-data {
+    font-family: var(--apsj-font-scalysans);
+    font-weight: 300;
+    font-size: 1em;
+}
+
+.apsj-text {
+    font-family: var(--apsj-font-bookinsanity);
+    font-weight: 700;
+    font-size: 1em;
 }
 
 .sheet.journal-entry .journal-entry-page h1 {
@@ -591,12 +667,6 @@
     font-weight: 700;
     font-size: 1.5em;
     border-bottom: 2px solid;
-}
-
-.apsj-data {
-    font-family: var(--apsj-font-scalysans);
-    font-weight: 300;
-    font-size: 1em;
 }
 
 /**
@@ -647,7 +717,7 @@
 .apsj-block.apsj-card img,
 .apsj-block.apsj-scroll img {
     border: none;
-    height: 150px;
+    height: 130px;
     width: auto;
 }
 
@@ -660,7 +730,7 @@
 .apsj-block.red-item img,
 .apsj-block.yellow-item img {
     border: none;
-    height: 180px;
+    height: 150px;
     width: auto;
 }
 

@@ -23,6 +23,7 @@ export const registerSettings = function () {
 		'none': "None",
 		'darkParchment': "Parchment - Dark",
 		'parchment': "Parchment - Light",
+		"marbleBlack": "Marble - Black",
 		"marbleWhite": "Marble - White",
 		"metalBrushed": "Metal - Brushed",
 		"paperCotton": "Paper - Cotton",
@@ -30,6 +31,9 @@ export const registerSettings = function () {
 		"paperCrumpledYellowed": "Paper - Crumpled Yellowed",
 		"paperRecycled": "Paper - Recycled",
 		"paperRice": "Paper - Rice",
+		"solidBlack": "Solid - Black",
+		"solidGrey": "Solid - Grey",
+		"solidWhite": "Solid - White",
 		"woodAlpine": "Wood - Alpine",
 		"woodPine": "Wood - Pine"
 	};
@@ -37,6 +41,7 @@ export const registerSettings = function () {
 	let sidebarImages = {
 		'none': "None",
 		"granite": "Granite",
+		"marbleBlack": "Marble - Black",
 		"marbleWhite": "Marble - White",
 		"metalBrushed": "Metal - Brushed",
 		"metalGalvanized": "Metal - Galvanized",
@@ -44,6 +49,9 @@ export const registerSettings = function () {
 		'parchment': "Parchment - Light",
 		'darkLeather': "Leather - Dark",
 		'leather': "Leather - Light",
+		"solidBlack": "Solid - Black",
+		"solidGrey": "Solid - Grey",
+		"solidWhite": "Solid - White",
 		"woodAlpine": "Wood - Alpine",
 		"woodCottagePine": "Wood - Cottage Pine",
 		"woodPine": "Wood - Pine",
@@ -52,6 +60,7 @@ export const registerSettings = function () {
 	let backgroundColour = {
 		'none': "None",
 		'clear': "Clear",
+		'black': 'Black',
 		'red': "Red",
 		'orange': "Orange",
 		'yellow': "Yellow",
