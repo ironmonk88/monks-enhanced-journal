@@ -1,3 +1,11 @@
+# Version 10.16
+
+Fixing an issue with the rendering Journal Entry Page hook when not viewing MEJ Journal pages.
+
+Fixed issue with the sidebar directory repositioning when the window is reduced past a certain size.
+
+Fixed issue with MEJ pages showing as blank.
+
 # Version 10.15
 
 Added integration with Monks Sound Enhancement to use the Sound Effects volume if it's available.
@@ -60,7 +68,7 @@ Fixed issue with Polyglot.
 
 Fixed issue with MATT integration.
 
-Added the option to generate the shop or person name randomly.  Person names will also generate based on the race in the Race field on the sheet.
+Added the option to generate the shop or person name randomly.  Person names will also generate based on the ancestry in the Ancestry field on the sheet.
 
 Fixed issue in the Encounter sheet when actors no longer exist.  It will now indicate that they don't exist, so you're not confused when they're not generated with the encounter.
 
@@ -97,6 +105,8 @@ Fixed issue dragging a folder of items into a shop or loot sheet.
 Added the option to drop a tab onto the chat window to create a chat card with a link to the journal.
 
 Added permissions to individual list items so you can reveal items on a per user basis.
+
+Changed the Race field to Ancestry field.
 
 # Version 10.14
 

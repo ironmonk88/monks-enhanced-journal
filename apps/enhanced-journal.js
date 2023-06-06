@@ -439,7 +439,8 @@ export class EnhancedJournal extends Application {
                 Hooks.callAll('renderJournalSheet', this.subsheet, contentform, templateData); //this.object);
                 if (this.object._source.type == "text")
                     Hooks.callAll('renderJournalTextPageSheet', this.subsheet, contentform, templateData);
-                Hooks.callAll('renderJournalPageSheet', this.subsheet, contentform, templateData);
+                if (this.subsheet.object instanceof JournalEntryPage)
+                    Hooks.callAll('renderJournalPageSheet', this.subsheet, contentform, templateData);
             }
 
             this.object._sheet = this.subsheet;
