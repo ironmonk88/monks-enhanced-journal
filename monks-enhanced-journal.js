@@ -20,7 +20,7 @@ import { createlinkinit } from "./plugins/createlink.plugin.js"
 import { NoteHUD } from "./apps/notehud.js"
 import { getValue, setValue, setPrice, MEJHelpers } from "./helpers.js";
 import { MEJFontHelper } from "./font-helper.js"
-import { APSJ } from "./apsjournal.js";
+import { APSJ, APSJMenu } from "./apsjournal.js";
 
 export let debugEnabled = 0;
 
@@ -916,6 +916,29 @@ export class MonksEnhancedJournal {
             const oldPageSubmit = JournalPageSheet.prototype._getSubmitData;
             JournalPageSheet.prototype._getSubmitData = function (event) {
                 return pageGetSubmitData.call(this, oldPageSubmit.bind(this), ...arguments);
+            }
+        }
+
+        let proseMirrorPlugins = function (wrapped, ...args) {
+            let plugins = wrapped(...args);
+            let that = this;
+
+            plugins.menu = APSJMenu.build(ProseMirror.defaultSchema, {
+                destroyOnSave: true,
+                onSave: function () {
+                    that.saveEditor(...args);
+                }
+            });
+
+            return plugins;
+        }
+
+        if (game.modules.get("lib-wrapper")?.active) {
+            libWrapper.register("monks-enhanced-journal", "JournalPageSheet.prototype._configureProseMirrorPlugins", proseMirrorPlugins, "WRAPPER");
+        } else {
+            const oldProseMirrorPlugins = JournalPageSheet.prototype._configureProseMirrorPlugins;
+            JournalPageSheet.prototype._configureProseMirrorPlugins = function (event) {
+                return proseMirrorPlugins.call(this, oldProseMirrorPlugins.bind(this), ...arguments);
             }
         }
 

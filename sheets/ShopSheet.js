@@ -306,6 +306,7 @@ export class ShopSheet extends EnhancedJournalSheet {
             // Import items from the folder
             let folder = await fromUuid(data.uuid);
             if (folder) {
+                let items = [];
                 for (let item of folder.contents) {
                     if (item instanceof Item) {
                         let itemData = item.toObject();
@@ -314,9 +315,10 @@ export class ShopSheet extends EnhancedJournalSheet {
 
                         setProperty(itemData, "flags.monks-enhanced-journal.quantity", 1);
                         setProperty(itemData, "flags.monks-enhanced-journal.price", price.value + " " + price.currency);
-                        await this.addItem({ data: itemData });
+                        items.push({ data: itemData });
                     }
                 }
+                await this.addItem(items);
             }
         } else if (data.type == 'Item') {
             if (data.from == this.object.uuid)  //don't drop on yourself
@@ -695,44 +697,47 @@ export class ShopSheet extends EnhancedJournalSheet {
     }
 
     async addItem(data) {
-        let item = await this.getDocument(data);
+        data = data instanceof Array ? data : [data];
+        let items = duplicate(this.object.flags["monks-enhanced-journal"].items || []);
+        for (let d of data) {
+            let item = await this.getDocument(d);
 
-        if (item) {
-            let items = duplicate(this.object.flags["monks-enhanced-journal"].items || []);
-
-            let itemData = item.toObject();
-            if ((itemData.type === "spell")) {
-                if (game.system.id == 'dnd5e')
-                    itemData = await ShopSheet.createScrollFromSpell(itemData);
-                /*else if (game.system.id == 'pf2e') {
-                    itemData = await new Promise((resolve, reject) => {
-                        new CastingItemCreateDialog({}, {}, async (heightenedLevel, itemType, spell) => {
-                            resolve(await createConsumableFromSpell(itemType, spell, heightenedLevel));
+            if (item) {
+                let itemData = item.toObject();
+                if ((itemData.type === "spell")) {
+                    if (game.system.id == 'dnd5e')
+                        itemData = await ShopSheet.createScrollFromSpell(itemData);
+                    /*else if (game.system.id == 'pf2e') {
+                        itemData = await new Promise((resolve, reject) => {
+                            new CastingItemCreateDialog({}, {}, async (heightenedLevel, itemType, spell) => {
+                                resolve(await createConsumableFromSpell(itemType, spell, heightenedLevel));
+                            });
                         });
-                    });
-                }*/
-            }
+                    }*/
+                }
 
-            let sysPrice = MEJHelpers.getSystemPrice(item, pricename()); //MEJHelpers.getPrice(getProperty(item, "flags.monks-enhanced-journal.price"));
-            let price = MEJHelpers.getPrice(sysPrice);
-            let adjustment = this.object.flags["monks-enhanced-journal"].sell ?? 1;
-            let flags = Object.assign({
-                hide: false,
-                lock: false,
-                quantity: 1
-            }, getProperty(itemData, "flags.monks-enhanced-journal"), {
-                parentId: item.id,
-                price: `${price.value} ${price.currency}`,
-                cost: (price.value * adjustment) + " " + price.currency
-            });
-            let update = { _id: makeid(), flags: { 'monks-enhanced-journal': flags } };
-            if (game.system.id == "dnd5e") {
-                setProperty(update, "system.equipped", false);
+                let sysPrice = MEJHelpers.getSystemPrice(item, pricename()); //MEJHelpers.getPrice(getProperty(item, "flags.monks-enhanced-journal.price"));
+                let price = MEJHelpers.getPrice(sysPrice);
+                let adjustment = this.object.flags["monks-enhanced-journal"].sell ?? 1;
+                let flags = Object.assign({
+                    hide: false,
+                    lock: false,
+                    quantity: 1
+                }, getProperty(itemData, "flags.monks-enhanced-journal"), {
+                    parentId: item.id,
+                    price: `${price.value} ${price.currency}`,
+                    cost: (price.value * adjustment) + " " + price.currency
+                });
+                let update = { _id: makeid(), flags: { 'monks-enhanced-journal': flags } };
+                if (game.system.id == "dnd5e") {
+                    setProperty(update, "system.equipped", false);
+                }
+                items.push(mergeObject(itemData, update));
             }
-            items.push(mergeObject(itemData, update));
-            this.object.flags["monks-enhanced-journal"].items = items;
-            await this.object.setFlag('monks-enhanced-journal', 'items', items);
         }
+
+        this.object.flags["monks-enhanced-journal"].items = items;
+        await this.object.setFlag('monks-enhanced-journal', 'items', items);
     }
 
     clickItem(event) {

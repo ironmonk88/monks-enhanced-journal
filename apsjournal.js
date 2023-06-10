@@ -226,7 +226,7 @@ export class APSJ {
     }
 }
 
-class APSJMenu extends ProseMirror.ProseMirrorMenu {
+export class APSJMenu extends ProseMirror.ProseMirrorMenu {
     addElement(htmlString) {
         const parser = ProseMirror.DOMParser.fromSchema(
             ProseMirror.defaultSchema
@@ -342,7 +342,3 @@ class APSJMenu extends ProseMirror.ProseMirrorMenu {
         return menus;
     }
 }
-
-Hooks.on('createProseMirrorEditor', (uuid, plugins, options) => {
-    plugins.menu = APSJMenu.build(ProseMirror.defaultSchema);
-});

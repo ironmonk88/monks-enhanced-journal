@@ -1653,7 +1653,7 @@ export class EnhancedJournalSheet extends JournalPageSheet {
                     const tableString = `Compendium.${pack.collection}.`;
                     for (let table of index) {
                         entries.push({
-                            name: table.name,
+                            name: table.name.length > 32 ? table.name.substring(0, 30) + "..." : table.name,
                             uuid: tableString + table._id,
                         });
                     }
@@ -1664,7 +1664,12 @@ export class EnhancedJournalSheet extends JournalPageSheet {
             };
         }
 
-        let groups = game.tables.map(t => { return { uuid: t.uuid, name: t.name } }).sort((a, b) => { return a.name.localeCompare(b.name) }).reduce((a, v) => ({ ...a, [v.uuid]: v.name }), {});
+        let groups = game.tables.map(t => {
+            return {
+                uuid: t.uuid,
+                name: t.name.length > 32 ? t.name.substring(0, 30) + "..." : t.name
+            }
+        }).sort((a, b) => { return a.name.localeCompare(b.name) }).reduce((a, v) => ({ ...a, [v.uuid]: v.name }), {});
         rolltables.push({ text: i18n("MonksEnhancedJournal.RollTables"), groups: groups });
 
         let that = this;

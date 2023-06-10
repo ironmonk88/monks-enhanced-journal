@@ -1,3 +1,15 @@
+# Version 10.17
+
+Fixing issue with the save button disappearing in Prose Mirror editors.
+
+Fixed issue with broken inline links not being coloured red.
+
+Fixed issue with roll table names being too long for the select drop down.
+
+Fixed issue with dropping a folder of items onto a Shop taking forever to add them all.
+
+Fixed issue with APSJ Blocks Panels, and Dialogs having html displayed in them.
+
 # Version 10.16
 
 Fixing an issue with the rendering Journal Entry Page hook when not viewing MEJ Journal pages.

@@ -910,6 +910,20 @@ span.unknown-link {
     color: var(--color-text-hyperlink);
 }
 
+.inline-roll-styling a.content-link.broken,
+.inline-roll-styling a.picture-link.broken,
+.inline-roll-styling a.inline-request-roll.broken,
+.inline-roll-styling a.tile-trigger-link.broken {
+    color: red;
+    text-decoration: line-through;
+}
+
+.inline-roll-styling a.content-link.broken i,
+.inline-roll-styling a.picture-link.broken i,
+.inline-roll-styling a.inline-request-roll.broken i,
+.inline-roll-styling a.tile-trigger-link.broken i {
+    color: red;
+}
 /* Show to Players */
 .journal-show-dialog .show-to-players {
     display: grid;
@@ -945,6 +959,7 @@ span.unknown-link {
 
 .sheet.journal-entry .pages-list .page-heading {
     position: relative;
+    width: 100%;
 }
 
 .sheet.journal-entry .pages-list .page-heading .page-ownership {

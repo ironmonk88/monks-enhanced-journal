@@ -1084,6 +1084,7 @@ body:not(.system-pf2e) .monks-journal-sheet .sheet-container .tag {
 .monks-journal-sheet .list-list .list-item.document h3 {
     margin-bottom: 0px;
     flex-grow: 0;
+    white-space: nowrap;
 }
 
 .monks-journal-sheet .list-list .list-item h3.progress-title {
