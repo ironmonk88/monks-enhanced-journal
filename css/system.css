@@ -21,7 +21,7 @@ body.system-wfrp4e {
     --mej-header-tab-color: rgb(var(--mej-dark-4));
 }
 
-:root[mejtheme] body.system-wfrp4e .monks-enhanced-journal .sidebar-directory.directory .directory-header .header-actions.action-buttons button {
+:root[mejtheme] body.system-wfrp4e .monks-enhanced-journal .directory .directory-header .header-actions.action-buttons button {
     color: rgb(var(--mej-dark-4));
 }
 
@@ -215,7 +215,7 @@ body.system-D35E {
     border-color: transparent !important;
 }
 
-.d35ecustom .monks-enhanced-journal .sidebar-directory.directory .directory-header .header-actions button {
+.d35ecustom .monks-enhanced-journal .directory .directory-header .header-actions button {
     background-size: 100% 100%;
     border: none;
 }
@@ -225,7 +225,7 @@ body.system-D35E {
     top: 1px;
 }
 
-.sfrpg.monks-enhanced-journal .sidebar-directory.directory .directory-header .header-actions button {
+.sfrpg.monks-enhanced-journal .directory .directory-header .header-actions button {
     line-height: 20px;
 }
 
@@ -234,7 +234,7 @@ body.system-D35E {
     top: 1px;
 }
 
-.sw5e.monks-enhanced-journal .sidebar-directory.directory .directory-header .header-actions button {
+.sw5e.monks-enhanced-journal .directory .directory-header .header-actions button {
     line-height: 20px;
 }
 
@@ -365,7 +365,7 @@ body.system-forbidden-lands {
     height: var(--form-field-height);
 }
 
-.forbidden-lands.monks-enhanced-journal .sidebar-directory.directory .directory-header .header-actions button {
+.forbidden-lands.monks-enhanced-journal .directory .directory-header .header-actions button {
     line-height: 20px;
 }
 /* Chronicles of Darkness */
@@ -548,7 +548,7 @@ body.system-vaesen {
     height: 22px;
 }
 
-.-emu-layout body.-emu .sidebar-tab.directory .directory-item.journalentry .permissions {
+.-emu-layout body.-emu .directory .directory-item.journalentry .permissions {
     border-bottom-right-radius: 4px;
 }
 .-emu-layout body.-emu .monks-journal-sheet.sheet .editor .tox-tinymce .tox-menubar button {

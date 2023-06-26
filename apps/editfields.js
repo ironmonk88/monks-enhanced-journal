@@ -26,7 +26,7 @@ export class EditFields extends FormApplication {
             delete attr.shown;
         }
         let attributes = mergeObject(this.object.flags['monks-enhanced-journal'].attributes, fd.attributes);
-        this.object.setFlag('monks-enhanced-journal', 'attributes', attributes)
+        this.object.update({ "flags.monks-enhanced-journal.attributes": attributes }, { focus: false });
         this.change = true;
     }
 

@@ -188,15 +188,17 @@ export class LootSheet extends EnhancedJournalSheet {
     _getSubmitData(updateData = {}) {
         let data = expandObject(super._getSubmitData(updateData));
 
-        data.flags['monks-enhanced-journal'].items = duplicate(this.object.getFlag("monks-enhanced-journal", "items") || []);
-        for (let item of data.flags['monks-enhanced-journal'].items) {
-            let dataItem = data.items[item._id];
-            if (dataItem)
-                item = mergeObject(item, dataItem);
-        }
-        delete data.items;
+        if (this.object.isOwner) {
+            data.flags['monks-enhanced-journal'].items = duplicate(this.object.getFlag("monks-enhanced-journal", "items") || []);
+            for (let item of data.flags['monks-enhanced-journal'].items) {
+                let dataItem = data.items[item._id];
+                if (dataItem)
+                    item = mergeObject(item, dataItem);
+            }
+            delete data.items;
 
-        data.flags['monks-enhanced-journal'].items = data.flags['monks-enhanced-journal'].items.filter(i => getValue(i, quantityname()) > 0);
+            data.flags['monks-enhanced-journal'].items = data.flags['monks-enhanced-journal'].items.filter(i => getValue(i, quantityname()) > 0);
+        }
 
         return flattenObject(data);
     }

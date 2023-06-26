@@ -72,6 +72,8 @@
   "MonksEnhancedJournal.loot-name.hint": "This name will be used when creating the new entry.",
   "MonksEnhancedJournal.add-create-link.name": "Add Create Link",
   "MonksEnhancedJournal.add-create-link.hint": "Add context menu, when text is selected to find a document with that name and replace the text with a link.",
+  "MonksEnhancedJournal.party-loot-entity.name": "Party Loot",
+  "MonksEnhancedJournal.party-loot-entity.hint": "When selling items, add option to ",
 
   "MonksEnhancedJournal.SlideConfiguration": "Slide Configuration",
   "MonksEnhancedJournal.DCConfiguration": "DC Configuration",
@@ -417,6 +419,7 @@
   "MonksEnhancedJournal.ExpandDirectory": "Expand Directory",
   "MonksEnhancedJournal.CollapseDirectory": "Collapse Directory",
   "MonksEnhancedJournal.AutoOpen": "Open based on world clock",
+  "MonksEnhancedJournal.ChangeSheetType": "Change Sheet Type",
 
   "MonksEnhancedJournal.msg.NoPlayersSelected": "No players selected to send this entry to",
   "MonksEnhancedJournal.msg.CannotAddItemType": "Cannot add item of this type",

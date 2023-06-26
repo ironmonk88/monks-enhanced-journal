@@ -44,6 +44,11 @@
             <button type="button" class="create-folder">
                 <i class="fas fa-folder"></i> {{localize 'FOLDER.Create'}}
             </button>
+            {{#if owner}}
+            <span style="text-align: right; overflow: hidden; white-space: nowrap; color: var(--color-text-dark-secondary); line-height: 32px;margin-right: 5px;">
+                You can change to a different list type using the <span style="border:1px solid #333;padding: 4px; margin: 2px;"><i class="fas fa-cog"></i>Sheet</span> configuration
+            </span>
+            {{/if}}
         </section>
         <section class="flexcol sheet-body">
             <ol class="list-list">

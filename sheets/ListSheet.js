@@ -14,6 +14,7 @@ export class ListSheet extends EnhancedJournalSheet {
     }
 
     get sheetTemplates() {
+        delete _templateCache["modules/monks-enhanced-journal/templates/sheets/list-template.html"];
         return {
             listItemTemplate: "modules/monks-enhanced-journal/templates/sheets/list-template.html"
         };
@@ -72,6 +73,7 @@ export class ListSheet extends EnhancedJournalSheet {
 
     _documentControls() {
         let ctrls = [
+            { id: 'sheet-config', text: i18n("MonksEnhancedJournal.ChangeSheetType"), icon: 'fa-cog', conditional: game.user.isGM, callback: (ev) => { this._onConfigureSheet(ev) } },
             { id: 'show', text: i18n("MonksEnhancedJournal.ShowToPlayers"), icon: 'fa-eye', conditional: game.user.isGM, callback: this.enhancedjournal.doShowPlayers }
         ];
         //this.addPolyglotButton(ctrls);
@@ -237,7 +239,7 @@ export class ListSheet extends EnhancedJournalSheet {
         const entries = list.find(".list-item");
 
         // Folder-level events
-        html.find('.create-item').click(ev => this._onCreateItem(ev));
+        html.find('.create-item').click((ev) => { new ListEdit({ data: {}}, this).render(true) });
         html.find('.collapse-all').click(this.collapseAll.bind(this));
         html.find(".folder .folder .folder .create-folder").remove(); // Prevent excessive folder nesting
         if (game.user.isGM) html.find('.create-folder').click(ev => this._onCreateFolder(ev));
@@ -714,6 +716,7 @@ export class ListSheet extends EnhancedJournalSheet {
 
 export class CheckListSheet extends ListSheet {
     get sheetTemplates() {
+        delete _templateCache["modules/monks-enhanced-journal/templates/sheets/list-template-checklist.html"];
         return {
             listItemTemplate: "modules/monks-enhanced-journal/templates/sheets/list-template-checklist.html"
         };
@@ -754,6 +757,7 @@ export class PollListSheet extends ListSheet {
     }
 
     get sheetTemplates() {
+        delete _templateCache["modules/monks-enhanced-journal/templates/sheets/list-template-poll.html"];
         return {
             listItemTemplate: "modules/monks-enhanced-journal/templates/sheets/list-template-poll.html"
         };
@@ -864,7 +868,7 @@ export class PollListSheet extends ListSheet {
         let item = items.find(i => i.id == id);
 
         let ownershipLevels = CONST.DOCUMENT_OWNERSHIP_LEVELS;
-        let ownership = item.data.ownership || { default: ownershipLevels.OBSERVER };
+        let ownership = item.ownership || { default: ownershipLevels.OBSERVER };
         let canVote = game.user.isGM || ownership?.default >= ownershipLevels.OBSERVER || ownership[game.user.id] >= ownershipLevels.OBSERVER;
 
         if (!canVote)
@@ -903,6 +907,7 @@ export class ProgressListSheet extends ListSheet {
     }
 
     get sheetTemplates() {
+        delete _templateCache["modules/monks-enhanced-journal/templates/sheets/list-template-progress.html"];
         return {
             listItemTemplate: "modules/monks-enhanced-journal/templates/sheets/list-template-progress.html"
         };

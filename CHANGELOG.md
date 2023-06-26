@@ -1,3 +1,37 @@
+# Version 11.01
+
+Added support for v11
+
+Updated so that the edit property dialog doesn't refocus the enhanced journal.
+
+Added the option to reorder bookmark.
+
+Added the option to right click and open a bookmark in a new tab, or open it outside the enhanced browser.
+
+Fixed issue with creating a new list entry
+
+Fixed styling of the solid black, grey and white backgrounds so that you can see text correctly.
+
+Fixed issue where sometimes the List type would get stuck and wouldn't change to a different version until Foundry was reloaded.
+
+Added option to display inline links as either core, enhanced journal style, or APSJ style.
+
+Fixed issue with having the option to use tagger when selecting a journal entry page for the MATT action to start an Encounter.
+
+Added consistant actions for what to do with page images.  If the image does not exists, then it will always open up the FilePicker.  If the file exists and you are the owner of the sheet, then clicking will view the image, and right clickign will show a context menu that can be used to edit the image, open the image, or delete the image.  And if you are not the owner then clicking on it will view the image.
+
+Fixed issues with highlighting the background sound on journal pages when stopping the sound.
+
+Fixed issues with displaying the roll table formula when filling items using a roll table.
+
+Fixed issue when assigning items to a loot sheet if the currency isn't a string.
+
+Added a button to configure the list sheet type from the enhanced journal menu bar.  And added some helper text so that people know you can change the type.
+
+Fixed issues with players unable to vote in a poll.
+
+Added additional information when a progress has no information to display a progress bar correctly.
+
 # Version 10.17
 
 Fixing issue with the save button disappearing in Prose Mirror editors.
@@ -9,6 +43,8 @@ Fixed issue with roll table names being too long for the select drop down.
 Fixed issue with dropping a folder of items onto a Shop taking forever to add them all.
 
 Fixed issue with APSJ Blocks Panels, and Dialogs having html displayed in them.
+
+Adding additional APSJ stylings.
 
 # Version 10.16
 

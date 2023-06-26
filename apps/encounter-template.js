@@ -39,13 +39,15 @@ export class EncounterTemplate extends MeasuredTemplate {
         return this.#stage > 0;
     }
 
-    _drawControlIcon() {
+    /*
+    #createControlIcon() {
         const size = Math.max(Math.round((canvas.dimensions.size * 0.5) / 20) * 20, 40);
         let icon = new ControlIcon({ texture: CONFIG.controlIcons.combat, size: size });
         icon.x -= (size * 0.5);
         icon.y -= (size * 0.5);
         return icon;
     }
+    */
 
     static fromEncounter(encounter) {
         // Prepare template data
@@ -112,9 +114,9 @@ export class EncounterTemplate extends MeasuredTemplate {
             };
 
             // Activate listeners
-            canvas.stage.on("mousedown", this.#events.position);
-            canvas.stage.on("mousemove", this.#events.move);
-            canvas.stage.on("mouseup", this.#events.confirm);
+            canvas.stage.on("pointerdown", this.#events.position);
+            canvas.stage.on("pointermove", this.#events.move);
+            canvas.stage.on("pointerup", this.#events.confirm);
             canvas.app.view.oncontextmenu = this.#events.cancel;
         });
     }
@@ -128,6 +130,7 @@ export class EncounterTemplate extends MeasuredTemplate {
 
     _onMovePlacement(event) {
         event.stopPropagation();
+        event.stopImmediatePropagation();
         let now = Date.now(); // Apply a 20ms throttle
         if (now - this.#moveTime <= 20) return;
         const center = event.data.getLocalPosition(this.layer);
@@ -138,14 +141,15 @@ export class EncounterTemplate extends MeasuredTemplate {
     }
 
     async _onSetPlacement(event) {
-        canvas.stage.off("mousemove", this.#events.move);
-        canvas.stage.on("mousemove", this.#events.size);
+        canvas.stage.off("pointermove", this.#events.move);
+        canvas.stage.on("pointermove", this.#events.size);
         this.#stage = 1;
     }
 
     _onSizePlacement(event) {
-        const { destination, origin } = event.data;
+        const { origin } = event.interactionData;
         event.stopPropagation();
+        event.stopImmediatePropagation();
 
         event.data.createState = 0;
 
@@ -153,6 +157,7 @@ export class EncounterTemplate extends MeasuredTemplate {
         const snapped = canvas.grid.getSnappedPosition(center.x, center.y, this.gridPrecision);
 
         // Compute the ray
+        console.log("Size Placement", origin, snapped);
         const ray = new Ray(origin, snapped);
         const ratio = (canvas.dimensions.size / canvas.dimensions.distance);
 
@@ -171,10 +176,10 @@ export class EncounterTemplate extends MeasuredTemplate {
  */
     async _finishPlacement(event) {
         this.layer._onDragLeftCancel(event);
-        canvas.stage.off("mousemove", this.#events.move);
-        canvas.stage.off("mousemove", this.#events.size);
-        canvas.stage.off("mousedown", this.#events.position);
-        canvas.stage.off("mouseup", this.#events.confirm);
+        canvas.stage.off("pointermove", this.#events.move);
+        canvas.stage.off("pointermove", this.#events.size);
+        canvas.stage.off("pointerdown", this.#events.position);
+        canvas.stage.off("pointerup", this.#events.confirm);
         canvas.app.view.oncontextmenu = null;
         delete this.layer.encounterTemplate;
         this.#initialLayer.activate();

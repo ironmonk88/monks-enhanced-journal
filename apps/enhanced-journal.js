@@ -1,5 +1,4 @@
-import { makeid } from "../monks-enhanced-journal.js";
-import { MonksEnhancedJournal, log, i18n, error, setting, getVolume } from "../monks-enhanced-journal.js"
+import { MonksEnhancedJournal, log, i18n, error, setting, getVolume, isV11, makeid  } from "../monks-enhanced-journal.js"
 import { EnhancedJournalSheet } from "../sheets/EnhancedJournalSheet.js"
 import { JournalEntrySheet } from "../sheets/JournalEntrySheet.js"
 
@@ -64,13 +63,25 @@ export class EnhancedJournal extends Application {
             height: 700,
             resizable: true,
             editable: true,
-            dragDrop: [{ dragSelector: ".journal-tab", dropSelector: ".enhanced-journal-header" }],
+            dragDrop: [{ dragSelector: ".journal-tab, .bookmark-button", dropSelector: ".enhanced-journal-header" }],
             closeOnSubmit: false,
             submitOnClose: false,
             submitOnChange: true,
             viewPermission: CONST.DOCUMENT_OWNERSHIP_LEVELS.NONE,
             scrollY: ["ol.directory-list"]
         });
+    }
+
+    get entryType() {
+        return ui.journal.collection.documentName;
+    }
+
+    get _onCreateDocument() {
+        return ui.journal._onCreateDocument;
+    }
+
+    get collection() {
+        return ui.journal.collection;
     }
 
     get isEditable() {
@@ -100,7 +111,7 @@ export class EnhancedJournal extends Application {
         return mergeObject(super.getData(options),
             {
                 tabs: this.tabs,
-                bookmarks: this.bookmarks,
+                bookmarks: this.bookmarks.sort((a, b) => a.sort - b.sort),
                 user: game.user,
                 canForward: canForward,
                 canBack: canBack,
@@ -145,14 +156,26 @@ export class EnhancedJournal extends Application {
 
     async renderDirectory() {
         const cfg = CONFIG["JournalEntry"];
+        const cls = cfg.documentClass;
         let template = "modules/monks-enhanced-journal/templates/directory.html";
         let data = {
-            tree: ui.journal.tree,
-            canCreate: cfg.documentClass.canUserCreate(game.user),
+            tree: ui.journal.collection.tree,
+            entryPartial: ui.journal.constructor.entryPartial,
+            folderPartial: ui.journal.constructor.folderPartial,
+            canCreateEntry: ui.journal.canCreateEntry,
+            canCreateFolder: ui.journal.canCreateFolder,
+            sortIcon: ui.journal.collection.sortingMode === "a" ? "fa-arrow-down-a-z" : "fa-arrow-down-short-wide",
+            sortTooltip: ui.journal.collection.sortingMode === "a" ? "SIDEBAR.SortModeAlpha" : "SIDEBAR.SortModeManual",
+            searchIcon: ui.journal.collection.searchMode === CONST.DIRECTORY_SEARCH_MODES.NAME ? "fa-search" : "fa-file-magnifying-glass",
+            searchTooltip: ui.journal.collection.searchMode === CONST.DIRECTORY_SEARCH_MODES.NAME ? "SIDEBAR.SearchModeName" : "SIDEBAR.SearchModeFull",
+            documentCls: cls.documentName.toLowerCase(),
+            tabName: cls.metadata.collection,
             sidebarIcon: cfg.sidebarIcon,
+            folderIcon: "fas fa-folder",
             user: game.user,
             label: i18n("MonksEnhancedJournal.Entry"),
-            labelPlural: i18n("MonksEnhancedJournal.JournalEntries")
+            labelPlural: i18n(cls.metadata.labelPlural),
+            unavailable: game.user.isGM ? cfg.collection?.instance?.invalidDocumentIds?.size : 0
         };
 
         let html = await renderTemplate(template, data);
@@ -440,7 +463,7 @@ export class EnhancedJournal extends Application {
                 if (this.object._source.type == "text")
                     Hooks.callAll('renderJournalTextPageSheet', this.subsheet, contentform, templateData);
                 if (this.subsheet.object instanceof JournalEntryPage)
-                    Hooks.callAll('renderJournalPageSheet', this.subsheet, contentform, templateData);
+                    Hooks.callAll('renderJournalPageSheet', this.subsheet, contentform, Object.assign({ enhancedjournal: this }, templateData));
             }
 
             this.object._sheet = this.subsheet;
@@ -1197,7 +1220,19 @@ export class EnhancedJournal extends Application {
             log('Drag Start', dragData);
 
             event.dataTransfer.setData("text/plain", JSON.stringify(dragData));
-        }else
+        } else if ($(target).hasClass('bookmark-button')) {
+            const dragData = { from: this.object.uuid };
+
+            let bookmarkId = target.dataset.bookmarkId;
+            let bookmark = this.bookmarks.find(t => t.id == bookmarkId);
+            dragData.uuid = bookmark.entityId;
+            dragData.type = "Bookmark";
+            dragData.bookmarkId = bookmarkId;
+
+            log('Drag Start', dragData);
+
+            event.dataTransfer.setData("text/plain", JSON.stringify(dragData));
+        } else
             return this.subsheet._onDragStart(event);
     }
 
@@ -1236,6 +1271,26 @@ export class EnhancedJournal extends Application {
 
                 game.user.update({
                     flags: { 'monks-enhanced-journal': { 'tabs': tabs } }
+                }, { render: false });
+            } else if (data.bookmarkId) {
+                const target = event.target.closest(".bookmark-button") || null;
+                let bookmarks = duplicate(this.bookmarks);
+
+                if (data.bookmarkId === target.dataset.bookmarkId) return; // Don't drop on yourself
+
+                let from = bookmarks.findIndex(a => a.id == data.bookmarkId);
+                let to = bookmarks.findIndex(a => a.id == target.dataset.bookmarkId);
+                log('moving tab from', from, 'to', to);
+                bookmarks.splice(to, 0, bookmarks.splice(from, 1)[0]);
+
+                this.bookmarks = bookmarks;
+                if (from < to)
+                    $('.bookmark-button[data-bookmark-id="' + data.bookmarkId + '"]', this.element).insertAfter(target);
+                else
+                    $('.bookmark-button[data-bookmark-id="' + data.bookmarkId + '"]', this.element).insertBefore(target);
+
+                game.user.update({
+                    flags: { 'monks-enhanced-journal': { 'bookmarks': bookmarks } }
                 }, { render: false });
             } else if (data.type == 'Actor') {
                 if (data.pack == undefined) {
@@ -1344,6 +1399,36 @@ export class EnhancedJournal extends Application {
     async _contextMenu(html) {
         this._context = new ContextMenu(html, ".bookmark-button", [
             {
+                name: "Open outside Enhanced Journal",
+                icon: '<i class="fas fa-file-export"></i>',
+                callback: async (li) => {
+                    let bookmark = this.bookmarks.find(b => b.id == li[0].dataset.bookmarkId);
+                    let document = await fromUuid(bookmark.entityId);
+                    if (!document) {
+                        document = game.journal.get(bookmark.entityId);
+                    }
+                    if (document) {
+                        MonksEnhancedJournal.fixType(document);
+                        document.sheet.render(true);
+                    }
+                }
+            },
+            {
+                name: "Open in new tab",
+                icon: '<i class="fas fa-file-export"></i>',
+                callback: async (li) => {
+                    let bookmark = this.bookmarks.find(b => b.id == li[0].dataset.bookmarkId);
+                    let document = await fromUuid(bookmark.entityId);
+                    if (!document) {
+                        document = game.journal.get(bookmark.entityId);
+                    }
+                    if (document) {
+                        MonksEnhancedJournal.fixType(document);
+                        this.open(document, true);
+                    }
+                }
+            },
+            {
                 name: "MonksEnhancedJournal.Delete",
                 icon: '<i class="fas fa-trash"></i>',
                 callback: li => {
@@ -1401,6 +1486,9 @@ export class EnhancedJournal extends Application {
         });
         $('.tab-bar .journal-tab', html).on("contextmenu", (event) => {
             this.contextTab = event.currentTarget.dataset.tabid;
+        });
+        $('.bookmark-bar .bookmark-button', html).on("contextmenu", (event) => {
+            this.contextBookmark = event.currentTarget.dataset.bookmarkId;
         });
 
         let history = await this.getHistory();
@@ -1526,19 +1614,28 @@ export class EnhancedJournal extends Application {
         const entries = directory.find(".directory-item");
 
         // Directory-level events
-        html.find('.create-document').click(ev => ui.journal._onCreateDocument(ev));
-        html.find('.collapse-all').click(ui.journal.collapseAll.bind(this));
-        html.find(".folder .folder .folder .create-folder").remove(); // Prevent excessive folder nesting
-        if (game.user.isGM) html.find('.create-folder').click(ev => ui.journal._onCreateFolder(ev));
-
-        // Entry-level events
-        directory.on("click", ".document-name", ui.journal._onClickDocumentName.bind(ui.journal));
-        directory.on("click", ".folder-header", ui.journal._toggleFolder.bind(this));
-        //this._contextMenu(html);
+        html.find(`[data-folder-depth="${this.maxFolderDepth}"] .create-folder`).remove();
+        html.find('.toggle-sort').click((event) => {
+            event.preventDefault();
+            ui.journal.collection.toggleSortingMode();
+            ui.journal.render();
+        });
+        html.find(".collapse-all").click(ui.journal.collapseAll.bind(this));
 
         // Intersection Observer
         const observer = new IntersectionObserver(ui.journal._onLazyLoadImage.bind(this), { root: directory[0] });
         entries.each((i, li) => observer.observe(li));
+
+        // Entry-level events
+        directory.on("click", ".entry-name", ui.journal._onClickEntryName.bind(ui.journal));
+        directory.on("click", ".folder-header", ui.journal._toggleFolder.bind(this));
+        const dh = ui.journal._onDragHighlight.bind(this);
+        html.find(".folder").on("dragenter", dh).on("dragleave", dh);
+        //this._contextMenu(html);
+
+        // Allow folder and entry creation
+        if (ui.journal.canCreateFolder) html.find(".create-folder").click(ui.journal._onCreateFolder.bind(this));
+        if (ui.journal.canCreateEntry) html.find(".create-entry").click(ui.journal._onCreateEntry.bind(this));
 
         this._searchFilters = [new SearchFilter({ inputSelector: 'input[name="search"]', contentSelector: ".directory-list", callback: ui.journal._onSearchFilter.bind(ui.journal) })];
         this._searchFilters.forEach(f => f.bind(html[0]));
@@ -1579,8 +1676,9 @@ export class EnhancedJournal extends Application {
 
     activateFooterListeners(html) {
         let folder = (this.object.folder || this.object.parent?.folder);
-        let content = folder ? folder.contents : ui.journal.tree.documents;
-        let sorting = folder?.sorting || "m";
+        let content = folder ? folder.contents : ui.journal.collection.tree?.entries || ui.journal.documents;
+        let sorting = folder?.sorting || ui.journal.collection.sortingMode || "m";
+        
         let documents = content
             .map(c => {
                 if (!c.testUserPermission(game.user, "OBSERVER"))
@@ -1604,7 +1702,7 @@ export class EnhancedJournal extends Application {
 
         if (this.object instanceof JournalEntry) {
             $('.page-prev', html).toggleClass("disabled", !this.subsheet || this.subsheet?.pageIndex < 1).show().on("click", this.previousPage.bind(this));
-            $('.page-next', html).toggleClass("disabled", !this.subsheet || this.subsheet?.pageIndex >= this.subsheet?._pages.length - 1).show().on("click", this.nextPage.bind(this));
+            $('.page-next', html).toggleClass("disabled", !this.subsheet || this.subsheet?.pageIndex >= (this.object?.pages?.size || 0) - 1).show().on("click", this.nextPage.bind(this));
         /*} else if (this.object instanceof JournalEntryPage) {
             let pageIdx = this.object.parent.pages.contents.findIndex(p => p.id == this.object.id);
             let prevPage = (pageIdx > 0 ? this.object.parent.pages.contents[pageIdx - 1] : null);

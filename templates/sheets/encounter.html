@@ -4,7 +4,7 @@
             <i class="fas {{data.icon}} sheet-icon"></i>
             <input name="name" type="text" value="{{data.name}}" placeholder="{{localize 'MonksEnhancedJournal.EncounterName'}}">
             {{#if sound.audiofile}}
-            <button type="button" class="play-journal-sound">
+            <button type="button" class="play-journal-sound{{#if sound.playing}} active{{/if}}">
                 <i class="fas {{#if sound.playing}}fa-volume-up{{else}}fa-volume-off{{/if}}"></i>
             </button>
             {{/if}}

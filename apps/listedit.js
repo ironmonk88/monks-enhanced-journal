@@ -40,8 +40,8 @@ export class ListEdit extends FormApplication {
         mergeObject(this.object.data, formData);
         let items = duplicate(this.sheet.object.flags["monks-enhanced-journal"].items || []);
         if (this.object.id == undefined) {
-            this.object.id = makeid();
-            items.push(this.object);
+            this.object.data.id = makeid();
+            items.push(this.object.data);
         } else {
             items.findSplice((i) => i.id == this.object.id, this.object.data);
         }

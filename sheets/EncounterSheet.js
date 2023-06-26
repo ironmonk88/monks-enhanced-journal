@@ -426,16 +426,16 @@ export class EncounterSheet extends EnhancedJournalSheet {
 
                         switch (template.document.t) {
                             case "circle":
-                                template.shape = template._getCircleShape(distance);
+                                template.shape = template.constructor.getCircleShape(distance);
                                 break;
                             case "cone":
-                                template.shape = template._getConeShape(direction, angle, distance);
+                                template.shape = template.constructor.getConeShape(direction, angle, distance);
                                 break;
                             case "rect":
-                                template.shape = template._getRectShape(direction, distance);
+                                template.shape = template.constructor.getRectShape(direction, distance);
                                 break;
                             case "ray":
-                                template.shape = template._getRayShape(direction, distance, width);
+                                template.shape = template.constructor.getRayShape(direction, distance, width);
                         }
                     }
 

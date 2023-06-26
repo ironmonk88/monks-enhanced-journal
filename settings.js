@@ -19,6 +19,12 @@ export const registerSettings = function () {
 		'false': "Neither"
 	};
 
+	let inlineStyling = {
+		'true': "Monk's Enhanced Journal",
+		'apsj': "Arius Planeswalker's Stylish Journal",
+		'false': "Core Foundry"
+	};
+
 	let backgroundImages = {
 		'none': "None",
 		'darkParchment': "Parchment - Dark",
@@ -233,10 +239,11 @@ export const registerSettings = function () {
 		hint: i18n("MonksEnhancedJournal.inline-roll-styling.hint"),
 		scope: "world",
 		config: true,
-		default: true,
-		type: Boolean,
+		default: "true",
+		type: String,
+		choices: inlineStyling,
 		onChange: (value) => {
-			$('body').toggleClass("inline-roll-styling", value);
+			$('body').attr("inline-roll-styling", value);
 		},
 	});
 
@@ -419,6 +426,14 @@ export const registerSettings = function () {
 		scope: "world",
 		config: true,
 		default: i18n("MonksEnhancedJournal.LootEntry"),
+		type: String,
+	});
+	game.settings.register(modulename, "party-loot-entity", {
+		name: game.i18n.localize("MonksEnhancedJournal.party-loot-entity.name"),
+		hint: game.i18n.localize("MonksEnhancedJournal.party-loot-entity.hint"),
+		scope: "world",
+		config: false,
+		default: "",
 		type: String,
 	});
 

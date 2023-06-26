@@ -85,16 +85,29 @@
     --mej-itemlist-background: var(--apsj-primary-bright);
     --mej-itemlist-colour: rgb(var(--mej-dark-0));
     --mej-itemlist-control-background: var(--apsj-btn-background);
+    --mej-itemlist-control-color: rgb(var(--mej-dark-5));
+    --mej-itemlist-control-color-hover: rgb(var(--mej-dark-0));
+    --mej-itemlist-header-control-color: rgb(var(--mej-dark-0));
+    --mej-itemlist-input-background: var(--mej-cream);
+    --mej-itemlist-input-border: rgb(var(--mej-dark-3));
     --mej-sheet-button-background: var(--apsj-btn-background);
-    --mej-sheet-button-color: rgb(var(--mej-dark-2));
+    --mej-sheet-button-background-hover: rgb(var(--mej-light-2));
+    --mej-sheet-button-color: rgb(var(--mej-dark-5));
     --mej-sheet-header-input-color: rgb(var(--mej-light-0));
     --mej-sheet-page-control-background: var(--apsj-btn-background);
+    --mej-sheet-page-control-background-hover: rgb(var(--mej-light-2));
     --mej-sheet-page-control-color: rgb(var(--mej-dark-2));
     --mej-sheet-tab-background: rgba(var(--apsj-primary-color-light), 0.4);
     --mej-sheet-tab-color: rgb(var(--mej-light-0));
     --mej-sheet-tab-color-active: var(--mej-sheet-color);
     --mej-sheet-tab-color-hover: rgb(var(--mej-dark-3));
     --mej-sidebar-button-background: var(--apsj-btn-background);
+    --mej-sidebar-input-background: rgba(var(--mej-light-0), 0.25);
+    --mej-sidebar-input-background-focus: rgba(var(--mej-light-0), 0.3);
+    --mej-sheet-header-name-background-hover: rgba(var(--mej-light-0), 0.25);
+    --mej-sheet-header-search-background: var(--mej-cream);
+    --mej-sheet-header-search-border: rgb(var(--mej-dark-0)) 1px solid;
+    --mej-sheet-header-search-color: rgb(var(--mej-dark-3));
 }
 
 :root[mejtheme='clear'] {
@@ -165,6 +178,13 @@
     --apsj-primary-color-dark: 0, 0, 0;
     --apsj-primary-color-bright: 96, 96, 96;
     --mej-sidebar-document-color: rgb(var(--mej-light-0));
+    --mej-header-nav-input-placeholder-color: rgb(var(--mej-light-6));
+    --mej-header-nav-input-focus-color: rgb(var(--mej-dark-3));
+    --mej-sidebar-folder-background-collapsed: rgb(var(--mej-dark-2));
+    --mej-sidebar-folder-background: rgb(var(--mej-dark-3));
+    --mej-sidebar-folder-color-collapsed: rgb(var(--mej-light-2));
+    --mej-sidebar-folder-color: rgb(var(--mej-light-2));
+    --mej-sidebar-input-placeholder-color: rgb(var(--mej-light-6));
 }
 
 /**
@@ -206,11 +226,12 @@
     font-weight: 400;
 }
 
-:root[mejtheme] body:not(.inline-roll-styling) a.entity-link,
-:root[mejtheme] body:not(.inline-roll-styling) a.content-link,
-:root[mejtheme] body:not(.inline-roll-styling) a.inline-roll,
-:root[mejtheme] body:not(.inline-roll-styling) a.picture-link,
-:root[mejtheme] body:not(.inline-roll-styling) a.inline-request-roll {
+body[inline-roll-styling="apsj"] a.entity-link,
+body[inline-roll-styling="apsj"] a.content-link,
+body[inline-roll-styling="apsj"] a.inline-roll,
+body[inline-roll-styling="apsj"] a.picture-link,
+body[inline-roll-styling="apsj"] a.inline-request-roll,
+body[inline-roll-styling="apsj"] a.tile-trigger-link {
     padding: 3px 5px;
     color: rgb(var(--mej-light-0));
     font-family: var(--apsj-font-scalysans);
@@ -224,11 +245,12 @@
     text-shadow: 1px 1px 2px rgb(var(--mej-dark-0));
 }
 
-:root[mejtheme] body:not(.inline-roll-styling) a.entity-link i,
-:root[mejtheme] body:not(.inline-roll-styling) a.content-link i,
-:root[mejtheme] body:not(.inline-roll-styling) a.inline-roll i,
-:root[mejtheme] body:not(.inline-roll-styling) a.picture-link i,
-:root[mejtheme] body:not(.inline-roll-styling) a.inline-request-roll i {
+body[inline-roll-styling="apsj"] a.entity-link i,
+body[inline-roll-styling="apsj"] a.content-link i,
+body[inline-roll-styling="apsj"] a.inline-roll i,
+body[inline-roll-styling="apsj"] a.picture-link i,
+body[inline-roll-styling="apsj"] a.inline-request-roll i,
+body[inline-roll-styling="apsj"] a.tile-trigger-link i {
     color: rgb(var(--mej-light-0));
 }
 
@@ -240,7 +262,7 @@
     box-shadow: 0 3px 15px rgba(var(--mej-dark-0), 0.75);
 }
 
-.monks-enhanced-journal[sidebar-image='leather'] .sheet.journal-entry .sidebar-directory li.journalentry {
+.monks-enhanced-journal[sidebar-image='leather'] .sheet.journal-entry .directory li.journalentry {
     --mej-sidebar-document-color: rgb(var(--mej-light-0));
 }
 
@@ -276,10 +298,12 @@
     background: var(--apsj-primary);
 }
 
+:root[mejtheme] .journal-sheet .journal-entry-pages {
+    color: var(--mej-sheet-color);
+}
 /**
 * Background Overrides
 **/
-
 /*-----------------------------------Page Backgrounds-----------------------------------*/
 .monks-enhanced-journal[background-image='parchment'] {
     --mej-background: url('/modules/monks-enhanced-journal/assets/apsjournal/parchment.webp') repeat;
@@ -323,10 +347,34 @@
 
 .monks-enhanced-journal[background-image='solidBlack'] {
     --mej-background: url('/modules/monks-enhanced-journal/assets/apsjournal/solid-black.webp') repeat;
+    --mej-itemlist-item-name: rgb(var(--mej-light-1));
+    --mej-sheet-color: rgb(var(--mej-light-6));
+    --mej-sheet-header-detail-input-color: rgb(var(--mej-light-5));
+    --mej-sheet-header-label-color: rgb(var(--mej-light-3));
+    --mej-sheet-tab-color-active: rgb(var(--mej-light-6));
+    --mej-sheet-input-background: rgb(var(--mej-dark-2));
+    --mej-itemlist-control-color: rgb(var(--mej-light-6));
+    --mej-itemlist-colour: rgb(var(--mej-light-3));
+    --mej-itemlist-header-colour: rgb(var(--mej-dark-0));
+    --mej-itemlist-input-color: rgb(var(--mej-light-3));
+    --mej-header-nav-input-color: rgb(var(--mej-light-6));
+    --mej-itemlist-input-background: rgb(var(--mej-dark-2));
+    --mej-blank-color: rgb(var(--mej-light-2));
+    --mej-itemlist-control-color-hover: rgb(var(--mej-light-0));
+    --mej-sheet-header-search-border: rgb(var(--mej-light-6));
+    --mej-sheet-header-search-color: rgb(var(--mej-light-2));
+    --mej-sheet-header-search-background: rgb(var(--mej-dark-1));
+    --mej-sheet-header-search-background-hover: rgba(var(--mej-dark-2));
+    --mej-sheet-input-color: rgb(var(--mej-light-2));
+}
+
+.monks-enhanced-journal[background-image='solidBlack'] .editor-edit {
+    color: rgb(var(--mej-dark-2));
 }
 
 .monks-enhanced-journal[background-image='solidGrey'] {
     --mej-background: url('/modules/monks-enhanced-journal/assets/apsjournal/solid-grey.webp') repeat;
+    --mej-instruction: rgb(var(--mej-light-2));
 }
 
 .monks-enhanced-journal[background-image='solidWhite'] {
@@ -479,18 +527,18 @@
     background: linear-gradient(rgb(var(--mej-light-5)), rgb(var(--mej-light-2)), rgb(var(--mej-light-5)));
 }
 
-:root[mejtheme] .monks-enhanced-journal .sidebar-tab.directory .directory-item.journalentry .permissions {
+:root[mejtheme] .monks-enhanced-journal .directory .directory-item.journalentry .permissions {
     line-height: 20px;
 }
 
-:root[mejtheme] .monks-enhanced-journal .sidebar-directory .action-buttons button,
+:root[mejtheme] .monks-enhanced-journal .directory .action-buttons button,
 :root[mejtheme] .monks-enhanced-journal footer.navigation .nav-button.navigate {
     text-shadow: 1px 1px 1px rgb(var(--mej-light-4));
     box-shadow: 0 0 5px rgba(var(--mej-dark-0), 0.75);
 }
 
 :root[mejtheme] .monks-enhanced-journal .editor-edit:hover,
-:root[mejtheme] .monks-enhanced-journal .sidebar-directory .action-buttons button:hover,
+:root[mejtheme] .monks-enhanced-journal .directory .action-buttons button:hover,
 :root[mejtheme] .monks-enhanced-journal footer.navigation .nav-button.navigate:not(.disabled):hover {
     color: rgb(var(--mej-dark-0));
     background: var(--mej-cream);
@@ -505,13 +553,6 @@
 /**
 * Stylish MEJ Sheets
 **/
-
-:root[mejtheme] .monks-journal-sheet.sheet .items-list .items-header {
-    background: var(--apsj-primary) !important;
-    color: rgb(var(--mej-light-0));
-    box-shadow: 0 0 5px rgba(var(--mej-dark-0), 0.75);
-}
-
 :root[mejtheme] .monks-journal-sheet.sheet .sheet-navigation {
     text-shadow: 1px 1px 2px rgb(var(--mej-dark-4));
     opacity: 85%;
@@ -526,60 +567,13 @@
     font-family: var(--mej-font-family);
 }
 
-:root[mejtheme] .monks-journal-sheet .header-name input:hover {
-    background-color: rgba(var(--mej-light-0), 0.25);
-}
-
-:root[mejtheme] .monks-enhanced-journal .sidebar-directory.directory .directory-header .header-search input {
-    background-color: rgba(var(--mej-light-0), 0.25);
-}
-
-:root[mejtheme] .monks-enhanced-journal .sidebar-directory.directory .directory-header .header-search input:hover,
-:root[mejtheme] .monks-enhanced-journal .sidebar-directory.directory .directory-header .header-search input:active,
-:root[mejtheme] .monks-enhanced-journal .sidebar-directory.directory .directory-header .header-search input:focus {
-    background-color: rgba(var(--mej-light-0), 0.75);
-}
-
-:root[mejtheme] .monks-journal-sheet .journal-subsheet .encounter-buttons > div {
-    color: rgb(var(--mej-dark-0));
-    background: var(--apsj-cream) !important;
-}
-
-:root[mejtheme] .monks-journal-sheet .journal-subsheet .encounter-buttons > div:hover {
-    color: rgb(var(--mej-dark-2));
-    background: rgb(var(--mej-light-0)) !important;
-}
-
-:root[mejtheme] .monks-journal-sheet.sheet .journal-subsheet .items-list .item-controls.item-quantity input[type='text'],
-:root[mejtheme] .monks-journal-sheet.sheet .journal-subsheet .items-list .item-controls.item-quantity input[type='number'],
-:root[mejtheme] .monks-journal-sheet.sheet .journal-subsheet .items-list .item-controls.item-remaining input[type='number'],
-:root[mejtheme] .monks-journal-sheet.sheet .items-list .item-from input[type='text'] {
-    background: var(--apsj-cream);
-    border-color: rgb(var(--mej-dark-3)) !important;
-}
-
-:root[mejtheme] .monks-journal-sheet.sheet .items-list .item-from:hover,
-:root[mejtheme] .monks-journal-sheet.sheet .items-list .item-from:focus {
-    border-color: rgb(var(--mej-dark-3)) !important;
-}
-
 :root[mejtheme] .monks-journal-sheet.sheet .items-list .item-header .item-control:hover {
-	background: var(--mej-cream);
     box-shadow: 0 0 5px red !important;
 	text-shadow: none;
 }
 
-:root[mejtheme] .monks-journal-sheet.sheet .items-list .item-list .item-control:hover {
-    color: rgb(var(--mej-dark-0));
-}
-
 :root[mejtheme] .monks-journal-sheet.sheet .items-list .item-header .item-controls a {
-    color: rgb(var(--mej-dark-0));
     text-shadow: 1px 1px 2px rgb(var(--mej-light-4));
-}
-
-:root[mejtheme] .monks-journal-sheet.sheet .items-list .item-list .item-controls a {
-    color: rgb(var(--mej-dark-5));
 }
 
 :root[mejtheme] .monks-journal-sheet.sheet .tab.items .currency-group {
@@ -588,38 +582,13 @@
 	opacity: 85%;
 }
 
-:root[mejtheme] .monks-journal-sheet.sheet .tab.items .currency-group label {
-    color: rgb(var(--mej-light-0));
-    text-shadow: 1px 1px 2px rgb(var(--mej-dark-0));
-}
-
-:root[mejtheme] .monks-journal-sheet.sheet .items-list > .item-list {
-    color: rgb(var(--mej-dark-0));
-}
-
-:root[mejtheme] .loot-character > .character-name {
-    color: rgb(var(--mej-dark-0));
-}
-
 :root[mejtheme] .monks-journal-sheet .header-name .header-search {
-    color: rgb(var(--mej-dark-3));
     text-shadow: none;
 }
 
 :root[mejtheme] .monks-journal-sheet .header-name .header-search input {
-    background: var(--apsj-cream);
-    border: rgb(var(--mej-dark-0)) 1px solid;
     font-family: var(--apsj-font-signika);
-    color: rgb(var(--mej-dark-3));
     text-shadow: none;
-}
-
-:root[mejtheme] .monks-journal-sheet .header-name .header-search input:focus {
-    color: rgb(var(--mej-dark-0)) !important;
-}
-
-:root[mejtheme] .monks-journal-sheet.sheet .list button:hover {
-    background: rgb(var(--mej-light-2));
 }
 
 /**

@@ -437,7 +437,7 @@ export class QuestSheet extends EnhancedJournalSheet {
         await this.loadRewards(0);
     }*/
 
-    deleteItem(id, container) {
+    async deleteItem(id, container) {
         if (container == 'items') {
             let rewards = duplicate(this.object.flags["monks-enhanced-journal"].rewards);
             let reward = rewards.find(r => r.id == this.object.flags["monks-enhanced-journal"].reward);

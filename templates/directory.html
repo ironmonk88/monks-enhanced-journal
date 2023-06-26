@@ -1,11 +1,19 @@
 {{#*inline "folderPartial"}}
 <li class="directory-item folder flexcol {{#unless folder.expanded}}collapsed{{/unless}}"
-    data-folder-id="{{folder.id}}" data-folder-depth="{{node.depth}}">
+    data-folder-id="{{folder.id}}" data-uuid={{folder.uuid}} data-folder-depth="{{node.depth}}">
     <header class="folder-header flexrow{{#if folder.color}} customcolor{{/if}}" {{#if folder.color}} style="background-color: {{folder.color}}" {{/if}}>
         <h3 class="noborder"><i class="fas fa-folder-open fa-fw"></i>{{folder.name}}</h3>
-        {{#if user.isGM}}
-        <a class="create-button create-folder" data-parent-folder="{{folder.id}}"><i class="fas fa-folder fa-fw"></i><i class="fas fa-plus"></i></a>
-        <a class="create-button create-document" data-folder="{{folder.id}}"><i class="fas fa-book-open fa-fw"></i><i class="fas fa-plus"></i></a>
+        {{#if @root.canCreateFolder}}
+        <a class="create-button create-folder">
+            <i class="{{@root.folderIcon}}"></i>
+            <i class="fas fa-plus"></i>
+        </a>
+        {{/if}}
+        {{#if @root.canCreateEntry}}
+        <a class="create-button create-entry">
+            <i class="{{@root.sidebarIcon}}"></i>
+            <i class="fas fa-plus"></i>
+        </a>
         {{/if}}
     </header>
 
@@ -13,34 +21,35 @@
         {{~#each node.children}}
         {{> folderPartial node=this folder=this.folder user=../user}}
         {{/each}}
-        {{#each node.documents}}
-        {{> documentPartial}}
+        {{#each node.entries}}
+        {{> entryPartial}}
         {{/each~}}
     </ol>
 </li>
 {{/inline}}
 
-{{#*inline "documentPartial"}}
-<li class="directory-item document journalentry flexrow" data-document-id="{{this.id}}">
-    <h4 class="document-name"><a>{{this.name}}</a></h4>
+{{#*inline "entryPartial"}}
+<li class="directory-item entry document journalentry flexrow" data-entry-id="{{this.id}}">
+    <h4 class="entry-name"><a>{{this.name}}</a></h4>
 </li>
 {{/inline}}
 
-<section class="sidebar-tab sidebar-directory directory tab flexcol journal-directory" id="journal-directory" data-tab="journal">
+<section class="{{cssClass}} directory tab flexcol journal-directory" id="journal-directory" data-tab="journal">
     <!-- Directory Header -->
     <header class="directory-header">
         <div class="header-actions action-buttons flexrow">
-            {{#if canCreate}}
-            <button class="create-document"><i class="fas fa-book-open"></i> {{localize 'SIDEBAR.Create' type=label}}</button>
+            {{#if canCreateEntry}}
+            <button class="create-document create-entry"><i class="{{sidebarIcon}}"></i> {{localize 'SIDEBAR.Create' type=label}}</button>
             {{/if}}
-            {{#if user.isGM }}
-            <button class="create-folder"><i class="fas fa-folder"></i> {{localize 'FOLDER.Create'}}</button>
+            {{#if canCreateFolder }}
+            <button class="create-folder"><i class="{{folderIcon}}"></i> {{localize 'FOLDER.Create'}}</button>
             {{/if}}
         </div>
         <div class="header-search flexrow">
-            <i class="fas fa-search"></i>
-            <input type="text" name="search" value="" placeholder="{{localize 'SIDEBAR.Search' types=labelPlural}}" autocomplete="off" />
-            <a class="header-control collapse-all" title="{{localize 'FOLDER.Collapse'}}"><i class="fas fa-sort-amount-up fa-fw"></i></a>
+            <a class="header-control toggle-search-mode" data-tooltip="{{localize searchTooltip}}"><i class="fas {{searchIcon}}"></i></a>
+            <input type="search" name="search" value="" placeholder="{{localize 'SIDEBAR.Search' types=labelPlural}}" autocomplete="off" />
+            <a class="header-control toggle-sort" data-tooltip="{{localize sortTooltip}}"><i class="fa-solid {{sortIcon}}"></i></a>
+            <a class="header-control collapse-all" data-tooltip="{{localize 'FOLDER.Collapse'}}"><i class="fa-duotone fa-folder-tree"></i></a>
         </div>
     </header>
 
@@ -49,8 +58,16 @@
         {{~#each tree.children}}
         {{> folderPartial node=this folder=this.folder user=../user}}
         {{/each}}
-        {{#each tree.documents}}
-        {{> documentPartial}}
+        {{#each tree.entries}}
+        {{> entryPartial}}
         {{/each~}}
     </ol>
+
+    <!-- Directory Footer -->
+    <footer class="directory-footer action-buttons {{#if unavailable}}warning{{/if}}">
+        {{~#if unavailable}}
+        <i class="fa-solid fa-triangle-exclamation"></i>
+        <a class="show-issues">{{localize "SUPPORT.UnavailableDocuments" count=unavailable document=label}}</a>
+        {{/if~}}
+    </footer>
 </section>

@@ -73,15 +73,21 @@ body:not(.system-pf2e) .monks-journal-sheet .sheet-container .tag {
     border-bottom: 2px groove var(--mej-sheet-detailed-header-border);
     margin: 0px;
     padding-left: 0px;
+    position: relative;
 }
 
 .monks-journal-sheet .journal-sheet-header.header-name input[type="text"] {
-    background: none;
+    background: var(--mej-sheet-header-name-background);
     border: 1px solid transparent;
-    color: var(--mej-sheet-header-input-color);
+    color: var(--mej-sheet-header-name-color);
     margin-right: 2px;
     font-size: 28px;
     height: calc(100% - 2px);
+}
+
+.monks-journal-sheet .journal-sheet-header.header-name input[type="text"]:hover,
+.monks-journal-sheet .journal-sheet-header.header-name input[type="text"]:focus {
+    background: var(--mej-sheet-header-name-background-hover);
 }
 
 .monks-journal-sheet .sheet-container .journal-sheet-header .sheet-icon {
@@ -107,6 +113,7 @@ body:not(.system-pf2e) .monks-journal-sheet .sheet-container .tag {
 .monks-journal-sheet .journal-sheet-header.header-name .header-search {
     font-size: 14px;
     flex: 0 0 255px;
+    color: var(--mej-sheet-color);
 }
 
 .monks-journal-sheet .journal-sheet-header.header-name .header-search i {
@@ -120,12 +127,23 @@ body:not(.system-pf2e) .monks-journal-sheet .sheet-container .tag {
     height: 25px;
     margin-top: 6px;
     margin-right: 4px;
-    border: var(--mej-sheet-header-input-border);
-    background: rgba(0, 0, 0, 0.05);
+    border: 1px solid var(--mej-sheet-header-search-border);
+    background: var(--mej-sheet-header-search-background);
+    color: var(--mej-sheet-header-search-color);
+}
+
+.monks-journal-sheet .journal-sheet-header.header-name .header-search input[type="text"]::placeholder {
+    color: var(--mej-sheet-header-search-placeholder);
+}
+
+.monks-journal-sheet .journal-sheet-header.header-name .header-search input[type="text"]:hover,
+.monks-journal-sheet .journal-sheet-header.header-name .header-search input[type="text"]:focus {
+    background: var(--mej-sheet-header-search-background-hover);
 }
 
 .monks-journal-sheet.sheet .journal-sheet-header .sheet-image {
     flex: 0 0 160px;
+    font-size: 13px;
     max-width: 160px;
     height: 160px;
     position: relative;
@@ -276,6 +294,10 @@ body:not(.system-pf2e) .monks-journal-sheet .sheet-container .tag {
     color: var(--mej-sheet-page-control-color);
 }
 
+.monks-journal-sheet .page-controls button:hover {
+    background: var(--mej-sheet-page-control-background-hover);
+}
+
 .monks-journal-sheet .page-controls button.header-control {
     flex: 0 0 30px;
 }
@@ -350,12 +372,16 @@ body:not(.system-pf2e) .monks-journal-sheet .sheet-container .tag {
 }
 
 .monks-journal-sheet.sheet .journal-sheet-header .header-details .header-name input[type="text"] {
-    background: none;
+    background: var(--mej-sheet-header-name-background);
     border: 1px solid transparent;
-    color: var(--mej-sheet-header-input-color);
+    color: var(--mej-sheet-header-name-color);
     margin-right: 2px;
 }
 
+.monks-journal-sheet.sheet .journal-sheet-header .header-details .header-name input[type="text"]:hover,
+.monks-journal-sheet.sheet .journal-sheet-header .header-details .header-name input[type="text"]:focus {
+    background: var(--mej-sheet-header-name-background-hover);
+}
 /* Details Section */
 .monks-journal-sheet.sheet .sheet-body .details-section {
     font-family: var(--mej-font-family);
@@ -383,11 +409,13 @@ body:not(.system-pf2e) .monks-journal-sheet .sheet-container .tag {
 .monks-journal-sheet.sheet .sheet-body .details-section label {
     flex: 1;
     max-width: 175px;
+    color: var(--mej-sheet-color);
 }
 .monks-journal-sheet.sheet .sheet-body .details-section input,
 .monks-journal-sheet.sheet .sheet-body .details-section textarea {
     border: var(--mej-sheet-input-border);
     background: var(--mej-sheet-input-background);
+    color: var(--mej-sheet-input-color);
 }
 
 .monks-journal-sheet.sheet .sheet-body .details-section select {
@@ -463,6 +491,7 @@ body:not(.system-pf2e) .monks-journal-sheet .sheet-container .tag {
     height: calc(100% - 6px);
     border: var(--mej-sheet-input-border);
     background: var(--mej-sheet-input-background);
+    color: var(--mej-sheet-input-color);
     margin-left: 2px;
 }
 
@@ -500,6 +529,10 @@ body:not(.system-pf2e) .monks-journal-sheet .sheet-container .tag {
 
 .monks-journal-sheet.sheet .editor .tox-tinymce .tox-menubar button {
     height: 15px;
+}
+
+.monks-journal-sheet.sheet .editor .tox-tinymce .tox-promotion-link {
+    display: none;
 }
 
 .monks-journal-sheet .journal-subsheet[editable='false'] .editor-edit {
@@ -615,6 +648,7 @@ body:not(.system-pf2e) .monks-journal-sheet .sheet-container .tag {
     align-items: center;
     background: var(--mej-itemlist-background);
     border: 2px groove var(--mej-itemlist-border);
+    color: var(--mej-sidebar-input-color);
     font-weight: bold;
 }
 
@@ -629,6 +663,7 @@ body:not(.system-pf2e) .monks-journal-sheet .sheet-container .tag {
     text-align: left;
     font-size: var(--font-size-16);
     margin-bottom: 1px;
+    color: var(--mej-itemlist-header-color);
 }
 
 .monks-journal-sheet .items-list .item-header .collapse-text {
@@ -683,6 +718,11 @@ body:not(.system-pf2e) .monks-journal-sheet .sheet-container .tag {
     text-align: center;
     padding: 0px;
     margin: 0px;
+    color: var(--mej-itemlist-control-color);
+}
+
+.monks-journal-sheet .items-list .item-list .item-controls a:hover {
+    color: var(--mej-itemlist-control-color-hover);
 }
 
 .monks-journal-sheet.sheet .items-list .item-list .item-controls a.active,
@@ -703,6 +743,7 @@ body:not(.system-pf2e) .monks-journal-sheet .sheet-container .tag {
     border-radius: 2px;
     border: 1px solid var(--mej-itemlist-control-border);
     background: var(--mej-itemlist-control-background);
+    color: var(--mej-itemlist-header-control-color);
     line-height: 22px;
 }
 
@@ -804,7 +845,9 @@ body:not(.system-pf2e) .monks-journal-sheet .sheet-container .tag {
 }
 
 .monks-journal-sheet .items-list .item input {
-    border-color: transparent;
+    border-color: var(--mej-itemlist-input-border);
+    color: var(--mej-itemlist-input-color);
+    background-color: var(--mej-itemlist-input-background);
 }
 
 .monks-journal-sheet .items-list .item input:hover  {
@@ -1095,6 +1138,10 @@ body:not(.system-pf2e) .monks-journal-sheet .sheet-container .tag {
     text-align: center;
 }
 
+.monks-journal-sheet .list-list .list-item h3.progress-title:empty {
+    display: none;
+}
+
 .monks-journal-sheet .list-list .list-item.checked h3 {
     text-decoration: line-through;
 }
@@ -1130,6 +1177,15 @@ body:not(.system-pf2e) .monks-journal-sheet .sheet-container .tag {
     max-width: 200px;
 }
 
+.monks-journal-sheet .list .list-list button {
+    background: var(--mej-sheet-button-background);
+    color: var(--mej-sheet-button-color);
+}
+
+.monks-journal-sheet .list .list-list button:hover {
+    background: var(--mej-sheet-button-background-hover);
+}
+
 .monks-journal-sheet .list-list .progress {
     width: 100%;
     height: 24px;
@@ -1163,8 +1219,6 @@ body:not(.system-pf2e) .monks-journal-sheet .sheet-container .tag {
     padding: 0px 5px;
     padding-left: 5px;
     padding-right: 2px;
-    background: var(--mej-sheet-button-background);
-    color: var(--mej-sheet-button-color);
 }
 
 .monks-journal-sheet .list .list-list .progress-text {
@@ -1197,8 +1251,6 @@ body:not(.system-pf2e) .monks-journal-sheet .sheet-container .tag {
 .monks-journal-sheet .list .list-list .vote-button {
     height: 34px;
     flex: 0 0 100px;
-    background: var(--mej-sheet-button-background);
-    color: var(--mej-sheet-button-color);
 }
 
 .monks-journal-sheet .list .list-list .players-voted {
@@ -1267,10 +1319,11 @@ body:not(.system-pf2e) .monks-journal-sheet .sheet-container .tag {
     border-bottom: 1px solid var(--color-underline-header);
 }
 
+/*
 .monks-journal-sheet .quest-container .tab.rewards .items-list li.instruction {
     height: calc(100% - 250px);
 }
-
+    */
 #objectives {
     min-height: 431px;
     min-width: 350px;
