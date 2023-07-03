@@ -1,3 +1,13 @@
+# Version 11.02
+
+Fixing issue when tabs get saved with entity data and they shouldn't be.
+
+Fixed issue with opening journal sheets when the player doesn't have permissions.
+
+Fixed issue with player dragging items to be sold in a shop.
+
+Fixed issues with the enhanced journal directory functionality.
+
 # Version 11.01
 
 Added support for v11

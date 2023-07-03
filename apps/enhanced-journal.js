@@ -14,6 +14,7 @@ export class EnhancedJournal extends Application {
         super(options);
 
         this.tabs = duplicate(game.user.getFlag('monks-enhanced-journal', 'tabs') || [{ "id": makeid(), "text": i18n("MonksEnhancedJournal.NewTab"), "active": true, "history": [] }]);
+        this.tabs = this.tabs.map(t => { delete t.entity; return t; })
         this.tabs.active = (findone = true) => {
             let tab = this.tabs.find(t => t.active);
             if (findone) {
@@ -144,7 +145,7 @@ export class EnhancedJournal extends Application {
                 MonksEnhancedJournal.updateDirectory(html, false);
             })
 
-            this.renderSubSheet(options); /*.then(() => {
+            this.renderSubSheet(force, options); /*.then(() => {
                 if (options?.pageId && this.subsheet.goToPage) {
                     this.subsheet.goToPage(options.pageId, options?.anchor);
                 }
@@ -204,7 +205,7 @@ export class EnhancedJournal extends Application {
         return html;
     }
 
-    async renderSubSheet(options = {}) {
+    async renderSubSheet(force, options = {}) {
         try {
             const modes = JournalSheet.VIEW_MODES;
 
@@ -215,7 +216,7 @@ export class EnhancedJournal extends Application {
                 else
                     currentTab = this.addTab();
             }
-            if (!currentTab.entity && getProperty(currentTab, "flags.monks-enhanced-journal.type") != "blank")
+            if (!currentTab.entity && !["blank", "folder"].includes(getProperty(currentTab, "flags.monks-enhanced-journal.type")))
                 currentTab.entity = await this.findEntity(currentTab.entityId);
             if (this.object?.id != currentTab.entity?.id || currentTab.entity instanceof Promise || currentTab.entity?.id == undefined)
                 this.object = currentTab.entity;
@@ -243,7 +244,9 @@ export class EnhancedJournal extends Application {
 
             MonksEnhancedJournal.fixType(this.object);
 
-            if (options.force != true) {
+            force = force || this.tempOwnership;
+
+            if (force != true) {
                 let testing = this.object;
                 if (testing instanceof JournalEntryPage && !!getProperty(testing, "flags.monks-enhanced-journal.type"))
                     testing = testing.parent;
@@ -258,6 +261,13 @@ export class EnhancedJournal extends Application {
                         },
                         content: `${i18n("MonksEnhancedJournal.DoNotHavePermission")}: ${this.object.name}`
                     }
+                }
+            } else if (!["blank", "folder"].includes(this.object.type) && this.object.testUserPermission) {
+                if (!this.object.testUserPermission(game.user, "OBSERVER") || (this.object.parent && !this.object.parent.testUserPermission(game.user, "OBSERVER"))) {
+                    this.object.ownership[game.user.id] = CONST.DOCUMENT_OWNERSHIP_LEVELS.OBSERVER;
+                    if (this.object.parent)
+                        this.object.parent.ownership[game.user.id] = CONST.DOCUMENT_OWNERSHIP_LEVELS.OBSERVER;
+                    this.tempOwnership = true;
                 }
             }
 
@@ -426,7 +436,7 @@ export class EnhancedJournal extends Application {
             $('button[type="submit"]', $(this.subdocument)).attr('type', 'button').on("click", this.subsheet._onSubmit.bind(this.subsheet));
             $('form.journal-header', $(this.subdocument)).on("submit", () => { return false; });
 
-            if (this.subsheet.updateStyle && this.object.type != 'blank')
+            if (this.subsheet.updateStyle && !["blank", "folder"].includes(this.object.type))
                 this.subsheet.updateStyle(null, this.subdocument);
 
             if (game.modules.get("polyglot")?.active && this.subsheet.renderPolyglot)
@@ -458,7 +468,7 @@ export class EnhancedJournal extends Application {
 
             this.object._sheet = null;  // Adding this to prevent Quick Encounters from automatically opening
 
-            if (this.object.type != 'blank') {
+            if (!["blank", "folder"].includes(this.object.type)) {
                 Hooks.callAll('renderJournalSheet', this.subsheet, contentform, templateData); //this.object);
                 if (this.object._source.type == "text")
                     Hooks.callAll('renderJournalTextPageSheet', this.subsheet, contentform, templateData);
@@ -499,7 +509,7 @@ export class EnhancedJournal extends Application {
                     });
                 }
                 // if the new entry has a sound file, that autoplays, then start the sound file playing
-                if (this.object.type != "blank") {
+                if (!["blank", "folder"].includes(this.object.type)) {
                     let sound = this.object.getFlag("monks-enhanced-journal", "sound");
                     if (sound?.audiofile && sound?.autoplay && this.subsheet?.canPlaySound) {
                         this.subsheet._playSound(sound).then((soundfile) => {
@@ -1202,7 +1212,7 @@ export class EnhancedJournal extends Application {
         if (this.subsheet)
             return this.subsheet._canDragDrop(selector);
         else
-            return super._canDragDrop(selector);
+            return true;
     }
 
     _onDragStart(event) {
@@ -1697,8 +1707,8 @@ export class EnhancedJournal extends Application {
 
         let prev = (idx > 0 ? documents[idx - 1] : null);
         let next = (idx < documents.length - 1 ? documents[idx + 1] : null);
-        $('.navigate-prev', html).toggle(this.object.type !== "blank").toggleClass('disabled', !prev).attr("title", prev?.name).on("click", this.openPage.bind(this, prev));
-        $('.navigate-next', html).toggle(this.object.type !== "blank").toggleClass('disabled', !next).attr("title", next?.name).on("click", this.openPage.bind(this, next));
+        $('.navigate-prev', html).toggle(!["blank", "folder"].includes(this.object.type)).toggleClass('disabled', !prev).attr("title", prev?.name).on("click", this.openPage.bind(this, prev));
+        $('.navigate-next', html).toggle(!["blank", "folder"].includes(this.object.type)).toggleClass('disabled', !next).attr("title", next?.name).on("click", this.openPage.bind(this, next));
 
         if (this.object instanceof JournalEntry) {
             $('.page-prev', html).toggleClass("disabled", !this.subsheet || this.subsheet?.pageIndex < 1).show().on("click", this.previousPage.bind(this));

@@ -355,7 +355,7 @@ export class MonksEnhancedJournal {
 
             MonksEnhancedJournal.fixType(entry);
 
-            let hasBlank = MonksEnhancedJournal?.journal?.object?.type == "blank";
+            let hasBlank = ["blank", "folder"].includes(MonksEnhancedJournal?.journal?.object?.type);
             if (event.altKey || this._groupSelect || game.MonksActiveTiles?.waitingInput || !MonksEnhancedJournal.openJournalEntry(entry, { newtab: setting('open-new-tab') && !hasBlank })) {
                 if (entry.pages.size == 1) {
                     let page = entry.pages.contents[0];
@@ -3713,8 +3713,8 @@ export class MonksEnhancedJournal {
                 object.unsetFlag("monks-enhanced-journal", "type");
 
             return type;
-        } else if (getProperty(object, "flags.monks-enhanced-journal.type") == 'blank') {
-            object.type = 'blank';
+        } else if (["blank", "folder"].includes(getProperty(object, "flags.monks-enhanced-journal.type"))) {
+            object.type = getProperty(object, "flags.monks-enhanced-journal.type");
         }
     }
 
@@ -3953,7 +3953,7 @@ Hooks.on("updateJournalEntryPage", (document, data, options, userId) => {
                 renderUpdate ||
                 getProperty(data, "flags.core.sheetClass") != undefined))
         {
-            MonksEnhancedJournal.journal.render(true, { reload: true, focus: options?.focus !== false });
+            MonksEnhancedJournal.journal.render(MonksEnhancedJournal.journal.tempOwnership, { reload: true, focus: options?.focus !== false });
         }
     } else {
         if (data.content != undefined ||

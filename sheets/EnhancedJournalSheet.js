@@ -193,6 +193,17 @@ export class EnhancedJournalSheet extends JournalPageSheet {
         return null;
     }
 
+    render(force, options) {
+        force = force || this.tempOwnership;
+        if (force && (!this.object.testUserPermission(game.user, "OBSERVER") || (this.object.parent && !this.object.parent.testUserPermission(game.user, "OBSERVER")))) {
+            this.object.ownership[game.user.id] = CONST.DOCUMENT_OWNERSHIP_LEVELS.OBSERVER;
+            if (this.object.parent)
+                this.object.parent.ownership[game.user.id] = CONST.DOCUMENT_OWNERSHIP_LEVELS.OBSERVER;
+            this.tempOwnership = true;
+        }
+        super.render(force, options);
+    }
+
     async _render(force, options = {}) {
         //Foundry is going to try and reposition the window, but since it's a subsheet, we don't want that to happen
         //So fake it by telling it that the window is minimized
@@ -2113,6 +2124,21 @@ export class EnhancedJournalSheet extends JournalPageSheet {
                 this._stopSound(this._backgroundsound);
                 delete this._backgroundsound;
                 Hooks.off(game.modules.get("monks-sound-enhancements")?.active ? "globalSoundEffectVolumeChanged" : "globalInterfaceVolumeChanged", this._soundHook);
+            }
+
+            if (this.tempOwnership || (this.enhancedjournal && this.enhancedjournal.tempOwnership)) {
+                if (this.object._source.ownership[game.user.id] == undefined)
+                    delete this.object.ownership[game.user.id];
+                else
+                    this.object.ownership[game.user.id] = this.object._source.ownership[game.user.id];
+                if (this.object.parent) {
+                    if (this.object.parent._source.ownership[game.user.id] == undefined)
+                        delete this.object.parent.ownership[game.user.id];
+                    else
+                        this.object.parent.ownership[game.user.id] = this.object.parent._source.ownership[game.user.id];
+                }
+                delete this.tempOwnership;
+                delete this.enhancedjournal?.tempOwnership;
             }
 
             return super.close(options);

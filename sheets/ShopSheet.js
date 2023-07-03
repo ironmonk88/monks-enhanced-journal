@@ -232,7 +232,7 @@ export class ShopSheet extends EnhancedJournalSheet {
     }
 
     _canDragDrop(selector) {
-        return (game.user.isGM || this.object.isOwner);
+        return (game.user.isGM || this.object.isOwner || selector == ".shop-container");
     }
 
     async _onDragStart(event) {

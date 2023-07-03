@@ -7,8 +7,6 @@ export const registerSettings = function () {
 	// Register any custom module settings here
 	let modulename = "monks-enhanced-journal";
 
-	const debouncedReload = foundry.utils.debounce(function () { window.location.reload(); }, 500);
-
 	let rollingmodules = {
 		'monks-tokenbar': "Monk's TokenBar"
 	};
@@ -203,7 +201,7 @@ export const registerSettings = function () {
 		scope: "world",
 		default: false,
 		type: Boolean,
-		onChange: debouncedReload
+		requiresReload: true
 	});
 
 	game.settings.register(modulename, "use-runes", {
