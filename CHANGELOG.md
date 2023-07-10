@@ -1,3 +1,23 @@
+# Version 11.03
+
+Added Saving Thorws to the DC Config for Encounters
+
+Fixed warning about the private property of compendiums being discontinued.
+
+Fixed issue when trying to find permissions for a document that doesn't support that functionality.
+
+Added the option for GMs to drag and drop and actor onto the transfer currency dialog to change actors.
+
+Added a right click entry for GMs to open the transfer currency for a specific actor.
+
+Added a check to the currency transfer to make sure that the Loot Sheet has enough currency to cover the transfer.
+
+Fixed issues with Active Tiles action for creating an Encounter.
+
+Fixed issue where players couldn't close a Journal Entry.
+
+Added the option to use a playlist as the background sound for a slideshow.  And the option to pause any currently playing sounds while the slideshow is playing.
+
 # Version 11.02
 
 Fixing issue when tabs get saved with entity data and they shouldn't be.

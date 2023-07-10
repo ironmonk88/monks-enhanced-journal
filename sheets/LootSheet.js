@@ -119,7 +119,7 @@ export class LootSheet extends EnhancedJournalSheet {
 
         $('.clear-items', html).click(this.clearAllItems.bind(this));
         $('.split-money', html).click(this.splitMoney.bind(this));
-        $('.transfer-currency', html).click(this.transferCurrency.bind(this));
+        $('.transfer-currency', html).click(this.transferCurrency.bind(this, null));
         $('.add-players', html).click(this.addPlayers.bind(this));
         $('.roll-table', html).click(this.rollTable.bind(this, "items", true));
 
@@ -159,8 +159,8 @@ export class LootSheet extends EnhancedJournalSheet {
         new DistributeCurrency(actors, currency, this).render(true, { focus: true });
     }
 
-    transferCurrency() {
-        new TransferCurrency(this.object, this).render(true, { focus: true });
+    transferCurrency(actor, event) {
+        new TransferCurrency(this.object, actor, this).render(true, { focus: true });
     }
 
     async doSplitMoney(characters, remainder){
@@ -661,6 +661,16 @@ export class LootSheet extends EnhancedJournalSheet {
 
     _getActorContextOptions() {
         return [
+            {
+                name: "Transfer Funds",
+                icon: '<i class="fas fa-user"></i>',
+                condition: () => game.user.isGM,
+                callback: li => {
+                    const id = li.attr('id');
+                    const actor = game.actors.get(id);
+                    this.transferCurrency(actor);
+                }
+            },
             {
                 name: i18n("MonksEnhancedJournal.RemoveActor"),
                 icon: '<i class="fas fa-trash"></i>',

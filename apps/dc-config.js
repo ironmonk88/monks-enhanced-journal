@@ -24,9 +24,12 @@ export class DCConfig extends FormApplication {
         else if (game.system.id == "shadowrun5e")
             config = CONFIG.SR5;
 
+        const { lore, ...skills } = config.skillList || {};
+
         let attributeOptions = [
             { id: "ability", text: "MonksEnhancedJournal.Ability", groups: config.abilities || config.scores || config.atributos },
-            { id: "skill", text: "MonksEnhancedJournal.Skill", groups: config.skills || config.pericias }
+            { id: "save", text: "MonksTokenBar.SavingThrow", groups: config.savingThrows || config.saves || config.saves_long || config.resistencias || config.abilities },
+            { id: "skill", text: "MonksEnhancedJournal.Skill", groups: config.skills || config.pericias || skills }
         ];
         if (game.system.id == "pf2e")
             attributeOptions.push({ id: "attribute", text: i18n("MonksTokenBar.Attribute"), groups: { perception: CONFIG.PF2E.attributes.perception } });

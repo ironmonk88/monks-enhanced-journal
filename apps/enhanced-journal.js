@@ -251,7 +251,7 @@ export class EnhancedJournal extends Application {
                 if (testing instanceof JournalEntryPage && !!getProperty(testing, "flags.monks-enhanced-journal.type"))
                     testing = testing.parent;
 
-                if (!game.user.isGM && testing && ((!testing.compendium && testing.testUserPermission && !testing.testUserPermission(game.user, "OBSERVER")) || (testing.compendium && testing.compendium.private))) {
+                if (!game.user.isGM && testing && ((!testing.compendium && testing.testUserPermission && !testing.testUserPermission(game.user, "OBSERVER")) || (testing.compendium && !testing.compendium.visible))) {
                     this.object = {
                         name: this.object.name,
                         type: 'blank',
@@ -1691,7 +1691,7 @@ export class EnhancedJournal extends Application {
         
         let documents = content
             .map(c => {
-                if (!c.testUserPermission(game.user, "OBSERVER"))
+                if (c.testUserPermission && !c.testUserPermission(game.user, "OBSERVER"))
                     return null;
                 return {
                     id: c.id,

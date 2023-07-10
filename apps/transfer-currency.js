@@ -2,11 +2,12 @@ import { MonksEnhancedJournal, log, setting, i18n, makeid, quantityname } from '
 import { getValue, setValue } from "../helpers.js";
 
 export class TransferCurrency extends FormApplication {
-    constructor(object, loot, options = {}) {
+    constructor(object, actor, loot, options = {}) {
         super(object, options);
 
         this.loot = loot;
         this.currency = {};
+        this.actor = actor || game.user.character;
     }
 
     /** @override */
@@ -16,6 +17,9 @@ export class TransferCurrency extends FormApplication {
             classes: ["form", "transfer-currency", "monks-journal-sheet", "dialog"],
             title: i18n("MonksEnhancedJournal.TransferCurrency"),
             template: "modules/monks-enhanced-journal/templates/transfer-currency.html",
+            dragDrop: [
+                { dropSelector: ".transfer-container" }
+            ],
             width: 600,
             height: 'auto'
         });
@@ -28,14 +32,37 @@ export class TransferCurrency extends FormApplication {
 
         data.coins = this.currency;
 
-        let actor = game.user.character;
         data.actor = {
-            id: actor?.id,
-            name: actor?.name || "No Actor",
-            img: actor?.img || "icons/svg/mystery-man.svg"
+            id: this.actor?.id,
+            name: this.actor?.name || "No Actor",
+            img: this.actor?.img || "icons/svg/mystery-man.svg"
         };
 
         return data;
+    }
+
+    _canDragStart(selector) {
+        return game.user.isGM;
+    }
+
+    async _onDrop(event) {
+        let data;
+        try {
+            data = JSON.parse(event.dataTransfer.getData('text/plain'));
+        }
+        catch (err) {
+            return false;
+        }
+
+        if (data.type == "Actor") {
+            let actor = await fromUuid(data.uuid);
+
+            if (!actor || actor.compendium)
+                return;
+
+            this.actor = actor;
+            this.render();
+        }
     }
 
     /** @override */
@@ -43,12 +70,11 @@ export class TransferCurrency extends FormApplication {
         event.preventDefault();
 
         let remainder = this.object.getFlag('monks-enhanced-journal', 'currency');
-        let actor = game.user.character;
 
         for (let [k, v] of Object.entries(this.currency)) {
             if (v < 0) {
                 // make sure the character has the currency
-                let curr = this.loot.getCurrency(actor, k);
+                let curr = this.loot.getCurrency(this.actor, k);
                 if (curr < Math.abs(v)) {
                     return ui.notifications.warn("Actor does not have enough currency: " + k);
                 }
@@ -64,11 +90,10 @@ export class TransferCurrency extends FormApplication {
 
     async _updateObject(event, formData) {
         let remainder = this.object.getFlag('monks-enhanced-journal', 'currency') || {};
-        let actor = game.user.character;
 
         for (let [k, v] of Object.entries(this.currency)) {
             if (v != 0) {
-                await this.loot.addCurrency(actor, k, v);
+                await this.loot.addCurrency(this.actor, k, v);
                 remainder[k] = (remainder[k] ?? 0) - v;
             }
         }
@@ -89,7 +114,11 @@ export class TransferCurrency extends FormApplication {
         $('.item-delete', html).on("click", this.clearCurrency.bind(this));
         $('.cancel-offer', html).on("click", this.close.bind(this));
         $('.currency-field', html).on("blur", (event) => {
-            this.currency[$(event.currentTarget).attr("name")] = parseInt($(event.currentTarget).val() || 0);
+            let currName = $(event.currentTarget).attr("name");
+            let lootCurrency = this.loot.object.getFlag("monks-enhanced-journal", "currency") || {};
+            let maxCurr = lootCurrency[currName] || 0;
+            this.currency[currName] = Math.min(parseInt($(event.currentTarget).val() || 0), maxCurr);
+            $(event.currentTarget).val(this.currency[currName]);
         });
     }
 
@@ -108,9 +137,8 @@ export class TransferCurrency extends FormApplication {
 
     async openActor() {
         try {
-            let actor = game.user.character;
-            if (actor) {
-                actor.sheet.render(true);
+            if (this.actor) {
+                this.actor.sheet.render(true);
             }
         } catch { }
     }

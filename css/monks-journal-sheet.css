@@ -1419,7 +1419,7 @@ body:not(.system-pf2e) .monks-journal-sheet .sheet-container .tag {
 }
 
 .monks-journal-sheet.sheet .loot-container .loot-characters .loot-character-list .loot-character #context-menu {
-    top: 50%;
+    top: 20%;
 }
 
 .monks-journal-sheet.sheet .loot-items .request-players {

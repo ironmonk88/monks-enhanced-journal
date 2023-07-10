@@ -4,7 +4,7 @@ import { EditSound } from "../apps/editsound.js";
 import { MakeOffering } from "../apps/make-offering.js";
 import { getValue, setValue, setPrice, MEJHelpers } from "../helpers.js";
 
-class EnhancedJournalContextMenu extends ContextMenu {
+export class EnhancedJournalContextMenu extends ContextMenu {
     constructor(...args) {
         super(...args);
     }
@@ -96,7 +96,7 @@ export class EnhancedJournalSheet extends JournalPageSheet {
     }
 
     _canUserView(user) {
-        if (this.object.compendium) return user.isGM || !this.object.compendium.private;
+        if (this.object.compendium) return user.isGM || this.object.compendium.visible;
         return this.object.parent.testUserPermission(user, this.options.viewPermission);
     }
 
@@ -1088,7 +1088,7 @@ export class EnhancedJournalSheet extends JournalPageSheet {
                 userdata: formData.flags["monks-enhanced-journal"][game.user.id]
             });
             return true;//new Promise(() => { });
-        } else {
+        } else if (this.isEditable) {
             formData.type = "text";
             return this.object.update(formData);
         }
@@ -2115,7 +2115,7 @@ export class EnhancedJournalSheet extends JournalPageSheet {
                     if (el.length === 1) pos[sel] = el[0].scrollTop;
                     return pos;
                 }, {});
-                if (this.isEditable)
+                if (this.isEditable && this.object.isOwner)
                     this.object.setFlag('monks-enhanced-journal', 'scrollPos', JSON.stringify(scrollPos));
             }
 

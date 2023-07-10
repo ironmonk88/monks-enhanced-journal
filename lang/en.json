@@ -420,6 +420,8 @@
   "MonksEnhancedJournal.CollapseDirectory": "Collapse Directory",
   "MonksEnhancedJournal.AutoOpen": "Open based on world clock",
   "MonksEnhancedJournal.ChangeSheetType": "Change Sheet Type",
+  "MonksEnhancedJournal.Playlist": "Background Playlist",
+  "MonksEnhancedJournal.PausePlaylists": "Pause currently playing playlist when slideshow starts",
 
   "MonksEnhancedJournal.msg.NoPlayersSelected": "No players selected to send this entry to",
   "MonksEnhancedJournal.msg.CannotAddItemType": "Cannot add item of this type",

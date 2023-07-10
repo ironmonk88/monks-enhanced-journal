@@ -53,6 +53,12 @@ export class SlideshowSheet extends EnhancedJournalSheet {
 
         data.effectOptions = MonksEnhancedJournal.effectTypes;
 
+        const playlists = game.playlists.map(doc => {
+            return { id: doc.id, name: doc.name };
+        });
+        playlists.sort((a, b) => a.name.localeCompare(b.name));
+        data.playlists = playlists;
+
         let idx = 0;
         if (flags.slides) {
             let changed = false;
@@ -368,7 +374,7 @@ export class SlideshowSheet extends EnhancedJournalSheet {
 
         if (flags.state == 'playing')
             return;
-
+        let currentlyPlaying;
         if (flags.state == 'stopped') {
             if (this.object.isOwner)
                 await this.object.setFlag("monks-enhanced-journal", "slideAt", 0);
@@ -389,15 +395,28 @@ export class SlideshowSheet extends EnhancedJournalSheet {
                     return sound;
                 });
             }
+            if (flags.pauseplaylist) {
+                currentlyPlaying = ui.playlists._playingSounds.map(ps => ps.playing ? ps.uuid : null).filter(p => !!p);
+                for (let playing of currentlyPlaying) {
+                    let sound = await fromUuid(playing);
+                    sound.update({ playing: false, pausedTime: sound.sound.currentTime });
+                }
+            }
+            if (flags.playlist != undefined) {
+                let playlist = game.playlists.get(flags.playlist);
+                if (playlist)
+                    playlist.playAll();
+            }
         } else {
             if (this.object.sound && this.object.sound.paused)
                 this.object.sound.play();
         }
 
         let animate = (flags.state != 'paused');
-        if(this.object.isOwner)
+        if (this.object.isOwner) {
+            await this.object.setFlag("monks-enhanced-journal", "lastPlaying", currentlyPlaying);
             await this.object.setFlag("monks-enhanced-journal", "state", "playing");
-        else
+        } else
             this.object.flags['monks-enhanced-journal'].state = "playing";
         $('.slide-showing .duration', this.element).show();
         ($(this.element).hasClass('slideshow-container') ? $(this.element) : $('.slideshow-container', this.element)).addClass('playing');
@@ -473,6 +492,22 @@ export class SlideshowSheet extends EnhancedJournalSheet {
                 MonksEnhancedJournal.emit("stopSlideAudio");
             this.object.slidesound.stop();
             this.object.slidesound = undefined;
+        }
+
+        if (this.object.isOwner) {
+            if (this.object.flags['monks-enhanced-journal'].playlist) {
+                let playlist = game.playlists.get(this.object.flags['monks-enhanced-journal'].playlist);
+                if (playlist && playlist.playing)
+                    playlist.stopAll();
+            }
+            if (this.object.flags['monks-enhanced-journal'].lastPlaying) {
+                for (let playing of this.object.flags['monks-enhanced-journal'].lastPlaying) {
+                    let sound = await fromUuid(playing);
+                    if (sound)
+                        sound.parent?.playSound(sound);
+                }
+                this.object.unsetFlag("monks-enhanced-journal", "currentlyPlaying");
+            }
         }
 
         //inform players

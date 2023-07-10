@@ -1327,7 +1327,7 @@ export class MonksEnhancedJournal {
                 }
 
                 const checkPermission = doc => {
-                    if (!game.user.isGM && doc && ((!doc.compendium && doc.testUserPermission && !doc.testUserPermission(game.user, "LIMITED")) || (doc.compendium && doc.compendium.private))) {
+                    if (!game.user.isGM && doc && ((!doc.compendium && doc.testUserPermission && !doc.testUserPermission(game.user, "LIMITED")) || (doc.compendium && !doc.compendium.visible))) {
                         const span = document.createElement('span');
                         span.classList.add("unknown-link");
                         span.innerHTML = `<i class="fas fa-eye-slash"></i> Hidden`;
@@ -4596,7 +4596,7 @@ Hooks.on("setupTileActions", (app) => {
         fn: async (args = {}) => {
             const { tile, action, value } = args;
 
-            let dests = await game.MonksActiveTiles.getLocation.call(tile, action.data.location, value);
+            let dests = await game.MonksActiveTiles.getLocation.call(tile, action.data.location, args);
             dests = (dests instanceof Array ? dests : [dests]);
 
             if (!dests.length)

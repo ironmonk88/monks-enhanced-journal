@@ -39,10 +39,24 @@
                         <h3 class="noborder"><i class="fas fa-music"></i> {{localize 'MonksEnhancedJournal.Audio'}}</h3>
                     </header>
                     <div class="form-group">
+                        <label for="audiofile">{{localize 'MonksEnhancedJournal.Playlist'}}</label>
+                        <div class="form-fields">
+                            <select name="flags.monks-enhanced-journal.playlist">
+                                {{ selectOptions playlists selected=data.flags.monks-enhanced-journal.playlist blank="" nameAttr="id" labelAttr="name" }}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
                         <label for="audiofile">{{localize 'MonksEnhancedJournal.AudioFile'}}</label>
                         <div class="form-fields">
                             {{ filePicker type="audio" target="flags.monks-enhanced-journal.audiofile" }}
                             <input class="image" style="border-color:#7a7971;" type="text" name="flags.monks-enhanced-journal.audiofile" placeholder="path/audio.mp3" value="{{data.flags.monks-enhanced-journal.audiofile}}">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>{{localize 'MonksEnhancedJournal.PausePlaylists'}}</label>
+                        <div class="form-fields" style="justify-content:flex-end;">
+                            <input type="checkbox" name="flags.monks-enhanced-journal.pauseplaylist" {{checked data.flags.monks-enhanced-journal.pauseplaylist}}>
                         </div>
                     </div>
                     <div class="form-group">
