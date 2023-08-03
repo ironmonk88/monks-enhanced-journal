@@ -231,8 +231,6 @@ export class MonksEnhancedJournal {
         if (!(CONFIG.TinyMCE.content_css instanceof Array))
             CONFIG.TinyMCE.content_css = [CONFIG.TinyMCE.content_css];
         CONFIG.TinyMCE.content_css.push('modules/monks-enhanced-journal/css/editor.css');
-        if (game.modules.get("polyglot")?.active)
-            CONFIG.TinyMCE.content_css.push('modules/polyglot/css/polyglot.css');
 
         CONFIG.TinyMCE.style_formats.push({
             title: "Enhanced Journal",
@@ -2400,14 +2398,6 @@ export class MonksEnhancedJournal {
         if (setting("add-create-link"))
             tinyMCE.PluginManager.add('createlink', createlinkinit);
 
-        // Preload fonts for polyglot so there isn't a delay in showing them, and possibly revealing something
-        if (game.modules.get("polyglot")?.active && !isNewerVersion(game.modules.get("polyglot")?.version, "1.7.30")) {
-            let root = $('<div>').attr('id', 'enhanced-journal-fonts').appendTo('body');
-            for (let [k, v] of Object.entries(polyglot.polyglot.LanguageProvider.alphabets)) {
-                $('<span>').attr('lang', k).css({ font: v }).appendTo(root);
-            }
-        }
-
         let oldDragMouseUp = Draggable.prototype._onDragMouseUp;
         Draggable.prototype._onDragMouseUp = function (event) {
             Hooks.call(`dragEnd${this.app.constructor.name}`, this.app);
@@ -4328,7 +4318,7 @@ Hooks.on("updateSetting", (setting, data, options, userid) => {
 Hooks.on("polyglot.ready", () => {
     try {
         let root = $('<div>').attr('id', 'enhanced-journal-fonts').appendTo('body');
-        let alphabets = game.polyglot.LanguageProvider?.alphabets || game.polyglot.languageProvider?.alphabets;
+        let alphabets = game.polyglot.languageProvider?.alphabets;
         if (alphabets) {
             for (let [k, v] of Object.entries(alphabets)) {
                 $('<span>').attr('lang', k).css({ font: v }).appendTo(root);
