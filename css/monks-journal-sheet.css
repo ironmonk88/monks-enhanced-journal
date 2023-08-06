@@ -485,16 +485,18 @@ body:not(.system-pf2e) .monks-journal-sheet .sheet-container .tag {
     position: relative;
 }
 
-.monks-journal-sheet .tab.notes textarea.trim-textarea {
-    resize: none;
-    width: calc(100% - 4px);
-    height: calc(100% - 6px);
+.monks-journal-sheet .tab.notes .notes-container {
+    overflow: auto;
     border: var(--mej-sheet-input-border);
     background: var(--mej-sheet-input-background);
     color: var(--mej-sheet-input-color);
-    margin-left: 2px;
+    border-radius: 4px;
+    margin-bottom: 3px;
 }
 
+.monks-journal-sheet .tab.notes .notes-container .editor-content {
+    padding: 0px 6px;
+}
 /* Editor */
 .monks-journal-sheet.sheet .editor {
     overflow: visible;
@@ -545,7 +547,7 @@ body:not(.system-pf2e) .monks-journal-sheet .sheet-container .tag {
 
 .monks-journal-sheet.sheet .editor-content .polyglot-journal {
     cursor: help;
-    background-color: transparent;
+    background-color: rgba(var(--polyglot-journal-color), 0.1);
 }
 
 .monks-journal-sheet.sheet .editor-content .polyglot-journal:hover {
@@ -2026,15 +2028,11 @@ body:not(.system-pf2e) .monks-journal-sheet .sheet-container .tag {
 }
 
 #objective-display .window-content > ul > li {
-    padding: 4px;
-}
-
-#objective-display .window-content > ul > li:not(:last-child) {
     border-bottom: 1px solid #fff;
+    cursor: pointer;
 }
-
-#objective-display .window-content > ul > li:nth-child(even) {
-    background-color: rgba(255, 255, 255, 0.1);
+#objective-display .window-content > ul > li:first-child {
+    border-top: 1px solid #fff;
 }
 
 #objective-display ul ul li:before {
@@ -2062,26 +2060,80 @@ body:not(.system-pf2e) .monks-journal-sheet .sheet-container .tag {
 }
 
 #objective-display .objective-list > li[status] .quest-name {
-    border-bottom: 2px solid var(--mej-quest-status-default);
+    background-color: rgba(var(--mej-quest-status-default), 0.4);
     width: 100%;
-    border-left: 2px solid var(--mej-quest-status-default);
-    padding-left: 4px;
+    border-left: 2px solid rgb(var(--mej-quest-status-default));
+    padding: 4px;
 }
+#objective-display .objective-list > li[status] ul {
+    background-color: rgba(var(--mej-quest-status-default), 0.2);
+    border-left: 2px solid rgb(var(--mej-quest-status-default));
+    margin: 0px;
+    padding: 4px 10px;
+}
+#objective-display .objective-list > li[status] ul li {
+    padding-left: 5px;
+}
+/*
+#objective-display .objective-list > li[status] .quest-name i {
+    color: rgb(var(--mej-quest-status-default));
+}
+    */
 
 #objective-display .objective-list > li[status='available'] .quest-name {
-    border-color: var(--mej-quest-status-available);
+    border-color: rgb(var(--mej-quest-status-available));
+    background-color: rgba(var(--mej-quest-status-available), 0.4);
+}
+/*
+#objective-display .objective-list > li[status='available'] .quest-name i {
+    color: rgb(var(--mej-quest-status-available));
+}
+    */
+#objective-display .objective-list > li[status='available'] ul {
+    background-color: rgba(var(--mej-quest-status-available), 0.2);
+    border-color: rgb(var(--mej-quest-status-available));
 }
 
 #objective-display .objective-list > li[status='inprogress'] .quest-name {
-    border-color: var(--mej-quest-status-inprogress);
+    border-color: rgb(var(--mej-quest-status-inprogress));
+    background-color: rgba(var(--mej-quest-status-inprogress), 0.4);
+}
+/*
+#objective-display .objective-list > li[status='inprogress'] .quest-name i {
+    color: rgb(var(--mej-quest-status-inprogress));
+}
+    */
+#objective-display .objective-list > li[status='inprogress'] ul {
+    background-color: rgba(var(--mej-quest-status-inprogress), 0.2);
+    border-color: rgb(var(--mej-quest-status-inprogress));
 }
 
 #objective-display .objective-list > li[status='completed'] .quest-name {
-    border-color: var(--mej-quest-status-completed);
+    border-color: rgb(var(--mej-quest-status-completed));
+    background-color: rgba(var(--mej-quest-status-completed), 0.4);
+}
+/*
+#objective-display .objective-list > li[status='completed'] .quest-name i {
+    color: rgb(var(--mej-quest-status-completed));
+}
+    */
+#objective-display .objective-list > li[status='completed'] ul {
+    background-color: rgba(var(--mej-quest-status-completed), 0.2);
+    border-color: rgb(var(--mej-quest-status-completed));
 }
 
 #objective-display .objective-list > li[status='failed'] .quest-name {
-    border-color: var(--mej-quest-status-failed);
+    border-color: rgb(var(--mej-quest-status-failed));
+    background-color: rgba(var(--mej-quest-status-failed), 0.2);
+}
+/*
+#objective-display .objective-list > li[status='failed'] .quest-name i {
+    color: rgb(var(--mej-quest-status-failed));
+}
+*/
+#objective-display .objective-list > li[status='failed'] ul {
+    background-color: rgba(var(--mej-quest-status-failed), 0.1);
+    border-color: rgb(var(--mej-quest-status-failed));
 }
 
 /*

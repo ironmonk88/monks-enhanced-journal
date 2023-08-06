@@ -118,11 +118,11 @@
     --mej-objective-header-background: rgba(255, 255, 255, 0.2);
     --mej-objective-header-border: rgba(255, 255, 255, 0.3);
     --mej-objective-item-border: rgba(255, 255, 255, 0.2);
-    --mej-quest-status-default: rgb(128, 128, 128);
-    --mej-quest-status-available: rgb(47, 150, 180);
-    --mej-quest-status-inprogress: rgb(248, 148, 6);
-    --mej-quest-status-completed: rgb(81, 163, 81);
-    --mej-quest-status-failed: rgb(189, 54, 47);
+    --mej-quest-status-default: 128, 128, 128;
+    --mej-quest-status-available: 47, 150, 180;
+    --mej-quest-status-inprogress: 248, 148, 6;
+    --mej-quest-status-completed: 81, 163, 81;
+    --mej-quest-status-failed: 136, 26, 26;
     --mej-slideshow-add-slide: rgba(0, 0, 0, 0.2);
     --mej-slideshow-duration-border: rgb(0, 24, 74);
     --mej-slideshow-duration-background: rgba(0, 0, 0, 0.5);
@@ -757,35 +757,35 @@
     margin: 0 0.25em;
 }
 
-#journal li.journalentry[status] .entry-name i,
-.monks-enhanced-journal .directory li.journalentry[status] .entry-name i {
+#journal li.journalentry[status] .entry-name > i,
+.monks-enhanced-journal .directory li.journalentry[status] .entry-name > i {
     margin-left: 6px;
 }
 
 #journal li.journalentry[status] .entry-name,
 .monks-enhanced-journal .directory li.journalentry[status] .entry-name {
-    border-left: 0.45em solid var(--mej-quest-status-default);
+    border-left: 0.45em solid rgb(var(--mej-quest-status-default));
     margin-left: 0px;
 }
 
 #journal li.journalentry[status='available'] .entry-name,
 .monks-enhanced-journal .directory li.journalentry[status='available'] .entry-name {
-    border-left-color: var(--mej-quest-status-available);
+    border-left-color: rgb(var(--mej-quest-status-available));
 }
 
 #journal li.journalentry[status='inprogress'] .entry-name,
 .monks-enhanced-journal .directory li.journalentry[status='inprogress'] .entry-name {
-    border-left-color: var(--mej-quest-status-inprogress);
+    border-left-color: rgb(var(--mej-quest-status-inprogress));
 }
 
 #journal li.journalentry[status='completed'] .entry-name,
 .monks-enhanced-journal .directory li.journalentry[status='completed'] .entry-name {
-    border-left-color: var(--mej-quest-status-completed);
+    border-left-color: rgb(var(--mej-quest-status-completed));
 }
 
 #journal li.journalentry[status='failed'] .entry-name,
 .monks-enhanced-journal .directory li.journalentry[status='failed'] .entry-name {
-    border-left-color: var(--mej-quest-status-failed);
+    border-left-color: rgb(var(--mej-quest-status-failed));
 }
 
 .directory .directory-item.journalentry .permissions {

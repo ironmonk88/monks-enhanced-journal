@@ -81,8 +81,8 @@
             <div class="tab notes" data-group="primary" data-tab="notes">
                 <div class="tab-inner flexcol">
                     <div style="flex-grow: 0;">{{localize 'MonksEnhancedJournal.OnlyViewable'}}{{#unless hasGM}}<span style="color:darkred;font-weight:bold;"> {{localize 'MonksEnhancedJournal.msg.CannotEditNotesWithoutGM'}}</span>{{/unless}}</div>
-                    <div>
-                        <textarea name="flags.monks-enhanced-journal.{{userid}}.notes" class="trim-textarea">{{userdata.notes}}</textarea>
+                    <div class="notes-container">
+                        {{editor userdata.enrichedText target=notesTarget editable=true button=true owner=owner}}
                     </div>
                 </div>
             </div>

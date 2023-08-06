@@ -1,7 +1,7 @@
 <ul class="objective-list">
     {{#each quests}}
     <li data-document-id="{{this.uuid}}" status="{{this.status}}">
-        <div class="quest-name">{{this.name}}</div>
+        <div class="quest-name"><i class="fas {{this.icon}}"></i> {{this.name}}</div>
         {{#if this.objectives}}
         <ul>
             {{#each objectives}}

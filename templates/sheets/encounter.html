@@ -14,7 +14,7 @@
             {{#if owner}}
             <a class="item{{#if has.monsters}} hasitems{{/if}}" data-tab="monsters">{{localize 'MonksEnhancedJournal.Monsters'}}</a>
             <a class="item{{#if has.items}} hasitems{{/if}}" data-tab="items">{{localize 'MonksEnhancedJournal.Loot'}}</a>
-            <a class="item{{#if has.dcs}} hasitems{{/if}}" data-tab="dcs">{{localize 'MonksEnhancedJournal.DCs'}}</a>
+            {{#if canShow.dcs}}<a class="item{{#if has.dcs}} hasitems{{/if}}" data-tab="dcs">{{localize 'MonksEnhancedJournal.DCs'}}</a>{{/if}}
             {{/if}}
             <a class="item" data-tab="notes">{{localize 'MonksEnhancedJournal.Notes'}}</a>
         </nav>
@@ -161,6 +161,7 @@
                     </div>
                 </div>
             </div>
+            {{#if canShow.dcs}}
             <div class="tab dcs" data-group="primary" data-tab="dcs">
                 <div class="tab-inner flexcol">
                     <div class="items-list encounter-dcs">
@@ -208,6 +209,7 @@
                     </div>
                 </div>
             </div>
+            {{/if}}
             <div class="tab traps" data-group="primary" data-tab="traps" style="display:none;">
                 <div class="tab-inner flexcol">
                     <div class="items-list encounter-traps">
@@ -257,8 +259,8 @@
             <div class="tab notes" data-group="primary" data-tab="notes">
                 <div class="tab-inner flexcol">
                     <div style="flex-grow: 0;">{{localize 'MonksEnhancedJournal.OnlyViewable'}}{{#unless hasGM}}<span style="color:darkred;font-weight:bold;"> {{localize 'MonksEnhancedJournal.msg.CannotEditNotesWithoutGM'}}</span>{{/unless}}</div>
-                    <div>
-                        <textarea name="flags.monks-enhanced-journal.{{userid}}.notes" class="trim-textarea">{{userdata.notes}}</textarea>
+                    <div class="notes-container">
+                        {{editor userdata.enrichedText target=notesTarget editable=true button=true owner=owner}}
                     </div>
                 </div>
             </div>

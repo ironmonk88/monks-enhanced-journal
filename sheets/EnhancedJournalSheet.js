@@ -160,8 +160,16 @@ export class EnhancedJournalSheet extends JournalPageSheet {
 
         data.userid = game.user.id;
 
-        if (data.data.flags && data.data.flags["monks-enhanced-journal"] && data.data.flags["monks-enhanced-journal"][game.user.id])
+        data.userdata = {};
+        if (data.data.flags && data.data.flags["monks-enhanced-journal"] && data.data.flags["monks-enhanced-journal"][game.user.id]) {
             data.userdata = data.data.flags["monks-enhanced-journal"][game.user.id];
+            data.userdata.enrichedText = await TextEditor.enrichHTML((data.userdata.notes || ""), {
+                relativeTo: this.object,
+                secrets: this.object.isOwner,
+                async: true
+            });
+        }
+        data.notesTarget = `flags.monks-enhanced-journal.${game.user.id}.notes`;
 
         data.entrytype = this.type;
         data.isGM = game.user.isGM;
@@ -395,86 +403,9 @@ export class EnhancedJournalSheet extends JournalPageSheet {
     activateEditor(name, options = {}, initialContent = "") {
         $('.editor .editor-content', this.element).unmark();
 
-        let polyglot = (isNewerVersion(game.modules.get("polyglot")?.version, "1.7.30") ? game.polyglot : polyglot?.polyglot);
-
         if (this.editors[name] != undefined) {
-            if (game.modules.get("polyglot")?.active && polyglot) {
-                let polyLangs = polyglot.LanguageProvider?.languages || game.polyglot.languageProvider?.languages;
-                if (!game.user.isGM) {
-                    var langs = {};
-                    
-                    for (let lang of polyglot.known_languages) {
-                        langs[lang] = polyLangs[lang];
-                    }
-                    for (let lang of polyglot.literate_languages) {
-                        langs[lang] = polyLangs[lang];
-                    }
-                } else langs = polyLangs;
-
-                const languages = Object.entries(langs).map(([lang, name]) => {
-                    return {
-                        title: name || "",
-                        inline: "span",
-                        classes: "polyglot-journal",
-                        attributes: {
-                            title: name || "",
-                            "data-language": lang || "",
-                        },
-                    };
-                });
-                if (this.truespeech) {
-                    const truespeechIndex = languages.findIndex((element) => element.attributes["data-language"] == this.truespeech);
-                    if (truespeechIndex !== -1) languages.splice(truespeechIndex, 1);
-                }
-                if (this.comprehendLanguages && !this._isTruespeech(this.comprehendLanguages)) {
-                    const comprehendLanguagesIndex = languages.findIndex((element) => element.attributes["data-language"] == this.comprehendLanguages);
-                    if (comprehendLanguagesIndex !== -1) languages.splice(comprehendLanguagesIndex, 1);
-                }
-                options.style_formats = [
-                    ...CONFIG.TinyMCE.style_formats,
-                    {
-                        title: "Polyglot",
-                        items: languages,
-                    },
-                ];
-                options.formats = {
-                    removeformat: [
-                        // Default remove format configuration from tinyMCE
-                        {
-                            selector: "b,strong,em,i,font,u,strike,sub,sup,dfn,code,samp,kbd,var,cite,mark,q,del,ins",
-                            remove: "all",
-                            split: true,
-                            expand: false,
-                            block_expand: true,
-                            deep: true,
-                        },
-                        {
-                            selector: "span",
-                            attributes: ["style", "class"],
-                            remove: "empty",
-                            split: true,
-                            expand: false,
-                            deep: true,
-                        },
-                        {
-                            selector: "*",
-                            attributes: ["style", "class"],
-                            split: false,
-                            expand: false,
-                            deep: true,
-                        },
-                        // Add custom config to remove spans from polyglot when needed
-                        {
-                            selector: "span",
-                            classes: "polyglot-journal",
-                            attributes: ["title", "class", "data-language"],
-                            remove: "all",
-                            split: true,
-                            expand: false,
-                            deep: true,
-                        },
-                    ],
-                };
+            if (game.modules.get("polyglot")?.active && game.polyglot) {
+                game.polyglot.activeEditorLogic(options);
             }
 
             options = foundry.utils.mergeObject(options, {
@@ -1209,7 +1140,7 @@ export class EnhancedJournalSheet extends JournalPageSheet {
             if (!polyglot)
                 return;
 
-            let scramble = polyglot.scrambleString(this.textContent, game.settings.get('polyglot', 'useUniqueSalt') ? that.object.id : lang, lang);
+            let scramble = polyglot.scrambleString(this.textContent, that.object.id, lang);
             let font = polyglot._getFontStyle(lang);
             let languages = polyglot.LanguageProvider?.languages || polyglot.languageProvider?.languages;
 
@@ -1387,6 +1318,9 @@ export class EnhancedJournalSheet extends JournalPageSheet {
                 return null;
 
             let actor = game.actors.get(o.actor?.id || o.actorId);
+            if (!actor)
+                return null;
+
             let items = [];
             for (let [k, v] of Object.entries(o.currency)) {
                 if (v) {

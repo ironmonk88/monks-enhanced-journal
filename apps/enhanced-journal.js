@@ -225,7 +225,11 @@ export class EnhancedJournal extends Application {
             if (this.object instanceof Promise)
                 this.object = await this.object;
 
-            options = mergeObject(options, game.user.getFlag("monks-enhanced-journal", `pagestate.${this.object.id}`) || {}, { overwrite: false });
+            let defaultOptions = {
+                collapsed: setting("start-toc-collapsed")
+            };
+
+            options = mergeObject(options, mergeObject(defaultOptions, game.user.getFlag("monks-enhanced-journal", `pagestate.${this.object.id}`) || {}), { overwrite: false });
 
             let contentform = $('.content > section', this.element);
 
@@ -1452,6 +1456,10 @@ export class EnhancedJournal extends Application {
             {
                 name: "Open outside Enhanced Journal",
                 icon: '<i class="fas fa-file-export"></i>',
+                condition: (li) => {
+                    let tab = this.tabs.find(t => t.id == this.contextTab);
+                    return !["blank", "folder"].includes(tab.type);
+                },
                 callback: async (li) => {
                     let tab = this.tabs.find(t => t.id == this.contextTab);
                     let document = tab.entity;

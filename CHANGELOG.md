@@ -1,3 +1,37 @@
+# Version 11.04
+
+Fixed DC configuration in systems that don't have support for skills lists.
+
+Added a setting to open the enhanced journal with the table of contents collapsed.
+
+Fixed context menu option for opening outside the enhanced journal, when right clicking on a blank page.
+
+Updated the Objective Display to include colour highlighting and icons.  And added sorting of objectives based on status.
+
+Fixed padding of ownership indication of journal entries.
+
+Added a slight background highlight to polyglot text.
+
+Fixed issue with GURPS system and relationship list positioning.
+
+Fixed issue with background while using Ernie's Modern UI.
+
+Updated the Hotbar so that opening a Journal Entry link will open Enhanced Journal sheets properly.
+
+Added code to ignore conflicts between Enhanced Journal and Multiple Document Selection.
+
+Fixed issue that was clearing out all the saved setting of Journal Pages.
+
+Fixed issue with refreshing the Object list when the permission of the Journal Entry changes.
+
+Added additional compatibility with Polyglot.
+
+Updated the notes tab to use an Editor rather than just a textarea.
+
+Fixed issue where offerings from an actor that no longer existed were preventing the sheet fro loading.
+
+Added In Progress back to the quest sheet.
+
 # Version 11.03
 
 Added Saving Thorws to the DC Config for Encounters

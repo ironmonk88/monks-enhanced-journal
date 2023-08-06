@@ -103,6 +103,10 @@ export class EncounterSheet extends EnhancedJournalSheet {
             dcs: getProperty(data, "data.flags.monks-enhanced-journal.dcs")?.length
         }
 
+        data.canShow = {
+            dcs: !!Object.keys(DCConfig.optionList).length
+        }
+
         return data;
     }
 

@@ -231,8 +231,10 @@ export class MonksEnhancedJournal {
         if (!(CONFIG.TinyMCE.content_css instanceof Array))
             CONFIG.TinyMCE.content_css = [CONFIG.TinyMCE.content_css];
         CONFIG.TinyMCE.content_css.push('modules/monks-enhanced-journal/css/editor.css');
+        /*
         if (game.modules.get("polyglot")?.active)
             CONFIG.TinyMCE.content_css.push('modules/polyglot/css/polyglot.css');
+            */
 
         CONFIG.TinyMCE.style_formats.push({
             title: "Enhanced Journal",
@@ -377,6 +379,26 @@ export class MonksEnhancedJournal {
             patchFunc("JournalDirectory.prototype._onClickDocumentName", clickDocumentName, "MIXED");
         }
 
+        patchFunc("Hotbar.prototype.constructor.toggleDocumentSheet", async (...args) => {
+            const [uuid] = args;
+            let doc = await fromUuid(uuid);
+            if (!doc) {
+                return ui.notifications.warn(game.i18n.format("WARNING.ObjectDoesNotExist", {
+                    name: game.i18n.localize("Document"),
+                    identifier: uuid
+                }));
+            }
+            if (MonksEnhancedJournal.getMEJType(doc)) {
+                if (!MonksEnhancedJournal.openJournalEntry(doc)) {
+                    if (doc instanceof JournalEntry)
+                        doc = doc.pages.contents[0];
+                    MonksEnhancedJournal.fixType(doc);
+                } else return;
+            }
+            const sheet = doc.sheet;
+            return sheet.rendered ? sheet.close() : sheet.render(true);
+        }, "OVERRIDE");
+
         let dragStart = function (...args) {
             let event = args[0];
             event.stopPropagation();
@@ -403,6 +425,7 @@ export class MonksEnhancedJournal {
             if (isV11()) {
                 libWrapper.ignore_conflicts("monks-enhanced-journal", "monks-active-tiles", "JournalDirectory.prototype._onClickEntryName");
                 libWrapper.ignore_conflicts("monks-enhanced-journal", "multiple-document-selection", "JournalDirectory.prototype._onClickEntryName");
+                libWrapper.ignore_conflicts("monks-enhanced-journal", "multiple-document-selection", "Compendium.prototype._onClickEntryName");
             } else {
                 libWrapper.ignore_conflicts("monks-enhanced-journal", "monks-active-tiles", "JournalDirectory.prototype._onClickDocumentName");
                 libWrapper.ignore_conflicts("monks-enhanced-journal", "multiple-document-selection", "JournalDirectory.prototype._onClickDocumentName");
@@ -1735,7 +1758,7 @@ export class MonksEnhancedJournal {
 
     static async cleanPageState() {
         let tabs = (game.user.getFlag("monks-enhanced-journal", "tabs") || []).map(t => {
-            if (!t.entitId)
+            if (!t.entityId)
                 return null;
             let parts = t.entityId.split(".");
             return parts[parts.length - 1];
@@ -2401,12 +2424,14 @@ export class MonksEnhancedJournal {
             tinyMCE.PluginManager.add('createlink', createlinkinit);
 
         // Preload fonts for polyglot so there isn't a delay in showing them, and possibly revealing something
+        /*
         if (game.modules.get("polyglot")?.active && !isNewerVersion(game.modules.get("polyglot")?.version, "1.7.30")) {
             let root = $('<div>').attr('id', 'enhanced-journal-fonts').appendTo('body');
             for (let [k, v] of Object.entries(polyglot.polyglot.LanguageProvider.alphabets)) {
                 $('<span>').attr('lang', k).css({ font: v }).appendTo(root);
             }
         }
+        */
 
         let oldDragMouseUp = Draggable.prototype._onDragMouseUp;
         Draggable.prototype._onDragMouseUp = function (event) {
@@ -3915,6 +3940,9 @@ Hooks.on("createJournalEntryPage", (entry, data, options, userId) => {
 });
 
 Hooks.on("updateJournalEntry", (document, data, options, userId) => {
+    if (MonksEnhancedJournal.getMEJType(document) == 'quest')
+        MonksEnhancedJournal.refreshObjectives(true);
+
     if (MonksEnhancedJournal.journal) {
         if (data.name) {
             MonksEnhancedJournal.journal.updateTabNames(document.uuid, data.name);
@@ -4328,7 +4356,7 @@ Hooks.on("updateSetting", (setting, data, options, userid) => {
 Hooks.on("polyglot.ready", () => {
     try {
         let root = $('<div>').attr('id', 'enhanced-journal-fonts').appendTo('body');
-        let alphabets = game.polyglot.LanguageProvider?.alphabets || game.polyglot.languageProvider?.alphabets;
+        let alphabets = game.polyglot.languageProvider?.alphabets;
         if (alphabets) {
             for (let [k, v] of Object.entries(alphabets)) {
                 $('<span>').attr('lang', k).css({ font: v }).appendTo(root);

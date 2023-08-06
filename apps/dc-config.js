@@ -17,7 +17,7 @@ export class DCConfig extends FormApplication {
         });
     }
 
-    getData(options) {
+    static optionList() {
         let config = CONFIG[game.system.id.toUpperCase()];
         if (game.system.id == "tormenta20")
             config = CONFIG.T20;
@@ -33,7 +33,7 @@ export class DCConfig extends FormApplication {
         ];
         if (game.system.id == "pf2e")
             attributeOptions.push({ id: "attribute", text: i18n("MonksTokenBar.Attribute"), groups: { perception: CONFIG.PF2E.attributes.perception } });
-        
+
         attributeOptions = attributeOptions.filter(g => g.groups);
         for (let attr of attributeOptions) {
             attr.groups = duplicate(attr.groups);
@@ -42,9 +42,13 @@ export class DCConfig extends FormApplication {
             }
         }
 
+        return attributeOptions;
+    }
+
+    getData(options) {
         return mergeObject(super.getData(options),
             {
-                attributeOptions: attributeOptions
+                attributeOptions: DCConfig.optionList()
             }, { recursive: false }
         );
     }

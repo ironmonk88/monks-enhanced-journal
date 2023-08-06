@@ -21,6 +21,13 @@ export class ObjectiveDisplay extends Application {
     }
 
     getData(options) {
+        let icons = {
+            inactive: "fa-ban",
+            available: "fa-circle-plus",
+            inprogress: "fa-circle-exclamation",
+            completed: "fa-check",
+            failed: "fa-xmark"
+        }
         let quests = game.journal.filter(j => {
             if (j.pages.size != 1)
                 return false;
@@ -30,12 +37,14 @@ export class ObjectiveDisplay extends Application {
                 page.getFlag('monks-enhanced-journal', 'display');
         }).map(q => {
             let page = q.pages.contents[0];
+            let status = getProperty(page, 'flags.monks-enhanced-journal.status') || (getProperty(page, 'flags.monks-enhanced-journal.completed') ? 'completed' : 'inactive');
             let data = {
                 id: page.id,
                 uuid: page.uuid,
                 completed: page.getFlag('monks-enhanced-journal', 'completed'),
                 status: getProperty(page, 'flags.monks-enhanced-journal.status') || (getProperty(page, 'flags.monks-enhanced-journal.completed') ? 'completed' : 'inactive'),
-                name: page.name
+                name: page.name,
+                icon: icons[status]
             };
 
             if (setting('use-objectives')) {
@@ -52,6 +61,11 @@ export class ObjectiveDisplay extends Application {
             }
 
             return data;
+        }).sort((a, b) => {
+            let indexA = Object.keys(icons).findIndex(i => i == a.status);
+            let indexB = Object.keys(icons).findIndex(i => i == b.status);
+
+            return indexA - indexB;
         });
 
         return mergeObject(super.getData(options), { quests: quests } );

@@ -35,6 +35,7 @@ export class QuestSheet extends EnhancedJournalSheet {
         data.statusOptions = {
             inactive: "MonksEnhancedJournal.queststatus.unavailable",
             available: "MonksEnhancedJournal.queststatus.available",
+            inprogress: "MonksEnhancedJournal.queststatus.inprogress",
             completed: "MonksEnhancedJournal.queststatus.completed",
             failed: "MonksEnhancedJournal.queststatus.failed"
         };

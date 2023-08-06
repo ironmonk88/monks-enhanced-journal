@@ -263,6 +263,15 @@ export const registerSettings = function () {
 		type: Boolean,
 	});
 
+	game.settings.register(modulename, "start-toc-collapsed", {
+		name: i18n("MonksEnhancedJournal.start-toc-collapsed.name"),
+		hint: i18n("MonksEnhancedJournal.start-toc-collapsed.hint"),
+		scope: "world",
+		config: true,
+		default: false,
+		type: Boolean,
+	});
+
 	game.settings.register(modulename, "open-outside", {
 		name: i18n("MonksEnhancedJournal.open-outside.name"),
 		hint: i18n("MonksEnhancedJournal.open-outside.hint"),

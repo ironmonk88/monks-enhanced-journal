@@ -185,6 +185,12 @@ body.system-wfrp4e {
     box-shadow: inset 0px 0px 12px #6b3a0f87 !important;
 }
 
+/* GURPS */
+.system-gurps .monks-enhanced-journal .relationships .item-list .item {
+    line-height: 70px;
+    height: 70px;
+}
+
 /* AGE System */
 .age-system .sheet-container .form-group label {
     font-size: var(--font-size-16);
@@ -535,6 +541,10 @@ body.system-vaesen {
 }
 
 /* EMU Layout */
+.-emu-layout body.-emu {
+    --mej-background: RGBA(var(--emu-color-background-lightest,230,233,235),var(--emu-background-opacity-window-content,1));
+    --mej-adventure-toc-background: RGB(var(--emu-color-background,41,62,64));
+}
 .-emu-layout body.-emu .monks-journal-sheet.journal-sheet.sheet.window-app .window-content form.sheet-body.flexcol {
     flex-direction: column;
     flex-wrap: nowrap;
@@ -561,7 +571,6 @@ body.system-vaesen {
     background: transparent;
     border: transparent;
 }
-
 /* Tidy UI */
 .monks-enhanced-journal .tidy5e.sheet.actor .list-layout {
     height: 100%;
