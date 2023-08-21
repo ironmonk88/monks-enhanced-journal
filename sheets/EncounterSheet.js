@@ -269,7 +269,11 @@ export class EncounterSheet extends EnhancedJournalSheet {
     }
 
     async addItem(data) {
-        let item = await fromUuid(data.uuid);
+        let item;
+        if (data.from) {
+            item = await EnhancedJournalSheet.getDocument(data);
+        } else
+            item = await fromUuid(data.uuid);
 
         if (item) {
             if (getValue(item.system, quantityname()) || (item.type == "spell" && game.system.id == 'dnd5e')) {

@@ -925,6 +925,7 @@ export class ProgressListSheet extends ListSheet {
                 } else {
                     item.noprogress = false;
                     item.percent = (count / max) * 100;
+                    item.valueText = `${count}/${max}`;
                 }
             }
 

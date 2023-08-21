@@ -97,6 +97,8 @@ export class MonksEnhancedJournal {
     static quantityname = "quantity";
     static currencyname = "currency";
 
+    static includedTypes = ["armor", "consumable", "backpack", "equipment", "kit", "treasure", "weapon", "tool", "loot"];
+
     constructor() {
     }
 
@@ -1007,14 +1009,16 @@ export class MonksEnhancedJournal {
         }
 
         let sceneActivate = function (wrapped, ...args) {
-            if (this.journal && this.journal.type == 'slideshow') {
+            if (MonksEnhancedJournal.getMEJType(this.journal) == 'slideshow') {
                 if (game.user.isGM) {
                     //start slideshow for everyone
-                    MonksEnhancedJournal.fixType(this.journal);
-                    const cls = (this.journal._getSheetClass ? this.journal._getSheetClass() : null);
-                    const sheet = new cls(this.journal, { render: false });
+                    let page = this.journal.pages.contents[0];
+                    MonksEnhancedJournal.fixType(page);
+                    const cls = (page._getSheetClass ? page._getSheetClass() : null);
+                    const sheet = new cls(page, { render: false });
                     if (sheet.playSlideshow)
                         sheet.playSlideshow();
+                    MonksEnhancedJournal.openJournalEntry(this.journal);
                 }
             }
             return wrapped(...args);
@@ -1920,6 +1924,33 @@ export class MonksEnhancedJournal {
         }
     }
 
+    static async fixAdjustments() {
+        if (setting('fix-adjustment')) {
+            let defaultAdjustments = setting('adjustment-defaults');
+            defaultAdjustments.default = mergeObject({ sell: 1, buy: 0.5 }, defaultAdjustments.default);
+            for (let journal of game.journal) {
+                if (MonksEnhancedJournal.getMEJType(journal) == "shop") {
+                    let page = journal.pages.contents[0];
+
+                    let adjustment = getProperty(page, "flags.monks-enhanced-journal.adjustment") || {};
+                    let defValue = {
+                        sell: adjustment.default?.sell ?? getProperty(page, "flags.monks-enhanced-journal.sell"),
+                        buy: adjustment.default?.buy ?? getProperty(page, "flags.monks-enhanced-journal.buy")
+                    };
+
+                    if (defValue.sell || defValue.buy) {
+                        if (defValue.sell && defValue.sell == defaultAdjustments.default.sell) delete defValue.sell;
+                        if (defValue.buy && defValue.buy == defaultAdjustments.default.buy) delete defValue.buy;
+                        if (Object.keys(defValue).length != 0) {
+                            adjustment.default = defValue;
+                            await page.update({ flags: { "monks-enhanced-journal": { adjustment: adjustment } } });
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     static registerSheetClasses() {
         let types = MonksEnhancedJournal.getDocumentTypes();
         let labels = MonksEnhancedJournal.getTypeLabels();
@@ -2374,6 +2405,12 @@ export class MonksEnhancedJournal {
                    // game.settings.set("monks-enhanced-journal", "fix-person", false);
                 } catch { }
             }
+            if (setting("fix-adjustment")) {
+                try {
+                    MonksEnhancedJournal.fixAdjustments();
+                    game.settings.set("monks-enhanced-journal", "fix-adjustment", false);
+                } catch { }
+            }
         }
 
         MonksEnhancedJournal.cleanPageState();
@@ -2432,11 +2469,13 @@ export class MonksEnhancedJournal {
             }
         }
         */
-
-        let oldDragMouseUp = Draggable.prototype._onDragMouseUp;
-        Draggable.prototype._onDragMouseUp = function (event) {
-            Hooks.call(`dragEnd${this.app.constructor.name}`, this.app);
-            return oldDragMouseUp.call(this, event);
+        if (!game.modules.get('monks-combat-details')?.active) {
+            patchFunc("Draggable.prototype._onDragMouseUp", async function (wrapped, ...args) {
+                for (const cls of this.app.constructor._getInheritanceChain()) {
+                    Hooks.callAll(`dragEnd${cls.name}`, this.app, this.app.position);
+                }
+                return wrapped(...args);
+            });
         }
     }
 
@@ -2804,9 +2843,11 @@ export class MonksEnhancedJournal {
             textarea.append($('<div>').addClass('slide-text').attr({'data-id': t.id}).html(t.text).css(style));
         }
 
+        let tag = VideoHelper.hasVideoExtension(slide.img) ? "<video>" : "<img>";
+
         return $('<div>').addClass("slide animate-slide loading").attr('data-slide-id', slide.id)
             .append($('<div>').addClass('slide-background').append($('<div>').attr('style', background)))
-            .append($('<img>').addClass('slide-image').attr('src', slide.img).css({ 'object-fit': slide.sizing}))
+            .append($(tag).addClass('slide-image').attr({ 'src': slide.img, 'loop': true, 'autoplay': "true" }).css({ 'object-fit': slide.sizing}))
             .append(textarea);
     }
 

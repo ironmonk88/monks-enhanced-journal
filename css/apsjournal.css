@@ -190,15 +190,15 @@
 /**
 * Core Style Overrides
 **/
-:root[mejtheme] .editor-content table tbody tr td {
+:root[mejtheme] .monks-journal-sheet .editor-content table tbody tr td {
     padding: 0 15px;
 }
 
-:root[mejtheme] .editor-content table tbody tr td:first-child {
+:root[mejtheme] .monks-journal-sheet .editor-content table tbody tr td:first-child {
     white-space: nowrap;
 }
 
-:root[mejtheme] .editor-content blockquote {
+:root[mejtheme] .monks-journal-sheet .editor-content blockquote {
     margin-bottom: 1.5em;
 }
 
@@ -207,8 +207,8 @@
     margin: 1em 5%;
 }
 
-:root[mejtheme] table thead,
-:root[mejtheme] table tfoot {
+:root[mejtheme] .monks-journal-sheet table thead,
+:root[mejtheme] .monks-journal-sheet table tfoot {
     color: rgb(var(--mej-light-0));
     background: var(--apsj-primary);
     font-family: var(--apsj-font-scalycaps);
@@ -216,12 +216,12 @@
     text-shadow: 1px 1px 2px rgb(var(--mej-dark-0));
 }
 
-:root[mejtheme] table thead a.hyperlink,
-:root[mejtheme] table tfoot a.hyperlink {
+:root[mejtheme] .monks-journal-sheet table thead a.hyperlink,
+:root[mejtheme] .monks-journal-sheet table tfoot a.hyperlink {
     color: var(--apsj-yellow);
 }
 
-:root[mejtheme] tbody tr td {
+:root[mejtheme] .monks-journal-sheet tbody tr td {
     font-family: var(--apsj-font-scalysans);
     font-weight: 400;
 }

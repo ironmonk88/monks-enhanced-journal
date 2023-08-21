@@ -1,6 +1,7 @@
 import { setting, i18n, format, log, makeid, MonksEnhancedJournal, quantityname, pricename, currencyname } from "../monks-enhanced-journal.js";
 import { EnhancedJournalSheet } from "../sheets/EnhancedJournalSheet.js";
 import { getValue, setValue, setPrice, MEJHelpers } from "../helpers.js";
+import { AdjustPrice } from "../apps/adjust-price.js";
 
 export class ShopSheet extends EnhancedJournalSheet {
     constructor(data, options) {
@@ -115,7 +116,13 @@ export class ShopSheet extends EnhancedJournalSheet {
     }
 
     static get defaultObject() {
-        return { purchasing: 'confirm', selling:'confirm', items: [], sell: 1, buy: 0.5, opening: 480, closing: 1020 };
+        return {
+            purchasing: 'confirm',
+            selling: 'confirm',
+            items: [],
+            opening: 480,
+            closing: 1020
+        };
     }
 
     /*
@@ -336,7 +343,10 @@ export class ShopSheet extends EnhancedJournalSheet {
                     let sysPrice = MEJHelpers.getSystemPrice(item, pricename());
                     let price = MEJHelpers.getPrice(sysPrice);
                     let origPrice = price.value;
-                    let buy = this.object.getFlag('monks-enhanced-journal', 'buy') ?? 0.5;
+                    let adjustment = Object.assign({}, setting("adjustment-defaults"), this.object.getFlag('monks-enhanced-journal', 'adjustment') || {});
+                    let buy = adjustment[item.type]?.buy ?? adjustment.default.buy ?? 0.5;
+                    if (buy == -1)
+                        return ui.notifications.warn(i18n("MonksEnhancedJournal.msg.CannotSellItem"));
                     price.value = Math.floor(price.value * buy);
                     let result = await this.constructor.confirmQuantity(item, max, "sell", true, price);
                     if ((result?.quantity ?? 0) > 0) {
@@ -376,7 +386,10 @@ export class ShopSheet extends EnhancedJournalSheet {
                     let sysPrice = MEJHelpers.getSystemPrice(item, pricename());
                     let price = MEJHelpers.getPrice(sysPrice);
                     let origPrice = price.value;
-                    let buy = this.object.getFlag('monks-enhanced-journal', 'buy') ?? 0.5;
+                    let adjustment = Object.assign({}, setting("adjustment-defaults"), this.object.getFlag('monks-enhanced-journal', 'adjustment') || {});
+                    let buy = adjustment[item.type]?.buy ?? adjustment.default.buy ?? 0.5;
+                    if (buy == -1)
+                        return ui.notifications.warn(i18n("MonksEnhancedJournal.msg.CannotSellItem"));
                     price.value = Math.floor(price.value * buy);
                     let result = await this.constructor.confirmQuantity(item, max, "sell", true, price);
                     if ((result?.quantity ?? 0) > 0) {
@@ -523,54 +536,7 @@ export class ShopSheet extends EnhancedJournalSheet {
     }
 
     async adjustPrice(event) {
-        let convertItems = async function (html) {
-            let sell = parseFloat($('[name="adjustment.sell"]', html).val());
-
-            let items = this.object.getFlag('monks-enhanced-journal', 'items') || [];
-
-            for (let item of items) {
-                let price = MEJHelpers.getPrice(getProperty(item, "flags.monks-enhanced-journal.price"));
-                let cost = Math.max(Math.ceil((price.value * sell), 1)) + " " + price.currency;
-                setProperty(item, "flags.monks-enhanced-journal.cost", cost);
-            }
-
-            await this.object.setFlag('monks-enhanced-journal', 'items', items);
-        }
-
-        let data = {
-            sell: this.object.getFlag('monks-enhanced-journal', 'sell') ?? 1,
-            buy: this.object.getFlag('monks-enhanced-journal', 'buy') ?? 0.5
-        }
-
-        let content = await renderTemplate("modules/monks-enhanced-journal/templates/adjust-price.html", data);
-
-        const dialog = new Dialog({
-            title: i18n("MonksEnhancedJournal.AdjustPrices"),
-            content: content,
-            buttons: {
-                yes: {
-                    icon: '<i class="fas fa-check"></i>',
-                    label: game.i18n.localize("Yes"),
-                    callback: async (html) => {
-                        let buy = parseFloat($('[name="adjustment.buy"]', html).val());
-                        let sell = parseFloat($('[name="adjustment.sell"]', html).val());
-
-                        await this.object.setFlag('monks-enhanced-journal', 'buy', buy);
-                        await this.object.setFlag('monks-enhanced-journal', 'sell', sell);
-                    }
-                },
-                no: {
-                    icon: '<i class="fas fa-times"></i>',
-                    label: game.i18n.localize("No"),
-                }
-            },
-            default: "yes",
-            render: (html) => {
-                $('input', html).on("change", this._onChangeInput.bind(this));
-                $('.convert-button', html).on("click", convertItems.bind(this, html));
-            },
-        });
-        dialog.render(true);
+        new AdjustPrice(this.object).render(true);
     }
 
     async requestItem(event) {
@@ -660,7 +626,8 @@ export class ShopSheet extends EnhancedJournalSheet {
     async createSellMessage(item, actor) {
         let data = getProperty(item, "flags.monks-enhanced-journal");
         let price = MEJHelpers.getPrice(data.price);
-        let buy = this.object.getFlag('monks-enhanced-journal', 'buy') ?? 0.5;
+        let adjustment = Object.assign({}, setting("adjustment-defaults"), this.object.getFlag('monks-enhanced-journal', 'adjustment') || {});
+        let buy = adjustment[item.type]?.buy ?? adjustment.default.buy ?? 0.5;
         data.sell = Math.floor(price.value * buy);
         data.currency = price.currency;
         data.maxquantity = data.quantity;
@@ -718,7 +685,8 @@ export class ShopSheet extends EnhancedJournalSheet {
 
                 let sysPrice = MEJHelpers.getSystemPrice(item, pricename()); //MEJHelpers.getPrice(getProperty(item, "flags.monks-enhanced-journal.price"));
                 let price = MEJHelpers.getPrice(sysPrice);
-                let adjustment = this.object.flags["monks-enhanced-journal"].sell ?? 1;
+                let adjustment = Object.assign({}, setting("adjustment-defaults"), this.object.getFlag('monks-enhanced-journal', 'adjustment') || {});
+                let sell = adjustment[item.type]?.sell ?? adjustment.default.sell ?? 1;
                 let flags = Object.assign({
                     hide: false,
                     lock: false,
@@ -726,7 +694,7 @@ export class ShopSheet extends EnhancedJournalSheet {
                 }, getProperty(itemData, "flags.monks-enhanced-journal"), {
                     parentId: item.id,
                     price: `${price.value} ${price.currency}`,
-                    cost: (price.value * adjustment) + " " + price.currency
+                    cost: (price.value * sell) + " " + price.currency
                 });
                 let update = { _id: makeid(), flags: { 'monks-enhanced-journal': flags } };
                 if (game.system.id == "dnd5e") {

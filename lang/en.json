@@ -76,6 +76,8 @@
   "MonksEnhancedJournal.party-loot-entity.hint": "When selling items, add option to ",
   "MonksEnhancedJournal.start-toc-collapsed.name": "Start TOC Collapsed",
   "MonksEnhancedJournal.start-toc-collapsed.hint": "Start with the Table of Contents collapsed",
+  "MonksEnhancedJournal.defaultprices.name": "Default Prices",
+  "MonksEnhancedJournal.defaultprices.hint": "Default prices for shops",
 
   "MonksEnhancedJournal.SlideConfiguration": "Slide Configuration",
   "MonksEnhancedJournal.DCConfiguration": "DC Configuration",
@@ -487,6 +489,7 @@
   "MonksEnhancedJournal.msg.PleaseSelectJournal": "Please select a Journal",
   "MonksEnhancedJournal.msg.ShopIsNotReceivingItems": "Shop is not receiving items at this time",
   "MonksEnhancedJournal.msg.NoItemsToAssign": "No items to assign to a target",
+  "MonksEnhancedJournal.msg.CannotSellItem": "This shop does not buy back this item",
 
   "MonksEnhancedJournal.Contain": "Contain",
   "MonksEnhancedJournal.Cover": "Cover",

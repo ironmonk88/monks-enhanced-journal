@@ -1893,8 +1893,9 @@ export class EnhancedJournalSheet extends JournalPageSheet {
                                         itemData._id = makeid();
                                         let sysPrice = MEJHelpers.getSystemPrice(itemData, pricename());
                                         let price = MEJHelpers.getPrice(sysPrice);
-                                        let adjustment = this.object.flags["monks-enhanced-journal"].sell ?? 1;
-                                        let cost = MEJHelpers.getPrice(`${price.value * adjustment} ${price.currency}`);
+                                        let adjustment = Object.assign({}, setting("adjustment-defaults"), this.object.getFlag('monks-enhanced-journal', 'adjustment') || {});
+                                        let sell = adjustment[itemData.type]?.sell ?? adjustment.default.sell ?? 1;
+                                        let cost = MEJHelpers.getPrice(`${price.value * sell} ${price.currency}`);
                                         itemData.flags['monks-enhanced-journal'] = {
                                             parentId: oldId,
                                             price: `${price.value} ${price.currency}`,

@@ -1,24 +1,66 @@
 <form>
     <p class="notes">Change the rate this shop sells items and buys them back.</p>
-    <div class="form-group">
-        <label>Buy back from player</label>
-        <div class="form-fields">
-            <span style="font-size:20px;margin-left:10px;flex: 0 0 20px;text-align:left;">&times;</span>
-            <input type="number" style="flex: 0 0 60px;text-align:right;" name="adjustment.buy" min="0" data-dtype="Number" value="{{buy}}" />
-        </div>
-    </div>
-    <div class="form-group">
-        <label>Sell to players</label>
-        <div class="form-fields">
-            <span style="font-size:20px;margin-left:10px;flex: 0 0 20px;text-align:left;">&times;</span>
-            <input type="number" style="flex: 0 0 60px;text-align:right;" name="adjustment.sell" min="0" data-dtype="Number" value="{{sell}}" />
-        </div>
-    </div>
+    <p class="notes">Leave the type field blank to use the default, or use -1 to prevent the shop from buying back that type of item.</p>
+    <table>
+        <tr>
+            <td></td>
+            <td style="text-align:right;">Sell</td>
+            <td style="text-align:right;">Buy Back</td>
+        </tr>
+        <tr>
+            <td>Default</td>
+            <td>
+                <div class="form-fields flexrow" style="justify-content: flex-end;">
+                    <span style="font-size:20px;margin-left:10px;flex: 0 0 20px;text-align:left;">&times;</span>
+                    <input type="number" class="sell-field" style="flex: 0 0 60px;text-align:right;" name="adjustment.default.sell" min="0" step="0.01" data-dtype="Number" placeholder="{{defaultAdjustment.default.sell}}" value="{{adjustment.default.sell}}" />
+                </div>
+            </td>
+            <td>
+                <div class="form-fields flexrow" style="justify-content: flex-end;">
+                    <span style="font-size:20px;margin-left:10px;flex: 0 0 20px;text-align:left;">&times;</span>
+                    <input type="number" class="buy-field" style="flex: 0 0 60px;text-align:right;" name="adjustment.default.buy" min="-1" step="0.01" data-dtype="Number" placeholder="{{defaultAdjustment.default.buy}}" value="{{adjustment.default.buy}}" />
+                </div>
+            </td>
+        </tr>
+        {{#if types}}
+        <tr>
+            <td colspan="3">
+                <hr />
+                Types
+                <hr />
+            </td>
+        </tr>
+        {{/if}}
+        {{#each types}}
+        <tr>
+            <td>{{this}}</td>
+            <td>
+                <div class="form-fields flexrow" style="justify-content: flex-end;">
+                    <span style="font-size:20px;margin-left:10px;flex: 0 0 20px;text-align:left;">&times;</span>
+                    <input type="number" class="sell-field" style="flex: 0 0 60px;text-align:right;" name="adjustment.{{@key}}.sell" data-dtype="Number" placeholder="{{lookup (lookup @root.defaultAdjustment @key) 'sell'}}" value="{{lookup (lookup @root.adjustment @key) 'sell'}}" />
+                </div>
+            </td>
+            <td>
+                <div class="form-fields flexrow" style="justify-content: flex-end;">
+                    <span style="font-size:20px;margin-left:10px;flex: 0 0 20px;text-align:left;">&times;</span>
+                    <input type="number" class="buy-field" style="flex: 0 0 60px;text-align:right;" name="adjustment.{{@key}}.buy" data-dtype="Number" placeholder="{{lookup (lookup @root.defaultAdjustment @key) 'buy'}}" value="{{lookup (lookup @root.adjustment @key) 'buy'}}" />
+                </div>
+            </td>
+        </tr>
+        {{/each}}
+    </table>
+    {{#if showConvert}}
     <hr />
     <div class="form-group">
         <label>{{localize 'MonksEnhancedJournal.ConvertShopItems'}}</label>
         <div class="form-fields" style="text-align:right;">
             <a class="convert-button"><i class="fas fa-donate"></i> {{localize 'MonksEnhancedJournal.Convert'}}</a>
         </div>
+    </div>
+    {{/if}}
+    <div class="flexrow" style="flex: 0 0 30px;">
+        {{#if showConvert}}<button type="button" class="reset"><i class="fas fa-undo"></i> Reset</button>{{/if}}
+        <button type="submit"><i class="fas fa-check"></i> Save</button>
+        <button type="button" class="cancel"><i class="fas fa-times"></i> Cancel</button>
     </div>
 </form>

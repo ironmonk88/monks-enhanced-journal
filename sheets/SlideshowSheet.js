@@ -91,13 +91,13 @@ export class SlideshowSheet extends EnhancedJournalSheet {
             data.slides = flags.slides.map(s => {
                 let slide = duplicate(s);
 
-                slide.thumbnail = (this.object._thumbnails && this.object._thumbnails[slide.id]) || "/modules/monks-enhanced-journal/assets/loading.gif"; //slide.img;
+                slide.thumbnail = s.img ? (this.object._thumbnails && this.object._thumbnails[slide.id]) || "/modules/monks-enhanced-journal/assets/loading.gif" : ""; //slide.img;
 
-                if (slide.background?.color == '') {
+                if (slide.background?.color == '' && slide.thumbnail) {
                     slide.background = `background-image:url(\'${slide.thumbnail}\');`;
                 }
                 else
-                    slide.background = `background-color:${slide.background.color}`;
+                    slide.background = `background-color:${slide.background.color || "#ffffff"}`;
 
                 slide.texts = slide.texts.map(t => {
                     let text = duplicate(t);
@@ -149,6 +149,7 @@ export class SlideshowSheet extends EnhancedJournalSheet {
     }
 
     static async createSlideThumbnail(src) {
+        if (!src) return null;
         try {
             const texture = await loadTexture(src);
             let sprite = PIXI.Sprite.from(texture);
@@ -666,11 +667,13 @@ export class SlideshowSheet extends EnhancedJournalSheet {
                 MonksEnhancedJournal.emit('playSlide', { uuid: this.object.uuid, idx: idx });
         }
 
-        if (img[0].complete) {
+        if (img[0].complete || !img[0].paused) {
             loaded.call(this);
         } else {
-            img.on('load', loaded.bind(this))
-            img.on('error', function () {
+            //img.on('play', loaded.bind(this));
+            img.on('load', loaded.bind(this));
+            img.on('loadeddata', loaded.bind(this));
+            img.on('error', () => {
                 loaded.call(this);
             })
         }

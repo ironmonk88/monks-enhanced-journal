@@ -8,6 +8,7 @@
             {{#if @root.owner}}<button type="button" class="progress-button decrease"><i class="fas fa-minus"></i></button>{{/if}}
             <div class="progress" style="margin-top: 1px;">
                 <div class="progress-bar" style="width:{{this.percent}}%"></div>
+                <div class="progress-value">{{this.valueText}}</div>
             </div>
             {{#if @root.owner}}<button type="button" class="progress-button increase"><i class="fas fa-plus"></i></button>{{/if}}
         </div>

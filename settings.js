@@ -1,5 +1,6 @@
 import { MonksEnhancedJournal, i18n } from "./monks-enhanced-journal.js"
 import { EditCurrency } from "./apps/editcurrency.js"
+import { AdjustPrice } from "./apps/adjust-price.js"
 import { EditPersonAttributes, EditPlaceAttributes } from "./apps/editattributes.js"
 import { APSJ } from "./apsjournal.js";
 
@@ -83,6 +84,14 @@ export const registerSettings = function () {
 		icon: 'fas fa-coins',
 		restricted: true,
 		type: EditCurrency
+	});
+
+	game.settings.registerMenu(modulename, 'defaultPrices', {
+		label: i18n("MonksEnhancedJournal.defaultprices.name"),
+		hint: i18n("MonksEnhancedJournal.defaultprices.hint"),
+		icon: 'fas fa-dollar-sign',
+		restricted: true,
+		type: AdjustPrice
 	});
 
 	game.settings.registerMenu(modulename, 'editPersonAttributes', {
@@ -502,6 +511,18 @@ export const registerSettings = function () {
 		type: Array,
 	});
 
+	game.settings.register(modulename, "adjustment-defaults", {
+		scope: "world",
+		config: false,
+		default: {
+			default: {
+				sell: 1,
+				buy: 0.5
+			}
+		},
+		type: Object,
+    });
+
 	game.settings.register(modulename, "show-dialog", {
 		scope: "client",
 		default: true,
@@ -540,6 +561,13 @@ export const registerSettings = function () {
 	});
 
 	game.settings.register(modulename, "fix-person", {
+		scope: "world",
+		default: true,
+		type: Boolean,
+		config: false
+	});
+
+	game.settings.register(modulename, "fix-adjustment", {
 		scope: "world",
 		default: true,
 		type: Boolean,

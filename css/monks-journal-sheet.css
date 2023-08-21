@@ -1197,12 +1197,21 @@ body:not(.system-pf2e) .monks-journal-sheet .sheet-container .tag {
     box-shadow: 0 0 4px #b2c3ff;
     border-radius: 4px;
     margin: 0px 4px;
+    position: relative;
 }
 .monks-journal-sheet .list-list .progress:first-child {
     margin-left: 0px;
 }
 .monks-journal-sheet .list-list .progress:last-child {
     margin-right: 0px;
+}
+.monks-journal-sheet .list-list .progress-value {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    width: 100%;
+    text-align: center;
+    color: #ffffff;
 }
 .monks-journal-sheet .list-list .progress-bar {
     position: relative;

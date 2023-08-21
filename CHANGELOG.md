@@ -1,3 +1,19 @@
+# Version 11.05
+
+Fixed issue with playing a slideshow when a scene loads.
+
+Added the option to use a video file for a Slideshow slide.
+
+Fixed issue with adding loot to an Encounter from a Journal Entry
+
+Added the option to set sell and buy adjustments based on item type.
+
+Added number display for progress list sheet.
+
+Removed loading indication if error with slideshow image.
+
+Cleared warning message with changes to Combat Details.
+
 # Version 11.04
 
 Fixed DC configuration in systems that don't have support for skills lists.
@@ -34,7 +50,7 @@ Added In Progress back to the quest sheet.
 
 # Version 11.03
 
-Added Saving Thorws to the DC Config for Encounters
+Added Saving Throws to the DC Config for Encounters
 
 Fixed warning about the private property of compendiums being discontinued.
 
