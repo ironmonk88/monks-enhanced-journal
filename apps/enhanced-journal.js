@@ -1600,6 +1600,13 @@ export class EnhancedJournal extends Application {
                 }
             },
             {
+                name: i18n("MonksEnhancedJournal.auctioneer"),
+                icon: '<i class="fas fa-dolly-flatbed"></i>', // TODO
+                callback: li => {
+                    this.convert('auctioneer');
+                }
+            },
+            {
                 name: i18n("MonksEnhancedJournal.textimage"),
                 icon: '<i class="fas fa-book-open-reader"></i>',
                 callback: li => {

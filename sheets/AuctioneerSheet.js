@@ -588,7 +588,7 @@ export class AuctioneerSheet extends EnhancedJournalSheet {
                 if (!AuctioneerSheet.canAfford((result.quantity * price.value) + " " + price.currency, actor))
                     ui.notifications.error(format("MonksEnhancedJournal.msg.ActorCannotAffordItem", { name: actor.name, quantity: result.quantity, itemname: item.name}));
                 else {
-                    this.constructor.createRequestMessage.call(this, this.object, item, actor, true);
+                    this.constructor.createRequestMessage.call(this, this.object, item, actor, "auctioneer");
                     MonksEnhancedJournal.emit("notify", { actor: actor.name, item: item.name });
                 }
             } else if (this.object.flags['monks-enhanced-journal'].purchasing == 'free') {
@@ -754,7 +754,7 @@ export class AuctioneerSheet extends EnhancedJournalSheet {
         }
     }
 
-    static actorPurchase(actor, price) {
+    static actorBid(actor, price) {
         //find the currency
         if (price.value == 0)
             return;
@@ -810,7 +810,7 @@ export class AuctioneerSheet extends EnhancedJournalSheet {
                         if (!AuctioneerSheet.canAfford((result.quantity * price.value) + " " + price.currency, actor))
                             ui.notifications.error(format("MonksEnhancedJournal.msg.ActorCannotAffordItem", { name: actor.name, quantity: result.quantity, itemname: item.name}));
                         else {
-                            AuctioneerSheet.createRequestMessage.call(this, entry, item, actor, true);
+                            AuctioneerSheet.createRequestMessage.call(this, entry, item, actor, "auctioneer");
                             MonksEnhancedJournal.emit("notify", { actor: actor.name, item: item.name });
                         }
                     } else {

@@ -48,7 +48,7 @@ export class SelectPlayer extends FormApplication {
 
     canShowPic() {
         let type = this.journalsheet.object?.flags["monks-enhanced-journal"]?.type || 'oldentry';
-        return ((["person", "place", "poi", "event", "quest", "oldentry", "organization", "shop", "oldentry", "journalentry", "base"].includes(type) || this.object.documentName == 'Actor') && this.object.img);
+        return ((["person", "place", "poi", "event", "quest", "oldentry", "organization", "shop", "auctioneer", "oldentry", "journalentry", "base"].includes(type) || this.object.documentName == 'Actor') && this.object.img);
     }
 
     /* -------------------------------------------- */

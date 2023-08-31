@@ -12,6 +12,7 @@ import { QuestSheet } from "./sheets/QuestSheet.js"
 import { SlideshowSheet } from "./sheets/SlideshowSheet.js"
 import { OrganizationSheet } from "./sheets/OrganizationSheet.js"
 import { ShopSheet } from "./sheets/ShopSheet.js"
+import { AuctioneerSheet } from "./sheets/AuctioneerSheet.js"
 import { LootSheet } from "./sheets/LootSheet.js"
 import { EventSheet } from "./sheets/EventSheet.js"
 import { TextEntrySheet, TextImageEntrySheet } from "./sheets/TextEntrySheet.js"
@@ -121,6 +122,7 @@ export class MonksEnhancedJournal {
             poi: PointOfInterestSheet,
             quest: QuestSheet,
             shop: ShopSheet,
+            auctioneer: AuctioneerSheet,
             loot: LootSheet,
             slideshow: SlideshowSheet,
             journalentry: TextEntrySheet
@@ -139,6 +141,7 @@ export class MonksEnhancedJournal {
             event: "MonksEnhancedJournal.event",
             organization: "MonksEnhancedJournal.organization",
             shop: "MonksEnhancedJournal.shop",
+            auctioneer: "MonksEnhancedJournal.auctioneer",
             loot: "MonksEnhancedJournal.loot",
             list: "MonksEnhancedJournal.list",
             journalentry: "MonksEnhancedJournal.journalentry"
@@ -497,7 +500,7 @@ export class MonksEnhancedJournal {
                 ...ownership.map(([name, level]) => ({ level, label: `OWNERSHIP.${name}` }))
             ];
             MonksEnhancedJournal.fixType(doc);
-            let hasImage = (doc instanceof JournalEntryPage) && ((["loot", "organization", "person", "place", "poi", "quest", "shop", "picture"].includes(doc.type) || (doc.type === "image")) && !!doc.src);
+            let hasImage = (doc instanceof JournalEntryPage) && ((["loot", "organization", "person", "place", "poi", "quest", "shop", "auctioneer", "picture"].includes(doc.type) || (doc.type === "image")) && !!doc.src);
 
             let showAs = doc.getFlag("monks-enhanced-journal", "showAs") || (doc.type == "image" ? "image" : options?.showAs || "journal");
             if (!hasImage && showAs != "journal")
@@ -1308,6 +1311,8 @@ export class MonksEnhancedJournal {
 
                 if (page.type == 'shop')
                     noteData.icon = "icons/svg/hanging-sign.svg";
+                else if (page.type == 'auctioneer')
+                    noteData.icon = "icons/svg/hanging-sign.svg"; // TODO
                 else if (page.type == 'loot')
                     noteData.icon = page.src || "icons/svg/chest.svg";
                 else if (page.type == 'encounter')
@@ -1672,7 +1677,7 @@ export class MonksEnhancedJournal {
 
         for (let journal of game.journal) {
             let type = journal.getFlag('monks-enhanced-journal', 'type');
-            if (["shop", "encounter", "quest"].includes(type)) {
+            if (["shop", "auctioneer", "encounter", "quest"].includes(type)) {
                 isFix = false;
                 if (type == "quest") {
                     let rewardFix = false;
@@ -1703,6 +1708,15 @@ export class MonksEnhancedJournal {
                     let olditems = journal.getFlag('monks-enhanced-journal', 'items') || [];
                     let actor;
                     if (type == 'shop' && journal.getFlag('monks-enhanced-journal', 'actor')) {
+                        let actorData = journal.getFlag('monks-enhanced-journal', 'actor');
+                        if (actorData.id) {
+                            actorData = actorData.id;
+                            await journal.setFlag('monks-enhanced-journal', 'actor', actorData);
+                        }
+
+                        actor = game.actors.get(actorData);
+                    }
+                    if (type == 'auctioneer' && journal.getFlag('monks-enhanced-journal', 'actor')) {
                         let actorData = journal.getFlag('monks-enhanced-journal', 'actor');
                         if (actorData.id) {
                             actorData = actorData.id;
@@ -1745,11 +1759,13 @@ export class MonksEnhancedJournal {
                     let actors = journal.getFlag('monks-enhanced-journal', 'actors') || [];
                     let shops = journal.getFlag('monks-enhanced-journal', 'shops') || [];
                     await journal.setFlag('monks-enhanced-journal', 'relationships', actors.concat(shops));
+                    let auctioneers = journal.getFlag('monks-enhanced-journal', 'auctioneers') || [];
+                    await journal.setFlag('monks-enhanced-journal', 'relationships', actors.concat(auctioneers));
                     //journal.unsetFlag('monks-enhanced-journal', 'actors');
                 }
 
                 //cheak to make sure the relationships go both ways
-                if (["person", "place", "organization", "shop", "quest"].includes(journal.type)) {
+                if (["person", "place", "organization", "shop", "auctioneer", "quest"].includes(journal.type)) {
                     let relationships = journal.getFlag('monks-enhanced-journal', 'relationships') || [];
                     for (let relationship of relationships) {
                         let other = game.journal.get(relationship.id);
@@ -1948,6 +1964,22 @@ export class MonksEnhancedJournal {
                     if (defValue.sell || defValue.buy) {
                         if (defValue.sell && defValue.sell == defaultAdjustments.default.sell) delete defValue.sell;
                         if (defValue.buy && defValue.buy == defaultAdjustments.default.buy) delete defValue.buy;
+                        if (Object.keys(defValue).length != 0) {
+                            adjustment.default = defValue;
+                            await page.update({ flags: { "monks-enhanced-journal": { adjustment: adjustment } } });
+                        }
+                    }
+                }
+                if (MonksEnhancedJournal.getMEJType(journal) == "auctioneer") {
+                    let page = journal.pages.contents[0];
+
+                    let adjustment = getProperty(page, "flags.monks-enhanced-journal.adjustment") || {};
+                    let defValue = {
+                        bid: adjustment.default?.bid ?? getProperty(page, "flags.monks-enhanced-journal.bid")
+                    };
+
+                    if (defValue.bid || defValue.retrieve) {
+                        if (defValue.bid && defValue.bid == defaultAdjustments.default.bid) delete defValue.bid;
                         if (Object.keys(defValue).length != 0) {
                             adjustment.default = defValue;
                             await page.update({ flags: { "monks-enhanced-journal": { adjustment: adjustment } } });
@@ -2506,6 +2538,7 @@ export class MonksEnhancedJournal {
             case 'actor': return 'fa-users';
             case 'organization': return 'fa-flag';
             case 'shop': return 'fa-dolly-flatbed';
+            case 'auctioneer': return 'fa-dolly-flatbed'; // TODO
             case 'loot': return 'fa-donate';
             case 'poi': return 'fa-map-marker-alt';
             case 'list': return 'fa-list';
@@ -3089,6 +3122,28 @@ export class MonksEnhancedJournal {
         }
     }
 
+    static async bidItem(data) {
+        if (game.user.isGM) {
+            let entry = await fromUuid(data.auctioneerid);
+            let actor = game.actors.get(data.actorid);
+
+            if (entry) {
+                MonksEnhancedJournal.fixType(entry);
+                const cls = (entry._getSheetClass ? entry._getSheetClass() : null);
+                if (cls && cls.bidItem) {
+                    cls.bidItem.call(cls, entry, data.itemid, data.quantity, { actor, user: data.user, chatmessage: data.chatmessage, bid: data.bid, remaining: data.remaining });
+                    let item = (entry.getFlag('monks-enhanced-journal', 'items') || []).find(i => i._id == data.itemid);
+                    let price = MEJHelpers.getPrice(getProperty(item, "flags.monks-enhanced-journal.cost"));
+                    if (data.bid === true && item) {
+                        price.value = price.value * (data.quantity ?? 1);
+                        cls.actorBid(actor, price);
+                    }
+                    cls.addLog.call(entry, { actor: actor.name, item: item.name, quantity: data.quantity, price: `${price.value} ${price.currency}`, type: data.bid ? 'bid' : 'but back' });
+                }
+            }
+        }
+    }
+
     static async requestLoot(data) {
         if (game.user.isGM) {
             let entry = await fromUuid(data.shopid);
@@ -3421,6 +3476,73 @@ export class MonksEnhancedJournal {
                     }
                 }
             }
+            else if (action == "bid") {
+                accepted = true;
+                let msg = `<span class="request-msg"><i class="fas fa-check"></i> ${i18n("MonksEnhancedJournal.msg.ItemAddedToInventory")}</span>`;
+                //find the item
+                let msgitems = message.getFlag('monks-enhanced-journal', 'items');
+                for (let msgitem of msgitems) {
+                    let data = getProperty(msgitem, "flags.monks-enhanced-journal")
+                    let purchaseQty = data.quantity;
+                    if (purchaseQty == 0)
+                        continue;
+                    let item = (entry.getFlag('monks-enhanced-journal', 'items') || []).find(i => i._id == msgitem._id);
+                    if (!item) {
+                        ui.notifications.warn(i18n("MonksEnhancedJournal.msg.CannotTransferItemQuantity"));
+                        msg = `<span class="request-msg"><i class="fas fa-times"></i> ${i18n("MonksEnhancedJournal.msg.CannotTransferItemQuantity")}</span>`
+                        continue;
+                    }
+
+                    MonksEnhancedJournal.fixType(entry);
+                    const cls = (entry._getSheetClass ? entry._getSheetClass() : null);
+
+                    let remaining = getProperty(item, "flags.monks-enhanced-journal.quantity");
+                    if (remaining && remaining < purchaseQty) {
+                        //check to see if there's enough quantity
+                        ui.notifications.warn(i18n("MonksEnhancedJournal.msg.CannotTransferItemQuantity"));
+                        msg = `<span class="request-msg"><i class="fas fa-times"></i> ${i18n("MonksEnhancedJournal.msg.CannotTransferItemQuantity")}</span>`
+                        continue;
+                    }
+
+                    // if (data.sell > 0 && cls.canAfford) {
+                    //     //check if the player can afford it
+                    //     if (!cls.canAfford((data.sell * purchaseQty) + " " + data.currency, actor)) {
+                    //         ui.notifications.warn(format("MonksEnhancedJournal.msg.CannotTransferCannotAffordIt", { name: actor.name }));
+                    //         msg = `<span class="request-msg"><i class="fas fa-times"></i> ${format("MonksEnhancedJournal.msg.CannotTransferCannotAffordIt", { name: actor.name })}</span>`;
+                    //         continue;
+                    //     }
+                    // }
+
+                    //Add it to the actor
+                    let itemData = duplicate(item);
+                    if ((itemData.type === "spell") && game.system.id == 'dnd5e') {
+                        itemData = await cls.createScrollFromSpell(itemData);
+                    }
+                    let itemQty = getValue(itemData, quantityname(), 1);
+                    setValue(itemData, quantityname(), purchaseQty * itemQty);
+                    if (data.sell > 0)
+                        setPrice(itemData, pricename(), data.sell + " " + data.currency);
+                    delete itemData._id;
+                    if (!data.consumable) {
+                        let sheet = actor.sheet;
+                        if (sheet._onDropItem)
+                            sheet._onDropItem({ preventDefault: () => { } }, { type: "Item", uuid: `${entry.uuid}.Items.${item._id}`, data: itemData });
+                        else
+                            actor.createEmbeddedDocuments("Item", [itemData]);
+                    }
+                    //deduct the gold
+                    // if (data.sell > 0)
+                    //     cls.actorPurchase(actor, { value: (data.sell * purchaseQty), currency: data.currency });
+                    cls.purchaseItem.call(cls, entry, item._id, data.quantity, { actor, chatmessage: false });
+
+                    cls.addLog.call(entry, { actor: actor.name, item: item.name, quantity: data.quantity, price: data.sell + " " + data.currency, type: 'purchase' });
+                }
+
+                $('.request-buttons', content).remove();
+                $('input', content).remove();
+                $('.item-quantity span, .item-price span', content).removeClass('player-only').show();
+                $('.card-footer', content).html(msg);
+            }
         } else {
             accepted = false;
             $('.request-buttons', content).remove();
@@ -3477,6 +3599,28 @@ export class MonksEnhancedJournal {
             document = game.actors.get(this.flags['monks-enhanced-journal'].actor.id);
         } else if (type == 'shop') {
             document = await fromUuid(this.flags['monks-enhanced-journal'].shop.uuid);
+
+            if (MonksEnhancedJournal.openJournalEntry(document))
+                return;
+
+            // if it's a journal entry, then check to see if it's an MEJ sheet, then switch to the page
+            if (document instanceof JournalEntry && document.pages.size == 1 && !!getProperty(this.object.pages.contents[0], "flags.monks-enhanced-journal.type")) {
+                document = this.object.pages.contents[0];
+            }
+
+            if (document instanceof JournalEntryPage) {
+                // Fix the page, and confirm that it's an MEJ type, otherwise switch to the parent, with the page as a link
+                MonksEnhancedJournal.fixType(document);
+                let type = getProperty(document, "flags.monks-enhanced-journal.type");
+                if (type == "base" || type == "oldentry") type = "journalentry";
+                let types = MonksEnhancedJournal.getDocumentTypes();
+                if (!types[type]) {
+                    options.pageId = document.id;
+                    document = document.parent;
+                }
+            }
+        } else if (type == 'auctioneer') {
+            document = await fromUuid(this.flags['monks-enhanced-journal'].auctioneer.uuid);
 
             if (MonksEnhancedJournal.openJournalEntry(document))
                 return;
@@ -4305,6 +4449,7 @@ Hooks.on("renderChatMessage", (message, html, data) => {
 
         $('.chat-actor-icon', html).click(MonksEnhancedJournal.openRequestItem.bind(message, 'actor')).attr('onerror', "$(this).attr('src', 'icons/svg/mystery-man.svg');");
         $('.chat-shop-icon', html).click(MonksEnhancedJournal.openRequestItem.bind(message, 'shop')).attr('onerror', "$(this).attr('src', 'modules/monks-enhanced-journal/assets/shop.png');");
+        $('.chat-auctioneer-icon', html).click(MonksEnhancedJournal.openRequestItem.bind(message, 'auctioneer')).attr('onerror', "$(this).attr('src', 'modules/monks-enhanced-journal/assets/auctioneer.png');");
         $('.item-list .item-name .item-image', html).click(MonksEnhancedJournal.openRequestItem.bind(message, 'item'));
         $('.items-list .item-icon', html).click(MonksEnhancedJournal.openRequestItem.bind(message, 'item'));
     } else if (message.flags['journal-chat-card']) {
@@ -4593,6 +4738,15 @@ Hooks.on('updateWorldTime', async (worldTime) => {
             let newstate = MonksEnhancedJournal.getOpenState(shop);
             if (state != newstate) {
                 await shop.setFlag("monks-enhanced-journal", "state", newstate);
+            }
+        }
+        else if (MonksEnhancedJournal.getMEJType(journal) == "auctioneer") {
+            let auctioneerp = journal.pages.contents[0];
+
+            let state = getProperty(auctioneer, "flags.monks-enhanced-journal.state");
+            let newstate = MonksEnhancedJournal.getOpenState(auctioneer);
+            if (state != newstate) {
+                await auctioneer.setFlag("monks-enhanced-journal", "state", newstate);
             }
         }
     }

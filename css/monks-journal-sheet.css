@@ -1449,6 +1449,16 @@ body:not(.system-pf2e) .monks-journal-sheet .sheet-container .tag {
 
 }
 
+/* Auctioneer */
+.monks-journal-sheet.sheet .auctioneer-container .time-field {
+    flex: 0 0 100px;
+}
+
+.monks-journal-sheet.sheet .auctioneer-container .tab.details .details-section .form-group label {
+    flex: 2;
+
+}
+
 /* Slideshow */
 .monks-journal-sheet .slideshow-container {
     height: 100%;

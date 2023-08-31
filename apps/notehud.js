@@ -66,7 +66,7 @@ export class NoteHUD extends BasePlaceableHUD {
         let ownership = {};
         Object.assign(ownership, document.ownership);
         let isHidden = ownership["default"] >= CONST.DOCUMENT_OWNERSHIP_LEVELS.LIMITED;
-        ownership["default"] = (isHidden ? CONST.DOCUMENT_OWNERSHIP_LEVELS.NONE : (document.type == "loot" || document.type == "shop" || !setting("hud-limited") ? CONST.DOCUMENT_OWNERSHIP_LEVELS.OBSERVER : CONST.DOCUMENT_OWNERSHIP_LEVELS.LIMITED));
+        ownership["default"] = (isHidden ? CONST.DOCUMENT_OWNERSHIP_LEVELS.NONE : (document.type == "loot" || document.type == "shop" || document.type == "auctioneer" || !setting("hud-limited") ? CONST.DOCUMENT_OWNERSHIP_LEVELS.OBSERVER : CONST.DOCUMENT_OWNERSHIP_LEVELS.LIMITED));
         document.update({ ownership: ownership });
 
         event.currentTarget.classList.toggle("active", isHidden);

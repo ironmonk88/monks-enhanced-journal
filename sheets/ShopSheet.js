@@ -588,7 +588,7 @@ export class ShopSheet extends EnhancedJournalSheet {
                 if (!ShopSheet.canAfford((result.quantity * price.value) + " " + price.currency, actor))
                     ui.notifications.error(format("MonksEnhancedJournal.msg.ActorCannotAffordItem", { name: actor.name, quantity: result.quantity, itemname: item.name}));
                 else {
-                    this.constructor.createRequestMessage.call(this, this.object, item, actor, true);
+                    this.constructor.createRequestMessage.call(this, this.object, item, actor, "shop");
                     MonksEnhancedJournal.emit("notify", { actor: actor.name, item: item.name });
                 }
             } else if (this.object.flags['monks-enhanced-journal'].purchasing == 'free') {
@@ -810,7 +810,7 @@ export class ShopSheet extends EnhancedJournalSheet {
                         if (!ShopSheet.canAfford((result.quantity * price.value) + " " + price.currency, actor))
                             ui.notifications.error(format("MonksEnhancedJournal.msg.ActorCannotAffordItem", { name: actor.name, quantity: result.quantity, itemname: item.name}));
                         else {
-                            ShopSheet.createRequestMessage.call(this, entry, item, actor, true);
+                            ShopSheet.createRequestMessage.call(this, entry, item, actor, "shop");
                             MonksEnhancedJournal.emit("notify", { actor: actor.name, item: item.name });
                         }
                     } else {
