@@ -1601,7 +1601,7 @@ export class EnhancedJournal extends Application {
             },
             {
                 name: i18n("MonksEnhancedJournal.auctioneer"),
-                icon: '<i class="fas fa-dolly-flatbed"></i>', // TODO
+                icon: '<i class="fas fa-hand-holding-usd"></i>',
                 callback: li => {
                     this.convert('auctioneer');
                 }

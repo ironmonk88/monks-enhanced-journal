@@ -1,13 +1,13 @@
 <form class="flexcol journal-subsheet {{entrytype}}{{#if isGM}} gm{{/if}}{{#if owner}} owner{{/if}}" editable="{{editable}}">
-    <div class="sheet-container detailed shop-container flexcol">
+    <div class="sheet-container detailed auctioneer-container flexcol">
         <header class="journal-sheet-header flexrow">
             <div class="sheet-image">
-                <img class="profile nopopout" src="{{data.src}}" data-edit="src" onerror="if (!this.imgerr) { this.imgerr = true; this.src = 'modules/monks-enhanced-journal/assets/shop.png' }">
+                <img class="profile nopopout" src="{{data.src}}" data-edit="src" onerror="if (!this.imgerr) { this.imgerr = true; this.src = 'modules/monks-enhanced-journal/assets/auctioneer.png' }">
             </div>
             <section class="header-details">
-                <h1 class="shopname header-name flexrow">
+                <h1 class="auctioneername header-name flexrow">
                     <i class="fas {{data.icon}} sheet-icon"></i>
-                    <input name="name" type="text" value="{{data.name}}" placeholder="{{localize 'MonksEnhancedJournal.ShopName'}}">
+                    <input name="name" type="text" value="{{data.name}}" placeholder="{{localize 'MonksEnhancedJournal.AuctioneerName'}}">
                     {{#if hasRollTables}}
                     <button type="button" class="generate-name" data-tooltip="Generate Name">
                         <i class="fas fa-comment-lines" style="margin-left: 2px; margin-right: 1px;"></i>
@@ -20,8 +20,8 @@
                     {{/if}}
                 </h1>
                 <div class="form-group">
-                    <label>{{localize 'MonksEnhancedJournal.ShopType'}}</label>
-                    <input type="text" name="flags.monks-enhanced-journal.shoptype" value="{{data.flags.monks-enhanced-journal.shoptype}}" />
+                    <label>{{localize 'MonksEnhancedJournal.AuctioneerType'}}</label>
+                    <input type="text" name="flags.monks-enhanced-journal.auctioneertype" value="{{data.flags.monks-enhanced-journal.auctioneertype}}" />
                 </div>
                 <div class="form-group">
                     <label>{{localize 'MonksEnhancedJournal.Location'}}</label>
@@ -65,8 +65,8 @@
                             <input type="text" class="time-field" name="opening" value="{{opening}}" style="text-align: right;" /><span style="flex: 0 0 50px;text-align:center;">to</span><input type="text" class="time-field" name="closing" value="{{closing}}" style="text-align: right;" />
                         </div>
                         <div class="form-group owner-only">
-                            <label style="background: none; border: none;">{{localize 'MonksEnhancedJournal.ShopOpen'}}</label>
-                            <select class="shop-state" name="flags.monks-enhanced-journal.state">
+                            <label style="background: none; border: none;">{{localize 'MonksEnhancedJournal.AuctioneerOpen'}}</label>
+                            <select class="auctioneer-state" name="flags.monks-enhanced-journal.state">
                                 {{ selectOptions openOptions selected=data.flags.monks-enhanced-journal.state localize=true }}
                             </select>
                         </div>
@@ -76,19 +76,19 @@
                         </div>
                         <div class="form-group owner-only">
                             <label style="background: none; border: none;">{{localize 'MonksEnhancedJournal.PlayerPurchasing'}}</label>
-                            <select class="shop-state" name="flags.monks-enhanced-journal.purchasing">
+                            <select class="auctioneer-state" name="flags.monks-enhanced-journal.purchasing">
                                 {{ selectOptions purchaseOptions selected=data.flags.monks-enhanced-journal.purchasing localize=true }}
                             </select>
                         </div>
                         <div class="form-group owner-only">
                             <label style="background: none; border: none;">{{localize 'MonksEnhancedJournal.PlayerSelling'}}</label>
-                            <select class="shop-state" name="flags.monks-enhanced-journal.selling">
+                            <select class="auctioneer-state" name="flags.monks-enhanced-journal.selling">
                                 {{ selectOptions sellingOptions selected=data.flags.monks-enhanced-journal.selling localize=true }}
                             </select>
                         </div>
                     </div>
                     <div class="flexcol" style="overflow: hidden;">
-                        <div class="items-list shop-items">
+                        <div class="items-list auctioneer-items">
                             <div class="item-header flexrow">
                                 <h3 class="item-name noborder flexrow">Name</h3>
                                 <h3 class="item-name noborder flexrow">Item</h3>
@@ -136,7 +136,7 @@
                     {{#if nocharacter}}
                     <div class="no-character-alert">You don't have a selected default character, and won't be able to automatically purchase items.  Please select a character <a class="open-player-config">here</a></div>
                     {{/if}}
-                    <div class="items-list shop-items">
+                    <div class="items-list auctioneer-items">
                         <div class="item-header flexrow">
                             <h3 class="item-name noborder flexrow" sort="name">{{localize 'MonksEnhancedJournal.Items'}}</h3>
                             {{#if @root.showrarity}}<div class="item-detail item-rarity">{{localize 'MonksEnhancedJournal.Rarity'}}</div>{{/if}}
@@ -212,13 +212,13 @@
                             </li>
                             {{else}}
                             {{#if owner}}
-                            <li class="instruction">{{localize 'MonksEnhancedJournal.msg.DragItemsToAddToShop'}}</li>
+                            <li class="instruction">{{localize 'MonksEnhancedJournal.msg.DragItemsToAddToAuctioneer'}}</li>
                             {{else}}
                             <li class="instruction">{{localize 'MonksEnhancedJournal.msg.NoItemsAtTheMoment'}}</li>
                             {{/if}}
                             {{/each}}
                             {{else}}
-                            <li class="instruction">{{localize 'MonksEnhancedJournal.msg.ShopCurrentlyClosed'}}</li>
+                            <li class="instruction">{{localize 'MonksEnhancedJournal.msg.AuctioneerCurrentlyClosed'}}</li>
                             {{/unless}}
                         </ol>
                     </div>
