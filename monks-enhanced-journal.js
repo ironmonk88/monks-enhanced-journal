@@ -2238,7 +2238,7 @@ export class MonksEnhancedJournal {
 
     static isTheBidWinner( item ) {
         const currentUser = game.user.id;
-        const bidWinner = getProperty(item, `flags.monks-enhanced-journal.bid-winner`);
+        const bidWinner = getProperty(item, `flags.monks-enhanced-journal.bidUsername`);
         if(game.user.isGM || currentUser === bidWinner) {
             return true;
         } else {
@@ -3467,6 +3467,11 @@ export class MonksEnhancedJournal {
                         data.price = (data.sell * sell) + " " + data.currency;
                         data.lock = true;
                         data.from = actor.name;
+
+                        data["bidDateEnd"] = entry.getFlag('monks-enhanced-journal', 'bidDateEnd');
+                        data["bidDateStart"] = entry.getFlag('monks-enhanced-journal', 'bidDateStart');
+                        data["bidPriceCurrent"] = entry.getFlag('monks-enhanced-journal', 'bidPriceCurrent');
+                        data["bidPriceUsername"] = entry.getFlag('monks-enhanced-journal', 'bidPriceUsername');
 
                         setProperty(msgitem, "flags.monks-enhanced-journal", data);
 

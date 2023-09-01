@@ -576,7 +576,7 @@ export class AuctioneerSheet extends EnhancedJournalSheet {
             return false;
         }
 
-        const bidCurrentPriceFlag = getProperty(this.object, `flags.monks-enhanced-journal.bid-price-current`) ?? data.cost ?? 0;
+        const bidCurrentPriceFlag = getProperty(this.object, `flags.monks-enhanced-journal.bidPriceCurrent`) ?? data.cost ?? 0;
         let result = await AuctioneerSheet.confirmQuantity(item, max, "purchase");
         
         if ((result?.quantity ?? 0) > 0) {
@@ -974,9 +974,9 @@ export class AuctioneerSheet extends EnhancedJournalSheet {
     }
 
     _isDateForBidBetween() {
-        const startS = getProperty(this.object, `flags.monks-enhanced-journal.bid-date-start`);
+        const startS = getProperty(this.object, `flags.monks-enhanced-journal.bidDateStart`);
         const start = startS ? Date.parse(startS) : null;
-        const endS = getProperty(this.object, `flags.monks-enhanced-journal.bid-date-end`);
+        const endS = getProperty(this.object, `flags.monks-enhanced-journal.bidDateEnd`);
         const end =  endS ? Date.parse(endS) : null;
         const d = Date.now();
 

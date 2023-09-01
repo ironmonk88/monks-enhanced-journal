@@ -1256,7 +1256,11 @@ export class EnhancedJournalSheet extends JournalPageSheet {
                 icon: icon,
                 assigned: flags.assigned,
                 received: flags.received,
-                requests: requests
+                requests: requests,
+                bidPriceCurrent: flags.bidPriceCurrent,
+                bidDateStart: flags.bidDateStart,
+                bidDateEnd: flags.bidDateEnd,
+                bidUsername: flags. bidUsername
             };
 
             if (game.system.id == "dnd5e" && item.system?.rarity) {
