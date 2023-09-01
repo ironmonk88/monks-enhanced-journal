@@ -42,12 +42,12 @@ export class AuctioneerSheet extends EnhancedJournalSheet {
             confirm: "MonksEnhancedJournal.purchasing.request"
         };
 
-        // data.sellingOptions = 
-        // {
-        //     locked: "MonksEnhancedJournal.selling.locked",
-        //     free: "MonksEnhancedJournal.selling.free",
-        //     confirm: "MonksEnhancedJournal.selling.request"
-        // };
+        data.sellingOptions = 
+        {
+            locked: "MonksEnhancedJournal.selling.locked",
+            free: "MonksEnhancedJournal.selling.free",
+            confirm: "MonksEnhancedJournal.selling.request"
+        };
 
         data.openOptions = {
             open: "MonksEnhancedJournal.open.open",
@@ -62,7 +62,7 @@ export class AuctioneerSheet extends EnhancedJournalSheet {
 
         let purchasing = data.data.flags['monks-enhanced-journal']?.purchasing || 'confirm';
         let hasGM = (game.users.find(u => u.isGM && u.active) != undefined);
-        data.showrequestbid = (['confirm', 'free'].includes(purchasing) && !this.object.isOwner && game.user.character && hasGM);
+        data.showrequest = (['confirm', 'free'].includes(purchasing) && !this.object.isOwner && game.user.character && hasGM);
         data.nocharacter = !game.user.isGM && !game.user.character;
 
         data.showrarity = (game.system.id == "dnd5e" || game.system.id == "pf2e");
@@ -118,7 +118,7 @@ export class AuctioneerSheet extends EnhancedJournalSheet {
     static get defaultObject() {
         return {
             purchasing: 'confirm',
-            // selling: 'confirm',
+            selling: 'confirm',
             items: [],
             opening: 480,
             closing: 1020
@@ -570,12 +570,11 @@ export class AuctioneerSheet extends EnhancedJournalSheet {
             return false;
         }
 
-        // TODO we really need this ???
-        // let hasGM = (game.users.find(u => u.isGM && u.active) != undefined);
-        // if (!hasGM) {
-        //     ui.notifications.warn(i18n("MonksEnhancedJournal.msg.CannotPurchaseItemWithoutGM"));
-        //     return false;
-        // }
+        let hasGM = (game.users.find(u => u.isGM && u.active) != undefined);
+        if (!hasGM) {
+            ui.notifications.warn(i18n("MonksEnhancedJournal.msg.CannotPurchaseItemWithoutGM"));
+            return false;
+        }
 
         const bidCurrentPriceFlag = getProperty(this.object, `flags.monks-enhanced-journal.bid-price-current`) ?? data.cost ?? 0;
         let result = await AuctioneerSheet.confirmQuantity(item, max, "purchase");
