@@ -80,12 +80,14 @@
                                 {{ selectOptions purchaseOptions selected=data.flags.monks-enhanced-journal.purchasing localize=true }}
                             </select>
                         </div>
+                        <!--
                         <div class="form-group owner-only">
                             <label style="background: none; border: none;">{{localize 'MonksEnhancedJournal.PlayerSelling'}}</label>
                             <select class="auctioneer-state" name="flags.monks-enhanced-journal.selling">
                                 {{ selectOptions sellingOptions selected=data.flags.monks-enhanced-journal.selling localize=true }}
                             </select>
                         </div>
+                        -->
                     </div>
                     <div class="flexcol" style="overflow: hidden;">
                         <div class="items-list auctioneer-items">
@@ -144,7 +146,15 @@
                             <div class="item-detail item-quantity" sort="quantity">{{localize 'MonksEnhancedJournal.Qty'}}</div>
                             <div class="item-detail item-price" sort="price">{{localize 'MonksEnhancedJournal.Price'}}</div>
                             <div class="item-detail item-cost owner-only" sort="cost">{{localize 'MonksEnhancedJournal.Cost'}} <i class="fas fa-question-circle" data-tooltip="Cost is the value that will be removed from the players currency"></i></div>
-                            {{#if showrequest}}<div class="item-controls flexrow" buttons="4"></div>{{/if}}
+                            
+                            <div class="item-detail item-bid-price-current">The current top bid price of start</div>
+                            <div class="item-detail item-bid-date-start">The bis tart date</div>
+                            <div class="item-detail item-bid-date-end">The bid end date</div>
+                            {{#if isGM}}<div class="item-detail item-bid-username">The current top bidder</div>{{/if}}
+                            {{#if isGM}}<div class="item-detail item-bid-winner">The current top price</div>{{/if}}
+                            {{#if showrequestbid}}<div class="item-controls flexrow" buttons="4"></div>{{/if}}
+                            {{#isTheBidWinner this}}<div class="item-controls flexrow" buttons="5"></div>{{/isTheBidWinner}}
+                            
                             <div class="item-controls flexrow owner-only" buttons="4">
                                 <a class="item-control roll-table" title="{{localize 'MonksEnhancedJournal.PopulateFromRollTable'}}"><i class="fas fa-th-list"></i></a>
                                 <a class="item-control adjust-price" title="{{localize 'MonksEnhancedJournal.AdjustAllPrices'}}"><i class="fas fa-donate"></i></a>
@@ -192,11 +202,41 @@
                                             <input type="text" name="items.{{this.id}}.flags.monks-enhanced-journal.cost" value="{{this.cost}}" style="text-align:center;" />
                                         </div>
 
-                                        {{#if @root.showrequest}}
-                                        <div class="item-controls item-request" style="text-align:center;flex: 0 0 90px;">
-                                            <a class="item-control text request-item" {{#if (or this.lock (eq this.quantity 0))}} disabled{{/if}}><i class="fas {{this.icon}}"></i> {{this.text}}</a>
+                                        
+                                        <div class="item-detail item-bid-price-current owner-only">
+                                            <input type="text" name="items.{{this.id}}.flags.monks-enhanced-journal.bid-price-current" value="{{this.bid-price-current}}" style="text-align:center;" />
+                                        </div>
+
+                                        <div class="item-detail item-bid-date-start owner-only">
+                                            <input type="datetime-local" name="items.{{this.id}}.flags.monks-enhanced-journal.bid-date-start" value="{{this.bid-date-start}}" style="text-align:center;" />
+                                        </div>
+
+                                        <div class="item-detail item-bid-date-end owner-only">
+                                            <input type="datetime-local" name="items.{{this.id}}.flags.monks-enhanced-journal.bid-date-end" value="{{this.bid-date-end}}" style="text-align:center;" />
+                                        </div>
+
+                                        {{#if isGM}}
+                                        <div class="item-detail item-bid-username owner-only">
+                                            <input type="text" name="items.{{this.id}}.flags.monks-enhanced-journal.bid-username" value="{{this.bid-username}}" style="text-align:center;" />
                                         </div>
                                         {{/if}}
+                                        {{#if isGM}}
+                                        <div class="item-detail item-bid-winner owner-only">
+                                            <input type="text" name="items.{{this.id}}.flags.monks-enhanced-journal.bid-winner" value="{{this.bid-winner}}" style="text-align:center;" />
+                                        </div>
+                                        {{/if}}
+
+                                        {{#if @root.showrequestbid && }}
+                                        <div class="item-controls item-request" style="text-align:center;flex: 0 0 90px;">
+                                            <a class="item-control text request-item" {{#if (or this.lock (eq this.quantity 0))}} disabled{{/if}}><i class="fas {{this.icon}}"></i> Made a bid</a>
+                                        </div>
+                                        {{/if}}
+
+                                        {{#isTheBidWinner this}}
+                                        <div class="item-controls item-request" style="text-align:center;flex: 0 0 90px;">
+                                            <a class="item-control text request-item" {{#if (or this.lock (eq this.quantity 0))}} disabled{{/if}}><i class="fas {{this.icon}}"></i> Bidder winner: {{items.{{this.id}}.flags.monks-enhanced-journal.bid-winner}}</a>
+                                        </div>
+                                        {{/isTheBidWinner}}
 
                                         <div class="item-controls flexrow owner-only" buttons="4">
                                             <input type="checkbox" name="items.{{this.id}}.flags.monks-enhanced-journal.lock" {{checked this.lock}} style="display: none;" />

@@ -1312,7 +1312,7 @@ export class MonksEnhancedJournal {
                 if (page.type == 'shop')
                     noteData.icon = "icons/svg/hanging-sign.svg";
                 else if (page.type == 'auctioneer')
-                    noteData.icon = "icons/svg/temple.svg";
+                    noteData.icon = "icons/svg/hanging-sign.svg"; // TODO
                 else if (page.type == 'loot')
                     noteData.icon = page.src || "icons/svg/chest.svg";
                 else if (page.type == 'encounter')
@@ -1632,6 +1632,7 @@ export class MonksEnhancedJournal {
         }
 
         Handlebars.registerHelper({ selectGroups: MonksEnhancedJournal.selectGroups });
+        Handlebars.registerHelper({ isTheBidWinner:  MonksEnhancedJournal.isTheBidWinner });
     }
 
     static async fixItems(reset = false) {
@@ -2235,6 +2236,16 @@ export class MonksEnhancedJournal {
         return new Handlebars.SafeString(html);
     }
 
+    static isTheBidWinner( item ) {
+        const currentUser = game.user.id;
+        const bidWinner = getProperty(item, `flags.monks-enhanced-journal.bid-winner`);
+        if(game.user.isGM || currentUser === bidWinner) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     static _createPictureLink(match, { async = false, relativeTo } = {}) {
         let [type, target, name] = match.slice(1, 5);
         const data = {
@@ -2538,7 +2549,7 @@ export class MonksEnhancedJournal {
             case 'actor': return 'fa-users';
             case 'organization': return 'fa-flag';
             case 'shop': return 'fa-dolly-flatbed';
-            case 'auctioneer': return 'fa-hand-holding-usd';
+            case 'auctioneer': return 'fa-dolly-flatbed'; // TODO
             case 'loot': return 'fa-donate';
             case 'poi': return 'fa-map-marker-alt';
             case 'list': return 'fa-list';
