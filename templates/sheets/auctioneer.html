@@ -206,10 +206,15 @@
                                         <div class="item-detail item-bid-price-current owner-only">
                                             <input type="text" name="items.{{this.id}}.flags.monks-enhanced-journal.bid-price-current" value="{{this.bid-price-current}}" style="text-align:center;" />
                                         </div>
-
+                                        
                                         <div class="item-detail item-bid-date-start owner-only">
                                             <input type="datetime-local" name="items.{{this.id}}.flags.monks-enhanced-journal.bid-date-start" value="{{this.bid-date-start}}" style="text-align:center;" />
                                         </div>
+                                        
+                                        <!-- how to do it ???-->
+                                        <!---
+                                        {{sc-full-calendar id='items.{{this.id}}.flags.monks-enhanced-journal.bid-date-start' date=items.{{this.id}}.flags.monks-enhanced-journal.bid-date-start colorToMatchSeason=false showCurrentDate=false showSeasonName=false showNoteCount=false showMoonPhases=false showYear=false}}
+                                        -->
 
                                         <div class="item-detail item-bid-date-end owner-only">
                                             <input type="datetime-local" name="items.{{this.id}}.flags.monks-enhanced-journal.bid-date-end" value="{{this.bid-date-end}}" style="text-align:center;" />
