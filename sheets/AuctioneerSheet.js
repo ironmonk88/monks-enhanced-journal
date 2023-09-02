@@ -1062,13 +1062,19 @@ export class AuctioneerSheet extends EnhancedJournalSheet {
         if(!bidDateEnd) {
             return true;
         }
+        const startS = bidDateStart;
+        const start = startS ? Date.parse(startS) : null;
         const endS = bidDateEnd;
         const end =  endS ? Date.parse(endS) : null;
         const d = Date.now();
-        if(end) {
-            return d.valueOf() > end.valueOf();
+        if(start && end) {
+            return d.valueOf() < start.valueOf() || d.valueOf() > end.valueOf()
         } else {
-            return false;
+            if(end) {
+                return d.valueOf() > end.valueOf();
+            } else {
+                return false;
+            }
         }
     }
 }
