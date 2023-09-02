@@ -610,8 +610,11 @@ export class AuctioneerSheet extends EnhancedJournalSheet {
                     <form>
                     <div class="form-group">
                         <label>Put your bid!</label>
-                        <span>
-                            <input type='number' min="${bidCurrentPrice}" name='bidCurrentPrice' value='${bidCurrentPrice}'></input>(${bidCurrentCurrency})
+                    </div>
+                    <div class="form-group">
+                        <span class="flexrow">
+                            <input type='number' min="${bidCurrentPrice}" name='bidCurrentPrice' value='${bidCurrentPrice}'></input>
+                            <label> (${bidCurrentCurrency})</label>
                         </span>
                     </div>
                     </form>`,
@@ -640,8 +643,18 @@ export class AuctioneerSheet extends EnhancedJournalSheet {
                                 // TODO what if price and cost have different currency...
                                 let newPrice = price.value + " " + price.currency;
                                 let newCost = costBid.value + difference + " " + price.currency;
-                                await this.object.setFlag("monks-enhanced-journal", "price", newPrice);
-                                await this.object.setFlag("monks-enhanced-journal", "cost", newCost);
+                                MonksEnhancedJournal.emit("bidItem",
+                                {
+                                    // TODO add a auctioneerid
+                                    shopid: this.object.uuid,
+                                    itemid: item._id,
+                                    actorid: actor.id,
+                                    user: game.user.id,
+                                    quantity: result.quantity,
+                                    bid: true,
+                                    newCost: newCost,
+                                    newPrice: newPrice
+                                });
                             }
                         
                         },
@@ -866,7 +879,7 @@ export class AuctioneerSheet extends EnhancedJournalSheet {
         }
     }
 
-    static actorBid(actor, price) {
+    static actor(actor, price) {
         //find the currency
         if (price.value == 0)
             return;
@@ -933,7 +946,8 @@ export class AuctioneerSheet extends EnhancedJournalSheet {
                             if (result.quantity > 0) {
                                 MonksEnhancedJournal.emit("purchaseItem",
                                     {
-                                        auctioneerid: entry.uuid,
+                                        // TODO add a auctioneerid
+                                        shopid: entry.uuid,
                                         actorid: actor.id,
                                         itemid: id,
                                         quantity: result.quantity,

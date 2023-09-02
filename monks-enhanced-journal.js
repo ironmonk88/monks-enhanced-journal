@@ -3157,6 +3157,35 @@ export class MonksEnhancedJournal {
         }
     }
 
+    static async bidItem(data) {
+        if (game.user.isGM) {
+            let entry = await fromUuid(data.shopid);
+            let actor = game.actors.get(data.actorid);
+
+            if (entry) {
+                MonksEnhancedJournal.fixType(entry);
+                const cls = (entry._getSheetClass ? entry._getSheetClass() : null);
+                if (cls) {
+                    // cls.bidItem.call(cls, entry, data.itemid, data.quantity, { actor, user: data.user, chatmessage: data.chatmessage, purchased: data.purchased, remaining: data.remaining });
+                    let itemsToUpdate = (entry.getFlag('monks-enhanced-journal', 'items') || []);
+                    let item = itemsToUpdate.find(i => i._id == data.itemid);
+                    //let price = MEJHelpers.getPrice(getProperty(item, "flags.monks-enhanced-journal.cost"));
+                    let price = MEJHelpers.getPrice(data.newCost);
+                    itemsToUpdate.map((i) => {
+                            if(i._id == data.itemid) {
+                                setProperty(i,"flags.monks-enhanced-journal.price", data.newPrice);
+                                setProperty(i,"flags.monks-enhanced-journal.cost", data.newCost);
+                            }
+                            return i;
+                        }
+                    );
+                    await entry.setFlag('monks-enhanced-journal', 'items', itemsToUpdate);
+                    cls.addLog.call(entry, { actor: actor.name, item: item.name, quantity: data.quantity, price: `${price.value} ${price.currency}`, type: data.bid ? 'bid' : 'but back' });
+                }
+            }
+        }
+    }
+
     static async requestLoot(data) {
         if (game.user.isGM) {
             let entry = await fromUuid(data.shopid);
@@ -3332,7 +3361,7 @@ export class MonksEnhancedJournal {
         let message = this;
 
         let content = $(message.content);
-  
+
         let offered = message.getFlag('monks-enhanced-journal', 'offered');
         let approved = message.getFlag('monks-enhanced-journal', 'approved');
         let accepted = message.getFlag('monks-enhanced-journal', 'accepted');
