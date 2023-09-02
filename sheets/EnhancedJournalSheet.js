@@ -1257,7 +1257,6 @@ export class EnhancedJournalSheet extends JournalPageSheet {
                 assigned: flags.assigned,
                 received: flags.received,
                 requests: requests,
-                bidPriceCurrent: flags.bidPriceCurrent,
                 bidDateStart: flags.bidDateStart,
                 bidDateEnd: flags.bidDateEnd,
                 bidUsername: flags. bidUsername

@@ -144,10 +144,11 @@
                             {{#if @root.showrarity}}<div class="item-detail item-rarity">{{localize 'MonksEnhancedJournal.Rarity'}}</div>{{/if}}
                             
                             <div class="item-detail item-quantity" sort="quantity">{{localize 'MonksEnhancedJournal.Qty'}}</div>
-
-                            <div class="item-detail item-bid-price-current">The current top bid price of start</div>
+                            <div class="item-detail item-price" sort="price">The current top bid price of start</div>
+                            <div class="item-detail item-cost owner-only" sort="cost">{{localize 'MonksEnhancedJournal.Cost'}} <i class="fas fa-question-circle" data-tooltip="Cost is the value that will be removed from the players currency"></i></div>
                             <div class="item-detail item-bid-date-start">The bis tart date</div>
                             <div class="item-detail item-bid-date-end">The bid end date</div>
+                            {{#if showrequest}}<div class="item-controls flexrow" buttons="4"></div>{{/if}}
                             {{#if isGM}}<div class="item-detail item-bid-username owner-only">The current top bidder</div>{{/if}}
                             
                             {{#if @root.showrequest}}<div class="item-controls flexrow" buttons="4"></div>{{/if}}
@@ -186,9 +187,13 @@
                                             <input {{#if @root.isNotGM}}readonly="true"{{/if}}  type="number" min="0" name="items.{{this.id}}.flags.monks-enhanced-journal.quantity" placeholder="&infin;" value="{{this.quantity}}" style="text-align:center;" />
                                         </div>                                                                  
 
-                                        <div class="item-detail item-bid-price-current">
-                                            <input {{#if @root.isNotGM}}readonly="true"{{/if}}  type="text" name="items.{{this.id}}.flags.monks-enhanced-journal.bidPriceCurrent" value="{{this.bidPriceCurrent}}" style="text-align:center;" />
-                                        </div>                                                                     
+                                        <div class="item-detail item-price">
+                                            <input {{#if @root.isNotGM}}readonly="true"{{/if}} type="text" name="items.{{this.id}}.flags.monks-enhanced-journal.price" value="{{this.price}}" style="text-align:center;" />
+                                        </div>
+                                        
+                                        <div class="item-detail item-cost owner-only">
+                                            <input type="text" name="items.{{this.id}}.flags.monks-enhanced-journal.cost" value="{{this.cost}}" style="text-align:center;" />
+                                        </div>
 
                                         <div class="item-detail item-bid-date-start">
                                             <input id="item-detail item-bid-date-start" {{#if @root.isNotGM}}readonly="true"{{/if}} {{#if this.bidDateEnd}}max="{{this.bidDateEnd}}"{{/if}}

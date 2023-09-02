@@ -26,6 +26,7 @@ export class AuctioneerSheet extends EnhancedJournalSheet {
                 { dragSelector: ".sheet-icon", dropSelector: "#board" }
             ],
             scrollY: [".auctioneer-items > .item-list", ".tab.description .tab-inner"],
+            width: 1200,
         });
     }
 
@@ -587,7 +588,7 @@ export class AuctioneerSheet extends EnhancedJournalSheet {
             return false;
         }
 
-        const bidCurrentPriceFlag = getProperty(this.object, `flags.monks-enhanced-journal.bidPriceCurrent`) ?? data.cost ?? 0;
+        const bidCurrentPriceFlag = getProperty(this.object, `flags.monks-enhanced-journal.price`) ?? data.cost ?? 0;
         let result = await AuctioneerSheet.confirmQuantity(item, max, "purchase");
         
         if ((result?.quantity ?? 0) > 0) {

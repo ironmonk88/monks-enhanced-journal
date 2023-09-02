@@ -3470,7 +3470,6 @@ export class MonksEnhancedJournal {
 
                         data["bidDateEnd"] = entry.getFlag('monks-enhanced-journal', 'bidDateEnd');
                         data["bidDateStart"] = entry.getFlag('monks-enhanced-journal', 'bidDateStart');
-                        data["bidPriceCurrent"] = entry.getFlag('monks-enhanced-journal', 'bidPriceCurrent');
                         data["bidPriceUsername"] = entry.getFlag('monks-enhanced-journal', 'bidPriceUsername');
 
                         setProperty(msgitem, "flags.monks-enhanced-journal", data);
