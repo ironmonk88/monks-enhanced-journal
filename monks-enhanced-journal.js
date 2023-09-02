@@ -1633,6 +1633,10 @@ export class MonksEnhancedJournal {
 
         Handlebars.registerHelper({ selectGroups: MonksEnhancedJournal.selectGroups });
         Handlebars.registerHelper({ isTheBidWinner:  MonksEnhancedJournal.isTheBidWinner });
+        Handlebars.registerHelper({ isTheBidExpired:  MonksEnhancedJournal.isTheBidExpired });
+        Handlebars.registerHelper({ getUserName:  MonksEnhancedJournal.getUserName });
+        Handlebars.registerHelper({ isTheBidExpiredAndYouAreNotTheWinner:  MonksEnhancedJournal.isTheBidExpiredAndYouAreNotTheWinner });
+        
     }
 
     static async fixItems(reset = false) {
@@ -2238,15 +2242,32 @@ export class MonksEnhancedJournal {
 
     static isTheBidWinner( item ) {
         const currentUser = game.user.id;
-        const bidDateStart = getProperty(item, "flags.monks-enhanced-journal.bidDateStart");
-        const bidDateEnd = getProperty(item, "flags.monks-enhanced-journal.bidDateEnd");
         if(AuctioneerSheet.isItemBidDateExpired(item)) {
-            const bidWinner = getProperty(item, `flags.monks-enhanced-journal.bidUsername`);
+            const bidWinner = getProperty(item, `flags.monks-enhanced-journal.bidUserId`);
             if(game.user.isGM || currentUser === bidWinner) {
                 return true;
             }
         }
         return false;
+    }
+
+    static isTheBidExpired( item ) {
+        if(AuctioneerSheet.isItemBidDateExpired(item)) {
+            return true;
+        }
+        return false;
+    }
+
+    
+    static isTheBidExpiredAndYouAreNotTheWinner( item ) {
+        if(MonksEnhancedJournal.isTheBidExpired(item) && !MonksEnhancedJournal.isTheBidWinner(item)) {
+            return true;
+        }
+        return false;
+    }
+
+    static getUserName(bidWinner) {
+        return game.users.get(bidWinner)?.name ?? "";
     }
 
     static _createPictureLink(match, { async = false, relativeTo } = {}) {
@@ -3136,28 +3157,6 @@ export class MonksEnhancedJournal {
         }
     }
 
-    static async bidItem(data) {
-        if (game.user.isGM) {
-            let entry = await fromUuid(data.auctioneerid);
-            let actor = game.actors.get(data.actorid);
-
-            if (entry) {
-                MonksEnhancedJournal.fixType(entry);
-                const cls = (entry._getSheetClass ? entry._getSheetClass() : null);
-                if (cls && cls.bidItem) {
-                    cls.bidItem.call(cls, entry, data.itemid, data.quantity, { actor, user: data.user, chatmessage: data.chatmessage, bid: data.bid, remaining: data.remaining });
-                    let item = (entry.getFlag('monks-enhanced-journal', 'items') || []).find(i => i._id == data.itemid);
-                    let price = MEJHelpers.getPrice(getProperty(item, "flags.monks-enhanced-journal.cost"));
-                    if (data.bid === true && item) {
-                        price.value = price.value * (data.quantity ?? 1);
-                        cls.actorBid(actor, price);
-                    }
-                    cls.addLog.call(entry, { actor: actor.name, item: item.name, quantity: data.quantity, price: `${price.value} ${price.currency}`, type: data.bid ? 'bid' : 'but back' });
-                }
-            }
-        }
-    }
-
     static async requestLoot(data) {
         if (game.user.isGM) {
             let entry = await fromUuid(data.shopid);
@@ -3473,7 +3472,7 @@ export class MonksEnhancedJournal {
 
                         data["bidDateEnd"] = entry.getFlag('monks-enhanced-journal', 'bidDateEnd');
                         data["bidDateStart"] = entry.getFlag('monks-enhanced-journal', 'bidDateStart');
-                        data["bidPriceUsername"] = entry.getFlag('monks-enhanced-journal', 'bidPriceUsername');
+                        data["bidUserId"] = entry.getFlag('monks-enhanced-journal', 'bidUserId');
 
                         setProperty(msgitem, "flags.monks-enhanced-journal", data);
 
@@ -3494,74 +3493,8 @@ export class MonksEnhancedJournal {
                     }
                 }
             }
-            else if (action == "bid") {
-                accepted = true;
-                let msg = `<span class="request-msg"><i class="fas fa-check"></i> ${i18n("MonksEnhancedJournal.msg.ItemAddedToInventory")}</span>`;
-                //find the item
-                let msgitems = message.getFlag('monks-enhanced-journal', 'items');
-                for (let msgitem of msgitems) {
-                    let data = getProperty(msgitem, "flags.monks-enhanced-journal")
-                    let purchaseQty = data.quantity;
-                    if (purchaseQty == 0)
-                        continue;
-                    let item = (entry.getFlag('monks-enhanced-journal', 'items') || []).find(i => i._id == msgitem._id);
-                    if (!item) {
-                        ui.notifications.warn(i18n("MonksEnhancedJournal.msg.CannotTransferItemQuantity"));
-                        msg = `<span class="request-msg"><i class="fas fa-times"></i> ${i18n("MonksEnhancedJournal.msg.CannotTransferItemQuantity")}</span>`
-                        continue;
-                    }
-
-                    MonksEnhancedJournal.fixType(entry);
-                    const cls = (entry._getSheetClass ? entry._getSheetClass() : null);
-
-                    let remaining = getProperty(item, "flags.monks-enhanced-journal.quantity");
-                    if (remaining && remaining < purchaseQty) {
-                        //check to see if there's enough quantity
-                        ui.notifications.warn(i18n("MonksEnhancedJournal.msg.CannotTransferItemQuantity"));
-                        msg = `<span class="request-msg"><i class="fas fa-times"></i> ${i18n("MonksEnhancedJournal.msg.CannotTransferItemQuantity")}</span>`
-                        continue;
-                    }
-
-                    // if (data.sell > 0 && cls.canAfford) {
-                    //     //check if the player can afford it
-                    //     if (!cls.canAfford((data.sell * purchaseQty) + " " + data.currency, actor)) {
-                    //         ui.notifications.warn(format("MonksEnhancedJournal.msg.CannotTransferCannotAffordIt", { name: actor.name }));
-                    //         msg = `<span class="request-msg"><i class="fas fa-times"></i> ${format("MonksEnhancedJournal.msg.CannotTransferCannotAffordIt", { name: actor.name })}</span>`;
-                    //         continue;
-                    //     }
-                    // }
-
-                    //Add it to the actor
-                    let itemData = duplicate(item);
-                    if ((itemData.type === "spell") && game.system.id == 'dnd5e') {
-                        itemData = await cls.createScrollFromSpell(itemData);
-                    }
-                    let itemQty = getValue(itemData, quantityname(), 1);
-                    setValue(itemData, quantityname(), purchaseQty * itemQty);
-                    if (data.sell > 0)
-                        setPrice(itemData, pricename(), data.sell + " " + data.currency);
-                    delete itemData._id;
-                    if (!data.consumable) {
-                        let sheet = actor.sheet;
-                        if (sheet._onDropItem)
-                            sheet._onDropItem({ preventDefault: () => { } }, { type: "Item", uuid: `${entry.uuid}.Items.${item._id}`, data: itemData });
-                        else
-                            actor.createEmbeddedDocuments("Item", [itemData]);
-                    }
-                    //deduct the gold
-                    // if (data.sell > 0)
-                    //     cls.actorPurchase(actor, { value: (data.sell * purchaseQty), currency: data.currency });
-                    cls.purchaseItem.call(cls, entry, item._id, data.quantity, { actor, chatmessage: false });
-
-                    cls.addLog.call(entry, { actor: actor.name, item: item.name, quantity: data.quantity, price: data.sell + " " + data.currency, type: 'purchase' });
-                }
-
-                $('.request-buttons', content).remove();
-                $('input', content).remove();
-                $('.item-quantity span, .item-price span', content).removeClass('player-only').show();
-                $('.card-footer', content).html(msg);
-            }
-        } else {
+        }
+        else {
             accepted = false;
             $('.request-buttons', content).remove();
             $('input', content).remove();

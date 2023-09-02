@@ -1259,7 +1259,7 @@ export class EnhancedJournalSheet extends JournalPageSheet {
                 requests: requests,
                 bidDateStart: flags.bidDateStart,
                 bidDateEnd: flags.bidDateEnd,
-                bidUsername: flags. bidUsername
+                bidUserId: flags. bidUserId
             };
 
             if (game.system.id == "dnd5e" && item.system?.rarity) {

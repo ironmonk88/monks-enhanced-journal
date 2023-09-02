@@ -177,8 +177,8 @@ export class AuctioneerSheet extends EnhancedJournalSheet {
         $('.adjust-price', html).click(this.adjustPrice.bind(this));
         $('.roll-table', html).click(this.rollTable.bind(this, "items", false));
 
+        $('.offer-item', html).prop('disabled', function () { return $(this).attr('locked') == 'true' }).click(this.offerItem.bind(this));
         $('.request-item', html).prop('disabled', function () { return $(this).attr('locked') == 'true' }).click(this.requestItem.bind(this));
-
         //$('.item-relationship .item-field', html).on('change', this.alterRelationship.bind(this));
 
         $('[sort]', html).on("click", this.alterSort.bind(this));
@@ -552,6 +552,109 @@ export class AuctioneerSheet extends EnhancedJournalSheet {
         new AdjustPrice(this.object).render(true);
     }
 
+    async offerItem(event) {
+        let li = $(event.currentTarget).closest("li")[0];
+
+        let id = li.dataset.id;
+        let item = this.object.flags['monks-enhanced-journal'].items.find(o => o._id == id);
+
+        if (!item)
+            return;
+
+        const actor = game.user.character;
+        if (!actor) {
+            ui.notifications.warn(i18n("MonksEnhancedJournal.msg.YouDontHaveCharacter"));
+            return;
+        }
+
+        let data = getProperty(item, "flags.monks-enhanced-journal");
+
+        if (data.cost && data.cost != '') {
+            //check if the player can afford it
+            if (!this.constructor.canAfford(item, actor)) {
+                ui.notifications.warn(format("MonksEnhancedJournal.msg.CannotTransferCannotAffordIt", { name: actor.name } ));
+                return false;
+            }
+        }
+
+        let max = data.quantity;
+        if (!game.user.isGM && (max != null && max <= 0)) {
+            ui.notifications.warn(i18n("MonksEnhancedJournal.msg.CannotTransferItemQuantity"));
+            return false;
+        }
+
+        let hasGM = (game.users.find(u => u.isGM && u.active) != undefined);
+        if (!hasGM) {
+            ui.notifications.warn(i18n("MonksEnhancedJournal.msg.CannotPurchaseItemWithoutGM"));
+            return false;
+        }
+
+        const bidCurrentPriceFlag = getProperty(this.object, `flags.monks-enhanced-journal.price`) ?? data.cost ?? 0;
+        // let result = await AuctioneerSheet.confirmQuantity(item, max, "purchase");
+        let priceBid = MEJHelpers.getPrice(bidCurrentPriceFlag);
+        let costBid = MEJHelpers.getPrice(getProperty(item, "flags.monks-enhanced-journal.cost"))
+        if (!priceBid) {
+            priceBid = MEJHelpers.getPrice(getProperty(item, "flags.monks-enhanced-journal.cost"));
+        }
+        let maxquantity = max != "" ? parseInt(max) : null;
+        let result = { quantity: maxquantity, price: priceBid };
+        if ((result?.quantity ?? 0) > 0) {
+            let price = MEJHelpers.getPrice(data.cost);
+            const bidCurrentCurrency = price.currency;
+            const bidCurrentPrice = price.value;
+
+            // Dialog for bid
+            new Dialog({
+                title: "Send your bid",
+                content: `
+                    <form>
+                    <div class="form-group">
+                        <label>Put your bid!</label>
+                        <span>
+                            <input type='number' min="${bidCurrentPrice}" name='bidCurrentPrice' value='${bidCurrentPrice}'></input>(${bidCurrentCurrency})
+                        </span>
+                    </div>
+                    </form>`,
+                buttons: {
+                    offer: {
+                        icon: "<i class='fas fa-check'></i>",
+                        label: `Put your bid (must be > of ${bidCurrentPrice} ${bidCurrentCurrency})`,
+                        callback: async (html) => {
+                            let bidOfferInput = html.find(`input[name='bidCurrentPrice']`).length > 0 ? html.find(`input[name='bidCurrentPrice']`)[0] : null;
+                            let bidOffer = bidOfferInput ? parseInt(bidOfferInput.value) : 0;
+                            if(bidOffer <= bidCurrentPrice) {
+                                ui.notifications.warn(`You must offer at least '${bidCurrentPrice + 1} ${bidCurrentCurrency}' for do a bid on this item`);
+                                return false;
+                            }
+
+                            let price = {};
+                            price.value = bidOffer;
+                            price.currency = bidCurrentCurrency;
+                            let difference = bidOffer - bidCurrentPrice;
+
+                            // Create the owned item
+                            // if (!AuctioneerSheet.canAfford((result.quantity * price.value) + " " + price.currency, actor))
+                            if (!AuctioneerSheet.canAfford((price.value) + " " + price.currency, actor))
+                                ui.notifications.error(format("MonksEnhancedJournal.msg.ActorCannotAffordItem", { name: actor.name, quantity: result.quantity, itemname: item.name }));
+                            else {
+                                // TODO what if price and cost have different currency...
+                                let newPrice = price.value + " " + price.currency;
+                                let newCost = costBid.value + difference + " " + price.currency;
+                                await this.object.setFlag("monks-enhanced-journal", "price", newPrice);
+                                await this.object.setFlag("monks-enhanced-journal", "cost", newCost);
+                            }
+                        
+                        },
+                    },
+                },
+                default: "offer",
+                close: (html) => {
+                    // Do nothing
+                },
+            }).render(true);
+        }
+    }
+
     async requestItem(event) {
         let li = $(event.currentTarget).closest("li")[0];
 
@@ -591,75 +694,44 @@ export class AuctioneerSheet extends EnhancedJournalSheet {
 
         const bidCurrentPriceFlag = getProperty(this.object, `flags.monks-enhanced-journal.price`) ?? data.cost ?? 0;
         // let result = await AuctioneerSheet.confirmQuantity(item, max, "purchase");
-        let price = MEJHelpers.getPrice(bidCurrentPriceFlag);
-        if (!price) {
-            price = MEJHelpers.getPrice(getProperty(item, "flags.monks-enhanced-journal.cost"));
+        let priceBid = MEJHelpers.getPrice(bidCurrentPriceFlag);
+        let costBid = MEJHelpers.getPrice(getProperty(item, "flags.monks-enhanced-journal.cost"))
+        if (!priceBid) {
+            priceBid = MEJHelpers.getPrice(getProperty(item, "flags.monks-enhanced-journal.cost"));
         }
         let maxquantity = max != "" ? parseInt(max) : null;
-        let result = { quantity: maxquantity, price: price };
+        let result = { quantity: maxquantity, price: priceBid };
         if ((result?.quantity ?? 0) > 0) {
-            let price = MEJHelpers.getPrice(bidCurrentPriceFlag);
-            const bidCurrentPrice = price.value;
+            let price = MEJHelpers.getPrice(data.cost);
+            // Create the owned item
+            // if (!AuctioneerSheet.canAfford((result.quantity * price.value) + " " + price.currency, actor))
+            if (!AuctioneerSheet.canAfford((price.value) + " " + price.currency, actor))
+                ui.notifications.error(format("MonksEnhancedJournal.msg.ActorCannotAffordItem", { name: actor.name, quantity: result.quantity, itemname: item.name }));
+            else {
+                let itemData = duplicate(item);
+                delete itemData._id;
+                let itemQty = getValue(itemData, quantityname(), 1);
+                setValue(itemData, quantityname(), result.quantity * itemQty);
+                setPrice(itemData, pricename(), result.price);
+                if (!data.consumable) {
+                    let sheet = actor.sheet;
+                    if (sheet._onDropItem)
+                        sheet._onDropItem({ preventDefault: () => { } }, { type: "Item", uuid: `${this.object.uuid}.Items.${item._id}`, data: itemData });
+                    else
+                        actor.createEmbeddedDocuments("Item", [itemData]);
+                }
 
-            // Dialog for bid
-            new Dialog({
-                title: "Send your bid",
-                content: `
-                    <form>
-                    <div class="form-group">
-                        <label>Put your bid!</label>
-                        <input type='number' min="${bidCurrentPrice}" name='bidCurrentPrice' value='${bidCurrentPrice}'></input>
-                    </div>
-                    </form>`,
-                buttons: {
-                    offer: {
-                        icon: "<i class='fas fa-check'></i>",
-                        label: `Put your bid (must be > of ${bidCurrentPrice})`,
-                        callback: async (html) => {
-                            let bidOffer = html.find(`input[name='bidCurrentPrice']`) ? parseInt(html.find(`input[name='bidCurrentPrice']`)) : 0;
-                            if(bidOffer <= bidCurrentPrice) {
-                                ui.notifications.warn(`You must offer at least ${bidCurrentPrice + 1} for do a bid on this item`);
-                                return false;
-                            }
-
-                            let price = MEJHelpers.getPrice(bidOffer);
-
-                            // Create the owned item
-                            if (!AuctioneerSheet.canAfford((result.quantity * price.value) + " " + price.currency, actor))
-                                ui.notifications.error(format("MonksEnhancedJournal.msg.ActorCannotAffordItem", { name: actor.name, quantity: result.quantity, itemname: item.name }));
-                            else {
-                                let itemData = duplicate(item);
-                                delete itemData._id;
-                                let itemQty = getValue(itemData, quantityname(), 1);
-                                setValue(itemData, quantityname(), result.quantity * itemQty);
-                                setPrice(itemData, pricename(), result.price);
-                                if (!data.consumable) {
-                                    let sheet = actor.sheet;
-                                    if (sheet._onDropItem)
-                                        sheet._onDropItem({ preventDefault: () => { } }, { type: "Item", uuid: `${this.object.uuid}.Items.${item._id}`, data: itemData });
-                                    else
-                                        actor.createEmbeddedDocuments("Item", [itemData]);
-                                }
-                                // TODO ???
-                                // MonksEnhancedJournal.emit("purchaseItem",
-                                //     {
-                                //         auctioneerid: this.object.uuid,
-                                //         itemid: item._id,
-                                //         actorid: actor.id,
-                                //         user: game.user.id,
-                                //         quantity: result.quantity,
-                                //         purchase: true
-                                //     });
-                            }
-                        
-                        },
-                    },
-                },
-                default: "offer",
-                close: (html) => {
-                    // Do nothing
-                },
-            }).render(true);
+                MonksEnhancedJournal.emit("purchaseItem",
+                    {
+                        // TODO add a auctioneerid
+                        shopid: this.object.uuid,
+                        itemid: item._id,
+                        actorid: actor.id,
+                        user: game.user.id,
+                        quantity: result.quantity,
+                        purchase: true
+                    });
+            }
         }
     }
 
@@ -992,9 +1064,11 @@ export class AuctioneerSheet extends EnhancedJournalSheet {
     }
 
     static isItemBidDateBetween(item) {
-        const startS = getProperty(item, `flags.monks-enhanced-journal.bidDateStart`);
+        const bidDateStart = item.bidDateStart ? item.bidDateStart : getProperty(item, `flags.monks-enhanced-journal.bidDateStart`);
+        const bidDateEnd = item.bidDateEnd ? item.bidDateEnd : getProperty(item, `flags.monks-enhanced-journal.bidDateEnd`);
+        const startS = bidDateStart;
         const start = startS ? Date.parse(startS) : null;
-        const endS = getProperty(item, `flags.monks-enhanced-journal.bidDateEnd`);
+        const endS = bidDateEnd;
         const end =  endS ? Date.parse(endS) : null;
         const d = Date.now();
 
@@ -1010,11 +1084,13 @@ export class AuctioneerSheet extends EnhancedJournalSheet {
     }
 
     static isItemBidDateExpired(item) {
-        const endS = getProperty(item, `flags.monks-enhanced-journal.bidDateEnd`);
+        const bidDateStart = item.bidDateStart ? item.bidDateStart : getProperty(item, `flags.monks-enhanced-journal.bidDateStart`);
+        const bidDateEnd = item.bidDateEnd ? item.bidDateEnd : getProperty(item, `flags.monks-enhanced-journal.bidDateEnd`);
+        const endS = bidDateEnd;
         const end =  endS ? Date.parse(endS) : null;
         const d = Date.now();
         if(end) {
-            return d.valueOf() <= end.valueOf();
+            return d.valueOf() > end.valueOf();
         } else {
             return false;
         }
