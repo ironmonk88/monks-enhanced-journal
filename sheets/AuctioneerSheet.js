@@ -652,8 +652,9 @@ export class AuctioneerSheet extends EnhancedJournalSheet {
                                     user: game.user.id,
                                     quantity: result.quantity,
                                     bid: true,
-                                    newCost: newCost,
-                                    newPrice: newPrice
+                                    bidCost: newCost,
+                                    bidPrice: newPrice,
+                                    bidUserId: game.user.id
                                 });
                             }
                         

@@ -219,9 +219,15 @@
                                                         <div class="item-controls item-request" style="text-align:center;flex: 0 0 90px;"></div> 
                                                     {{/if}}
                                                 {{else}}
-                                                    <div class="item-controls item-request" style="text-align:center;flex: 0 0 90px;">
-                                                        <a class="item-control text offer-item" {{#if (or this.lock (eq this.quantity 0))}} disabled{{/if}}><i class="fas {{this.icon}}"></i> Offer a bid</a>
-                                                    </div> 
+                                                    {{#if ( isTheBidCurrent this)}}
+                                                        <div class="item-controls item-request" style="text-align:center;flex: 0 0 90px;">
+                                                            <a class="item-control text" disabled><i class="fas {{this.icon}}"></i> You are the higher bidder</a>
+                                                        </div>
+                                                    {{else}}
+                                                        <div class="item-controls item-request" style="text-align:center;flex: 0 0 90px;">
+                                                            <a class="item-control text offer-item" {{#if (or this.lock (eq this.quantity 0))}} disabled{{/if}}><i class="fas {{this.icon}}"></i> Offer a bid</a>
+                                                        </div> 
+                                                    {{/if}}
                                                 {{/if}}
                                             {{/if}}
                                             <div class="item-controls flexrow owner-only" buttons="4">

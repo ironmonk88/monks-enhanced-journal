@@ -1636,6 +1636,7 @@ export class MonksEnhancedJournal {
         Handlebars.registerHelper({ isTheBidExpired:  MonksEnhancedJournal.isTheBidExpired });
         Handlebars.registerHelper({ getUserName:  MonksEnhancedJournal.getUserName });
         Handlebars.registerHelper({ isTheBidExpiredAndYouAreNotTheWinner:  MonksEnhancedJournal.isTheBidExpiredAndYouAreNotTheWinner });
+        Handlebars.registerHelper({ isTheBidCurrent:  MonksEnhancedJournal.isTheBidCurrent });
         
     }
 
@@ -2241,8 +2242,8 @@ export class MonksEnhancedJournal {
     }
 
     static isTheBidWinner( item ) {
-        const currentUser = game.user.id;
         if(AuctioneerSheet.isItemBidDateExpired(item)) {
+            const currentUser = game.user.id;
             const bidWinner = getProperty(item, `flags.monks-enhanced-journal.bidUserId`);
             if(game.user.isGM || currentUser === bidWinner) {
                 return true;
@@ -2254,6 +2255,17 @@ export class MonksEnhancedJournal {
     static isTheBidExpired( item ) {
         if(AuctioneerSheet.isItemBidDateExpired(item)) {
             return true;
+        }
+        return false;
+    }
+
+    static isTheBidCurrent( item ) {
+        if(!AuctioneerSheet.isItemBidDateExpired(item)) {
+            const currentUser = game.user.id;
+            const bidWinner = item.bidUserId;
+            if(game.user.isGM || currentUser === bidWinner) {
+                return true;
+            }
         }
         return false;
     }
@@ -3170,11 +3182,13 @@ export class MonksEnhancedJournal {
                     let itemsToUpdate = (entry.getFlag('monks-enhanced-journal', 'items') || []);
                     let item = itemsToUpdate.find(i => i._id == data.itemid);
                     //let price = MEJHelpers.getPrice(getProperty(item, "flags.monks-enhanced-journal.cost"));
-                    let price = MEJHelpers.getPrice(data.newCost);
+                    let price = MEJHelpers.getPrice(data.bidCost);
                     itemsToUpdate.map((i) => {
                             if(i._id == data.itemid) {
-                                setProperty(i,"flags.monks-enhanced-journal.price", data.newPrice);
-                                setProperty(i,"flags.monks-enhanced-journal.cost", data.newCost);
+                                setProperty(i,"flags.monks-enhanced-journal.price", data.bidPrice);
+                                setProperty(i,"flags.monks-enhanced-journal.cost", data.bidCost);
+                                setProperty(i,"flags.monks-enhanced-journal.bidUserId", data.bidUserId);
+                                
                             }
                             return i;
                         }
