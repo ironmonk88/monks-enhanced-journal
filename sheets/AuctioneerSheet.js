@@ -190,13 +190,6 @@ export class AuctioneerSheet extends EnhancedJournalSheet {
 
         const actorOptions = this._getPersonActorContextOptions();
         if (actorOptions) new ContextMenu($(html), ".actor-img-container", actorOptions);
-
-        // TODO Check for start and end date ???
-        // $("#item-bid-date-start").on("change", function(){
-        //     $("#item-bid-date-end").attr("min", $(this).val());
-        // });
-        // $("#item-bid-date-start")
-        //     .attr("min", new Date().toISOString().split("T")[0]);
     }
 
     _getSubmitData(updateData = {}) {
@@ -346,9 +339,10 @@ export class AuctioneerSheet extends EnhancedJournalSheet {
             let item = await fromUuid(data.uuid);
             if (item.parent instanceof Actor) {
                 let actor = item.parent;
-                if (!actor)
+                if (!actor) {
                     return;
-
+                }
+                // Selling is disabled for auctioneer if you are not a gm
                 if (game.user.isGM) {
                     let max = getValue(item, quantityname());
 
@@ -382,64 +376,13 @@ export class AuctioneerSheet extends EnhancedJournalSheet {
                         this.constructor.addLog.call(this.object, { actor: actor.name, item: item.name, quantity: result.quantity, price: price.value + " " + price.currency, type: 'sell' });
                     }
                 } else {
-                    let selling = this.object.getFlag('monks-enhanced-journal', 'selling');
-                    if (selling == "locked" || !selling) {
-                        ui.notifications.warn(i18n("MonksEnhancedJournal.msg.AuctioneerIsNotReceivingItems"));
-                        return false;
-                    }
-
-                    let hasGM = (game.users.find(u => u.isGM && u.active) != undefined);
-                    if (!hasGM) {
-                        ui.notifications.warn(i18n("MonksEnhancedJournal.msg.CannotSellItemWithoutGM"));
-                        return false;
-                    }
-                    //request to sell
-                    let max = getValue(item, quantityname());
-                    let sysPrice = MEJHelpers.getSystemPrice(item, pricename());
-                    let price = MEJHelpers.getPrice(sysPrice);
-                    let origPrice = price.value;
-                    let adjustment = Object.assign({}, setting("adjustment-defaults"), this.object.getFlag('monks-enhanced-journal', 'adjustment') || {});
-                    let buy = adjustment[item.type]?.buy ?? adjustment.default.buy ?? 0.5;
-                    if (buy == -1)
-                        return ui.notifications.warn(i18n("MonksEnhancedJournal.msg.CannotSellItem"));
-                    price.value = Math.floor(price.value * buy);
-                    let result = await this.constructor.confirmQuantity(item, max, "sell", true, price);
-                    if ((result?.quantity ?? 0) > 0) {
-                        if (selling == "free") {
-                            //give the player the money
-                            await this.constructor.actorPurchase(actor, { value: -(price.value * result.quantity), currency: price.currency });
-
-                            //add the item to the auctioneer
-                            let itemData = item.toObject();
-                            setProperty(itemData, "flags.monks-enhanced-journal.quantity", result.quantity);
-                            setProperty(itemData, "flags.monks-enhanced-journal.price", origPrice + " " + price.currency);
-                            setProperty(itemData, "flags.monks-enhanced-journal.lock", true);
-                            setProperty(itemData, "flags.monks-enhanced-journal.from", actor.name);
-
-                            MonksEnhancedJournal.emit("sellItem", { auctioneerid: this.object.uuid, itemdata: itemData });
-
-                            //remove the item from the actor
-                            if (result.quantity == max) {
-                                await item.delete();
-                            } else {
-                                let update = { system: {} };
-                                setProperty(update.system, quantityname(), max - result.quantity);
-                                item.update(update);
-                            }
-
-                            this.constructor.addLog.call(this.object, { actor: actor.name, item: item.name, quantity: result.quantity, price: price.value + " " + price.currency, type: 'sell' });
-                        } else {
-                            let itemData = item.toObject();
-                            setProperty(itemData, "flags.monks-enhanced-journal.quantity", result.quantity);
-                            setProperty(itemData, "flags.monks-enhanced-journal.price", origPrice + " " + price.currency);
-                            setProperty(itemData, "flags.monks-enhanced-journal.lock", true);
-                            setProperty(itemData, "flags.monks-enhanced-journal.from", actor.name);
-
-                            this.createSellMessage(itemData, actor);
-                        }
-                    }
+                    return ui.notifications.warn(i18n("MonksEnhancedJournal.msg.CannotSellItem"));
                 }
             } else {
+                // Selling is disabled for auctioneer if you are not a gm
+                if(!game.user.isGM) {
+                    return ui.notifications.warn(i18n("MonksEnhancedJournal.msg.CannotSellItem"));
+                }
                 let result = await AuctioneerSheet.confirmQuantity(item, null, "transfer", false);
                 if ((result?.quantity ?? 0) > 0) {
                     let itemData = item.toObject();
@@ -803,46 +746,6 @@ export class AuctioneerSheet extends EnhancedJournalSheet {
         }
     }
 
-    // async createSellMessage(item, actor) {
-    //     let data = getProperty(item, "flags.monks-enhanced-journal");
-    //     let price = MEJHelpers.getPrice(data.price);
-    //     let adjustment = Object.assign({}, setting("adjustment-defaults"), this.object.getFlag('monks-enhanced-journal', 'adjustment') || {});
-    //     let buy = adjustment[item.type]?.buy ?? adjustment.default.buy ?? 0.5;
-    //     data.sell = Math.floor(price.value * buy);
-    //     data.currency = price.currency;
-    //     data.maxquantity = data.quantity;
-    //     data.quantity = Math.max(Math.min(data.maxquantity, data.quantity), 1);
-    //     data.total = data.quantity * data.sell;
-    //     setProperty(item, "flags.monks-enhanced-journal", data);
-
-    //     let messageContent = {
-    //         action: 'sell',
-    //         actor: { id: actor.id, name: actor.name, img: actor.img },
-    //         items: [item],
-    //         auctioneer: { id: this.object.id, uuid: this.object.uuid, name: this.object.name, img: this.object.img }
-    //     }
-
-    //     //create a chat message
-    //     let whisper = ChatMessage.getWhisperRecipients("GM").map(u => u.id);
-    //     if (!whisper.find(u => u == game.user.id))
-    //         whisper.push(game.user.id);
-    //     let speaker = ChatMessage.getSpeaker();
-    //     let content = await renderTemplate("./modules/monks-enhanced-journal/templates/request-sale.html", messageContent);
-    //     let messageData = {
-    //         user: game.user.id,
-    //         speaker: speaker,
-    //         type: CONST.CHAT_MESSAGE_TYPES.OTHER,
-    //         content: content,
-    //         flavor: (speaker.alias ? format("MonksEnhancedJournal.ActorWantsToPurchase", { alias: speaker.alias, verb: i18n("MonksEnhancedJournal.Sell").toLowerCase() }) : null),
-    //         whisper: whisper,
-    //         flags: {
-    //             'monks-enhanced-journal': messageContent
-    //         }
-    //     };
-
-    //     ChatMessage.create(messageData, {});
-    // }
-
     async addItem(data) {
         data = data instanceof Array ? data : [data];
         let items = duplicate(this.object.flags["monks-enhanced-journal"].items || []);
@@ -1155,6 +1058,10 @@ export class AuctioneerSheet extends EnhancedJournalSheet {
     static isItemBidDateExpired(item) {
         const bidDateStart = item.bidDateStart ? item.bidDateStart : getProperty(item, `flags.monks-enhanced-journal.bidDateStart`);
         const bidDateEnd = item.bidDateEnd ? item.bidDateEnd : getProperty(item, `flags.monks-enhanced-journal.bidDateEnd`);
+        // If not end date is defined
+        if(!bidDateEnd) {
+            return true;
+        }
         const endS = bidDateEnd;
         const end =  endS ? Date.parse(endS) : null;
         const d = Date.now();
