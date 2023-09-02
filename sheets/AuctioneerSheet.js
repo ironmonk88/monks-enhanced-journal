@@ -934,7 +934,7 @@ export class AuctioneerSheet extends EnhancedJournalSheet {
         }
     }
 
-    static actor(actor, price) {
+    static actorPurchase(actor, price) {
         //find the currency
         if (price.value == 0)
             return;

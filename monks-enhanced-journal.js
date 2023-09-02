@@ -2244,7 +2244,7 @@ export class MonksEnhancedJournal {
     static isTheBidWinner( item ) {
         if(AuctioneerSheet.isItemBidDateExpired(item)) {
             const currentUser = game.user.id;
-            const bidWinner = getProperty(item, `flags.monks-enhanced-journal.bidUserId`);
+            const bidWinner = item.bidUserId;
             if(game.user.isGM || currentUser === bidWinner) {
                 return true;
             }
@@ -2272,8 +2272,10 @@ export class MonksEnhancedJournal {
 
     
     static isTheBidExpiredAndYouAreNotTheWinner( item ) {
-        if(MonksEnhancedJournal.isTheBidExpired(item) && !MonksEnhancedJournal.isTheBidWinner(item)) {
-            return true;
+        if(MonksEnhancedJournal.isTheBidExpired(item)) {
+            if(!MonksEnhancedJournal.isTheBidWinner(item)) {
+                return true;
+            }
         }
         return false;
     }
