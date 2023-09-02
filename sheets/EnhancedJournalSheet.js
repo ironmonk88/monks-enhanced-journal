@@ -92,7 +92,7 @@ export class EnhancedJournalSheet extends JournalPageSheet {
     }
 
     get allowedRelationships() {
-        return ["encounter", "loot", "organization", "person", "place", "poi", "event", "quest", "shop"];
+        return ["encounter", "loot", "organization", "person", "place", "poi", "event", "quest", "shop", "auctioneer"];
     }
 
     _canUserView(user) {
@@ -483,6 +483,7 @@ export class EnhancedJournalSheet extends JournalPageSheet {
                 item.img = page.src || `modules/monks-enhanced-journal/assets/${type}.png`;
                 item.type = type;
                 item.shoptype = page.getFlag("monks-enhanced-journal", "shoptype");
+                item.auctioneertype = page.getFlag("monks-enhanced-journal", "auctioneertype");
                 item.role = page.getFlag("monks-enhanced-journal", "role");
 
                 relationships[type].documents.push(item);
@@ -1213,10 +1214,10 @@ export class EnhancedJournalSheet extends JournalPageSheet {
             let hasRequest = (requests.find(r => r.id == game.user.id) != undefined);
 
             let flags = getProperty(item, "flags.monks-enhanced-journal") || {};
-            let text = (type == 'shop' ?
+            let text = (type == 'shop' || type == 'auctioneer' ?
                 (flags.quantity === 0 ? i18n("MonksEnhancedJournal.SoldOut") : (flags.lock ? i18n("MonksEnhancedJournal.Unavailable") : i18n("MonksEnhancedJournal.Purchase"))) :
                 (purchasing == "free" || purchasing == "confirm" ? i18n("MonksEnhancedJournal.Take") : (hasRequest ? i18n("MonksEnhancedJournal.Cancel") : i18n("MonksEnhancedJournal.Request"))));
-            let icon = (type == 'shop' ?
+            let icon = (type == 'shop' || type == 'auctioneer' ?
                 (flags.quantity === 0 ? "" : (flags.lock ? "fa-lock" : "fa-dollar-sign")) :
                 (purchasing == "free" || purchasing == "confirm" ? "fa-hand-paper" : (hasRequest ? "" : "fa-hand-holding-medical")));
 
@@ -1255,7 +1256,10 @@ export class EnhancedJournalSheet extends JournalPageSheet {
                 icon: icon,
                 assigned: flags.assigned,
                 received: flags.received,
-                requests: requests
+                requests: requests,
+                bidDateStart: flags.bidDateStart,
+                bidDateEnd: flags.bidDateEnd,
+                bidUserId: flags.bidUserId
             };
 
             if (game.system.id == "dnd5e" && item.system?.rarity) {
@@ -1397,9 +1401,12 @@ export class EnhancedJournalSheet extends JournalPageSheet {
         return this.constructor.getDocument(...args);
     }
 
-    static async createRequestMessage(entry, item, actor, shop) {
+    static async createRequestMessage(entry, item, actor, isTypeShopLike) {
+        let shop = isTypeShopLike === "shop";
+        let auctioneer = isTypeShopLike === "auctioneer";
+
         let data = getProperty(item, "flags.monks-enhanced-journal");
-        let price = shop ? MEJHelpers.getPrice(data.cost) : null; //item, "cost", !shop);
+        let price = (shop || auctioneer) ? MEJHelpers.getPrice(data.cost) : null; //item, "cost", !shop);
         data.sell = price?.value;
         data.currency = price?.currency;
         data.maxquantity = data.maxquantity ?? data.quantity;
@@ -1408,12 +1415,30 @@ export class EnhancedJournalSheet extends JournalPageSheet {
         data.total = (price ? data.quantity * data.sell : null);
         setProperty(item, "flags.monks-enhanced-journal", data);
 
-        let messageContent = {
-            action: 'buy',
-            actor: { id: actor.id, name: actor.name, img: actor.img },
-            items: [item],
-            shop: { uuid: entry.uuid, name: entry.name, img: entry.src }
+        let messageContent = null;
+        if(shop) {
+            messageContent = {
+                action: 'buy',
+                actor: { id: actor.id, name: actor.name, img: actor.img },
+                items: [item],
+                shop: { uuid: entry.uuid, name: entry.name, img: entry.src }
+            }
+        } else if(auctioneer) {
+            messageContent = {
+                action: 'bid',
+                actor: { id: actor.id, name: actor.name, img: actor.img },
+                items: [item],
+                auctioneer: { uuid: entry.uuid, name: entry.name, img: entry.src }
+            }
+        } else {
+            messageContent = {
+                action: 'buy',
+                actor: { id: actor.id, name: actor.name, img: actor.img },
+                items: [item],
+                shop: { uuid: entry.uuid, name: entry.name, img: entry.src }
+            }
         }
+
 
         //create a chat message
         let whisper = ChatMessage.getWhisperRecipients("GM").map(u => u.id);
@@ -1693,7 +1718,7 @@ export class EnhancedJournalSheet extends JournalPageSheet {
                 let result = sheet.render(true, { focus: true });
                 result.options.alterprice = true;
                 //result.options.addremaining = (this.object.type == "encounter" || this.object.type == "quest");
-                result.options.addcost = (this.object.type == "shop");
+                result.options.addcost = (this.object.type == "shop" || this.object.type == "auctioneer");
             } catch {
                 ui.notifications.warn(i18n("MonksEnhancedJournal.msg.ErrorTryingToEdit"));
             }
