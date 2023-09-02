@@ -25,7 +25,7 @@ export class AuctioneerSheet extends EnhancedJournalSheet {
                 { dragSelector: ".actor-img img", dropSelector: "null" },
                 { dragSelector: ".sheet-icon", dropSelector: "#board" }
             ],
-            scrollY: [".auctioneer-items > .item-list", ".tab.description .tab-inner"]
+            scrollY: [".auctioneer-items > .item-list", ".tab.description .tab-inner"],
         });
     }
 
@@ -112,6 +112,10 @@ export class AuctioneerSheet extends EnhancedJournalSheet {
             return Object.assign({}, l, { time: date.toLocaleDateString()});
         });
 
+        // Strange issue the isGM context seem bugged ??
+        data.isGM = game.user.isGM;
+        data.isNotGM = game.user.isNotGM;
+
         return data;
     }
 
@@ -185,6 +189,13 @@ export class AuctioneerSheet extends EnhancedJournalSheet {
 
         const actorOptions = this._getPersonActorContextOptions();
         if (actorOptions) new ContextMenu($(html), ".actor-img-container", actorOptions);
+
+        // TODO Check for start and end date ???
+        // $("#item-bid-date-start").on("change", function(){
+        //     $("#item-bid-date-end").attr("min", $(this).val());
+        // });
+        // $("#item-bid-date-start")
+        //     .attr("min", new Date().toISOString().split("T")[0]);
     }
 
     _getSubmitData(updateData = {}) {
