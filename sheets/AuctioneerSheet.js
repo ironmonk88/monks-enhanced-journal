@@ -26,7 +26,6 @@ export class AuctioneerSheet extends EnhancedJournalSheet {
                 { dragSelector: ".sheet-icon", dropSelector: "#board" }
             ],
             scrollY: [".auctioneer-items > .item-list", ".tab.description .tab-inner"],
-            width: 1200,
         });
     }
 
@@ -339,118 +338,120 @@ export class AuctioneerSheet extends EnhancedJournalSheet {
                 }
                 await this.addItem(items);
             }
-        } else if (data.type == 'Item') {
-            if (data.from == this.object.uuid)  //don't drop on yourself
-                return;
+        // } else if (data.type == 'Item') {
+        //     if (data.from == this.object.uuid)  //don't drop on yourself
+        //         return;
 
-            let item = await fromUuid(data.uuid);
-            if (item.parent instanceof Actor) {
-                let actor = item.parent;
-                if (!actor)
-                    return;
+        //     let item = await fromUuid(data.uuid);
+        //     if (item.parent instanceof Actor) {
+        //         let actor = item.parent;
+        //         if (!actor)
+        //             return;
 
-                if (game.user.isGM) {
-                    let max = getValue(item, quantityname());
+        //         if (game.user.isGM) {
+        //             let max = getValue(item, quantityname());
 
-                    let sysPrice = MEJHelpers.getSystemPrice(item, pricename());
-                    let price = MEJHelpers.getPrice(sysPrice);
-                    let origPrice = price.value;
-                    let adjustment = Object.assign({}, setting("adjustment-defaults"), this.object.getFlag('monks-enhanced-journal', 'adjustment') || {});
-                    let buy = adjustment[item.type]?.buy ?? adjustment.default.buy ?? 0.5;
-                    if (buy == -1)
-                        return ui.notifications.warn(i18n("MonksEnhancedJournal.msg.CannotSellItem"));
-                    price.value = Math.floor(price.value * buy);
-                    let result = await this.constructor.confirmQuantity(item, max, "sell", true, price);
-                    if ((result?.quantity ?? 0) > 0) {
-                        let itemData = item.toObject();
-                        setProperty(itemData, "flags.monks-enhanced-journal.quantity", result.quantity);
-                        setProperty(itemData, "flags.monks-enhanced-journal.price", origPrice + " " + price.currency);
-                        setProperty(itemData, "flags.monks-enhanced-journal.lock", true);
-                        setProperty(itemData, "flags.monks-enhanced-journal.from", actor.name);
-                        this.addItem({ data: itemData });
+        //             let sysPrice = MEJHelpers.getSystemPrice(item, pricename());
+        //             let price = MEJHelpers.getPrice(sysPrice);
+        //             let origPrice = price.value;
+        //             let adjustment = Object.assign({}, setting("adjustment-defaults"), this.object.getFlag('monks-enhanced-journal', 'adjustment') || {});
+        //             let buy = adjustment[item.type]?.buy ?? adjustment.default.buy ?? 0.5;
+        //             if (buy == -1)
+        //                 return ui.notifications.warn(i18n("MonksEnhancedJournal.msg.CannotSellItem"));
+        //             price.value = Math.floor(price.value * buy);
+        //             let result = await this.constructor.confirmQuantity(item, max, "sell", true, price);
+        //             if ((result?.quantity ?? 0) > 0) {
+        //                 let itemData = item.toObject();
+        //                 setProperty(itemData, "flags.monks-enhanced-journal.quantity", result.quantity);
+        //                 setProperty(itemData, "flags.monks-enhanced-journal.price", origPrice + " " + price.currency);
+        //                 setProperty(itemData, "flags.monks-enhanced-journal.lock", true);
+        //                 setProperty(itemData, "flags.monks-enhanced-journal.from", actor.name);
+        //                 this.addItem({ data: itemData });
 
-                        await this.constructor.actorPurchase(actor, { value: -(result.price.value * result.quantity), currency: result.price.currency });
+        //                 await this.constructor.actorPurchase(actor, { value: -(result.price.value * result.quantity), currency: result.price.currency });
 
-                        if (result.quantity >= max)
-                            item.delete();
-                        else {
-                            let update = { system: {} };
-                            setProperty(update.system, quantityname(), max - result.quantity);
-                            item.update(update);
-                        }
+        //                 if (result.quantity >= max)
+        //                     item.delete();
+        //                 else {
+        //                     let update = { system: {} };
+        //                     setProperty(update.system, quantityname(), max - result.quantity);
+        //                     item.update(update);
+        //                 }
 
-                        this.constructor.addLog.call(this.object, { actor: actor.name, item: item.name, quantity: result.quantity, price: price.value + " " + price.currency, type: 'sell' });
-                    }
-                } else {
-                    // let selling = this.object.getFlag('monks-enhanced-journal', 'selling');
-                    // if (selling == "locked" || !selling) {
-                    //     ui.notifications.warn(i18n("MonksEnhancedJournal.msg.AuctioneerIsNotReceivingItems"));
-                    //     return false;
-                    // }
+        //                 this.constructor.addLog.call(this.object, { actor: actor.name, item: item.name, quantity: result.quantity, price: price.value + " " + price.currency, type: 'sell' });
+        //             }
+        //         } else {
+        //             let selling = this.object.getFlag('monks-enhanced-journal', 'selling');
+        //             if (selling == "locked" || !selling) {
+        //                 ui.notifications.warn(i18n("MonksEnhancedJournal.msg.AuctioneerIsNotReceivingItems"));
+        //                 return false;
+        //             }
 
-                    // let hasGM = (game.users.find(u => u.isGM && u.active) != undefined);
-                    // if (!hasGM) {
-                    //     ui.notifications.warn(i18n("MonksEnhancedJournal.msg.CannotSellItemWithoutGM"));
-                    //     return false;
-                    // }
-                    // //request to sell
-                    // let max = getValue(item, quantityname());
-                    // let sysPrice = MEJHelpers.getSystemPrice(item, pricename());
-                    // let price = MEJHelpers.getPrice(sysPrice);
-                    // let origPrice = price.value;
-                    // let adjustment = Object.assign({}, setting("adjustment-defaults"), this.object.getFlag('monks-enhanced-journal', 'adjustment') || {});
-                    // let buy = adjustment[item.type]?.buy ?? adjustment.default.buy ?? 0.5;
-                    // if (buy == -1)
-                    //     return ui.notifications.warn(i18n("MonksEnhancedJournal.msg.CannotSellItem"));
-                    // price.value = Math.floor(price.value * buy);
-                    // let result = await this.constructor.confirmQuantity(item, max, "sell", true, price);
-                    // if ((result?.quantity ?? 0) > 0) {
-                    //     if (selling == "free") {
-                    //         //give the player the money
-                    //         await this.constructor.actorPurchase(actor, { value: -(price.value * result.quantity), currency: price.currency });
+        //             let hasGM = (game.users.find(u => u.isGM && u.active) != undefined);
+        //             if (!hasGM) {
+        //                 ui.notifications.warn(i18n("MonksEnhancedJournal.msg.CannotSellItemWithoutGM"));
+        //                 return false;
+        //             }
+        //             //request to sell
+        //             let max = getValue(item, quantityname());
+        //             let sysPrice = MEJHelpers.getSystemPrice(item, pricename());
+        //             let price = MEJHelpers.getPrice(sysPrice);
+        //             let origPrice = price.value;
+        //             let adjustment = Object.assign({}, setting("adjustment-defaults"), this.object.getFlag('monks-enhanced-journal', 'adjustment') || {});
+        //             let buy = adjustment[item.type]?.buy ?? adjustment.default.buy ?? 0.5;
+        //             if (buy == -1)
+        //                 return ui.notifications.warn(i18n("MonksEnhancedJournal.msg.CannotSellItem"));
+        //             price.value = Math.floor(price.value * buy);
+        //             let result = await this.constructor.confirmQuantity(item, max, "sell", true, price);
+        //             if ((result?.quantity ?? 0) > 0) {
+        //                 if (selling == "free") {
+        //                     //give the player the money
+        //                     await this.constructor.actorPurchase(actor, { value: -(price.value * result.quantity), currency: price.currency });
 
-                    //         //add the item to the auctioneer
-                    //         let itemData = item.toObject();
-                    //         setProperty(itemData, "flags.monks-enhanced-journal.quantity", result.quantity);
-                    //         setProperty(itemData, "flags.monks-enhanced-journal.price", origPrice + " " + price.currency);
-                    //         setProperty(itemData, "flags.monks-enhanced-journal.lock", true);
-                    //         setProperty(itemData, "flags.monks-enhanced-journal.from", actor.name);
+        //                     //add the item to the auctioneer
+        //                     let itemData = item.toObject();
+        //                     setProperty(itemData, "flags.monks-enhanced-journal.quantity", result.quantity);
+        //                     setProperty(itemData, "flags.monks-enhanced-journal.price", origPrice + " " + price.currency);
+        //                     setProperty(itemData, "flags.monks-enhanced-journal.lock", true);
+        //                     setProperty(itemData, "flags.monks-enhanced-journal.from", actor.name);
 
-                    //         MonksEnhancedJournal.emit("sellItem", { auctioneerid: this.object.uuid, itemdata: itemData });
+        //                     MonksEnhancedJournal.emit("sellItem", { auctioneerid: this.object.uuid, itemdata: itemData });
 
-                    //         //remove the item from the actor
-                    //         if (result.quantity == max) {
-                    //             await item.delete();
-                    //         } else {
-                    //             let update = { system: {} };
-                    //             setProperty(update.system, quantityname(), max - result.quantity);
-                    //             item.update(update);
-                    //         }
+        //                     //remove the item from the actor
+        //                     if (result.quantity == max) {
+        //                         await item.delete();
+        //                     } else {
+        //                         let update = { system: {} };
+        //                         setProperty(update.system, quantityname(), max - result.quantity);
+        //                         item.update(update);
+        //                     }
 
-                    //         this.constructor.addLog.call(this.object, { actor: actor.name, item: item.name, quantity: result.quantity, price: price.value + " " + price.currency, type: 'sell' });
-                    //     } else {
-                    //         let itemData = item.toObject();
-                    //         setProperty(itemData, "flags.monks-enhanced-journal.quantity", result.quantity);
-                    //         setProperty(itemData, "flags.monks-enhanced-journal.price", origPrice + " " + price.currency);
-                    //         setProperty(itemData, "flags.monks-enhanced-journal.lock", true);
-                    //         setProperty(itemData, "flags.monks-enhanced-journal.from", actor.name);
+        //                     this.constructor.addLog.call(this.object, { actor: actor.name, item: item.name, quantity: result.quantity, price: price.value + " " + price.currency, type: 'sell' });
+        //                 } else {
+        //                     let itemData = item.toObject();
+        //                     setProperty(itemData, "flags.monks-enhanced-journal.quantity", result.quantity);
+        //                     setProperty(itemData, "flags.monks-enhanced-journal.price", origPrice + " " + price.currency);
+        //                     setProperty(itemData, "flags.monks-enhanced-journal.lock", true);
+        //                     setProperty(itemData, "flags.monks-enhanced-journal.from", actor.name);
 
-                    //         this.createSellMessage(itemData, actor);
-                    //     }
-                    // }
-                }
-            } else {
-                let result = await AuctioneerSheet.confirmQuantity(item, null, "transfer", false);
-                if ((result?.quantity ?? 0) > 0) {
-                    let itemData = item.toObject();
-                    let sysPrice = MEJHelpers.getSystemPrice(item, pricename());
-                    let price = MEJHelpers.getPrice(sysPrice);
+        //                     this.createSellMessage(itemData, actor);
+        //                 }
+        //             }
+        //         }
+        //     } else {
+        //         let result = await AuctioneerSheet.confirmQuantity(item, null, "transfer", false);
+        //         if ((result?.quantity ?? 0) > 0) {
+        //             let itemData = item.toObject();
+        //             let sysPrice = MEJHelpers.getSystemPrice(item, pricename());
+        //             let price = MEJHelpers.getPrice(sysPrice);
 
-                    setProperty(itemData, "flags.monks-enhanced-journal.quantity", result.quantity);
-                    setProperty(itemData, "flags.monks-enhanced-journal.price", price.value + " " + price.currency);
-                    this.addItem({ data: itemData });
-                }
-            }
+        //             setProperty(itemData, "flags.monks-enhanced-journal.quantity", result.quantity);
+        //             setProperty(itemData, "flags.monks-enhanced-journal.price", price.value + " " + price.currency);
+        //             this.addItem({ data: itemData });
+        //         }
+        //     }
+        // }
+        // The auctioneer can only be a journal not a single actor or person right ?
         } else if (data.type == 'JournalEntry') {
             if (this._tabs[0].active == "items") {
                 let auctioneer = await fromUuid(data.uuid);
@@ -589,8 +590,13 @@ export class AuctioneerSheet extends EnhancedJournalSheet {
         }
 
         const bidCurrentPriceFlag = getProperty(this.object, `flags.monks-enhanced-journal.price`) ?? data.cost ?? 0;
-        let result = await AuctioneerSheet.confirmQuantity(item, max, "purchase");
-        
+        // let result = await AuctioneerSheet.confirmQuantity(item, max, "purchase");
+        let price = MEJHelpers.getPrice(bidCurrentPriceFlag);
+        if (!price) {
+            price = MEJHelpers.getPrice(getProperty(item, "flags.monks-enhanced-journal.cost"));
+        }
+        let maxquantity = max != "" ? parseInt(max) : null;
+        let result = { quantity: maxquantity, price: price };
         if ((result?.quantity ?? 0) > 0) {
             let price = MEJHelpers.getPrice(bidCurrentPriceFlag);
             const bidCurrentPrice = price.value;
@@ -601,7 +607,7 @@ export class AuctioneerSheet extends EnhancedJournalSheet {
                 content: `
                     <form>
                     <div class="form-group">
-                        <label>Custom Link Type</label>
+                        <label>Put your bid!</label>
                         <input type='number' min="${bidCurrentPrice}" name='bidCurrentPrice' value='${bidCurrentPrice}'></input>
                     </div>
                     </form>`,
@@ -985,10 +991,10 @@ export class AuctioneerSheet extends EnhancedJournalSheet {
         $('[name="name"]', this.element).val(`${firstName.results[0].text} ${secondName.results[0].text}`).change();
     }
 
-    _isDateForBidBetween() {
-        const startS = getProperty(this.object, `flags.monks-enhanced-journal.bidDateStart`);
+    static isItemBidDateBetween(item) {
+        const startS = getProperty(item, `flags.monks-enhanced-journal.bidDateStart`);
         const start = startS ? Date.parse(startS) : null;
-        const endS = getProperty(this.object, `flags.monks-enhanced-journal.bidDateEnd`);
+        const endS = getProperty(item, `flags.monks-enhanced-journal.bidDateEnd`);
         const end =  endS ? Date.parse(endS) : null;
         const d = Date.now();
 
@@ -997,6 +1003,17 @@ export class AuctioneerSheet extends EnhancedJournalSheet {
         } else if(start && !end) {
             return d.valueOf() >= start.valueOf();
         } else if(!start && end) {
+            return d.valueOf() <= end.valueOf();
+        } else {
+            return false;
+        }
+    }
+
+    static isItemBidDateExpired(item) {
+        const endS = getProperty(item, `flags.monks-enhanced-journal.bidDateEnd`);
+        const end =  endS ? Date.parse(endS) : null;
+        const d = Date.now();
+        if(end) {
             return d.valueOf() <= end.valueOf();
         } else {
             return false;

@@ -2238,12 +2238,15 @@ export class MonksEnhancedJournal {
 
     static isTheBidWinner( item ) {
         const currentUser = game.user.id;
-        const bidWinner = getProperty(item, `flags.monks-enhanced-journal.bidUsername`);
-        if(game.user.isGM || currentUser === bidWinner) {
-            return true;
-        } else {
-            return false;
+        const bidDateStart = getProperty(item, "flags.monks-enhanced-journal.bidDateStart");
+        const bidDateEnd = getProperty(item, "flags.monks-enhanced-journal.bidDateEnd");
+        if(AuctioneerSheet.isItemBidDateExpired(item)) {
+            const bidWinner = getProperty(item, `flags.monks-enhanced-journal.bidUsername`);
+            if(game.user.isGM || currentUser === bidWinner) {
+                return true;
+            }
         }
+        return false;
     }
 
     static _createPictureLink(match, { async = false, relativeTo } = {}) {

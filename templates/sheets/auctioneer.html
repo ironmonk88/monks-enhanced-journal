@@ -148,11 +148,8 @@
                             <div class="item-detail item-cost owner-only" sort="cost">{{localize 'MonksEnhancedJournal.Cost'}} <i class="fas fa-question-circle" data-tooltip="Cost is the value that will be removed from the players currency"></i></div>
                             <div class="item-detail item-bid-date-start">The bis tart date</div>
                             <div class="item-detail item-bid-date-end">The bid end date</div>
-                            {{#if showrequest}}<div class="item-controls flexrow" buttons="4"></div>{{/if}}
                             {{#if isGM}}<div class="item-detail item-bid-username owner-only">The current top bidder</div>{{/if}}
-                            
-                            {{#if @root.showrequest}}<div class="item-controls flexrow" buttons="4"></div>{{/if}}
-
+                            {{#if showrequest}}<div class="item-controls flexrow" buttons="4"></div>{{/if}}
                             <div class="item-controls flexrow owner-only" buttons="4">
                                 <a class="item-control roll-table" title="{{localize 'MonksEnhancedJournal.PopulateFromRollTable'}}"><i class="fas fa-th-list"></i></a>
                                 <a class="item-control adjust-price" title="{{localize 'MonksEnhancedJournal.AdjustAllPrices'}}"><i class="fas fa-donate"></i></a>
@@ -209,10 +206,10 @@
                                             <input {{#if @root.isNotGM}}readonly="true"{{/if}} type="text" name="items.{{this.id}}.flags.monks-enhanced-journal.bidUsername" value="{{this.bidUsername}}" style="text-align:center;" />
                                         </div>                                                                    
 
-                                        {{#if @root.showrequest }}
-                                            <div class="item-controls item-request" style="text-align:center;flex: 0 0 90px;">
-                                                <a class="item-control text request-item" {{#if (or this.lock (eq this.quantity 0))}} disabled{{/if}}><i class="fas {{this.icon}}"></i> Made a bid</a>
-                                            </div>
+                                        {{#if @root.showrequest}}
+                                        <div class="item-controls item-request" style="text-align:center;flex: 0 0 90px;">
+                                            <a class="item-control text request-item" {{#if (or this.lock (eq this.quantity 0))}} disabled{{/if}}><i class="fas {{this.icon}}"></i> {{this.text}}</a>
+                                        </div>
                                         {{/if}}
 
                                         <div class="item-controls flexrow owner-only" buttons="4">
