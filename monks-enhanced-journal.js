@@ -3896,6 +3896,10 @@ export class MonksEnhancedJournal {
                     { id: "Money-H", name: i18n("Money-H"), convert: 0.1 },
                     { id: "Money-K", name: i18n("Money-K"), convert: 0.01 }
                 ];
+            case "pirateborg":
+                return [
+                    { id: "silver", name: i18n("MonksEnhancedJournal.currency.silver"), convert: 0 },
+                ];
             default:
             return [];
         }
