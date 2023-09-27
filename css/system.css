@@ -252,11 +252,10 @@ body.system-D35E {
 
 /* Shadow of the Demon Lord System */
 body.system-demonlord {
-    --mej-background: url('../../../systems/demonlord/assets/ui/sidebar_background.webp') repeat;
+    --mej-background: url('../../../systems/demonlord/assets/ui/paper.webp') repeat;
+    --mej-sidebar-background: url('../../../systems/demonlord/assets/ui/sidebar_background.webp');
+    --mej-sidebar-document-color: rgba(255, 255, 224, 1);
     --mej-sheet-header-input-background: rgba(255, 255, 255, 0.05);
-    --mej-sheet-header-detail-input-color: #fff;
-    --mej-sheet-header-input-color: #fff;
-    --mej-sheet-color: #fff;
     --mej-itemlist-control-background: rgba(0, 0, 0, 0.4);
     --mej-footer-background: rgba(255, 255, 255, 0.05);
 }
