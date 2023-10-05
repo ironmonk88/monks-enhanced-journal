@@ -275,6 +275,11 @@ body.system-demonlord {
 .demonlord .sheet-container .items-list .item-header .item-controls {
     height: 26px;
 }
+
+.demonlord .items-list .item .item-summary {
+    color: rgba(0, 0, 0, 1);
+}
+
 /* Legend of the Five Rings*/
 body.system-l5r5e {
     --mej-background: #fffae6 url(../../../systems/l5r5e/assets/imgs/bg-l5r.webp) no-repeat;
