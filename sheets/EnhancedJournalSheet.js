@@ -661,8 +661,6 @@ export class EnhancedJournalSheet extends JournalPageSheet {
             case 'sfrpg':
                 coinage = parseInt(actor.system.currency[(denomination == "cr" ? "credit" : denomination)]);
                 break;
-            case 'pirateborg':
-                coinage = parseInt(actor.system[denomination]);
             case 'demonlord':
                 coinage = parseInt(actor.system.wealth[denomination]);
                 break;
@@ -825,9 +823,6 @@ export class EnhancedJournalSheet extends JournalPageSheet {
                         break;
                     case 'starwarsffg':
                         updates[`system.stats.credits.value`] = v;
-                        break;
-                    case 'pirateborg':
-                        updates[`system.${k}`] = v;
                         break;
                     case 'cyphersystem':
                         {
