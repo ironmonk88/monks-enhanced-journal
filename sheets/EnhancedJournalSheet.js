@@ -661,6 +661,9 @@ export class EnhancedJournalSheet extends JournalPageSheet {
             case 'sfrpg':
                 coinage = parseInt(actor.system.currency[(denomination == "cr" ? "credit" : denomination)]);
                 break;
+            case 'demonlord':
+                coinage = parseInt(actor.system.wealth[denomination]);
+                break;
             default:
                 {
                     let coin = currencyname() == "" ? actor : getValue(actor, currencyname()) ?? actor;
@@ -843,6 +846,9 @@ export class EnhancedJournalSheet extends JournalPageSheet {
 
                             updates[`system.settings.equipment.currency.${qtyname}`] = v;
                         } break;
+                    case 'demonlord':
+                        updates[`system.wealth.${k}`] = v;
+                        break;
                     default:
                         {
                             let coin = currencyname() == "" ? actor : getValue(actor, currencyname()) ?? actor;
