@@ -225,6 +225,8 @@ export class MonksEnhancedJournal {
             MonksEnhancedJournal.currencyname = "";
         } else if (game.system.id == "archmage") {
             MonksEnhancedJournal.currencyname = "coins";
+        } else if (game.system.id == "demonlord") {
+            MonksEnhancedJournal.pricename = "value";
         }
 
         game.MonksEnhancedJournal = this;
@@ -3900,6 +3902,13 @@ export class MonksEnhancedJournal {
                 return [
                     { id: "silver", name: i18n("MonksEnhancedJournal.currency.silver"), convert: 0 },
                 ];
+            case 'demonlord':
+                return [
+                    { id: "gc", name: "gc", convert: 10 },
+                    { id: "ss", name: "ss", convert: 0 },
+                    { id: "cp", name: "cp", convert: 0.1 },
+                    { id: "bits", name: "bits", convert: 0.01 }
+                    ];
             default:
             return [];
         }
