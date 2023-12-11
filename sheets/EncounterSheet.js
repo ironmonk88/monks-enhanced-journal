@@ -28,7 +28,7 @@ export class EncounterSheet extends EnhancedJournalSheet {
         });
     }
 
-    get type() {
+    static get type() {
         return 'encounter';
     }
 
@@ -104,7 +104,7 @@ export class EncounterSheet extends EnhancedJournalSheet {
         }
 
         data.canShow = {
-            dcs: !!Object.keys(DCConfig.optionList).length
+            dcs: !!Object.keys(DCConfig.optionList()).length
         }
 
         return data;
@@ -232,10 +232,16 @@ export class EncounterSheet extends EnhancedJournalSheet {
         }
 
         if (data.type == 'Actor') {
-            //let scrollTop = $('.encounter-content', this.element).scrollTop();
-            this.addActor(data);
+            if (data.groupSelect) {
+                for (let actor of data.groupSelect) {
+                    await this.addActor({ type: "Actor", uuid: `Actor.${actor}` });
+                }
+                if (game.MultipleDocumentSelection)
+                    game.MultipleDocumentSelection.clearAllTabs();
+            } else
+                await this.addActor(data);
         }
-        else if (data.type == 'Folder' && data.documentName == "Item") {
+        else if (data.type == 'Folder') {
             if (!this.object.isOwner)
                 return false;
             // Import items from the folder
@@ -252,7 +258,16 @@ export class EncounterSheet extends EnhancedJournalSheet {
         else if (data.type == 'Item') {
             if (data.from == this.object.uuid)  //don't drop on yourself
                 return;
-            this.addItem(data);
+            if (data.groupSelect) {
+                // remove the last 16 characters from the uuid to get the item uuid
+                let itemId = data.uuid.substring(0, data.uuid.length - 16);
+                for (let item of data.groupSelect) {
+                    await this.addItem({ type: "Item", uuid: `${itemId}${item}` });
+                }
+                if (game.MultipleDocumentSelection)
+                    game.MultipleDocumentSelection.clearAllTabs();
+            } else
+                this.addItem(data);
         }
 
         log('drop data', event, data);
@@ -263,8 +278,12 @@ export class EncounterSheet extends EnhancedJournalSheet {
 
         if (actor) {
             let actors = duplicate(this.object.getFlag("monks-enhanced-journal", "actors") || []);
-            actors.push(actor);
-            this.object.setFlag("monks-enhanced-journal", "actors", actors);
+            if (!actors.find(a => a.uuid == actor.uuid)) {
+                actors.push(actor);
+                await this.object.setFlag("monks-enhanced-journal", "actors", actors);
+            } else {
+                ui.notifications.warn(i18n("MonksEnhancedJournal.msg.ActorAlreadyInEncounter"));
+            }
         }
     }
 
@@ -302,7 +321,7 @@ export class EncounterSheet extends EnhancedJournalSheet {
                 }
 
                 items.push(mergeObject(itemData, update));
-                this.object.setFlag('monks-enhanced-journal', 'items', items);
+                await this.object.setFlag('monks-enhanced-journal', 'items', items);
             } else {
                 ui.notifications.warn(i18n("MonksEnhancedJournal.msg.CannotAddItemType"));
             }
@@ -448,6 +467,7 @@ export class EncounterSheet extends EnhancedJournalSheet {
                     }
 
                     let newSpot = MonksEnhancedJournal.findVacantSpot(template, { width: actor.prototypeToken.width, height: actor.prototypeToken.height }, tokens, data.center || options.center);
+                    log("Encounter, New Spot", newSpot);
                     let td = await actor.getTokenDocument({ x: newSpot.x, y: newSpot.y, hidden: ea.hidden });
                     //if (ea.hidden)
                     //    td.hidden = true;

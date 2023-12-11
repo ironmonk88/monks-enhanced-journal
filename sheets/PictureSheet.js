@@ -19,8 +19,8 @@ export class PictureSheet extends EnhancedJournalSheet {
         return data;
     }
 
-    get type() {
-        return 'image';
+    static get type() {
+        return 'picture';
     }
 
     _inferDefaultMode() {
@@ -28,7 +28,8 @@ export class PictureSheet extends EnhancedJournalSheet {
     }
 
     get template() {
-        //if (!this.object.isOwner && !setting("allow-player")) return ImagePopout.defaultOptions.template;
+        //let settings = this.sheetSettings();
+        //if (!this.object.isOwner && getProperty(settings, "settings.open.value") === true) return ImagePopout.defaultOptions.template;
         return this.options.template;
     }
 

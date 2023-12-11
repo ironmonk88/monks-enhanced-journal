@@ -230,6 +230,7 @@ body[inline-roll-styling="apsj"] a.entity-link,
 body[inline-roll-styling="apsj"] a.content-link,
 body[inline-roll-styling="apsj"] a.inline-roll,
 body[inline-roll-styling="apsj"] a.picture-link,
+body[inline-roll-styling="apsj"] a.sound-link,
 body[inline-roll-styling="apsj"] a.inline-request-roll,
 body[inline-roll-styling="apsj"] a.tile-trigger-link {
     padding: 3px 5px;
@@ -249,6 +250,7 @@ body[inline-roll-styling="apsj"] a.entity-link i,
 body[inline-roll-styling="apsj"] a.content-link i,
 body[inline-roll-styling="apsj"] a.inline-roll i,
 body[inline-roll-styling="apsj"] a.picture-link i,
+body[inline-roll-styling="apsj"] a.sound-link i,
 body[inline-roll-styling="apsj"] a.inline-request-roll i,
 body[inline-roll-styling="apsj"] a.tile-trigger-link i {
     color: rgb(var(--mej-light-0));
@@ -624,10 +626,10 @@ body[inline-roll-styling="apsj"] a.tile-trigger-link i {
     font-size: 1em;
 }
 
-.sheet.journal-entry .journal-entry-page h1 {
+.sheet.journal-entry .journal-entry-page header.journal-page-header h1 {
     font-family: var(--mej-font-family);
     font-weight: 700;
-    font-size: 3em;
+    font-size: 38px;
     border-bottom: 2px solid var(--apsj-primary-dark);
 }
 

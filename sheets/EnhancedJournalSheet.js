@@ -1,5 +1,5 @@
 ﻿import { setting, i18n, format, log, warn, makeid, MonksEnhancedJournal, quantityname, pricename, currencyname, getVolume } from "../monks-enhanced-journal.js";
-import { EditFields } from "../apps/editfields.js";
+import { CustomisePage } from "../apps/customise-page.js";
 import { EditSound } from "../apps/editsound.js";
 import { MakeOffering } from "../apps/make-offering.js";
 import { getValue, setValue, setPrice, MEJHelpers } from "../helpers.js";
@@ -87,8 +87,20 @@ export class EnhancedJournalSheet extends JournalPageSheet {
         return this.options.template;
     }
 
-    get type() {
+    static get type() {
         return 'blank';
+    }
+
+    static sheetSettings() {
+        let settingDefault = (game.settings.settings.get("monks-enhanced-journal.sheet-settings")?.default || {})[this.type] || {};
+        let sheetSettings = (setting("sheet-settings") || {})[this.type] || {};
+        return mergeObject(duplicate(settingDefault), duplicate(sheetSettings));
+    }
+
+    sheetSettings() {
+        let sheetSettings = this.constructor.sheetSettings();
+        let settings = getProperty(this.object, "flags.monks-enhanced-journal.sheet-settings") || {};
+        return mergeObject(sheetSettings, duplicate(settings));
     }
 
     get allowedRelationships() {
@@ -171,9 +183,11 @@ export class EnhancedJournalSheet extends JournalPageSheet {
         }
         data.notesTarget = `flags.monks-enhanced-journal.${game.user.id}.notes`;
 
-        data.entrytype = this.type;
+        data.entrytype = this.constructor.type;
         data.isGM = game.user.isGM;
         data.hasGM = (game.users.find(u => u.isGM && u.active) != undefined);
+
+        data.sheetSettings = this.sheetSettings() || {};
 
         if (this.canPlaySound) {
             data.sound = (getProperty(data, "data.flags.monks-enhanced-journal.sound") || {});
@@ -183,7 +197,7 @@ export class EnhancedJournalSheet extends JournalPageSheet {
                 data.sound.playing = this._backgroundsound?.playing;
         }
 
-        data.data.icon = MonksEnhancedJournal.getIcon(this.type);
+        data.data.icon = MonksEnhancedJournal.getIcon(this.constructor.type);
 
         return data;
     }
@@ -317,7 +331,6 @@ export class EnhancedJournalSheet extends JournalPageSheet {
 
         new EnhancedJournalContextMenu($(html), (this.type == "text" ? ".editor-parent" : ".tab.description .tab-inner"), this._getDescriptionContextOptions());
 
-        //$("a.inline-request-roll", html).click(MonksEnhancedJournal._onClickInlineRequestRoll.bind(this));
         $("a.picture-link", html).click(MonksEnhancedJournal._onClickPictureLink.bind(this));
         $("img:not(.nopopout)", html).click(this._onClickImage.bind(this));
 
@@ -325,7 +338,6 @@ export class EnhancedJournalSheet extends JournalPageSheet {
 
         if (this.object.isOwner && this.object.src) {
             new EnhancedJournalContextMenu($(html), '.sheet-image,div.picture-img', this._getImageContextOptions());
-            
         } else {
             if (!this.object.src) {
                 $('img[data-edit],div.picture-img', html).contextmenu(this._onEditImage.bind(this));
@@ -410,8 +422,8 @@ export class EnhancedJournalSheet extends JournalPageSheet {
 
             options = foundry.utils.mergeObject(options, {
                 contextmenu: 'link createlink',
-                plugins: CONFIG.TinyMCE.plugins + ' createlink background dcconfig template anchor',
-                toolbar: CONFIG.TinyMCE.toolbar + ' background dcconfig template anchor',
+                plugins: CONFIG.TinyMCE.plugins + ' createlink background dcconfig soundeffect template anchor',
+                toolbar: CONFIG.TinyMCE.toolbar + ' background dcconfig soundeffect template anchor',
                 templates: CONFIG.TinyMCE.templates
                 //font_formats: "Andale Mono=andale mono,times; Arial=arial,helvetica,sans-serif; Arial Black=arial black,avant garde; Book Antiqua=book antiqua,palatino; Comic Sans MS=comic sans ms,sans-serif; Courier New=courier new,courier; Georgia=georgia,palatino; Helvetica=helvetica; Impact=impact,chicago; Oswald=oswald; Symbol=symbol; Tahoma=tahoma,arial,helvetica,sans-serif; Terminal=terminal,monaco; Times New Roman=times new roman,times; Trebuchet MS=trebuchet ms,geneva; Verdana=verdana,geneva; Webdings=webdings; Wingdings=wingdings,zapf dingbats;Anglo Text=anglo_textregular;Lovers Quarrel=lovers_quarrelregular;Play=Play-Regular"
             });
@@ -425,7 +437,7 @@ export class EnhancedJournalSheet extends JournalPageSheet {
             else
                 super.activateEditor(name, options, initialContent);
             //need this because foundry doesn't allow access to the init of the editor
-            if (this.object.type == 'text' || this.object.type == 'journalentry' || this.object.type == 'oldentry' || setting("show-menubar")) {
+            //if (this.object.type == 'text' || this.object.type == 'journalentry' || this.object.type == 'oldentry' || setting("show-menubar")) {
                 let count = 0;
                 let that = this;
                 let data = this.object.getFlag('monks-enhanced-journal', 'style');
@@ -443,7 +455,7 @@ export class EnhancedJournalSheet extends JournalPageSheet {
                         }
                     }, 100);
                 //}
-            }
+            //}
         }
     }
 
@@ -565,7 +577,7 @@ export class EnhancedJournalSheet extends JournalPageSheet {
                 icon: '<i class="fas fa-pencil"></i>',
                 condition: this.object.isOwner,
                 callback: () => {
-                    that._onEditImage.bind(that)
+                    that._onEditImage.call(that);
                 }
             },
             {
@@ -663,6 +675,7 @@ export class EnhancedJournalSheet extends JournalPageSheet {
                 break;
             case 'pirateborg':
                 coinage = parseInt(actor.system[denomination]);
+                break;
             case 'demonlord':
                 coinage = parseInt(actor.system.wealth[denomination]);
                 break;
@@ -826,9 +839,6 @@ export class EnhancedJournalSheet extends JournalPageSheet {
                     case 'starwarsffg':
                         updates[`system.stats.credits.value`] = v;
                         break;
-                    case 'pirateborg':
-                        updates[`system.${k}`] = v;
-                        break;
                     case 'cyphersystem':
                         {
                             let currency = MonksEnhancedJournal.currencies.find(c => c.id == k);
@@ -851,6 +861,9 @@ export class EnhancedJournalSheet extends JournalPageSheet {
 
                             updates[`system.settings.equipment.currency.${qtyname}`] = v;
                         } break;
+                    case 'pirateborg':
+                        updates[`system.${k}`] = v;
+                        break;
                     case 'demonlord':
                         updates[`system.wealth.${k}`] = v;
                         break;
@@ -973,30 +986,28 @@ export class EnhancedJournalSheet extends JournalPageSheet {
     }
 
     _onEditImage(event) {
-        event.preventDefault();
-        event.stopPropagation();
-        event.stopImmediatePropagation();
+        event?.preventDefault();
+        event?.stopPropagation();
+        event?.stopImmediatePropagation();
 
         if (this.object.permission < CONST.DOCUMENT_OWNERSHIP_LEVELS.OWNER)
             return null;
 
-        if (event.shiftKey) {
-            $(event.currentTarget).attr('src', "").css({ backgroundImage: `` });
+        if (event?.shiftKey) {
+            $(event?.currentTarget).attr('src', "").css({ backgroundImage: `` });
             $('img[data-edit="src"]', this.element).css({ opacity: '' });
             $('.tab.picture .instruction', this.element).show();
             $('.sheet-body .instruction', this.element).show();
             this._onSubmit(event, { preventClose: true });
-        } else if (!event.ctrlKey && !event.metaKey) {
+        } else if (!event?.ctrlKey && !event?.metaKey) {
             const fp = new FilePicker({
                 type: "image",
                 current: this.object.img,
                 callback: async (path) => {
-                    $(event.currentTarget).attr('src', path).css({ backgroundImage: `url(${path})` });
-                    /*
-                    $('img[data-edit="src"]', this.element).css({ opacity: '' });
+                    //$(event?.currentTarget).attr('src', path).css({ backgroundImage: `url(${path})` });
+                    $('img[data-edit="src"],div.picture-img', this.element).css({ opacity: '' }).attr('src', path).css({ backgroundImage: `url(${path})` });
                     $('.tab.picture .instruction', this.element).hide();
                     $('.sheet-body .instruction', this.element).hide();
-                    */
                     let result = this._onSubmit(event, { preventClose: true });
                     if (result instanceof Promise)
                         await result;
@@ -1022,6 +1033,10 @@ export class EnhancedJournalSheet extends JournalPageSheet {
         if (formData.src?.startsWith("modules/monks-enhanced-journal/assets/"))
             formData.src = null;
 
+        if (formData.src != undefined) {
+            this.object.parent.setFlag('monks-enhanced-journal', 'img', formData.src);
+        }
+
         if (!this.isEditable && foundry.utils.getProperty(formData, 'flags.monks-enhanced-journal.' + game.user.id)) {
             //need to have the GM update this, but only the user notes
             MonksEnhancedJournal.emit("saveUserData", {
@@ -1040,7 +1055,7 @@ export class EnhancedJournalSheet extends JournalPageSheet {
         let ctrls = [];
         if (this.object.id)
             ctrls.push({ id: 'locate', text: i18n("SIDEBAR.JumpPin"), icon: 'fa-crosshairs', conditional: game.user.isGM, attr: { "page-id": this.object.id, "journal-id": this.object.parent.id }, callback: this.enhancedjournal.findMapEntry.bind(this) });
-        if (this.fieldlist() != undefined)
+        if ((game.settings.settings.get("monks-enhanced-journal.sheet-settings")?.default || {})[this.constructor.type] != undefined)
             ctrls.push({ id: 'settings', text: i18n("MonksEnhancedJournal.EditFields"), icon: 'fa-cog', conditional: game.user.isGM, callback: this.onEditFields });
         return ctrls;
     }
@@ -1128,8 +1143,11 @@ export class EnhancedJournalSheet extends JournalPageSheet {
 
     onEditFields() {
         //popup a dialog with the available fields to edit
+        /*
         let fields = this.fieldlist();
         new EditFields(this.object, fields).render(true);
+        */
+       new CustomisePage(this).render(true);
     }
 
     async renderPolyglot(html) {
@@ -1372,7 +1390,7 @@ export class EnhancedJournalSheet extends JournalPageSheet {
     static async getDocument(data, type, notify = true) {
         let document;
         if (data.data) {
-            document = new CONFIG.Item.documentClass(data.data);
+            document = new CONFIG.Item.documentClass(data.data, {});
         } else if (data.pack) {
             const pack = game.packs.get(data.pack);
             let id = data.id;
@@ -1904,7 +1922,7 @@ export class EnhancedJournalSheet extends JournalPageSheet {
                                         itemData._id = makeid();
                                         let sysPrice = MEJHelpers.getSystemPrice(itemData, pricename());
                                         let price = MEJHelpers.getPrice(sysPrice);
-                                        let adjustment = Object.assign({}, setting("adjustment-defaults"), this.object.getFlag('monks-enhanced-journal', 'adjustment') || {});
+                                        let adjustment = this.sheetSettings()?.adjustment;
                                         let sell = adjustment[itemData.type]?.sell ?? adjustment.default.sell ?? 1;
                                         let cost = MEJHelpers.getPrice(`${price.value * sell} ${price.currency}`);
                                         itemData.flags['monks-enhanced-journal'] = {

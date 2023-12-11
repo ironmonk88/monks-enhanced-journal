@@ -1,3 +1,85 @@
+# Version 11.08
+
+Updated the page settings to allow for multiple setting options.
+
+Added the option to customise what tabs are shown in general and on each page.
+
+Added the option to open Picture sheets as Images rather than Journal Entries.
+
+Fixed issue with DC Config when game system doesn't have a config setting
+
+Added additional with to the currency editor dialog
+
+Fixed issue when trying to remove a currency.
+
+Removed controls associated with Open GM Note as they interfere with rendering the enhanced journal properly.
+
+Fixing issues with re-ordering tabs causing an issue
+
+Added options to the right click menu of tabs to close tabs other than the one clicked, and close all tabs to the right of the tab.
+
+Fixed issue with dropping items on the Make Offering dialog.
+
+Fixed scaling issues when displaying slide show slides.
+
+Added the option to set colour, font, and size of text on slideshow slides
+
+Added controls for editing and deleting text areas on slideshow slides, since the previous ways to edit and delete were confusing.
+
+Added sound links to the links that are tracked by MEJ to be formatted.
+
+Fixed item list issues with the GURPS system
+
+Updated the Hotbar macro to display an image of the Journal Entry image when dragged onto the Hotbar.
+
+Updated the Compendium view when dragging a Journal Entry into a Compendium it will attempt to use the image fromt he Journal Entry.
+
+Added confirmation when trying to convert a Journal Entry that has more than one page.
+
+Added context menu items when clicking on Journal Directory items to open in the Enhanced Browser or out of the Enhanced Browser, depending with the default settigns are.
+
+Added context menu items when clicking on Journal Directory items to open in a new tab if setting is set to overwrite current tab.
+
+Fixed issue with Foundry code when creating the Encounter Template on a gridless Scene.
+
+Fixed issue with wall collisions when placing encounter tokens.
+
+Fixed issue when updating a sale chat card information.
+
+Sorting Journal entries appropriately when selecting a Journal Entry for the Note Dialog.
+
+Added DnD 3.5 and DS4 currencies.
+
+Defaulting the image correctly when creating a new Journal Entry.
+
+Fixed issue finding the appropriate image to use when rendering a Compendium of Journal Entries.
+
+Fixed issue with error message that players don't have permission to edit a Journal Entry when world time is changed.
+
+Fixed issue in Encounter sheet when determining if the DCs tab can be shown.
+
+Added the option to drag and drop multiple actors onto and Encounter using Multiple Document Selection module
+
+Added the option to drag and drop multiple items using Multiple Document Selection module
+
+Fixed issue when dragging and dropping a folder onto an Enhanced Journal entry.
+
+Added check to make sure you're not dropping an actor that's already in the Encounter onto the Encounter.
+
+Added sound effect quick link to the Editor toolbar.  So you can add sound links quickly.
+
+Fixed issue with trying to edit, clear, and show a Journal Entry image.
+
+Fixed issue with pirate borg currency
+
+Fixed issue with List Journal Entry not respecting the folder an item is created in.
+
+Fixed issue when creating a new List Journal Entry.
+
+Fixed issue when adjusting the shop prices not accepting decimal values.
+
+Fixed issue with the transfer currency dialog not translating strings properly.
+
 # Version 11.05
 
 Fixed issue with playing a slideshow when a scene loads.

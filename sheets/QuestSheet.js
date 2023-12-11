@@ -161,7 +161,7 @@ export class QuestSheet extends EnhancedJournalSheet {
         return { rewards: [], objectives: [], seen: false, status: 'inactive' };
     }
 
-    get type() {
+    static get type() {
         return 'quest';
     }
 
@@ -499,7 +499,14 @@ export class QuestSheet extends EnhancedJournalSheet {
         if (data.type == 'Item') {
             if (data.from == this.object.uuid)  //don't drop on yourself
                 return;
-            this.addItem(data);
+            if (data.groupSelect) {
+                let itemId = data.uuid.substring(0, data.uuid.length - 16);
+                for (let item of data.groupSelect) {
+                    await this.addItem({ type: "Item", uuid: `${itemId}${item}` });
+                }
+                game?.MultipleDocumentSelection?.clearAllTabs();
+            } else
+                this.addItem(data);
         } else if (data.type == 'Actor') {
             this.addActor(data);
         } else if (data.type == 'Objective') {
@@ -528,7 +535,7 @@ export class QuestSheet extends EnhancedJournalSheet {
             data.uuid = doc?.parent.uuid;
             data.type = "JournalEntry";
             this.addRelationship(data);
-        } else if (data.type == 'Folder' && data.documentName == "Item") {
+        } else if (data.type == 'Folder') {
             if (!this.object.isOwner)
                 return false;
             // Import items from the folder

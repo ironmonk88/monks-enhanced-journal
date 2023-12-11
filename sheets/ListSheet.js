@@ -9,7 +9,7 @@ export class ListSheet extends EnhancedJournalSheet {
         this.initialize();
     }
 
-    get type() {
+    static get type() {
         return 'list';
     }
 
@@ -239,7 +239,12 @@ export class ListSheet extends EnhancedJournalSheet {
         const entries = list.find(".list-item");
 
         // Folder-level events
-        html.find('.create-item').click((ev) => { new ListEdit({ data: {}}, this).render(true) });
+        html.find('.create-item').click((ev) => {
+            let folderId = ev.currentTarget.closest("li.folder").dataset.folderId;
+            new ListEdit({ data: { folder: folderId } }, this).render(true, { focus: true });
+            ev.preventDefault();
+            ev.stopPropagation();
+        });
         html.find('.collapse-all').click(this.collapseAll.bind(this));
         html.find(".folder .folder .folder .create-folder").remove(); // Prevent excessive folder nesting
         if (game.user.isGM) html.find('.create-folder').click(ev => this._onCreateFolder(ev));
@@ -666,6 +671,7 @@ export class ListSheet extends EnhancedJournalSheet {
                     let items = (that.object.flags['monks-enhanced-journal'].items || []);
                     const original = items.find(i => i.id == li.data("documentId"));
                     let newItem = duplicate(original);
+                    newItem.id = randomID();
                     items.push(newItem);
                     that.object.setFlag('monks-enhanced-journal', 'items', items);
                 }

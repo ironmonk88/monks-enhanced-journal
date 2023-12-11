@@ -52,7 +52,7 @@ export class PointOfInterestSheet extends EnhancedJournalSheet {
         return data;
     }
 
-    get type() {
+    static get type() {
         return 'poi';
     }
 

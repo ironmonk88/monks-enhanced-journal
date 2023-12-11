@@ -1,4 +1,4 @@
-import { MonksEnhancedJournal, log, i18n, error, setting, getVolume, isV11, makeid  } from "../monks-enhanced-journal.js"
+import { MonksEnhancedJournal, log, i18n, error, setting, getVolume, makeid  } from "../monks-enhanced-journal.js"
 import { EnhancedJournalSheet } from "../sheets/EnhancedJournalSheet.js"
 import { JournalEntrySheet } from "../sheets/JournalEntrySheet.js"
 
@@ -126,6 +126,7 @@ export class EnhancedJournal extends Application {
     //}
 
     async _render(force, options = {}) {
+        $('.open-gm-note', this.element).remove();
         let result = await super._render(force, options);
 
         if (setting('background-image') != 'none') {
@@ -1278,6 +1279,15 @@ export class EnhancedJournal extends Application {
                 tabs.splice(to, 0, tabs.splice(from, 1)[0]);
 
                 this.tabs = tabs;
+                this.tabs.active = (findone = true) => {
+                    let tab = this.tabs.find(t => t.active);
+                    if (findone) {
+                        if (tab == undefined && this.tabs.length > 0)
+                            tab = this.tabs[0];
+                    }
+                    return tab;
+                };
+
                 if (from < to)
                     $('.journal-tab[data-tabid="' + data.tabid + '"]', this.element).insertAfter(target);
                 else
@@ -1294,7 +1304,7 @@ export class EnhancedJournal extends Application {
 
                 let from = bookmarks.findIndex(a => a.id == data.bookmarkId);
                 let to = bookmarks.findIndex(a => a.id == target.dataset.bookmarkId);
-                log('moving tab from', from, 'to', to);
+                log('moving bookmark from', from, 'to', to);
                 bookmarks.splice(to, 0, bookmarks.splice(from, 1)[0]);
 
                 this.bookmarks = bookmarks;
@@ -1488,6 +1498,25 @@ export class EnhancedJournal extends Application {
                     this.tabs.splice(0, this.tabs.length);
                     this.saveTabs();
                     this.addTab();
+                }
+            },
+            {
+                name: "Close Other Tabs",
+                icon: '<i class="fas fa-dumpster"></i>',
+                callback: li => {
+                    let idx = this.tabs.findIndex(t => t.id == this.contextTab);
+                    this.tabs.splice(0, idx);
+                    this.tabs.splice(1, this.tabs.length);
+                    this.saveTabs();
+                }
+            },
+            {
+                name: "Close To the right",
+                icon: '<i class="fas fa-dumpster"></i>',
+                callback: li => {
+                    let idx = this.tabs.findIndex(t => t.id == this.contextTab);
+                    this.tabs.splice(idx + 1, this.tabs.length);
+                    this.saveTabs();
                 }
             }
         ]);

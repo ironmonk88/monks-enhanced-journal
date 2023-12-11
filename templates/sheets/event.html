@@ -25,9 +25,9 @@
             </section>
         </header>
         <nav class="sheet-navigation tabs" data-group="primary">
-            <a class="item" data-tab="description">{{localize 'MonksEnhancedJournal.Description'}}</a>
-            <a class="item{{#if has.relationships}} hasitems{{/if}}" data-tab="relationships">{{localize 'MonksEnhancedJournal.Relationships'}}</a>
-            <a class="item" data-tab="notes">{{localize 'MonksEnhancedJournal.Notes'}}</a>
+            {{#if sheetSettings.tabs.description.shown}}<a class="item" data-tab="description">{{localize 'MonksEnhancedJournal.Description'}}</a>{{/if}}
+            {{#if sheetSettings.tabs.relationships.shown}}<a class="item{{#if has.relationships}} hasitems{{/if}}" data-tab="relationships">{{localize 'MonksEnhancedJournal.Relationships'}}</a>{{/if}}
+            {{#if sheetSettings.tabs.notes.shown}}<a class="item" data-tab="notes">{{localize 'MonksEnhancedJournal.Notes'}}</a>{{/if}}
         </nav>
         <section class="sheet-body">
             <div class="tab description" data-group="primary" data-tab="description">

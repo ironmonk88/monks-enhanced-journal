@@ -26,7 +26,7 @@ export class PersonSheet extends EnhancedJournalSheet {
         return ['organization', 'person', 'place', 'shop', 'quest', 'poi'];
     }*/
 
-    get type() {
+    static get type() {
         return 'person';
     }
 
@@ -37,28 +37,39 @@ export class PersonSheet extends EnhancedJournalSheet {
     async getData() {
         let data = await super.getData();
 
-        let needsAttributes = data?.data?.flags['monks-enhanced-journal']?.attributes == undefined;
-        if (!needsAttributes) {
-            for (let value of Object.values(data?.data?.flags['monks-enhanced-journal']?.attributes || {})) {
-                if (typeof value != "object") {
-                    needsAttributes = true;
-                    break;
+        if (hasProperty(data, "data.flags.monks-enhanced-journal.attributes")) {
+            // check to make sure the attributes are formatted correctly
+            let changedObjectValues = false;
+            let sheetSettings = {};
+            let attributes = data?.data?.flags['monks-enhanced-journal']?.attributes || {};
+            for (let [k, v] of Object.entries(attributes)) {
+                if (typeof v == "object") {
+                    sheetSettings[k] = { shown: !v.hidden };
+                    attributes[k] = v.value;
+                    changedObjectValues = true;
                 }
             }
-        }
-        if (needsAttributes) {
-            let fields = data?.data?.flags['monks-enhanced-journal']?.fields || {};
-            let attributes = {};
-            let flags = data?.data?.flags['monks-enhanced-journal'] || {};
-            for (let attr of ['race','gender','age','eyes','skin','hair', 'life','profession','voice',  'faction','height','weight','traits','ideals','bonds', 'flaws','longterm','shortterm','beliefs','secret']) {
-                attributes[attr] = { value: flags[attr] || ""};
-                if (fields[attr] != undefined)
-                    attributes[attr].hidden = !fields[attr]?.value;
-                //delete data?.data?.flags['monks-enhanced-journal'][attr]
+            if (changedObjectValues) {
+                await this.object.update({ 'monks-enhanced-journal.flags.sheet-settings.attributes': sheetSettings });
+                await this.object.setFlag('monks-enhanced-journal', 'attributes', attributes);
             }
-            data.data.flags['monks-enhanced-journal'].attributes = attributes;
-            this.object.flags['monks-enhanced-journal'].attributes = attributes;
-            this.object.setFlag('monks-enhanced-journal', 'attributes', data.data.flags['monks-enhanced-journal'].attributes);
+        } else if (hasProperty(data, "data.flags.monks-enhanced-journal.fields")) {
+            // convert fields to attributes
+            let fields = getProperty(data, "data.flags.monks-enhanced-journal.fields");
+            let attributes = {};
+            let sheetSettings = {};
+            let flags = getProperty(data, "data.flags.monks-enhanced-journal") || {};
+            let defaultSettings = this.object.constructor.sheetSettings() || {};
+
+            for (let attr of Object.keys(defaultSettings.attributes)) {
+                attributes[attr] = flags[attr] || "";
+                if (fields[attr] != undefined)
+                    sheetSettings[attr].shown = !!fields[attr]?.value;
+            }
+            setProperty(data, "data.flags.monks-enhanced-journal.attributes", attributes);
+            setProperty(data, "data.flags.monks-enhanced-journal.sheet-settings.attributes", sheetSettings);
+            await this.object.setFlag('monks-enhanced-journal', 'attributes', attributes);
+            await this.object.update({ 'monks-enhanced-journal.flags.sheet-settings.attributes': sheetSettings });
         }
 
         data.relationships = await this.getRelationships();
@@ -93,14 +104,20 @@ export class PersonSheet extends EnhancedJournalSheet {
     }
 
     fieldlist() {
-        let fields = duplicate(setting("person-attributes"));
+        let settings = this.sheetSettings() || {};
+        let fields = MonksEnhancedJournal.convertObjectToArray(settings)?.attributes;
         let attributes = this.object.flags['monks-enhanced-journal'].attributes;
-        for (let field of fields) {
-            if (attributes[field.id]) {
-                field = mergeObject(field, attributes[field.id]);
-            }
-        }
-        return fields;
+        return fields
+            .filter(f => f.shown)
+            .map(f => {
+                let attr = attributes[f.id];
+                return {
+                    id: f.id,
+                    name: f.name,
+                    value: attr,
+                    full: f.full
+                }
+            });
     }
 
     _documentControls() {

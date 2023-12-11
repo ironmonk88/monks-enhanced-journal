@@ -23,11 +23,12 @@ export class SlideshowSheet extends EnhancedJournalSheet {
                 { dragSelector: ".slide", dropSelector: ".slide" },
                 { dragSelector: ".slide", dropSelector: ".slideshow-body" },
                 { dragSelector: ".sheet-icon", dropSelector: "#board" }
-            ]
+            ],
+            scrollY: [".tab.entry-details .tab-inner", ".tab.slides .tab-inner"]
         });
     }
 
-    get type() {
+    static get type() {
         return 'slideshow';
     }
 
@@ -40,6 +41,8 @@ export class SlideshowSheet extends EnhancedJournalSheet {
 
         if (this.object._thumbnails == undefined && (game.user.isGM || this.object.testUserPermission(game.user, "OBSERVER")))
             this.loadThumbnails();
+
+        data.fontOptions = mergeObject({ "": "" }, MonksEnhancedJournal.fonts);
 
         let flags = (data.data.flags["monks-enhanced-journal"]);
         if (flags == undefined) {
@@ -88,23 +91,31 @@ export class SlideshowSheet extends EnhancedJournalSheet {
                 flags.slides = slides;
             }
 
+            let windowSize = 25;
+            let windowFont = $(".window-content").css('font-family');
+
             data.slides = flags.slides.map(s => {
                 let slide = duplicate(s);
 
                 slide.thumbnail = s.img ? (this.object._thumbnails && this.object._thumbnails[slide.id]) || "/modules/monks-enhanced-journal/assets/loading.gif" : ""; //slide.img;
 
-                if (slide.background?.color == '' && slide.thumbnail) {
+                if (slide.background?.color == '' && slide.thumbnail)
                     slide.background = `background-image:url(\'${slide.thumbnail}\');`;
-                }
                 else
                     slide.background = `background-color:${slide.background.color || "#ffffff"}`;
 
                 slide.texts = slide.texts.map(t => {
                     let text = duplicate(t);
-                    let color = Color.from(t.background || '#000000');
+                    let bgcolor = Color.from(t.background || '#000000');
+                    let color = t.color || getProperty(flags, "font.color") || '#FFFFFF';
+                    let font = t.font || getProperty(flags, "font.name") || windowFont;
+                    let size = t.size || getProperty(flags, "font.size") || windowSize;
+                    size = (size  / windowSize) * 100;
                     let style = {
-                        color: t.color,
-                        'background-color': color.toRGBA(t.opacity != undefined ? t.opacity : 0.5),
+                        color,
+                        'font-size': size + "%",
+                        'font-family': font,
+                        'background-color': bgcolor.toRGBA(t.opacity != undefined ? t.opacity : 0.5),
                         'text-align': (t.align == 'middle' ? 'center' : t.align),
                         top: (t.top || 0) + "%",
                         left: (t.left || 0) + "%",
@@ -216,7 +227,7 @@ export class SlideshowSheet extends EnhancedJournalSheet {
 
         new ResizeObserver(() => {
             //change font size to match height
-            let size = $('.slide-showing .slide-textarea', html).outerHeight() / 20;
+            let size = ($('.slide-showing .slide-textarea', html).outerWidth() || 182) / 50;
             $('.slide-showing .slide-textarea', html).css({ 'font-size': `${size}px`});
         }).observe(this.element[0]);
 
@@ -224,6 +235,9 @@ export class SlideshowSheet extends EnhancedJournalSheet {
         $('.nav-button.play').click(this.playSlideshow.bind(this));
         $('.nav-button.pause').click(this.pauseSlideshow.bind(this));
         $('.nav-button.stop').click(this.stopSlideshow.bind(this));
+
+        let size = ($('.slideshow-body .slide-textarea', html).outerWidth() || 182) / 50;
+        $('.slideshow-body .slide-textarea', html).css({ 'font-size': `${size}px` });
     }
 
     async close(options) {
@@ -310,7 +324,9 @@ export class SlideshowSheet extends EnhancedJournalSheet {
             slides.push(slide);
             this.object.setFlag("monks-enhanced-journal", 'slides', slides);
 
-            MonksEnhancedJournal.createSlide(slide, $('.slideshow-body', this.element));
+            let newSlide = MonksEnhancedJournal.createSlide(slide, getProperty(this.object, "flags.monks-enhanced-journal"));
+            let size = $('.slide-textarea', newSlide).outerWidth() / 50;
+            $('.slide-textarea', newSlide).css({ 'font-size': `${size}px` });
         }
     }
 
@@ -522,9 +538,10 @@ export class SlideshowSheet extends EnhancedJournalSheet {
     showSlide() {
         let idx = this.object.flags["monks-enhanced-journal"].slideAt;
         let slide = this.object.flags["monks-enhanced-journal"].slides[idx];
-        let newSlide = MonksEnhancedJournal.createSlide(slide);
-        $('.slide-textarea', newSlide).css({'font-size':'25px'});
+        let newSlide = MonksEnhancedJournal.createSlide(slide, getProperty(this.object, "flags.monks-enhanced-journal"));
         $('.slide-showing', this.element).append(newSlide);
+        let size = $('.slide-textarea', newSlide).outerWidth() / 50;
+        $('.slide-textarea', newSlide).css({ 'font-size': `${size}px` });
     }
 
     playSlide(idx, animate = true) {
@@ -549,9 +566,10 @@ export class SlideshowSheet extends EnhancedJournalSheet {
         $('.slide-showing .slide', this.element).addClass('out');
 
         //bring in the new slide
-        let newSlide = MonksEnhancedJournal.createSlide(slide);
-        $('.slide-textarea', newSlide).css({ 'font-size': '25px' });
+        let newSlide = MonksEnhancedJournal.createSlide(slide, getProperty(this.object, "flags.monks-enhanced-journal"));
         $('.slide-showing', this.element).append(newSlide);
+        let size = $('.slide-showing', this.element).outerWidth() / 50;
+        $('.slide-textarea', newSlide).css({ 'font-size': `${size}px` });
 
         var img = $('.slide-image', newSlide);
 

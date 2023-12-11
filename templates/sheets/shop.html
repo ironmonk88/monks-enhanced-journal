@@ -42,13 +42,13 @@
             {{/if}}
         </header>
         <nav class="sheet-navigation tabs" data-group="primary">
-            <a class="item" data-tab="description">{{localize 'MonksEnhancedJournal.Description'}}</a>
+            {{#if sheetSettings.tabs.description.shown}}<a class="item" data-tab="description">{{localize 'MonksEnhancedJournal.Description'}}</a>{{/if}}
             {{#if owner}}
-            <a class="item" data-tab="details">{{localize 'MonksEnhancedJournal.Details'}}</a>
+            {{#if sheetSettings.tabs.entry-details.shown}}<a class="item" data-tab="entry-details">{{localize 'MonksEnhancedJournal.Details'}}</a>{{/if}}
             {{/if}}
-            <a class="item{{#if has.items}} hasitems{{/if}}" data-tab="items">{{localize 'MonksEnhancedJournal.Items'}}</a>
-            <a class="item{{#if has.relationships}} hasitems{{/if}}" data-tab="relationships">{{localize 'MonksEnhancedJournal.Relationships'}}</a>
-            <a class="item" data-tab="notes">{{localize 'MonksEnhancedJournal.Notes'}}</a>
+            {{#if sheetSettings.tabs.items.shown}}<a class="item{{#if has.items}} hasitems{{/if}}" data-tab="items">{{localize 'MonksEnhancedJournal.Items'}}</a>{{/if}}
+            {{#if sheetSettings.tabs.relationships.shown}}<a class="item{{#if has.relationships}} hasitems{{/if}}" data-tab="relationships">{{localize 'MonksEnhancedJournal.Relationships'}}</a>{{/if}}
+            {{#if sheetSettings.tabs.notes.shown}}<a class="item" data-tab="notes">{{localize 'MonksEnhancedJournal.Notes'}}</a>{{/if}}
         </nav>
         <section class="sheet-body">
             <div class="tab description active" data-group="primary" data-tab="description">
@@ -57,7 +57,7 @@
                 </div>
             </div>
             {{#if owner}}
-            <div class="tab details" data-group="primary" data-tab="details">
+            <div class="tab details" data-group="primary" data-tab="entry-details">
                 <div class="tab-inner flexcol" style="overflow-y: hidden !important;">
                     <div class="flexcol details-section no-border" style="flex-grow:0;margin-bottom: 8px;width: 100%;align-content: center;">
                         <div class="form-group owner-only">

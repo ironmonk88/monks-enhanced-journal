@@ -37,13 +37,13 @@
             <td>
                 <div class="form-fields flexrow" style="justify-content: flex-end;">
                     <span style="font-size:20px;margin-left:10px;flex: 0 0 20px;text-align:left;">&times;</span>
-                    <input type="number" class="sell-field" style="flex: 0 0 60px;text-align:right;" name="adjustment.{{@key}}.sell" data-dtype="Number" placeholder="{{lookup (lookup @root.defaultAdjustment @key) 'sell'}}" value="{{lookup (lookup @root.adjustment @key) 'sell'}}" />
+                    <input type="number" class="sell-field" style="flex: 0 0 60px;text-align:right;" name="adjustment.{{@key}}.sell" step="any" data-dtype="Number" placeholder="{{lookup (lookup @root.defaultAdjustment @key) 'sell'}}" value="{{lookup (lookup @root.adjustment @key) 'sell'}}" />
                 </div>
             </td>
             <td>
                 <div class="form-fields flexrow" style="justify-content: flex-end;">
                     <span style="font-size:20px;margin-left:10px;flex: 0 0 20px;text-align:left;">&times;</span>
-                    <input type="number" class="buy-field" style="flex: 0 0 60px;text-align:right;" name="adjustment.{{@key}}.buy" data-dtype="Number" placeholder="{{lookup (lookup @root.defaultAdjustment @key) 'buy'}}" value="{{lookup (lookup @root.adjustment @key) 'buy'}}" />
+                    <input type="number" class="buy-field" style="flex: 0 0 60px;text-align:right;" name="adjustment.{{@key}}.buy" step="any" data-dtype="Number" placeholder="{{lookup (lookup @root.defaultAdjustment @key) 'buy'}}" value="{{lookup (lookup @root.adjustment @key) 'buy'}}" />
                 </div>
             </td>
         </tr>

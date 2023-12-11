@@ -10,11 +10,11 @@
             {{/if}}
         </header>
         <nav class="sheet-navigation tabs" data-group="primary">
-            <a class="item active" data-tab="description">{{localize 'MonksEnhancedJournal.Description'}}</a>
+            {{#if sheetSettings.tabs.description.shown}}<a class="item active" data-tab="description">{{localize 'MonksEnhancedJournal.Description'}}</a>{{/if}}
             {{#if owner}}
-            <a class="item{{#if has.monsters}} hasitems{{/if}}" data-tab="monsters">{{localize 'MonksEnhancedJournal.Monsters'}}</a>
-            <a class="item{{#if has.items}} hasitems{{/if}}" data-tab="items">{{localize 'MonksEnhancedJournal.Loot'}}</a>
-            {{#if canShow.dcs}}<a class="item{{#if has.dcs}} hasitems{{/if}}" data-tab="dcs">{{localize 'MonksEnhancedJournal.DCs'}}</a>{{/if}}
+            {{#if sheetSettings.tabs.monsters.shown}}<a class="item{{#if has.monsters}} hasitems{{/if}}" data-tab="monsters">{{localize 'MonksEnhancedJournal.Monsters'}}</a>{{/if}}
+            {{#if sheetSettings.tabs.items.shown}}<a class="item{{#if has.items}} hasitems{{/if}}" data-tab="items">{{localize 'MonksEnhancedJournal.Loot'}}</a>{{/if}}
+            {{#if sheetSettings.tabs.dcs.shown}}{{#if canShow.dcs}}<a class="item{{#if has.dcs}} hasitems{{/if}}" data-tab="dcs">{{localize 'MonksEnhancedJournal.DCs'}}</a>{{/if}}{{/if}}
             {{/if}}
             <a class="item" data-tab="notes">{{localize 'MonksEnhancedJournal.Notes'}}</a>
         </nav>

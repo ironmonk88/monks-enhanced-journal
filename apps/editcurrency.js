@@ -13,7 +13,7 @@ export class EditCurrency extends FormApplication {
             title: i18n("MonksEnhancedJournal.EditCurrency"),
             classes: ["edit-currency"],
             template: "./modules/monks-enhanced-journal/templates/edit-currency.html",
-            width: 400,
+            width: 500,
             height: "auto",
             closeOnSubmit: true,
             popOut: true,
@@ -64,7 +64,7 @@ export class EditCurrency extends FormApplication {
         }
     }
 
-    removeCurrency() {
+    removeCurrency(event) {
         let currid = event.currentTarget.closest('li.item').dataset.id;
         this.currency.findSplice(s => s.id === currid);
         this.refresh();

@@ -1,4 +1,4 @@
-﻿.monks-journal-sheet.sheet {
+﻿.monks-journal-sheet.sheet:not(.item-card) {
     height: 100%;
 }
 
@@ -643,7 +643,7 @@ body:not(.system-pf2e) .monks-journal-sheet .sheet-container .tag {
     font-family: var(--mej-font-family);
     font-size: var(--font-size-14);
     text-align: center;
-    height: 29px;
+    flex: 0 0 25px;
     margin: 2px 0;
     margin-left: 1px;
     padding: 0;
@@ -1600,6 +1600,7 @@ body:not(.system-pf2e) .monks-journal-sheet .sheet-container .tag {
     height: 75px;
     width: 100px;
     padding: 0px 8px;
+    margin: 0;
 }
 
 .slideshow-container .slide-inner {
@@ -1744,7 +1745,7 @@ body:not(.system-pf2e) .monks-journal-sheet .sheet-container .tag {
 }
 
 .slide-config .slide .slide-inner {
-    width: 600px;
+    width: 584px;
     height: 400px;
     flex: 0 0 400px;
     margin: auto;
@@ -1805,6 +1806,39 @@ body:not(.system-pf2e) .monks-journal-sheet .sheet-container .tag {
     display: none;
     pointer-events: none;
     z-index: 10;
+}
+
+.slide-config .slide-textarea .slide-hud .control-column {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    align-items: center;
+    position: absolute;
+    height: 100%;
+    width: 40px;
+    left: -45px;
+    top: 0px;
+}
+
+.slide-config .slide-textarea .slide-hud .control-icon {
+    box-sizing: content-box;
+    width: 28px;
+    flex: 0 0 28px;
+    margin: 5px 0;
+    font-size: 18px;
+    line-height: 28px;
+    text-align: center;
+    color: var(--color-text-light-3);
+    background: rgba(0, 0, 0, 0.6);
+    box-shadow: 0 0 15px var(--color-shadow-dark);
+    border: 1px solid #333;
+    border-radius: 8px;
+    pointer-events: all;
+}
+
+.slide-config .slide-textarea .slide-hud .control-icon:hover {
+    color: var(--color-text-light-1);
 }
 
 .slide-config .slide-textarea .mover {

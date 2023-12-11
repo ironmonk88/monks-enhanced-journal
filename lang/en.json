@@ -78,6 +78,8 @@
   "MonksEnhancedJournal.start-toc-collapsed.hint": "Start with the Table of Contents collapsed",
   "MonksEnhancedJournal.defaultprices.name": "Default Prices",
   "MonksEnhancedJournal.defaultprices.hint": "Default prices for shops",
+  "MonksEnhancedJournal.customise-pages.name": "Customise Pages",
+  "MonksEnhancedJournal.customise-pages.hint": "Customise the pages that are shown in the journal",
 
   "MonksEnhancedJournal.SlideConfiguration": "Slide Configuration",
   "MonksEnhancedJournal.DCConfiguration": "DC Configuration",
@@ -426,6 +428,12 @@
   "MonksEnhancedJournal.ChangeSheetType": "Change Sheet Type",
   "MonksEnhancedJournal.Playlist": "Background Playlist",
   "MonksEnhancedJournal.PausePlaylists": "Pause currently playing playlist when slideshow starts",
+  "MonksEnhancedJournal.Font": "Font",
+  "MonksEnhancedJournal.ConvertToEnhancedJournal": "Convert to Enhanced Journal",
+  "MonksEnhancedJournal.OpenInEnhancedBrowser": "Open in Enhanced Browser",
+  "MonksEnhancedJournal.OpenOutsideEnhancedBrowser": "Open outside Enhanced Browser",
+  "MonksEnhancedJournal.OpenInNewTab": "Open in New Tab",
+  "MonksEnhancedJournal.OpenAsPicture": "Open as Picture",
 
   "MonksEnhancedJournal.msg.NoPlayersSelected": "No players selected to send this entry to",
   "MonksEnhancedJournal.msg.CannotAddItemType": "Cannot add item of this type",
@@ -490,6 +498,7 @@
   "MonksEnhancedJournal.msg.ShopIsNotReceivingItems": "Shop is not receiving items at this time",
   "MonksEnhancedJournal.msg.NoItemsToAssign": "No items to assign to a target",
   "MonksEnhancedJournal.msg.CannotSellItem": "This shop does not buy back this item",
+  "MonksEnhancedJournal.msg.ActorAlreadyInEncounter": "Actor is already in the encounter",
 
   "MonksEnhancedJournal.Contain": "Contain",
   "MonksEnhancedJournal.Cover": "Cover",

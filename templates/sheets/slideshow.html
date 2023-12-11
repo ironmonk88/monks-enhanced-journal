@@ -90,6 +90,30 @@
                             <label style="flex: 0 0 60px;">{{localize 'MonksEnhancedJournal.seconds'}}</label>
                         </div>
                     </div>
+                    <header class="form-header" style="font-size:16px;">
+                        <h3 class="noborder"><i class="fas fa-font"></i> {{localize 'MonksEnhancedJournal.Font'}}</h3>
+                    </header>
+                    <div class="form-group">
+                        <label for="font.name">{{localize 'MonksEnhancedJournal.Font'}}</label>
+                        <div class="form-fields">
+                            <select name="flags.monks-enhanced-journal.font.name">
+                                {{ selectOptions fontOptions selected=data.flags.monks-enhanced-journal.font.name localize=true }}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="flags.monks-enhanced-journal.font.color">{{localize 'MonksEnhancedJournal.TextColour'}}</label>
+                        <div class="form-fields">
+                            <input type="text" name="flags.monks-enhanced-journal.font.color" data-dtype="String" value="{{data.flags.monks-enhanced-journal.font.color}}">
+                            <input type="color" data-edit="flags.monks-enhanced-journal.font.color" value="{{data.flags.monks-enhanced-journal.font.color}}">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="font.size">{{localize 'MonksEnhancedJournal.Size'}}</label>
+                        <div class="form-fields" style="justify-content:flex-end;">
+                            <input type="number" name="flags.monks-enhanced-journal.font.size" value="{{data.flags.monks-enhanced-journal.font.size}}" style="height: 28px; flex: 0 0 60px; text-align: right;">
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="tab slides" data-group="primary" data-tab="slides">

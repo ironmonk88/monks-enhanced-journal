@@ -72,6 +72,10 @@ export class MakeOffering extends FormApplication {
 
     /* -------------------------------------------- */
 
+    _canDragDrop() {
+        return true;
+    }
+
     async _onDrop(event) {
         let data;
         try {

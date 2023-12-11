@@ -24,7 +24,7 @@ export class LootSheet extends EnhancedJournalSheet {
         });
     }
 
-    get type() {
+    static get type() {
         return 'loot';
     }
 
@@ -293,65 +293,73 @@ export class LootSheet extends EnhancedJournalSheet {
                 if (!this.object.isOwner && !hasGM) {
                     return ui.notifications.warn("Cannot drop items on this sheet without a GM logged in");
                 }
-                let item = await this.getDocument(data);
-                let max = getValue(item, quantityname(), null);
-                if (!entry && !item.actor?.id)
-                    max = null;
-
-                //Don't transfer between Loot sheets unless purchasing is set to "Anyone" or the player owns the sheet
-                if (entry
-                    && !((this.object.flags["monks-enhanced-journal"].purchasing == "free" || this.object.isOwner)
-                    && ((entry.data.flags["monks-enhanced-journal"].purchasing == "free" || entry.isOwner))))
-                    return;
-
-                //Only allow players to drop things from their own player onto the loot sheet
-                if (!this.object.isOwner && !(item.actor.id || entry))
-                    return;
-
-                let result = await LootSheet.confirmQuantity(item, max, "transfer", false);
-                if ((result?.quantity ?? 0) > 0) {
-                    let itemData = item.toObject();
-                    setProperty(itemData, "flags.monks-enhanced-journal.quantity", result.quantity);
-                    setValue(itemData, quantityname(), 1);
-
-                    if (game.user.isGM || this.object.isOwner) {
-                        this.addItem({ data: itemData });
-                    } else {
-                        MonksEnhancedJournal.emit("addItem",
-                            {
-                                lootid: this.object.uuid,
-                                itemdata: itemData
-                            });
+                if (data.groupSelect) {
+                    let itemId = data.uuid.substring(0, data.uuid.length - 16);
+                    for (let item of data.groupSelect) {
+                        await this.addItem({ type: "Item", uuid: `${itemId}${item}` });
                     }
+                    game?.MultipleDocumentSelection?.clearAllTabs();
+                } else {
+                    let item = await this.getDocument(data);
+                    let max = getValue(item, quantityname(), null);
+                    if (!entry && !item.actor?.id)
+                        max = null;
 
-                    //is this transferring from another journal entry?
-                    if (entry) {
-                        if (game.user.isGM)
-                            this.constructor.purchaseItem.call(this.constructor, entry, data.data._id, result.quantity, { chatmessage: false });
-                        else {
-                            MonksEnhancedJournal.emit("purchaseItem",
+                    //Don't transfer between Loot sheets unless purchasing is set to "Anyone" or the player owns the sheet
+                    if (entry
+                        && !((this.object.flags["monks-enhanced-journal"].purchasing == "free" || this.object.isOwner)
+                            && ((entry.data.flags["monks-enhanced-journal"].purchasing == "free" || entry.isOwner))))
+                        return;
+
+                    //Only allow players to drop things from their own player onto the loot sheet
+                    if (!this.object.isOwner && !(item.actor.id || entry))
+                        return;
+
+                    let result = await LootSheet.confirmQuantity(item, max, "transfer", false);
+                    if ((result?.quantity ?? 0) > 0) {
+                        let itemData = item.toObject();
+                        setProperty(itemData, "flags.monks-enhanced-journal.quantity", result.quantity);
+                        setValue(itemData, quantityname(), 1);
+
+                        if (game.user.isGM || this.object.isOwner) {
+                            this.addItem({ data: itemData });
+                        } else {
+                            MonksEnhancedJournal.emit("addItem",
                                 {
-                                    shopid: entry.uuid,
-                                    itemid: data.data._id,
-                                    user: game.user.id,
-                                    quantity: result.quantity,
-                                    chatmessage: false
+                                    lootid: this.object.uuid,
+                                    itemdata: itemData
                                 });
                         }
-                    } else if (item.actor) {
-                        //let actorItem = item.actor.items.get(data.data._id);
-                        let quantity = getValue(item, quantityname());
-                        if (result.quantity >= quantity)
-                            await item.delete();
-                        else {
-                            let update = { system: {} };
-                            update.system[quantityname()] = quantity - result.quantity;
-                            await item.update(update);
+
+                        //is this transferring from another journal entry?
+                        if (entry) {
+                            if (game.user.isGM)
+                                this.constructor.purchaseItem.call(this.constructor, entry, data.data._id, result.quantity, { chatmessage: false });
+                            else {
+                                MonksEnhancedJournal.emit("purchaseItem",
+                                    {
+                                        shopid: entry.uuid,
+                                        itemid: data.data._id,
+                                        user: game.user.id,
+                                        quantity: result.quantity,
+                                        chatmessage: false
+                                    });
+                            }
+                        } else if (item.actor) {
+                            //let actorItem = item.actor.items.get(data.data._id);
+                            let quantity = getValue(item, quantityname());
+                            if (result.quantity >= quantity)
+                                await item.delete();
+                            else {
+                                let update = { system: {} };
+                                update.system[quantityname()] = quantity - result.quantity;
+                                await item.update(update);
+                            }
                         }
                     }
                 }
             }
-        } else if (data.type == 'Folder' && data.documentName == "Item") {
+        } else if (data.type == 'Folder') {
             if (!this.object.isOwner)
                 return false;
             // Import items from the folder
@@ -361,18 +369,32 @@ export class LootSheet extends EnhancedJournalSheet {
                     if (item instanceof Item) {
                         let itemData = item.toObject();
                         setProperty(itemData, "flags.monks-enhanced-journal.quantity", 1);
-                        await this.addItem({data: itemData });
+                        await this.addItem({ data: itemData });
                     }
                 }
             }
         } else if (data.type == 'Actor') {
             //Add this actor to the list
+            let hasChanged = false;
             let actors = duplicate(this.object.getFlag('monks-enhanced-journal', 'actors'));
-            let actor = await fromUuid(data.uuid);
-            if (actor && !actors.includes(actor.id)) {
-                actors.push(actor.id);
-                this.object.setFlag('monks-enhanced-journal', 'actors', actors);
+
+            if (data.groupSelect) {
+                for (let actor of data.groupSelect) {
+                    if (!actors.includes(actor)) {
+                        actors.push(actor);
+                        hasChanged = true;
+                    }
+                }
+            } else {
+                let actor = await fromUuid(data.uuid);
+                if (actor && !actors.includes(actor.id)) {
+                    actors.push(actor.id);
+                    hasChanged = true;
+                }
             }
+
+            if (hasChanged)
+                this.object.setFlag('monks-enhanced-journal', 'actors', actors);
         }
         log('drop data', event, data);
     }

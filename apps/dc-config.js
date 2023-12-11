@@ -18,7 +18,7 @@ export class DCConfig extends FormApplication {
     }
 
     static optionList() {
-        let config = CONFIG[game.system.id.toUpperCase()];
+        let config = CONFIG[game.system.id.toUpperCase()] || {};
         if (game.system.id == "tormenta20")
             config = CONFIG.T20;
         else if (game.system.id == "shadowrun5e")

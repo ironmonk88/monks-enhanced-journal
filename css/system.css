@@ -186,6 +186,11 @@ body.system-wfrp4e {
 }
 
 /* GURPS */
+.system-gurps .monks-enhanced-journal .item-list .item {
+    height: unset;
+    line-height: unset;
+}
+
 .system-gurps .monks-enhanced-journal .relationships .item-list .item {
     line-height: 70px;
     height: 70px;

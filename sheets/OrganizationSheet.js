@@ -46,7 +46,7 @@ export class OrganizationSheet extends EnhancedJournalSheet {
         return data;
     }
 
-    get type() {
+    static get type() {
         return 'organization';
     }
 

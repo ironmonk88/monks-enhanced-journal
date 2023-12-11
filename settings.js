@@ -2,6 +2,7 @@ import { MonksEnhancedJournal, i18n } from "./monks-enhanced-journal.js"
 import { EditCurrency } from "./apps/editcurrency.js"
 import { AdjustPrice } from "./apps/adjust-price.js"
 import { EditPersonAttributes, EditPlaceAttributes } from "./apps/editattributes.js"
+import { CustomisePages } from "./apps/customise-pages.js"
 import { APSJ } from "./apsjournal.js";
 
 export const registerSettings = function () {
@@ -94,20 +95,12 @@ export const registerSettings = function () {
 		type: AdjustPrice
 	});
 
-	game.settings.registerMenu(modulename, 'editPersonAttributes', {
-		label: i18n("MonksEnhancedJournal.editpersonattribute.name"),
-		hint: i18n("MonksEnhancedJournal.editpersonattribute.hint"),
-		icon: 'fas fa-user',
+	game.settings.registerMenu(modulename, 'customise-pages', {
+		label: i18n("MonksEnhancedJournal.customise-pages.name"),
+		hint: i18n("MonksEnhancedJournal.customise-pages.hint"),
+		icon: 'fas fa-file-lines',
 		restricted: true,
-		type: EditPersonAttributes
-	});
-
-	game.settings.registerMenu(modulename, 'editPlaceAttributes', {
-		label: i18n("MonksEnhancedJournal.editplaceattribute.name"),
-		hint: i18n("MonksEnhancedJournal.editplaceattribute.hint"),
-		icon: 'fas fa-place-of-worship',
-		restricted: true,
-		type: EditPlaceAttributes
+		type: CustomisePages
 	});
 
 	game.settings.register(modulename, 'background-colour', {
@@ -460,6 +453,136 @@ export const registerSettings = function () {
 		type: Array,
 	});
 
+	game.settings.register(modulename, "sheet-settings", {
+		scope: "world",
+		config: false,
+		default: {
+			list: {
+
+			},
+			encounter: {
+				tabs: {
+					'description': { name: 'MonksEnhancedJournal.Description', shown: true },
+					'monsters': { name: 'MonksEnhancedJournal.Monsters', shown: true },
+					'items': { name: 'MonksEnhancedJournal.Loot', shown: true },
+					'dcs': { name: 'MonksEnhancedJournal.DCs', shown: true },
+					'notes': { name: 'MonksEnhancedJournal.Notes', shown: true },
+				}
+			},
+			event: {
+				tabs: {
+					'description': { name: 'MonksEnhancedJournal.Description', shown: true },
+					'relationships': { name: 'MonksEnhancedJournal.Relationships', shown: true },
+					'notes': { name: 'MonksEnhancedJournal.Notes', shown: true },
+				},
+			},
+			organization: {
+				tabs: {
+					'description': { name: 'MonksEnhancedJournal.Description', shown: true },
+					'relationships': { name: 'MonksEnhancedJournal.Relationships', shown: true },
+					'offerings': { name: 'MonksEnhancedJournal.Offerings', shown: true },
+					'notes': { name: 'MonksEnhancedJournal.Notes', shown: true },
+				},
+			},
+			person: {
+				tabs: {
+					'description': { name: 'MonksEnhancedJournal.Description', shown: true },
+					'entry-details': { name: 'MonksEnhancedJournal.Details', shown: true },
+					'relationships': { name: 'MonksEnhancedJournal.Relationships', shown: true },
+					'offerings': { name: 'MonksEnhancedJournal.Offerings', shown: true },
+					'notes': { name: 'MonksEnhancedJournal.Notes', shown: true },
+				},
+				attributes: {
+					'race': { name: "MonksEnhancedJournal.Race", order: 0, shown: false, full: false },
+					'ancestry': { name: "MonksEnhancedJournal.Ancestry", order: 1, shown: true, full: false },
+					'gender': { name: "MonksEnhancedJournal.Gender", order: 2, shown: false, full: false },
+					'age': { name: "MonksEnhancedJournal.Age", order: 3, shown: true, full: false },
+					'eyes': { name: "MonksEnhancedJournal.Eyes", order: 4, shown: true, full: false },
+					'skin': { name: "MonksEnhancedJournal.Skin", order: 5, shown: false, full: false },
+					'hair': { name: "MonksEnhancedJournal.Hair", order: 6, shown: true, full: false },
+					'life': { name: "MonksEnhancedJournal.LifeStatus", order: 7, shown: false, full: false },
+					'profession': { name: "MonksEnhancedJournal.Profession", order: 8, shown: false, full: false },
+					'pronoun': { name: "MonksEnhancedJournal.Pronoun", order: 9, shown: false, full: false },
+					'voice': { name: "MonksEnhancedJournal.Voice", order: 10, shown: true, full: false },
+					'faction': { name: "MonksEnhancedJournal.Faction", order: 11, shown: false, full: false },
+					'height': { name: "MonksEnhancedJournal.Height", order: 12, shown: false, full: false },
+					'weight': { name: "MonksEnhancedJournal.Weight", order: 13, shown: false, full: false },
+					'traits': { name: "MonksEnhancedJournal.Traits", order: 14, shown: true, full: false },
+					'ideals': { name: "MonksEnhancedJournal.Ideals", order: 15, shown: true, full: true },
+					'bonds': { name: "MonksEnhancedJournal.Bonds", order: 16, shown: true, full: true },
+					'flaws': { name: "MonksEnhancedJournal.Flaws", order: 17, shown: true, full: true },
+					'longterm': { name: "MonksEnhancedJournal.LongTermGoal", order: 18, shown: false, full: true },
+					'shortterm': { name: "MonksEnhancedJournal.ShortTermGoal", order: 19, shown: false, full: true },
+					'beliefs': { name: "MonksEnhancedJournal.Beliefs", order: 20, shown: false, full: true },
+					'secret': { name: "MonksEnhancedJournal.Secret", order: 21, shown: false, full: true }
+				}
+			},
+			place: {
+				tabs: {
+					'description': { name: 'MonksEnhancedJournal.Description', shown: true },
+					'entry-details': { name: 'MonksEnhancedJournal.Details', shown: true },
+					'townsfolk': { name: 'MonksEnhancedJournal.Townsfolk', shown: true },
+					'shops': { name: 'MonksEnhancedJournal.Shops', shown: true },
+					'relationships': { name: 'MonksEnhancedJournal.Relationships', shown: true },
+					'notes': { name: 'MonksEnhancedJournal.Notes', shown: true },
+				},
+				attributes: {
+					'age': { name: "MonksEnhancedJournal.Age", order: 0, shown: true, full: false },
+					'size': { name: "MonksEnhancedJournal.Size", order: 1, shown: true, full: false },
+					'government': { name: "MonksEnhancedJournal.Government", order: 2, shown: true, full: false },
+					'alignment': { name: "MonksEnhancedJournal.Alignment", order: 3, shown: false, full: false },
+					'faction': { name: "MonksEnhancedJournal.Faction", order: 4, shown: false, full: false },
+					'inhabitants': { name: "MonksEnhancedJournal.Inhabitants", order: 5, shown: true, full: true },
+					'districts': { name: "MonksEnhancedJournal.Districts", order: 6, shown: false, full: true },
+					'agricultural': { name: "MonksEnhancedJournal.Agricultural", order: 7, shown: false, full: true },
+					'cultural': { name: "MonksEnhancedJournal.Cultural", order: 8, shown: false, full: true },
+					'educational': { name: "MonksEnhancedJournal.Educational", order: 9, shown: false, full: true },
+					'indistrial': { name: "MonksEnhancedJournal.Industrial", order: 10, shown: false, full: true },
+					'mercantile': { name: "MonksEnhancedJournal.Mercantile", order: 11, shown: false, full: true },
+					'military': { name: "MonksEnhancedJournal.Military", order: 12, shown: false, full: true }
+				}
+			},
+			poi: {
+				tabs: {
+					'description': { name: 'MonksEnhancedJournal.Description', shown: true },
+					'relationships': { name: 'MonksEnhancedJournal.Relationships', shown: true },
+					'notes': { name: 'MonksEnhancedJournal.Notes', shown: true },
+				},
+			},
+			picture: {
+				settings: {
+					'open': { name: 'MonksEnhancedJournal.OpenAsPicture', value: false },
+				}
+			},
+			quest: {
+				tabs: {
+					'description': { name: 'MonksEnhancedJournal.Description', shown: true },
+					'objectives': { name: 'MonksEnhancedJournal.Objectives', shown: true },
+					'rewards': { name: 'MonksEnhancedJournal.Rewards', shown: true },
+					'relationships': { name: 'MonksEnhancedJournal.Relationships', shown: true },
+					'notes': { name: 'MonksEnhancedJournal.Notes', shown: true },
+				},
+			},
+			shop: {
+				tabs: {
+					'description': { name: 'MonksEnhancedJournal.Description', shown: true },
+					'entry-details': { name: 'MonksEnhancedJournal.Details', shown: true },
+					'items': { name: 'MonksEnhancedJournal.Loot', shown: true },
+					'relationships': { name: 'MonksEnhancedJournal.Relationships', shown: true },
+					'notes': { name: 'MonksEnhancedJournal.Notes', shown: true },
+				},
+				adjustment: {
+					default: {
+						name: "",
+						sell: 1,
+						buy: 0.5
+					}
+				}
+			}
+		},
+		type: Object,
+	});
+
 	game.settings.register(modulename, "person-attributes", {
 		scope: "world",
 		config: false,
@@ -568,6 +691,13 @@ export const registerSettings = function () {
 	});
 
 	game.settings.register(modulename, "fix-adjustment", {
+		scope: "world",
+		default: true,
+		type: Boolean,
+		config: false
+	});
+
+	game.settings.register(modulename, "fix-sheet-settings", {
 		scope: "world",
 		default: true,
 		type: Boolean,

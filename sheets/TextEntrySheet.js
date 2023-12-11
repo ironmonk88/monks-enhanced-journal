@@ -8,7 +8,7 @@ export class TextEntrySheet extends EnhancedJournalSheet {
         this.refresh();
     }
 
-    get type() {
+    static get type() {
         return 'text';
     }
 
@@ -108,12 +108,14 @@ export class TextImageEntrySheet extends TextEntrySheet {
     activateListeners(html, enhancedjournal) {
         super.activateListeners(html, enhancedjournal);
 
+        /*
         const options = this._getContextOptions();
         if (options) {
             let context = new ContextMenu($(html), 'div[data-tab="picture"]', options);
         }
+        */
     }
-
+    /*
     _getContextOptions() {
         return [
             {
@@ -146,7 +148,7 @@ export class TextImageEntrySheet extends TextEntrySheet {
         $('[data-edit="src"]', this.element).css({ opacity: 0 });
         $('.instruction', this.element).show();
         this.object.update({ src: '' });
-    }
+    }*/
 
     async render(data) {
         let element = await super.render(data);

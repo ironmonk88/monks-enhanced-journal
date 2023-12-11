@@ -935,6 +935,7 @@ body[inline-roll-styling="true"] a.entity-link,
 body[inline-roll-styling="true"] a.content-link,
 body[inline-roll-styling="true"] a.inline-roll,
 body[inline-roll-styling="true"] a.picture-link,
+body[inline-roll-styling="true"] a.sound-link,
 body[inline-roll-styling="true"] a.inline-request-roll,
 body[inline-roll-styling="true"] a.tile-trigger-link {
     color: var(--color-text-hyperlink);
@@ -947,6 +948,7 @@ body[inline-roll-styling="true"] a.entity-link i,
 body[inline-roll-styling="true"] a.content-link i,
 body[inline-roll-styling="true"] a.inline-roll,
 body[inline-roll-styling="true"] a.picture-link i,
+body[inline-roll-styling="true"] a.sound-link i,
 body[inline-roll-styling="true"] a.inline-request-roll i,
 body[inline-roll-styling="true"] a.tile-trigger-link i {
     color: var(--color-text-hyperlink);
@@ -1268,4 +1270,82 @@ body[inline-roll-styling="true"] a.tile-trigger-link i {
     margin-top: 0px;
     list-style-type: none;
     margin-bottom: 0px;
+}
+
+#customise-pages .window-content {
+    padding: 0px;
+}
+
+#customise-pages aside.sidebar {
+    flex: 0 0 220px;
+    height: 100%;
+    padding: 1rem;
+    border-right: 1px solid var(--color-border-light-primary);
+    font-size: var(--font-size-12);
+}
+
+#customise-pages aside.sidebar nav.page-tabs {
+    flex-direction: column;
+    justify-content: flex-start;
+    overflow: hidden auto;
+}
+
+#customise-pages aside.sidebar nav.page-tabs .category-tab {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 0;
+    border-bottom: 1px solid var(--color-border-light-primary);
+    text-align: left;
+}
+
+#customise-pages aside.sidebar nav.page-tabs .category-tab.active {
+    font-weight: bold;
+    border-bottom: 1px solid var(--color-underline-active);
+}
+
+#customise-pages aside.sidebar nav.page-tabs .category-tab > a {
+    flex: 1;
+}
+
+#customise-pages aside.sidebar .reset-all {
+    flex: 0;
+    margin-right: 0.5rem;
+}
+
+#customise-pages section .tab {
+    height: 100%;
+    overflow: hidden;
+}
+
+#customise-pages .sheet-body {
+    height: calc(100% - 35px);
+}
+
+#customise-pages .sheet-body .item-list {
+    padding-bottom: 5px;
+}
+
+#customise-pages .categories {
+    height: 100%;
+}
+
+#customise-pages .categories footer {
+    margin: 1rem;
+    flex: 0;
+}
+
+#customise-pages .tab[data-tab="tabs"] {
+    padding: 0px 8px;
+}
+
+#customise-page .monks-journal-sheet,
+#customise-page .monks-journal-sheet > div,
+#customise-page .monks-journal-sheet .sheet-body,
+#customise-page .monks-journal-sheet .tab[data-tab="fields"] {
+    overflow: hidden !important;
+}
+
+#customise-pages .shop-config-type-label:last-child,
+#customise-page .shop-config-type-label:last-child {
+    display: none;
 }

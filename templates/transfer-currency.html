@@ -23,7 +23,7 @@
                 {{#each currency}}
                 <li class="item offering-item flexrow" data-id="{{this.id}}">
                     <h3 class="item-name noborder flexrow">
-                        {{this.name}}
+                        {{localize this.name}}
                     </h3>
                     <div class="item-detail">
                         <input type="text" class="currency-field" name="{{this.id}}" placeholder="0" value="{{lookup @root.coins this.id}}" data-dtype="Number" />

@@ -35,16 +35,25 @@ export class SlideConfig extends FormApplication {
             }, { recursive: false }
         );
 
+        let windowSize = 25;
+        let windowFont = $(".window-content").css("font-family");
+
         data.texts = this.object.texts.map(t => {
             let text = duplicate(t);
             let x = (((t.left || 0) / 100) * 600).toFixed(2);
             let y = (((t.top || 0) / 100) * 400).toFixed(2);
             let x2 = (((t.right || 0) / 100) * 600).toFixed(2);
             let y2 = (((t.bottom || 0) / 100) * 400).toFixed(2);
-            let color = Color.from(t.background || '#000000');
+            let bgcolor = Color.from(t.background || '#000000');
+            let color = t.color || getProperty(this.journalentry, "flags.monks-enhanced-journal.font.color") || "#FFFFFF";
+            let font = t.font || getProperty(this.journalentry, "flags.monks-enhanced-journal.font.name") || windowFont;
+            let size = t.size || getProperty(this.journalentry, "flags.monks-enhanced-journal.font.size") || windowSize;
+            size = (size / windowSize) * 100;
             let style = {
-                color: t.color,
-                'background-color': color.toRGBA(t.opacity != undefined ? t.opacity : 0.5),
+                'font-size': size + "%",
+                'font-family': font,
+                color,
+                'background-color': bgcolor.toRGBA(t.opacity != undefined ? t.opacity : 0.5),
                 'text-align': (t.align == 'middle' ? 'center' : t.align),
                 top: y + "px",
                 left: x + "px",
@@ -115,10 +124,8 @@ export class SlideConfig extends FormApplication {
     activateListeners(html) {
         super.activateListeners(html);
 
-        $('.text-delete', html).click(this.deleteText.bind(this));
-
         $('.slide-text', html)
-            .on('mousedown', (ev) => { console.log('text mouse down'); ev.stopPropagation(); $(ev.currentTarget).focus(); })
+            .on('mousedown', (ev) => { ev.stopPropagation(); $(ev.currentTarget).focus(); })
             .on('dblclick', this.editText.bind(this))
             .on('focus', this.selectText.bind(this))
             .on('blur', (ev) => {
@@ -185,6 +192,22 @@ export class SlideConfig extends FormApplication {
         $('input[data-edit="background.color"]', html).on('change', function () {
             window.setTimeout(function () { that.updateImage.call(that) }, 200);
         });
+
+        let size = $('.slide-textarea', html).outerWidth() / 50;
+        $('.slide-textarea', html).css({ 'font-size': `${size}px` });
+
+        $('.control-icon[data-action="edit"]', html).on('mousedown', (ev) => {
+            ev.preventDefault();
+            ev.stopPropagation();
+            let textId = $('.slide-text.selected', html).get(0).dataset.id;
+            let text = this.object.texts.find(t => t.id == textId);
+            new SlideText(text, this).render(true);
+        });
+        $('.control-icon[data-action="delete"]', html).on('mousedown', (ev) => {
+            ev.preventDefault();
+            ev.stopPropagation();
+            this.deleteText($(`.slide-text.selected`, html));
+        });
     }
 
     async updateImage() {
@@ -202,7 +225,7 @@ export class SlideConfig extends FormApplication {
     selectText(ev) {
         let element = $(ev.currentTarget);
         element.addClass('selected').siblings().removeClass('selected');
-        $('.slide-hud', this.element).css({ left: element.position().left, top: element.position().top, width: element.width(), height: element.height() }).show();
+        $('.slide-hud', this.element).css({ left: element.position().left, top: element.position().top, width: element.outerWidth(), height: element.outerHeight() }).show();
     }
 
     editText(ev) {
@@ -227,14 +250,19 @@ export class SlideConfig extends FormApplication {
     }
 
     createText(data) {
+        let windowSize = 25;
+        let windowFont = $(".window-content").css("font-family");
+
         let text = {
             id: makeid(),
             align: 'left',
+            font: '',
+            size: '',
             left: data.left,
             top: data.top,
             right: data.right,
             bottom: data.bottom,
-            color: '#FFFFFF',
+            color: '',
             background: '#000000',
             opacity: 0.5
         };
@@ -244,10 +272,16 @@ export class SlideConfig extends FormApplication {
         let y = (((text.top || 0) / 100) * 400).toFixed(2);
         let x2 = (((text.right || 0) / 100) * 600).toFixed(2);
         let y2 = (((text.bottom || 0) / 100) * 400).toFixed(2);
-        let color = Color.from(text.background || '#000000');
+        let bgcolor = Color.from(text.background || '#000000');
+        let color = text.color || getProperty(this.journalentry, "flags.monks-enhanced-journal.font.color") || "#FFFFFF";
+        let font = text.font || getProperty(this.journalentry, "flags.monks-enhanced-journal.font.name") || windowFont;
+        let size = text.size || getProperty(this.journalentry, "flags.monks-enhanced-journal.font.size") || windowSize;
+        size = (size / windowSize) * 100;
         let style = {
-            color: text.color,
-            'background-color': color.toRGBA(text.opacity != undefined ? text.opacity : 0.5),
+            'font-size': size + "%",
+            'font-family': font,
+            color,
+            'background-color': bgcolor.toRGBA(text.opacity != undefined ? text.opacity : 0.5),
             'text-align': (text.align == 'middle' ? 'center' : text.align),
             top: y + "px",
             left: x + "px",
@@ -270,24 +304,32 @@ export class SlideConfig extends FormApplication {
         textarea.focus();
     }
 
-    refreshText(id) {
-        let t = this.object.texts.find(x => x.id == id);
+    refreshText(t) {
         if (t) {
+            let windowSize = 25;
+            let windowFont = $(".window-content").css("font-family");
+
             let x = (((t.left || 0) / 100) * 600);
             let y = (((t.top || 0) / 100) * 400);
             let x2 = (((t.right || 0) / 100) * 600);
             let y2 = (((t.bottom || 0) / 100) * 400);
-            let color = Color.from(t.background || '#000000');
+            let bgcolor = Color.from(t.background || '#000000');
+            let color = t.color || getProperty(this.journalentry, "flags.monks-enhanced-journal.font.color") || "#FFFFFF";
+            let font = t.font || getProperty(this.journalentry, "flags.monks-enhanced-journal.font.name") || windowFont;
+            let size = t.size || getProperty(this.journalentry, "flags.monks-enhanced-journal.font.size") || windowSize;
+            size = (size / windowSize) * 100;
             let style = {
-                color: t.color,
-                'background-color': color.toRGBA(t.opacity != undefined ? t.opacity : 0.5),
+                'font-size': size + "%",
+                'font-family': font,
+                color,
+                'background-color': bgcolor.toRGBA(t.opacity != undefined ? t.opacity : 0.5),
                 'text-align': (t.align == 'middle' ? 'center' : t.align),
                 top: y + "px",
                 left: x + "px",
                 width: (600 - x2 - x) + "px",
                 height: (400 - y2 - y) + "px",
             };
-            $(`.slide-text[data-id="${id}"]`, this.element).css(style);
+            $(`.slide-text[data-id="${t.id}"]`, this.element).css(style);
         }
     }
 
