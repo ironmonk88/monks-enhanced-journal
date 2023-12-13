@@ -80,6 +80,24 @@ Fixed issue when adjusting the shop prices not accepting decimal values.
 
 Fixed issue with the transfer currency dialog not translating strings properly.
 
+Fixed issue with PF2e labeling of Perception
+
+Fixed issue where the quest rewards entry was getting the context menu for the main tab bar
+
+Added the option when purchasing an item from the shop to store the price as the original price rather than the price the player actually bought it for.  I'd highly recommend not using this as it can lead to a lot of strange economic issues where a player ends up being able to sell the item for more than they purchased it for.  Use at your own risk.
+
+Fixed issue with clearing all items before filling with item from a Roll Table.
+
+Fixed issue where Encounter loot that's just currency was not being added to a loot entity.
+
+Fixed issue with copying text to chat, or splitting text to a new journal entry in Firefox.
+
+Fixed List sheet search.
+
+Fixed issue deleting rewards.
+
+Fixed type in the placeholder text for Folder name when creating a new List Folder.
+
 # Version 11.05
 
 Fixed issue with playing a slideshow when a scene loads.

@@ -186,7 +186,7 @@ export class ListSheet extends EnhancedJournalSheet {
 
             // Match document names
             for ( let d of this.items ) {
-                if ( rgx.test(SearchFilter.cleanQuery(d.data.text)) ) {
+                if ((d.data.text && rgx.test(SearchFilter.cleanQuery(d.data.text))) || (d.data.title && rgx.test(SearchFilter.cleanQuery(d.data.title)) )) {
                     documentIds.add(d.id);
                     if ( d.data.folder ) folderIds.add(d.data.folder);
                 }
@@ -240,7 +240,7 @@ export class ListSheet extends EnhancedJournalSheet {
 
         // Folder-level events
         html.find('.create-item').click((ev) => {
-            let folderId = ev.currentTarget.closest("li.folder").dataset.folderId;
+            let folderId = ev.currentTarget.closest("li.folder")?.dataset?.folderId;
             new ListEdit({ data: { folder: folderId } }, this).render(true, { focus: true });
             ev.preventDefault();
             ev.stopPropagation();

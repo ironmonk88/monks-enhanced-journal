@@ -32,7 +32,7 @@ export class DCConfig extends FormApplication {
             { id: "skill", text: "MonksEnhancedJournal.Skill", groups: config.skills || config.pericias || skills }
         ];
         if (game.system.id == "pf2e")
-            attributeOptions.push({ id: "attribute", text: i18n("MonksTokenBar.Attribute"), groups: { perception: CONFIG.PF2E.attributes.perception } });
+            attributeOptions.push({ id: "attribute", text: i18n("MonksTokenBar.Attribute"), groups: { perception: i18n("PF2E.PerceptionLabel") } });
 
         attributeOptions = attributeOptions.filter(g => g.groups);
         for (let attr of attributeOptions) {

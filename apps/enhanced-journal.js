@@ -1462,16 +1462,18 @@ export class EnhancedJournal extends Application {
             }
         ]);
 
-        this._tabcontext = new ContextMenu(html, ".tab-bar", [
+        this._tabcontext = new ContextMenu(html, ".enhanced-journal-header .tab-bar", [
             {
                 name: "Open outside Enhanced Journal",
                 icon: '<i class="fas fa-file-export"></i>',
                 condition: (li) => {
                     let tab = this.tabs.find(t => t.id == this.contextTab);
-                    return !["blank", "folder"].includes(tab.type);
+                    if (!tab) return false;
+                    return !["blank", "folder"].includes(tab.entity?.type);
                 },
                 callback: async (li) => {
                     let tab = this.tabs.find(t => t.id == this.contextTab);
+                    if (!tab) return;
                     let document = tab.entity;
                     if (!tab.entity) {
                         document = await fromUuid(tab.entityId);
@@ -1508,6 +1510,7 @@ export class EnhancedJournal extends Application {
                     this.tabs.splice(0, idx);
                     this.tabs.splice(1, this.tabs.length);
                     this.saveTabs();
+                    this.render();
                 }
             },
             {
@@ -1517,6 +1520,7 @@ export class EnhancedJournal extends Application {
                     let idx = this.tabs.findIndex(t => t.id == this.contextTab);
                     this.tabs.splice(idx + 1, this.tabs.length);
                     this.saveTabs();
+                    this.render();
                 }
             }
         ]);

@@ -2065,7 +2065,7 @@ export class MonksEnhancedJournal {
             let settings = setting('sheet-settings');
 
             let adjustmentDefaults = setting('adjustment-defaults');
-            setProperty(settings, "shop.adjustment", mergeObject(settings.shop.adjustment, adjustmentDefaults));
+            setProperty(settings, "shop.adjustment", mergeObject((settings?.shop?.adjustment || {}), adjustmentDefaults));
 
             let personDefaults = setting('person-attributes');
             //use reduce to turn the array into an object
@@ -3567,7 +3567,7 @@ export class MonksEnhancedJournal {
                     }
                     let itemQty = getValue(itemData, quantityname(), 1);
                     setValue(itemData, quantityname(), purchaseQty * itemQty);
-                    if (data.sell > 0)
+                    if (data.sell > 0 && !setting("use-generic-price"))
                         setPrice(itemData, pricename(), data.sell + " " + data.currency);
                     delete itemData._id;
                     if (!data.consumable) {
@@ -4364,7 +4364,8 @@ Hooks.on('dropActorSheetData', (actor, sheet, data) => {
                         let itemQty = Number(getValue(data.data, quantityname()));
                         if (isNaN(itemQty)) itemQty = 1;
                         setValue(data.data, quantityname(), result.quantity * itemQty);
-                        setPrice(data.data, pricename(), result.price);
+                        if (!setting("use-generic-price"))
+                            setPrice(data.data, pricename(), result.price);
                         data.uuid = `${data.uuid}${data.rewardId ? `.Rewards.${data.rewardId}` : ""}.Items.${data.itemId}`;
                         if (sheet._onDropItem && game.system.id != "cyphersystem")
                             sheet._onDropItem({ preventDefault: () => { } }, data);

@@ -87,14 +87,6 @@ export const registerSettings = function () {
 		type: EditCurrency
 	});
 
-	game.settings.registerMenu(modulename, 'defaultPrices', {
-		label: i18n("MonksEnhancedJournal.defaultprices.name"),
-		hint: i18n("MonksEnhancedJournal.defaultprices.hint"),
-		icon: 'fas fa-dollar-sign',
-		restricted: true,
-		type: AdjustPrice
-	});
-
 	game.settings.registerMenu(modulename, 'customise-pages', {
 		label: i18n("MonksEnhancedJournal.customise-pages.name"),
 		hint: i18n("MonksEnhancedJournal.customise-pages.hint"),
@@ -400,6 +392,15 @@ export const registerSettings = function () {
 		scope: "world",
 		config: true,
 		default: true,
+		type: Boolean,
+	});
+
+	game.settings.register(modulename, "use-generic-price", {
+		name: i18n("MonksEnhancedJournal.use-generic-price.name"),
+		hint: i18n("MonksEnhancedJournal.use-generic-price.hint"),
+		scope: "world",
+		config: true,
+		default: false,
 		type: Boolean,
 	});
 

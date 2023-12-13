@@ -467,7 +467,6 @@ export class EncounterSheet extends EnhancedJournalSheet {
                     }
 
                     let newSpot = MonksEnhancedJournal.findVacantSpot(template, { width: actor.prototypeToken.width, height: actor.prototypeToken.height }, tokens, data.center || options.center);
-                    log("Encounter, New Spot", newSpot);
                     let td = await actor.getTokenDocument({ x: newSpot.x, y: newSpot.y, hidden: ea.hidden });
                     //if (ea.hidden)
                     //    td.hidden = true;

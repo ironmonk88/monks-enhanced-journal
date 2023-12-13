@@ -157,7 +157,6 @@ export class EncounterTemplate extends MeasuredTemplate {
         const snapped = canvas.grid.getSnappedPosition(center.x, center.y, this.gridPrecision);
 
         // Compute the ray
-        console.log("Size Placement", origin, snapped);
         const ray = new Ray(origin, snapped);
         const ratio = (canvas.dimensions.size / canvas.dimensions.distance);
 

@@ -383,12 +383,12 @@ export class QuestSheet extends EnhancedJournalSheet {
         this.changeReward(reward.id);
     }
 
-    deleteReward(event) {
+    async deleteReward(event) {
         let id = $(event.currentTarget).closest('.reward-tab').data('rewardId');
 
         let rewards = duplicate(this.getRewardData());
         rewards.findSplice(r => r.id == id);
-        this.object.setFlag('monks-enhanced-journal', 'rewards', rewards);
+        await this.object.setFlag('monks-enhanced-journal', 'rewards', rewards);
         //$('.reward-list .journal-tab[data-reward-id="' + id + '"]').remove();
 
         if (id == this.object.getFlag('monks-enhanced-journal', 'reward')) {

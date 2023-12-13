@@ -329,7 +329,7 @@ export class EnhancedJournalSheet extends JournalPageSheet {
         super.activateListeners(html);
         this._contextMenu(html);
 
-        new EnhancedJournalContextMenu($(html), (this.type == "text" ? ".editor-parent" : ".tab.description .tab-inner"), this._getDescriptionContextOptions());
+        new EnhancedJournalContextMenu($(html), (this.constructor.type == "text" ? ".editor-parent" : ".tab.description .tab-inner"), this._getDescriptionContextOptions());
 
         $("a.picture-link", html).click(MonksEnhancedJournal._onClickPictureLink.bind(this));
         $("img:not(.nopopout)", html).click(this._onClickImage.bind(this));
@@ -1055,7 +1055,8 @@ export class EnhancedJournalSheet extends JournalPageSheet {
         let ctrls = [];
         if (this.object.id)
             ctrls.push({ id: 'locate', text: i18n("SIDEBAR.JumpPin"), icon: 'fa-crosshairs', conditional: game.user.isGM, attr: { "page-id": this.object.id, "journal-id": this.object.parent.id }, callback: this.enhancedjournal.findMapEntry.bind(this) });
-        if ((game.settings.settings.get("monks-enhanced-journal.sheet-settings")?.default || {})[this.constructor.type] != undefined)
+        let defaultSettings = (game.settings.settings.get("monks-enhanced-journal.sheet-settings")?.default || {})[this.constructor.type];
+        if (defaultSettings != undefined && Object.keys(defaultSettings).length > 0)
             ctrls.push({ id: 'settings', text: i18n("MonksEnhancedJournal.EditFields"), icon: 'fa-cog', conditional: game.user.isGM, callback: this.onEditFields });
         return ctrls;
     }
@@ -1802,10 +1803,6 @@ export class EnhancedJournalSheet extends JournalPageSheet {
                     numberof = await getDiceRoll(numberof);
 
                     let items = that.object.getFlag('monks-enhanced-journal', "items") || [];
-                    if (clear == "all")
-                        items = [];
-                    else if (clear == "notlocked")
-                        items = items.filter((i) => getProperty(i, "flags.monks-enhanced-journal.lock"));
 
                     if (that.object.getFlag('monks-enhanced-journal', "type") == "quest") {
                         let rewardId = that.object.getFlag('monks-enhanced-journal', "reward");
@@ -1813,6 +1810,11 @@ export class EnhancedJournalSheet extends JournalPageSheet {
                         let reward = rewards.find(r => r.id == rewardId || r.active);
                         items = reward.items;
                     }
+                    if (clear == "all")
+                        items = [];
+                    else if (clear == "notlocked")
+                        items = items.filter((i) => getProperty(i, "flags.monks-enhanced-journal.lock"));
+
                     let currency = that.object.getFlag('monks-enhanced-journal', "currency") || {};
                     let currChanged = false;
 
@@ -1922,8 +1924,8 @@ export class EnhancedJournalSheet extends JournalPageSheet {
                                         itemData._id = makeid();
                                         let sysPrice = MEJHelpers.getSystemPrice(itemData, pricename());
                                         let price = MEJHelpers.getPrice(sysPrice);
-                                        let adjustment = this.sheetSettings()?.adjustment;
-                                        let sell = adjustment[itemData.type]?.sell ?? adjustment.default.sell ?? 1;
+                                        let adjustment = this.sheetSettings()?.adjustment || {};
+                                        let sell = adjustment[itemData.type]?.sell ?? adjustment?.default?.sell ?? 1;
                                         let cost = MEJHelpers.getPrice(`${price.value * sell} ${price.currency}`);
                                         itemData.flags['monks-enhanced-journal'] = {
                                             parentId: oldId,
@@ -2184,7 +2186,8 @@ export class EnhancedJournalSheet extends JournalPageSheet {
 
         if (newitems.length == 0) {
             ui.notifications.warn(i18n("MonksEnhancedJournal.msg.NoItemsToAssign"));
-            return items;
+            if (!Object.values(currency).some(c => !!c))
+                return items;
         }
 
         let entity;
@@ -2717,7 +2720,7 @@ export class EnhancedJournalSheet extends JournalPageSheet {
     }
 
     async splitJournal() {
-        let ctrl = window.getSelection().baseNode?.parentNode;
+        let ctrl = window.getSelection().baseNode?.parentNode || window.getSelection().anchorNode?.parentNode;
 
         if (ctrl == undefined) {
             ui.notifications.info(i18n("MonksEnhancedJournal.NoTextSelected"));
@@ -2763,7 +2766,7 @@ export class EnhancedJournalSheet extends JournalPageSheet {
     }
 
     async copyToChat() {
-        let ctrl = window.getSelection().baseNode?.parentNode;
+        let ctrl = window.getSelection().baseNode?.parentNode || window.getSelection().anchorNode?.parentNode;
 
         if (ctrl == undefined) {
             ui.notifications.info(i18n("MonksEnhancedJournal.NoTextSelected"));

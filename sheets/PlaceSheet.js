@@ -139,7 +139,7 @@ export class PlaceSheet extends EnhancedJournalSheet {
     fieldlist() {
         let settings = this.sheetSettings() || {};
         let fields = MonksEnhancedJournal.convertObjectToArray(settings)?.attributes;
-        let attributes = this.object.flags['monks-enhanced-journal'].attributes;
+        let attributes = this.object.flags['monks-enhanced-journal'].attributes || {};
         return fields
             .filter(f => f.shown)
             .map(f => {

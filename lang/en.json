@@ -67,7 +67,7 @@
   "MonksEnhancedJournal.show-chat-bubbles.name": "Show chat bubbles",
   "MonksEnhancedJournal.show-chat-bubbles.hint": "Show chat bubbles when clicking on a Note or Token that's linked to a Journal",
   "MonksEnhancedJournal.objectives-always.name": "Always Show Objectives",
-  "MonksEnhancedJournal.objectives-always.hint": "Show Objectives even if the Notes layer isn't active'",
+  "MonksEnhancedJournal.objectives-always.hint": "Show Objectives even if the Notes layer isn't active",
   "MonksEnhancedJournal.loot-name.name": "Loot Name",
   "MonksEnhancedJournal.loot-name.hint": "This name will be used when creating the new entry.",
   "MonksEnhancedJournal.add-create-link.name": "Add Create Link",
@@ -80,6 +80,8 @@
   "MonksEnhancedJournal.defaultprices.hint": "Default prices for shops",
   "MonksEnhancedJournal.customise-pages.name": "Customise Pages",
   "MonksEnhancedJournal.customise-pages.hint": "Customise the pages that are shown in the journal",
+  "MonksEnhancedJournal.use-generic-price.name": "Use Original Price",
+  "MonksEnhancedJournal.use-generic-price.hint": "After purchasing, set price of purchased item to the original non-adjusted price",
 
   "MonksEnhancedJournal.SlideConfiguration": "Slide Configuration",
   "MonksEnhancedJournal.DCConfiguration": "DC Configuration",

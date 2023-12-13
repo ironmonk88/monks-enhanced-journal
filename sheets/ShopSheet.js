@@ -354,7 +354,7 @@ export class ShopSheet extends EnhancedJournalSheet {
                         let sysPrice = MEJHelpers.getSystemPrice(item, pricename());
                         let price = MEJHelpers.getPrice(sysPrice);
                         let origPrice = price.value;
-                        let adjustment = this.sheetSettings()?.adjustment;
+                        let adjustment = this.sheetSettings()?.adjustment || {};
                         let buy = adjustment[item.type]?.buy ?? adjustment.default.buy ?? 0.5;
                         if (buy == -1)
                             return ui.notifications.warn(i18n("MonksEnhancedJournal.msg.CannotSellItem"));
@@ -397,7 +397,7 @@ export class ShopSheet extends EnhancedJournalSheet {
                         let sysPrice = MEJHelpers.getSystemPrice(item, pricename());
                         let price = MEJHelpers.getPrice(sysPrice);
                         let origPrice = price.value;
-                        let adjustment = this.sheetSettings()?.adjustment;
+                        let adjustment = this.sheetSettings()?.adjustment || {};
                         let buy = adjustment[item.type]?.buy ?? adjustment.default.buy ?? 0.5;
                         if (buy == -1)
                             return ui.notifications.warn(i18n("MonksEnhancedJournal.msg.CannotSellItem"));
@@ -612,7 +612,8 @@ export class ShopSheet extends EnhancedJournalSheet {
                     delete itemData._id;
                     let itemQty = getValue(itemData, quantityname(), 1);
                     setValue(itemData, quantityname(), result.quantity * itemQty);
-                    setPrice(itemData, pricename(), result.price);
+                    if (!setting("use-generic-price"))
+                        setPrice(itemData, pricename(), result.price);
                     if (!data.consumable) {
                         let sheet = actor.sheet;
                         if (sheet._onDropItem)
@@ -638,7 +639,7 @@ export class ShopSheet extends EnhancedJournalSheet {
     async createSellMessage(item, actor) {
         let data = getProperty(item, "flags.monks-enhanced-journal");
         let price = MEJHelpers.getPrice(data.price);
-        let adjustment = this.sheetSettings()?.adjustment;
+        let adjustment = this.sheetSettings()?.adjustment || {};
         let buy = adjustment[item.type]?.buy ?? adjustment.default.buy ?? 0.5;
         data.sell = Math.floor(price.value * buy);
         data.currency = price.currency;
@@ -697,7 +698,7 @@ export class ShopSheet extends EnhancedJournalSheet {
 
                 let sysPrice = MEJHelpers.getSystemPrice(item, pricename()); //MEJHelpers.getPrice(getProperty(item, "flags.monks-enhanced-journal.price"));
                 let price = MEJHelpers.getPrice(sysPrice);
-                let adjustment = this.sheetSettings()?.adjustment;
+                let adjustment = this.sheetSettings()?.adjustment || {};
                 let sell = adjustment[item.type]?.sell ?? adjustment.default.sell ?? 1;
                 let flags = Object.assign({
                     hide: false,
