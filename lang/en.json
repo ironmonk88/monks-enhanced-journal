@@ -81,7 +81,7 @@
   "MonksEnhancedJournal.customise-pages.name": "Customise Pages",
   "MonksEnhancedJournal.customise-pages.hint": "Customise the pages that are shown in the journal",
   "MonksEnhancedJournal.use-generic-price.name": "Use Original Price",
-  "MonksEnhancedJournal.use-generic-price.hint": "After purchasing, set price of purchased item to the original non-adjusted price",
+  "MonksEnhancedJournal.use-generic-price.hint": "After purchasing, set price of purchased item back to the original non-adjusted price.  I would not recommend this.  USE AT YOUR OWN RISK!",
 
   "MonksEnhancedJournal.SlideConfiguration": "Slide Configuration",
   "MonksEnhancedJournal.DCConfiguration": "DC Configuration",

@@ -1068,8 +1068,7 @@ export class EnhancedJournal extends Application {
             if (entity instanceof Actor)
                 return 'actor';
 
-            let flags = entity.data?.flags;
-            let type = (flags != undefined ? flags['monks-enhanced-journal']?.type : null) || 'journalentry';
+            let type = getProperty(entity, "flags.monks-enhanced-journal.type") || 'journalentry';
 
             return type;
         }

@@ -1030,7 +1030,7 @@ export class MonksEnhancedJournal {
             let that = this;
 
             plugins.menu = APSJMenu.build(ProseMirror.defaultSchema, {
-                destroyOnSave: true,
+                destroyOnSave: false,
                 onSave: function () {
                     that.saveEditor(...args);
                 }
@@ -3616,7 +3616,7 @@ export class MonksEnhancedJournal {
                         if (!actoritem)
                             continue;
 
-                        data.maxquantity = getValue(actoritem.data, quantityname());
+                        data.maxquantity = getValue(actoritem, quantityname());
                         if (data.maxquantity < purchaseQty) {
                             purchaseQty = Math.min(data.maxquantity, purchaseQty);
                             ui.notifications.warn(format("MonksEnhancedJournal.msg.NoteEnoughRemains", { quantity: purchaseQty }));
@@ -4529,7 +4529,7 @@ Hooks.on('renderNoteConfig', (app, html, data) => {
 
 Hooks.on("renderTokenConfig", (app, html, data) => {
     if (game.user.isGM) {
-        let ctrl = $('<input>').attr('type', 'text').attr('name', 'flags.monks-enhanced-journal.chatbubble');
+        let ctrl = $('<input>').attr('type', 'text').attr('name', 'flags.monks-enhanced-journal.chatbubble').val(getProperty(data, 'object.flags.monks-enhanced-journal.chatbubble'));
         let group = $('<div>').addClass('form-group')
             .append($('<label>').html(i18n("MonksEnhancedJournal.TokenDialogJournalEntry")))
             .append(ctrl);

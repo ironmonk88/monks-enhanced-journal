@@ -98,6 +98,12 @@ Fixed issue deleting rewards.
 
 Fixed type in the placeholder text for Folder name when creating a new List Folder.
 
+Fixed issue with NPC chat bubble selection clearing on opening a second time.
+
+Fixed issue with the tooltip for saving the editor
+
+Fixed various warning for using deprecated functions
+
 # Version 11.05
 
 Fixed issue with playing a slideshow when a scene loads.
