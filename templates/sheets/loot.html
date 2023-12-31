@@ -57,10 +57,12 @@
                         </a>
                     </div>
                 </div>
-                <div class="flexrow form-fields">
+                <div class="flexrow currency-row">
                     {{#each currency}}
-                    <label>{{localize this.name}}</label>
-                    <input type="text" name="flags.monks-enhanced-journal.currency.{{this.id}}" placeholder="0" value="{{this.value}}" data-dtype="Number" />
+                    <div class="form-fields flexrow">
+                        <label data-tooltip="{{localize this.name}}">{{localize this.name}}</label>
+                        <input type="text" name="flags.monks-enhanced-journal.currency.{{this.id}}" placeholder="0" value="{{this.value}}" data-dtype="Number" />
+                    </div>
                     {{/each}}
                 </div>
             </div>

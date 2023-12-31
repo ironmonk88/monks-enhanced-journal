@@ -19,7 +19,7 @@
     </div>
 
     <div style="height: 302px; border: 1px solid rgb(var(--mej-light-6)); border-radius: 4px;">
-        {{editor data.enrichedText target="text" editable=true button=true owner=data.owner}}
+        {{editor data.enrichedText target="text" editable=true button=true owner=data.owner engine=editor.engine collaborate=editor.collaborate }}
     </div>
 
     {{#if (or (eq hasNumber "count") (eq hasNumber "full"))}}

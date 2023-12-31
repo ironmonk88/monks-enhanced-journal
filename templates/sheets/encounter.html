@@ -21,7 +21,7 @@
         <section class="sheet-body">
             <div class="tab description active" data-group="primary" data-tab="description">
                 <div class="tab-inner flexcol">
-                    {{editor enrichedText target="text.content" editable=true button=true owner=owner}}
+                    {{editor enrichedText target="text.content" editable=true button=true owner=owner engine=editor.engine collaborate=editor.collaborate }}
                 </div>
             </div>
             {{#if owner}}
@@ -89,10 +89,12 @@
                         <div class="item-header flexrow">
                             <h3 class="item-name noborder flexrow">{{localize 'MonksEnhancedJournal.Currency'}}</h3>
                         </div>
-                        <div class="flexrow form-fields">
+                        <div class="flexrow currency-row">
                             {{#each currency}}
-                            <label>{{localize this.name}}</label>
-                            <input type="text" name="flags.monks-enhanced-journal.currency.{{this.id}}" placeholder="0" value="{{this.value}}" data-dtype="Number" />
+                            <div class="form-fields flexrow">
+                                <label data-tooltip="{{localize this.name}}">{{localize this.name}}</label>
+                                <input type="text" name="flags.monks-enhanced-journal.currency.{{this.id}}" placeholder="0" value="{{this.value}}" data-dtype="Number" />
+                            </div>
                             {{/each}}
                         </div>
                     </div>
@@ -260,7 +262,7 @@
                 <div class="tab-inner flexcol">
                     <div style="flex-grow: 0;">{{localize 'MonksEnhancedJournal.OnlyViewable'}}{{#unless hasGM}}<span style="color:darkred;font-weight:bold;"> {{localize 'MonksEnhancedJournal.msg.CannotEditNotesWithoutGM'}}</span>{{/unless}}</div>
                     <div class="notes-container">
-                        {{editor userdata.enrichedText target=notesTarget editable=true button=true owner=owner}}
+                        {{editor userdata.enrichedText target=notesTarget editable=true button=true owner=owner engine=editor.engine collaborate=editor.collaborate }}
                     </div>
                 </div>
             </div>

@@ -159,6 +159,11 @@ export class EnhancedJournalSheet extends JournalPageSheet {
             })
         });
 
+        data.editor = {
+            engine: setting("editor-engine"),
+            collaborate: setting("editor-engine") == "prosemirror"
+        }
+
         //this._convertFormats(data);
         data.enrichedText = await TextEditor.enrichHTML(data.document?.text?.content, {
             relativeTo: this.object,
@@ -331,6 +336,10 @@ export class EnhancedJournalSheet extends JournalPageSheet {
 
         new EnhancedJournalContextMenu($(html), (this.constructor.type == "text" ? ".editor-parent" : ".tab.description .tab-inner"), this._getDescriptionContextOptions());
 
+        if (!this.isEditable) {
+            html.find(".tab.notes .editor-content[data-edit]").each((i, div) => this._activateEditor(div));
+        }
+
         $("a.picture-link", html).click(MonksEnhancedJournal._onClickPictureLink.bind(this));
         $("img:not(.nopopout)", html).click(this._onClickImage.bind(this));
 
@@ -420,13 +429,16 @@ export class EnhancedJournalSheet extends JournalPageSheet {
                 game.polyglot.activeEditorLogic(options);
             }
 
-            options = foundry.utils.mergeObject(options, {
-                contextmenu: 'link createlink',
-                plugins: CONFIG.TinyMCE.plugins + ' createlink background dcconfig soundeffect template anchor',
-                toolbar: CONFIG.TinyMCE.toolbar + ' background dcconfig soundeffect template anchor',
-                templates: CONFIG.TinyMCE.templates
-                //font_formats: "Andale Mono=andale mono,times; Arial=arial,helvetica,sans-serif; Arial Black=arial black,avant garde; Book Antiqua=book antiqua,palatino; Comic Sans MS=comic sans ms,sans-serif; Courier New=courier new,courier; Georgia=georgia,palatino; Helvetica=helvetica; Impact=impact,chicago; Oswald=oswald; Symbol=symbol; Tahoma=tahoma,arial,helvetica,sans-serif; Terminal=terminal,monaco; Times New Roman=times new roman,times; Trebuchet MS=trebuchet ms,geneva; Verdana=verdana,geneva; Webdings=webdings; Wingdings=wingdings,zapf dingbats;Anglo Text=anglo_textregular;Lovers Quarrel=lovers_quarrelregular;Play=Play-Regular"
-            });
+            if (this.editors[name].options.engine == "tinymce") {
+                options = foundry.utils.mergeObject(options, {
+                    contextmenu: 'link createlink',
+                    plugins: CONFIG.TinyMCE.plugins + ' createlink background dcconfig soundeffect template anchor',
+                    toolbar: CONFIG.TinyMCE.toolbar + ' background dcconfig soundeffect template anchor',
+                    templates: CONFIG.TinyMCE.templates,
+                    font_formats: CONFIG.TinyMCE.font_formats //"Andale Mono=andale mono,times; Arial=arial,helvetica,sans-serif; Arial Black=arial black,avant garde; Book Antiqua=book antiqua,palatino; Comic Sans MS=comic sans ms,sans-serif; Courier New=courier new,courier; Georgia=georgia,palatino; Helvetica=helvetica; Impact=impact,chicago; Oswald=oswald; Symbol=symbol; Tahoma=tahoma,arial,helvetica,sans-serif; Terminal=terminal,monaco; Times New Roman=times new roman,times; Trebuchet MS=trebuchet ms,geneva; Verdana=verdana,geneva; Webdings=webdings; Wingdings=wingdings,zapf dingbats;Anglo Text=anglo_textregular;Lovers Quarrel=lovers_quarrelregular;Play=Play-Regular"
+                });
+            } else if (this.editors[name].options.engine == "prosemirror") {
+            }
 
             MonksEnhancedJournal.fixType(this.object);
             if (this.object.type == 'text' || this.object.type == 'journalentry' || this.object.type == 'oldentry' || setting("show-menubar")) {

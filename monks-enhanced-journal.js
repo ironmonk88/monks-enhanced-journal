@@ -1126,6 +1126,7 @@ export class MonksEnhancedJournal {
                 if (type == "base" || type == "oldentry") type = "journalentry";
                 let types = MonksEnhancedJournal.getDocumentTypes();
                 if (types[type]) {
+                    setProperty(document, "_source.flags.monks-enhanced-journal.pagetype", type);
                     setProperty(document, "_source.flags.monks-enhanced-journal.img", document.pages.contents[0].src);
                 }
             }
@@ -4857,11 +4858,11 @@ Hooks.on("renderJournalPageSheet", (sheet, html, data) => {
 
 Hooks.on("renderCompendium", async (app, html, data) => {
     if (app.collection.documentName == "JournalEntry") {
+        let types = MonksEnhancedJournal.getDocumentTypes();
         await app.collection.getIndex({ fields: ["img", "flags.monks-enhanced-journal"] });
         for (let index of app.collection.index) {
             let img = $(`li[data-document-id="${index._id}"] > img.thumbnail`, html);
             let pagetype = getProperty(index, "flags.monks-enhanced-journal.pagetype");
-            let types = MonksEnhancedJournal.getDocumentTypes();
             let imgFile = index.img || getProperty(index, "flags.monks-enhanced-journal.img") || (pagetype && types[pagetype] != undefined ? `modules/monks-enhanced-journal/assets/${pagetype}.png` : "icons/svg/book.svg");
             if (img.length) {
                 img.attr("src", imgFile)

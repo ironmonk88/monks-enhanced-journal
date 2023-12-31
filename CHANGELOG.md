@@ -1,3 +1,15 @@
+# Version 11.09
+
+Fixed issue where the header buttons wouldn't refresh when changing between MEJ pages and Foundry pages.
+
+Added support for using Prose Mirror editing in MEJ templates.
+
+Fixed issue with the default page icon when exporting to compendium.
+
+Fixed issues where notes were no longer editable
+
+Added alternating shading for currency groups to better differentiate what name goes with what value.
+
 # Version 11.08
 
 Updated the page settings to allow for multiple setting options.

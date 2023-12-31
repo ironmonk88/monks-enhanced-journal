@@ -130,6 +130,7 @@
     --mej-slideshow-duration-color: rgb(255, 255, 255);
     --mej-list-progress-border: rgb(178, 195, 255);
     --mej-list-progress-background: rgb(93, 73, 255);
+    --mej-currency-background: rgba(var(--mej-light-5), 0.5);
     --mej-request-card-border: rgb(255, 255, 255);
     --mej-request-card-img-border: 1px solid #c0c0c0;
     --mej-active-color: rgb(255, 100, 0);

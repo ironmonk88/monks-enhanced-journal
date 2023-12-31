@@ -288,12 +288,12 @@ export class EnhancedJournal extends Application {
 
             this.activateFooterListeners(this.element);
 
+            $('> header a.subsheet', this.element).remove();
             if (this.subsheet._getHeaderButtons && this.object.id && !(this.object instanceof JournalEntry)) {
                 let buttons = this.subsheet._getHeaderButtons();
                 buttons.findSplice(b => b.class == "share-image");
                 Hooks.call(`getDocumentSheetHeaderButtons`, this.subsheet, buttons);
 
-                $('> header a.subsheet', this.element).remove();
                 let first = true;
                 let a;
                 for (let btn of buttons) {
@@ -575,12 +575,12 @@ export class EnhancedJournal extends Application {
     }
 
     activateEditor() {
-        $('.nav-button.edit i', this.element).removeClass('fa-pencil-alt').addClass('fa-download').attr('title', i18n("MonksEnhancedJournal.SaveChanges"));
+        $('.nav-button.edit i', this.element).removeClass('fa-pencil-alt').addClass(setting("editor-engine") == "tinymce" ? 'fa-download' : 'fa-save').attr('title', i18n("MonksEnhancedJournal.SaveChanges"));
         $('.nav-button.split', this.element).addClass('disabled');
     }
 
     saveEditor(name) {
-        $('.nav-button.edit i', this.element).addClass('fa-pencil-alt').removeClass('fa-download').attr('title', i18n("MonksEnhancedJournal.EditDescription"));
+        $('.nav-button.edit i', this.element).addClass('fa-pencil-alt').removeClass('fa-download').removeClass('fa-save').attr('title', i18n("MonksEnhancedJournal.EditDescription"));
         $('.nav-button.split', this.element).removeClass('disabled');
         const editor = this.subsheet.editors[name];
         if (editor)

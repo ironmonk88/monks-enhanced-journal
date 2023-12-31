@@ -47,7 +47,7 @@
         <section class="sheet-body">
             <div class="tab description" data-group="primary" data-tab="description">
                 <div class="tab-inner flexcol">
-                    {{editor enrichedText target="text.content" editable=true button=true owner=owner}}
+                    {{editor enrichedText target="text.content" editable=true button=true owner=owner engine=editor.engine collaborate=editor.collaborate}}
                 </div>
             </div>
             <div class="tab entry-details" data-group="primary" data-tab="entry-details">
@@ -195,7 +195,7 @@
                 <div class="tab-inner flexcol">
                     <div style="flex-grow: 0;">{{localize 'MonksEnhancedJournal.OnlyViewable'}}{{#unless hasGM}}<span style="color:darkred;font-weight:bold;"> {{localize 'MonksEnhancedJournal.msg.CannotEditNotesWithoutGM'}}</span>{{/unless}}</div>
                     <div class="notes-container">
-                        {{editor userdata.enrichedText target=notesTarget editable=true button=true owner=owner}}
+                        {{editor userdata.enrichedText target=notesTarget editable=true button=true owner=owner engine=editor.engine collaborate=editor.collaborate }}
                     </div>
                 </div>
             </div>

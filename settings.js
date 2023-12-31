@@ -25,6 +25,11 @@ export const registerSettings = function () {
 		'false': "Core Foundry"
 	};
 
+	let engineOptions = {
+		'tinymce': "TinyMCE",
+        'prosemirror': "ProseMirror",
+    };
+
 	let backgroundImages = {
 		'none': "None",
 		'darkParchment': "Parchment - Dark",
@@ -93,6 +98,16 @@ export const registerSettings = function () {
 		icon: 'fas fa-file-lines',
 		restricted: true,
 		type: CustomisePages
+	});
+
+	game.settings.register(modulename, 'editor-engine', {
+		name: i18n("MonksEnhancedJournal.editor-engine.name"),
+		hint: i18n("MonksEnhancedJournal.editor-engine.hint"),
+		scope: 'world',
+		config: true,
+		default: "tinymce",
+		choices: engineOptions,
+		type: String,
 	});
 
 	game.settings.register(modulename, 'background-colour', {

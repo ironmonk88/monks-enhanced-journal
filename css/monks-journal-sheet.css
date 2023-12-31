@@ -537,7 +537,7 @@ body:not(.system-pf2e) .monks-journal-sheet .sheet-container .tag {
     display: none;
 }
 
-.monks-journal-sheet .journal-subsheet[editable='false'] .editor-edit {
+.monks-journal-sheet .journal-subsheet[editable='false'] .tab[data-tab]:not([data-tab="notes"]) .editor-edit {
     display: none !important;
 }
 
@@ -887,26 +887,28 @@ body:not(.system-pf2e) .monks-journal-sheet .sheet-container .tag {
 /* Currency Group */
 .monks-journal-sheet .currency-group {
     font-size: var(--font-size-12);
-    flex: 0 0 64px;
+    flex: 0 0 60px;
+}
+
+.monks-journal-sheet .currency-group .item-header {
+    margin-bottom: 0px;
 }
 
 .monks-journal-sheet .currency-group .form-fields {
-    margin-left: 10px;
-    padding-top: 2px;
+    margin-left: 5px;
+    padding: 3px 0px;
+    max-width: 155px;
 }
 
 .monks-journal-sheet .currency-group .form-fields label {
     font-weight: bold;
     padding-top: 2px;
+    padding-left: 10px;
     max-width: 75px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     line-height: 26px;
-}
-
-.monks-journal-sheet .currency-group .form-fields label:not(:first-child) {
-    padding-left: 10px;
 }
 
 .monks-journal-sheet .currency-group .form-fields input {
@@ -917,6 +919,10 @@ body:not(.system-pf2e) .monks-journal-sheet .sheet-container .tag {
     color: var(--color-text-dark-primary);
     background: var(--mej-sheet-input-background);
     border: var(--mej-sheet-input-border);
+}
+
+.monks-journal-sheet .currency-group .currency-row :nth-child(even) {
+    background: var(--mej-currency-background);
 }
 
 /* Additional */

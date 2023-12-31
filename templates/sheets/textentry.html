@@ -11,7 +11,7 @@
             <input type="text" style="display:none;" /><!--I can't figure out what's going on, but to avoid Enter causing a page submit a second text needs to be on the page-->
         </header>
         <div class="flexcol editor-parent" style="overflow-y:auto;position:relative;">
-            {{editor enrichedText target="text.content" editable=true button=true owner=owner}}
+            {{editor enrichedText target="text.content" editable=true button=true owner=owner engine=editor.engine collaborate=editor.collaborate }}
         </div>
     </div>
 </form>

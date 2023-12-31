@@ -1,7 +1,7 @@
 {
   "title": "Monk's Enhanced Journal",
   "description": "Treat the journal like it's going to be popped out and used as a digital guide book.  Add extra information to summarize an encounter.  Show summaries of people and places.  Allow for bookmarking of commonly used pages",
-  "version": "11.08",
+  "version": "11.09",
   "authors": [
     {
       "name": "IronMonk",
@@ -95,7 +95,7 @@
     "css/apsjournal.css"
   ],
   "url": "https://github.com/ironmonk88/monks-enhanced-journal",
-  "download": "https://github.com/ironmonk88/monks-enhanced-journal/archive/11.08.zip",
+  "download": "https://github.com/ironmonk88/monks-enhanced-journal/archive/11.09.zip",
   "manifest": "https://github.com/ironmonk88/monks-enhanced-journal/releases/latest/download/module.json",
   "bugs": "https://github.com/ironmonk88/monks-enhanced-journal/issues",
   "allowBugReporter": true,
