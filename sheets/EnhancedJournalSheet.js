@@ -495,6 +495,7 @@ export class EnhancedJournalSheet extends JournalPageSheet {
                     item.shoptype = "";
                     item.role = "";
                     item.defunct = true;
+                    item.name = item.name || i18n("MonksEnhancedJournal.Unknown");
                     
                     if (!relationships[type])
                         relationships[type] = {
