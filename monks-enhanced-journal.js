@@ -1518,7 +1518,7 @@ export class MonksEnhancedJournal {
                         if (journal.pages.size > 1) {
                             isGood = await Dialog.confirm({
                                 title: "Confirm Page Deletion",
-                                content: "This Journal has more than one page.  Monk's Enhanced Journal only uses one page, so the additional pages will be deleted and cannot be recovered. <br><br>Are you sure you wish to continue?"
+                                content: `<div class="flexrow"><div style="padding: 10px;padding-right: 20px;font-size:40px; color: #ffc107; flex-grow: 0"><i class="fas fa-exclamation-triangle"></i></div><div>This Journal has more than one page.  Monk's Enhanced Journal only uses one page, so the additional pages will be deleted and cannot be recovered.</div></div> <br><div style="text-align: center;padding-bottom: 10px;">Are you <b>sure</b> you wish to continue?</div></br>`
                             });
                         }
 
@@ -2720,7 +2720,7 @@ export class MonksEnhancedJournal {
     }
 
     static onMessage(data) {
-        log('message', data);
+        //log('message', data);
         MonksEnhancedJournal[data.action].call(MonksEnhancedJournal, data);
     }
 
@@ -3574,7 +3574,7 @@ export class MonksEnhancedJournal {
                     if (!data.consumable) {
                         let sheet = actor.sheet;
                         if (sheet._onDropItem)
-                            sheet._onDropItem({ preventDefault: () => { } }, { type: "Item", uuid: `${entry.uuid}.Items.${item._id}`, data: itemData });
+                            sheet._onDropItem({ preventDefault: () => { }, target: { closest: () => { } } }, { type: "Item", uuid: `${entry.uuid}.Items.${item._id}`, data: itemData });
                         else
                             actor.createEmbeddedDocuments("Item", [itemData]);
                     }
@@ -4009,9 +4009,7 @@ export class MonksEnhancedJournal {
             }
 
             let rewards = MonksEnhancedJournal.journal.subsheet.convertRewards();
-            MonksEnhancedJournal.journal.object.flags['monks-enhanced-journal'].reward = rewards[0].id;
             MonksEnhancedJournal.journal.object.setFlag('monks-enhanced-journal', 'rewards', rewards);
-            MonksEnhancedJournal.journal.object.setFlag('monks-enhanced-journal', 'reward', rewards[0].id);
             MonksEnhancedJournal.journal.render(true);
         }
     }
@@ -4194,7 +4192,7 @@ export class MonksEnhancedJournal {
 
 Hooks.on("renderJournalDirectory", async (app, html, options) => {
     //add journal indicators
-    log('rendering journal directory', app, html, options);
+    //log('rendering journal directory', app, html, options);
     if (MonksEnhancedJournal.journal) {
         let jdir = await MonksEnhancedJournal.journal.renderDirectory();
         MonksEnhancedJournal.updateDirectory(jdir, false);
@@ -4332,7 +4330,7 @@ Hooks.on("updateJournalEntryPage", (document, data, options, userId) => {
             renderUpdate ||
             getProperty(data, "flags.core.sheetClass") != undefined)
         {
-            if (document._sheet)
+            if (document._sheet && document._sheet.rendered)
                 document._sheet.render(true, { reload: true });
         }
     }
@@ -4369,7 +4367,7 @@ Hooks.on('dropActorSheetData', (actor, sheet, data) => {
                             setPrice(data.data, pricename(), result.price);
                         data.uuid = `${data.uuid}${data.rewardId ? `.Rewards.${data.rewardId}` : ""}.Items.${data.itemId}`;
                         if (sheet._onDropItem && game.system.id != "cyphersystem")
-                            sheet._onDropItem({ preventDefault: () => { } }, data);
+                            sheet._onDropItem({ preventDefault: () => { }, target: { closest: () => { } } }, data);
                         else
                             actor.createEmbeddedDocuments("Item", [data.data]);
                     }
@@ -4396,7 +4394,7 @@ Hooks.on('dropJournalSheetData', (journal, sheet, data) => {
                         let itemQty = getValue(data.data, quantityname());
                         setValue(data.data, quantityname(), result.quantity * itemQty);
                         data.uuid = `${data.uuid}.Items.${data.itemId}`;
-                        sheet._onDropItem({ preventDefault: () => { } }, data);
+                        sheet._onDropItem({ preventDefault: () => { }, target: { closest: () => { } } }, data);
                     }
                 });
             }

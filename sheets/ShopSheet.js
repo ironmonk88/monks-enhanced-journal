@@ -617,7 +617,7 @@ export class ShopSheet extends EnhancedJournalSheet {
                     if (!data.consumable) {
                         let sheet = actor.sheet;
                         if (sheet._onDropItem)
-                            sheet._onDropItem({ preventDefault: () => { } }, { type: "Item", uuid: `${this.object.uuid}.Items.${item._id}`, data: itemData });
+                            sheet._onDropItem({ preventDefault: () => { }, target: { closest: () => { } } }, { type: "Item", uuid: `${this.object.uuid}.Items.${item._id}`, data: itemData });
                         else
                             actor.createEmbeddedDocuments("Item", [itemData]);
                     }

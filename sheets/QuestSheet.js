@@ -94,11 +94,12 @@ export class QuestSheet extends EnhancedJournalSheet {
                 (this.object.flags["monks-enhanced-journal"].items != undefined ||
             this.object.flags["monks-enhanced-journal"].xp != undefined ||
             this.object.flags["monks-enhanced-journal"].additional != undefined)) {
-
-            rewards = this.convertRewards();
-            this.object.flags['monks-enhanced-journal'].reward = rewards[0].id;
-            this.object.setFlag('monks-enhanced-journal', 'rewards', rewards);
-            this.object.setFlag('monks-enhanced-journal', 'reward', rewards[0].id);
+            if (this.object.isOwner) {
+                rewards = this.convertRewards();
+                //this.object.flags['monks-enhanced-journal'].reward = rewards[0].id;
+                this.object.setFlag('monks-enhanced-journal', 'rewards', rewards);
+                game.user.setFlag('monks-enhanced-journal', `reward${this.object.id}`, rewards[0].id);
+            }
         } else {
             rewards = this.object.flags["monks-enhanced-journal"].rewards || [];
             rewards = rewards.map(reward => {
@@ -142,11 +143,11 @@ export class QuestSheet extends EnhancedJournalSheet {
     getReward(rewards) {
         if (!rewards)
             rewards = this.getRewardData();
-        let id = this.object.getFlag('monks-enhanced-journal', 'reward') || 0;
+        let id = game.user.getFlag('monks-enhanced-journal', `reward${this.object.id}`) || 0;
         let reward = rewards.find(r => r.id == id);
         if (reward == undefined && rewards.length > 0) {
             reward = rewards[0];
-            this.object.setFlag('monks-enhanced-journal', 'reward', reward.id);
+            game.user.setFlag('monks-enhanced-journal', `reward${this.object.id}`, reward.id);
         }
 
         reward.groups = this.getItemGroups(
@@ -354,12 +355,8 @@ export class QuestSheet extends EnhancedJournalSheet {
             return;
         let id = (typeof event == 'string' ? event : $(event.currentTarget).closest('.reward-tab').data('rewardId'));
 
-        this.object.setFlag('monks-enhanced-journal', 'reward', id);
-        let rewards = duplicate(this.getRewardData() || []);
-        for (let reward of rewards) {
-            reward.active = (reward.id == id);
-        }
-        this.object.setFlag('monks-enhanced-journal', 'rewards', rewards);
+        await game.user.setFlag('monks-enhanced-journal', `reward${this.object.id}`, id);
+        this.render(true);
     }
 
     async addReward() {
@@ -391,7 +388,7 @@ export class QuestSheet extends EnhancedJournalSheet {
         await this.object.setFlag('monks-enhanced-journal', 'rewards', rewards);
         //$('.reward-list .journal-tab[data-reward-id="' + id + '"]').remove();
 
-        if (id == this.object.getFlag('monks-enhanced-journal', 'reward')) {
+        if (id == game.user.getFlag('monks-enhanced-journal', `reward${this.object.id}`)) {
             let newid = rewards[0]?.id;
             this.changeReward(newid);
         }
@@ -400,7 +397,7 @@ export class QuestSheet extends EnhancedJournalSheet {
     /*
     async loadRewards(id) {
         if (id == undefined)
-            id = this.object.getFlag('monks-enhanced-journal', 'reward');
+            id = game.user.getFlag('monks-enhanced-journal', `reward${this.object.id}`);
 
         $('.reward-container', this.element).empty();
 
@@ -410,7 +407,7 @@ export class QuestSheet extends EnhancedJournalSheet {
             reward = rewards[0];
             if (reward == undefined)
                 return;
-            await this.object.setFlag('monks-enhanced-journal', 'reward', reward.id);
+            await game.user.setFlag('monks-enhanced-journal', `reward${this.object.id}`, reward.id);
         }
         let template = "modules/monks-enhanced-journal/templates/reward.html";
 
@@ -441,7 +438,7 @@ export class QuestSheet extends EnhancedJournalSheet {
     async deleteItem(id, container) {
         if (container == 'items') {
             let rewards = duplicate(this.object.flags["monks-enhanced-journal"].rewards);
-            let reward = rewards.find(r => r.id == this.object.flags["monks-enhanced-journal"].reward);
+            let reward = rewards.find(r => r.id == game.user.getFlag("monks-enhanced-journal", `reward${this.object.id}`));
             reward.items.findSplice(i => i.id == id || i._id == id);
             this.object.setFlag('monks-enhanced-journal', "rewards", rewards);
         } else
@@ -557,7 +554,7 @@ export class QuestSheet extends EnhancedJournalSheet {
         let item = await this.getDocument(data);
 
         if (item) {
-            let id = this.object.getFlag('monks-enhanced-journal', 'reward');
+            let id = game.user.getFlag('monks-enhanced-journal', `reward${this.object.id}`);
 
             let itemData = item.toObject();
             if ((itemData.type === "spell") && game.system.id == 'dnd5e') {
@@ -690,7 +687,6 @@ export class QuestSheet extends EnhancedJournalSheet {
                     });
                 }
             },
-            ,
             {
                 name: i18n("MonksEnhancedJournal.OpenActorSheet"),
                 icon: '<i class="fas fa-user fa-fw"></i>',

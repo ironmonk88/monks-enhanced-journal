@@ -2020,7 +2020,6 @@ body:not(.system-pf2e) .monks-journal-sheet .sheet-container .tag {
 }
 /* Objective */
 #objective-display {
-    display: none;
     background: var(--mej-objective-background);
     border: 1px solid var(--mej-objective-border);
     padding: 6px 8px;
@@ -2031,14 +2030,6 @@ body:not(.system-pf2e) .monks-journal-sheet .sheet-container .tag {
 
 #objective-display.minimized {
     padding: 0px;
-}
-
-#objective-display.active {
-    display: inline-block;
-}
-
-#objective-display:empty {
-    display: none;
 }
 
 #objective-display header {

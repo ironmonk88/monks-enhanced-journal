@@ -687,6 +687,9 @@ export class ListSheet extends EnhancedJournalSheet {
                     document.apps = [];
                     document.uuid = document.id;
                     document.isOwner = game.user.isGM;
+                    document.getFlag = function (module, key) {
+                        return;
+                    }
                     let docOwnership = new DocumentOwnershipConfig(document, {
                         top: Math.min(li[0].offsetTop, window.innerHeight - 350),
                         left: window.innerWidth - 720

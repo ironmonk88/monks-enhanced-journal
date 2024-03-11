@@ -13,7 +13,7 @@ export class ObjectiveDisplay extends Application {
             title: i18n("MonksEnhancedJournal.Quests"),
             template: "modules/monks-enhanced-journal/templates/objective-display.html",
             width: pos?.width || 500,
-            height: "auto",
+            height: pos?.height || 300,
             top: pos?.top || 75,
             left: pos?.left || 120,
             resizable: true
@@ -23,7 +23,7 @@ export class ObjectiveDisplay extends Application {
     getData(options) {
         let icons = {
             inactive: "fa-ban",
-            available: "fa-circle-plus",
+            available: "fa-file-circle-plus",
             inprogress: "fa-circle-exclamation",
             completed: "fa-check",
             failed: "fa-xmark"

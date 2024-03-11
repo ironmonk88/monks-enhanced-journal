@@ -1241,7 +1241,7 @@ export class EnhancedJournalSheet extends JournalPageSheet {
         for (let item of items) {
             if (!item)
                 continue;
-            if (item.data && !item.system)
+            if (!item.system && item.data)
                 item = item.data;
             let requests = (Object.entries(getProperty(item, "flags.monks-enhanced-journal.requests") || {})).map(([k, v]) => {
                 if (!v)
@@ -1641,7 +1641,7 @@ export class EnhancedJournalSheet extends JournalPageSheet {
         let id = $(event.currentTarget).closest('li').attr('data-id');
         let items = (this.object.getFlag('monks-enhanced-journal', 'items') || []);
 
-        if (this.type == "quest") {
+        if (this.object?.type == "quest") {
             let rewards = this.getRewardData();
             if (rewards.length) {
                 let reward = this.getReward(rewards);
@@ -1706,14 +1706,37 @@ export class EnhancedJournalSheet extends JournalPageSheet {
                     }
                 }
 
+                if (game.system.id == "dnd5e") {
+                    if (hasProperty(formData, "system.properties")) {
+                        formData.system.properties = new Set(formData.system.properties);
+                    }
+                }
+
                 let items = duplicate(this.object.getFlag('monks-enhanced-journal', 'items') || []);
+                if (this.object?.type == "quest") {
+                    let rewards = this.getRewardData();
+                    if (rewards.length) {
+                        let reward = this.getReward(rewards);
+                        items = reward.items;
+                    }
+                }
+
                 let itm = items.find(i => i._id == itemData._id);
                 if (itm) {
                     itm = mergeObject(itm, formData);
                     //let sysPrice = MEJHelpers.getSystemPrice(itm, pricename());
                     //let price = MEJHelpers.getPrice(sysPrice);
                     //setProperty(itm, "flags.monks-enhanced-journal.price", `${price.value} ${price.currency}`);
-                    await this.object.setFlag('monks-enhanced-journal', 'items', items);
+                    if (this.object?.type == "quest") {
+                        let rewards = this.getRewardData();
+                        if (rewards.length) {
+                            let reward = this.getReward(rewards);
+                            reward.items = items;
+                            await this.object.setFlag('monks-enhanced-journal', 'rewards', rewards);
+                        }
+                    } else {
+                        await this.object.setFlag('monks-enhanced-journal', 'items', items);
+                    }
                 }
 
                 mergeObject(sheet.object, formData);
@@ -1728,6 +1751,9 @@ export class EnhancedJournalSheet extends JournalPageSheet {
                 sheet._submitting = false;
                 if (preventRender) sheet._state = priorState;
                 if (closeForm) await sheet.close({ submit: false, force: true });
+
+                if (!closeForm)
+                    sheet.bringToTop();
             }
 
             sheet._onSubmit = newSubmit.bind(sheet);
@@ -2641,7 +2667,7 @@ export class EnhancedJournalSheet extends JournalPageSheet {
                 setValue(itemData, quantityname(), item.qty * itemQty);
                 let sheet = destActor.sheet;
                 if (sheet._onDropItem)
-                    sheet._onDropItem({ preventDefault: () => { } }, { type: "Item", uuid: `${this.object.uuid}.Items.${item.item._id}`, data: itemData });
+                    sheet._onDropItem({ preventDefault: () => { }, target: { closest: () => { } } }, { type: "Item", uuid: `${this.object.uuid}.Items.${item.item._id}`, data: itemData });
                 else
                     destActor.createEmbeddedDocuments("Item", [itemData]);
             }

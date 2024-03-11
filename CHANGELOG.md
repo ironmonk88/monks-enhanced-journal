@@ -1,3 +1,25 @@
+# Version 11.10
+
+Updated the objectives display to allow full resizing
+
+Changed the available icon to make it clearer what it meant
+
+Updated the error message when converting from a journal with multiple pages to a MEJ page that only needs one, to make it clearer that data is about to be deleted.
+
+Fixed issues that the latest D&D5e updates introduced.
+
+Fixed issue with changing the visiblity of a reward causing player to try and save the journal
+
+Fixed issues with players not able to switch between rewards
+
+Fixed issues that D&D 5e introduced when trying to edit items in Shops
+
+Fixed issues that D&D 5e introduced when droppng an item on a Character sheet.
+
+Fixed issue where updating a journal entry that a player had previously viewed was causing ti to open up again.
+
+Fixed issue with saving items in a quest not finding the correct items to update
+
 # Version 11.09
 
 Fixed issue where the header buttons wouldn't refresh when changing between MEJ pages and Foundry pages.
