@@ -304,7 +304,7 @@
                                 <li class="item flexrow" data-id="{{this.id}}" data-uuid="{{this.uuid}}" data-container="relationships" data-document="JournalEntry" draggable="false">
                                     <div class="item-name clickable flexrow">
                                         <img class="item-image large actor-icon" src="{{this.img}}" onerror="if (!this.imgerr) { this.imgerr = true; this.src = 'modules/monks-enhanced-journal/assets/{{this.type}}.png' }" />
-                                        <h4><a>{{#if this.pack}}<i class="fas fa-atlas" title="{{localize 'MonksEnhancedJournal.FromCompendium'}}"></i> {{/if}}{{this.name}}</a></h4>
+                                        <h4><a{{#if this.defunct}} class="relationship-defunct"{{/if}}>{{#if this.pack}}<i class="fas fa-atlas" title="{{localize 'MonksEnhancedJournal.FromCompendium'}}"></i> {{/if}}{{this.name}}</a></h4>
                                     </div>
 
                                     <div class="item-name item-relationship flexrow">
