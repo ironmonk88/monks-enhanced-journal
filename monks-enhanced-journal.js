@@ -912,7 +912,7 @@ export class MonksEnhancedJournal {
                         ui.journal.render();
                     }, 500);
                 }
-            } 
+            }
             if (!!getProperty(this, "flags.forien-quest-log") || (options.renderSheet !== false && !MonksEnhancedJournal.openJournalEntry(this, options)))
                 return wrapped(...args);
         }
@@ -1144,7 +1144,10 @@ export class MonksEnhancedJournal {
         DocumentSheetConfig.prototype._updateObject = async function (event, formData) {
             event.preventDefault();
             const original = this.getData({});
-
+            /**
+             * form data gets modified during sheet.close, forcing us to make a shallow clone
+             */
+            const formDataClone = {...formData}
             let fromEnhancedJournal = (this.object._sheet == null);
 
             // De-register the current sheet class
@@ -1154,16 +1157,16 @@ export class MonksEnhancedJournal {
             delete this.object.apps[sheet.appId];
 
             // Update world settings
-            if (game.user.isGM && (formData.defaultClass !== original.defaultClass)) {
+            if (game.user.isGM && (formDataClone.defaultClass !== original.defaultClass)) {
                 const setting = await game.settings.get("core", "sheetClasses") || {};
                 const type = this.object.type || CONST.BASE_DOCUMENT_TYPE;
-                foundry.utils.mergeObject(setting, { [`${this.object.documentName}.${type}`]: formData.defaultClass });
+                foundry.utils.mergeObject(setting, { [`${this.object.documentName}.${type}`]: formDataClone.defaultClass });
                 await game.settings.set("core", "sheetClasses", setting);
             }
 
             // Update the document-specific override
-            if (formData.sheetClass !== original.sheetClass) {
-                await this.object.setFlag("core", "sheetClass", formData.sheetClass);
+            if (formDataClone.sheetClass !== original.sheetClass) {
+                await this.object.setFlag("core", "sheetClass", formDataClone.sheetClass);
             }
 
             // Re-draw the updated sheet
@@ -2232,7 +2235,7 @@ export class MonksEnhancedJournal {
                 let idx = text.lastIndexOf('</section>');
                 text = text.slice(0, idx) + text.slice(idx + 10, text.length);
             }
-        
+
             canvas.hud.bubbles.say(object, text);
             if (broadcast) {
                 MonksEnhancedJournal.emit('chatbubble', { entityId: object.id, text: text });
@@ -3422,7 +3425,7 @@ export class MonksEnhancedJournal {
 
         if (noWall.length == 0)
             return { x: template.x - hw, y: template.y - hh };
-        
+
         // find one without a token
         let noTokens = noWall.filter(p => {
             return !tokenCollide(p);
@@ -3506,13 +3509,13 @@ export class MonksEnhancedJournal {
         let message = this;
 
         let content = $(message.content);
-  
+
         let offered = message.getFlag('monks-enhanced-journal', 'offered');
         let approved = message.getFlag('monks-enhanced-journal', 'approved');
         let accepted = message.getFlag('monks-enhanced-journal', 'accepted');
 
         if (status == 'accept') {
-            //find the shop        
+            //find the shop
             let msgshop = message.getFlag('monks-enhanced-journal', 'shop');
             let entry = await fromUuid(msgshop.uuid);
             if (!entry)
