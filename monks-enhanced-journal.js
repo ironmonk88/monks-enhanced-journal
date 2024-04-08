@@ -912,7 +912,7 @@ export class MonksEnhancedJournal {
                         ui.journal.render();
                     }, 500);
                 }
-            }
+            } 
             if (!!getProperty(this, "flags.forien-quest-log") || (options.renderSheet !== false && !MonksEnhancedJournal.openJournalEntry(this, options)))
                 return wrapped(...args);
         }
@@ -2235,7 +2235,7 @@ export class MonksEnhancedJournal {
                 let idx = text.lastIndexOf('</section>');
                 text = text.slice(0, idx) + text.slice(idx + 10, text.length);
             }
-
+        
             canvas.hud.bubbles.say(object, text);
             if (broadcast) {
                 MonksEnhancedJournal.emit('chatbubble', { entityId: object.id, text: text });
@@ -3425,7 +3425,7 @@ export class MonksEnhancedJournal {
 
         if (noWall.length == 0)
             return { x: template.x - hw, y: template.y - hh };
-
+        
         // find one without a token
         let noTokens = noWall.filter(p => {
             return !tokenCollide(p);
@@ -3509,13 +3509,13 @@ export class MonksEnhancedJournal {
         let message = this;
 
         let content = $(message.content);
-
+  
         let offered = message.getFlag('monks-enhanced-journal', 'offered');
         let approved = message.getFlag('monks-enhanced-journal', 'approved');
         let accepted = message.getFlag('monks-enhanced-journal', 'accepted');
 
         if (status == 'accept') {
-            //find the shop
+            //find the shop        
             let msgshop = message.getFlag('monks-enhanced-journal', 'shop');
             let entry = await fromUuid(msgshop.uuid);
             if (!entry)
