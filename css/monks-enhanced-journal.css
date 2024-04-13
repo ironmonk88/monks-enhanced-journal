@@ -934,6 +934,7 @@ span.unknown-link {
 
 body[inline-roll-styling="true"] a.entity-link,
 body[inline-roll-styling="true"] a.content-link,
+body[inline-roll-styling="true"] .locked-tooltip.link-matches a.content-link
 body[inline-roll-styling="true"] a.inline-roll,
 body[inline-roll-styling="true"] a.picture-link,
 body[inline-roll-styling="true"] a.sound-link,
