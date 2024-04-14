@@ -1920,6 +1920,25 @@ export class EnhancedJournalSheet extends JournalPageSheet {
                                                 currChanged = true;
                                             }
                                         }
+                                        
+                                        // DND5E Award Enricher Parsing
+                                        if (text.startsWith("[[/award") && text.endsWith("]]")) {
+                                            const award = text.substring(2, text.length - 2);
+                                            for (const part of award.replace(/^\/award(?:\s|$)/i, "").split(" ")) {
+                                                if (!part) continue;
+                                                let [,formula, coin] = part.match(/^(.+?)(\D+)$/) ?? [];
+                                                coin = coin?.toLowerCase();
+                                                if (coin === "xp") continue;
+                                                
+                                                if (coin == undefined || coin.length == 0 || MonksEnhancedJournal.currencies.find(c => c.id == coin) == undefined) {
+                                                    coin = MEJHelpers.defaultCurrency();
+                                                }
+
+                                                let value = await tryRoll(formula);
+                                                currency[coin] = (currency[coin] || 0) + value;
+                                                currChanged = true;
+                                            }
+                                        }
                                     }
                             }
                             /*
