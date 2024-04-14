@@ -1923,8 +1923,8 @@ export class EnhancedJournalSheet extends JournalPageSheet {
                                         
                                         // DND5E Award Enricher Parsing
                                         if (text.startsWith("[[/award") && text.endsWith("]]")) {
-                                            const award = text.substring(2, text.length - 2);
-                                            for (const part of award.replace(/^\/award(?:\s|$)/i, "").split(" ")) {
+                                            const award = text.substring(8, text.length - 2);
+                                            for (const part of award.split(" ")) {
                                                 if (!part) continue;
                                                 let [,formula, coin] = part.match(/^(.+?)(\D+)$/) ?? [];
                                                 coin = coin?.toLowerCase();
