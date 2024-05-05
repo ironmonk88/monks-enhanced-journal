@@ -1,3 +1,21 @@
+# Version 11.11
+
+Fixed link styling for the link list that appears when selecting the text that matches the name of a document.
+
+Fixed issue with the new D&D 5e character sheet not saving a sheet type change.
+
+Fixed issue where players were shown links to documents they weren't allowed to see.
+
+Fixed issue with linking to a journal entry in the scene config
+
+Fixed issue with unidentified names not being shown to players in loot and shop sheets.
+
+Fixed issue with D&D 5e items not refreshing after changing the identified or equipped toggle.
+
+Added the option to use [[/award]] in roll tables to populate loot and shop sheets.  Thank you NeilWhite
+
+Also cleaned up the text option in roll tables to use {1d10gp} notation as well as {1d10 [gp]} notation.
+
 # Version 11.10
 
 Updated the objectives display to allow full resizing

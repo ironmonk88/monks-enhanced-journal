@@ -1272,16 +1272,18 @@ export class EnhancedJournalSheet extends JournalPageSheet {
             let name = item.name;
             let img = item.img;
 
+            let identifiedName = name;
             if (item.system?.identification?.status == "unidentified") {
                 name = item.system?.identification.unidentified.name || name;
                 img = item.system?.identification.unidentified.img || img;
-            } else if (game.system.id == "pf1" && item.system?.identified === false) {
+            } else if (item.system?.identified === false) {
                 name = item.system?.unidentified?.name || name;
             }
 
             let itemData = {
                 id: item._id,
                 name: name,
+                identifiedname: game.user.isGM && identifiedName != name ? identifiedName : null,
                 type: item.type,
                 img: img,
                 hide: flags.hide,
@@ -1721,6 +1723,8 @@ export class EnhancedJournalSheet extends JournalPageSheet {
                     }
                 }
 
+                mergeObject(sheet.object, formData);
+
                 let itm = items.find(i => i._id == itemData._id);
                 if (itm) {
                     itm = mergeObject(itm, formData);
@@ -1737,9 +1741,11 @@ export class EnhancedJournalSheet extends JournalPageSheet {
                     } else {
                         await this.object.setFlag('monks-enhanced-journal', 'items', items);
                     }
-                }
 
-                mergeObject(sheet.object, formData);
+                    if (game.system.id == "dnd5e") {
+                        sheet.object.name = itm.name;
+                    }
+                }
 
                 // Handle the form state prior to submission
                 let closeForm = sheet.options.closeOnSubmit && !preventClose;
@@ -1750,7 +1756,11 @@ export class EnhancedJournalSheet extends JournalPageSheet {
                 // Restore flags and optionally close the form
                 sheet._submitting = false;
                 if (preventRender) sheet._state = priorState;
-                if (closeForm) await sheet.close({ submit: false, force: true });
+                if (closeForm)
+                    await sheet.close({ submit: false, force: true });
+                else if (game.system.id == "dnd5e" && !preventRender) {
+                    sheet.render(true);
+                }
 
                 if (!closeForm)
                     sheet.bringToTop();
@@ -1901,24 +1911,48 @@ export class EnhancedJournalSheet extends JournalPageSheet {
                                         }
 
                                         let text = tableresult.text;
+                                        let textCoins = [];
                                         if (text.startsWith("{") && text.endsWith("}") && text.length > 2) {
-                                            let rolls = text.substring(1, text.length - 1).split(",");
-                                            for (let roll of rolls) {
-                                                let formula = roll;
-                                                let coin = roll.match(/\[[a-z]+\]/);
-                                                if (coin.length > 0) {
+                                            let splitStr = (text.indexOf("[") > -1 && text.indexOf("]") > -1) ? "," : " ";
+                                            let rolls = text.substring(1, text.length - 1).trim().split(splitStr);
+                                            for (let part of rolls) {
+                                                if (!part) continue;
+                                                let formula = part;
+                                                let coin = part.match(/\[[a-z]+\]/);
+                                                if (splitStr == " ") 
+                                                    [, formula, coin] = part.match(/^(.+?)(\D+)$/) ?? [];
+                                                if (Array.isArray(coin)) {
                                                     coin = coin[0];
                                                     formula = formula.replace(`${coin}`, '');
                                                     coin = coin.replace("[", "").replace("]", "");
                                                 }
-                                                if (coin == undefined || coin.length == 0 || MonksEnhancedJournal.currencies.find(c => c.id == coin) == undefined)
-                                                    coin = MEJHelpers.defaultCurrency();
 
-                                                let value = await tryRoll(formula);
-
-                                                currency[coin] = (currency[coin] || 0) + value;
-                                                currChanged = true;
+                                                textCoins.push({ formula, coin });
                                             }
+                                        }
+
+                                        // DND5E Award Enricher Parsing
+                                        if (text.startsWith("[[/award") && text.endsWith("]]")) {
+                                            const awards = text.substring(8, text.length - 2).trim().split(" ");
+                                            for (const part of awards) {
+                                                if (!part) continue;
+                                                let [,formula, coin] = part.match(/^(.+?)(\D+)$/) ?? [];
+                                                
+                                                textCoins.push({ formula, coin });
+                                            }
+                                        }
+
+                                        for (let tc of textCoins) {
+                                            if (tc.coin == undefined)
+                                                tc.coin = MEJHelpers.defaultCurrency();
+                                            else if (MonksEnhancedJournal.currencies.find(c => c.id == tc.coin) == undefined)
+                                                continue;
+
+                                            tc.coin = tc.coin?.toLowerCase();
+
+                                            let value = await tryRoll(tc.formula);
+                                            currency[tc.coin] = (currency[tc.coin] || 0) + value;
+                                            currChanged = true;
                                         }
                                     }
                             }
@@ -2443,6 +2477,8 @@ export class EnhancedJournalSheet extends JournalPageSheet {
                     const description = chatData?.description?.value ?? item.description;
                     div = $('<div>').addClass("item-summary").append(propertiesElem, levelPriceLabel, `<div class="item-description">${description}</div>`);
                 } else {
+                    if (item.system?.identified === false && !game.user.isGM && getProperty(item, "system.unidentified.description"))
+                        chatData = getProperty(item, "system.unidentified.description");
                     div = $(`<div class="item-summary">${(typeof chatData == "string" ? chatData : chatData.description.value ?? chatData.description)}</div>`);
                     if (typeof chatData !== "string") {
                         let props = $('<div class="item-properties"></div>');

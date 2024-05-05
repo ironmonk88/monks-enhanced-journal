@@ -1141,37 +1141,11 @@ export class MonksEnhancedJournal {
             return oldImportFromCompendium.call(this, collection, id, updateData, options);
         }
 
-        DocumentSheetConfig.prototype._updateObject = async function (event, formData) {
-            event.preventDefault();
-            const original = this.getData({});
-
-            let fromEnhancedJournal = (this.object._sheet == null);
-
-            // De-register the current sheet class
-            const sheet = this.object.sheet;
-            await sheet.close();
-            this.object._sheet = null;
-            delete this.object.apps[sheet.appId];
-
-            // Update world settings
-            if (game.user.isGM && (formData.defaultClass !== original.defaultClass)) {
-                const setting = await game.settings.get("core", "sheetClasses") || {};
-                const type = this.object.type || CONST.BASE_DOCUMENT_TYPE;
-                foundry.utils.mergeObject(setting, { [`${this.object.documentName}.${type}`]: formData.defaultClass });
-                await game.settings.set("core", "sheetClasses", setting);
-            }
-
-            // Update the document-specific override
-            if (formData.sheetClass !== original.sheetClass) {
-                await this.object.setFlag("core", "sheetClass", formData.sheetClass);
-            }
-
-            // Re-draw the updated sheet
-            if (!fromEnhancedJournal)
-                this.object.sheet.render(true);
-            else
-                MonksEnhancedJournal.journal?.render(false);
-        }
+        patchFunc("DocumentSheet.prototype._onConfigureSheet", async function (wrapped, ...args) {
+            if (this.enhancedjournal)
+                this.document.enhancedjournal = this.enhancedjournal;
+            return wrapped(...args);
+        });
 
         let clickNote2 = function (wrapped, ...args) {
             const options = { newtab: setting("open-new-tab")};
@@ -1294,7 +1268,12 @@ export class MonksEnhancedJournal {
                 sheetOpen ??= this.sheet.rendered;
                 await Promise.all(Object.values(this.apps).map(app => app.close()));
                 this._sheet = null;
-                if (sheetOpen) this.sheet.render(true);
+                if (sheetOpen) {
+                    if (this.enhancedjournal)
+                        this.enhancedjournal.render(true);
+                    else
+                        this.sheet.render(true);
+                }
             } else
                 return wrapped(...args);
         }, "MIXED");
@@ -1395,7 +1374,7 @@ export class MonksEnhancedJournal {
                 }
 
                 const checkPermission = doc => {
-                    if (!game.user.isGM && doc && ((!doc.compendium && doc.testUserPermission && !doc.testUserPermission(game.user, "LIMITED")) || (doc.compendium && !doc.compendium.visible))) {
+                    if (!game.user.isGM && doc && ((!doc.compendium && doc.testUserPermission && !doc.testUserPermission(game.user, "LIMITED")) || (doc.compendium && !doc.compendium.testUserPermission(game.user, "OBSERVER")))) {
                         const span = document.createElement('span');
                         span.classList.add("unknown-link");
                         span.innerHTML = `<i class="fas fa-eye-slash"></i> Hidden`;
@@ -4557,7 +4536,26 @@ Hooks.on("renderSceneConfig", (app, html, data) => {
         let ctrl = $('select[name="journal"]', html);
         let journal = app.object.journal;
 
-        MonksEnhancedJournal.journalListing(ctrl, html, journal?.id, journal?.name, 'journal').insertAfter(ctrl);
+        MonksEnhancedJournal.journalListing(ctrl, html, journal?.id, journal?.name, 'journal', (id, name) => {
+            let mejSheet = false;
+            let journal = game.journal.get(id);
+            if (journal?.pages?.size == 1 && (!!getProperty(journal?.pages?.contents[0], "flags.monks-enhanced-journal.type") || !!getProperty(journal, "flags.monks-enhanced-journal.type"))) {
+                let type = getProperty(journal?.pages?.contents[0], "flags.monks-enhanced-journal.type") || getProperty(journal, "flags.monks-enhanced-journal.type");
+                if (type == "base" || type == "oldentry") type = "journalentry";
+                let types = MonksEnhancedJournal.getDocumentTypes();
+                if (types[type]) {
+                    mejSheet = true;
+                }
+            }
+
+            // refresh page list
+            app._onChangeJournal({ preventDefault: () => { }, currentTarget: { value: id } });
+
+            // check if the page list and anchor should be shown
+            $('select[name="journalEntryPage"]', html).closest('.form-group').toggle(!mejSheet);
+
+            app.setPosition({ height: 'auto' });
+        }).insertAfter(ctrl);
         ctrl.hide();
     }
 });

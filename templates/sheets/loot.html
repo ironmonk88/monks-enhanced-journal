@@ -94,7 +94,11 @@
                             <li class="item flexrow" data-id="{{this.id}}" data-container="items" data-document="Item" draggable="false">
                                 <div class="item-name flexrow">
                                     <div class="item-image item-icon" style="background-image: url('{{this.img}}')"></div>
-                                    <h4>{{this.name}}{{#if (gt this.qtyof 1)}} <span class="highlight-text groups-of">(in groups of {{this.qtyof}})</span>{{/if}}</h4>
+                                    <h4>
+                                        {{this.name}}
+                                        {{#if this.identifiedname}} <span class="identified-name" data-tooltip="{{this.identifiedname}}"><i class="fas fa-circle-question"></i></span>{{/if}}
+                                        {{#if (gt this.qtyof 1)}} <span class="highlight-text groups-of">(in groups of {{this.qtyof}})</span>{{/if}}
+                                    </h4>
                                 </div>
 
                                 <div class="item-detail item-from flexrow">

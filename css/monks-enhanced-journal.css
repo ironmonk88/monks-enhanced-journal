@@ -933,6 +933,7 @@ span.unknown-link {
 }
 
 body[inline-roll-styling="true"] a.entity-link,
+body[inline-roll-styling="true"] aside.locked-tooltip.link-matches a.content-link,
 body[inline-roll-styling="true"] a.content-link,
 body[inline-roll-styling="true"] a.inline-roll,
 body[inline-roll-styling="true"] a.picture-link,
@@ -943,6 +944,15 @@ body[inline-roll-styling="true"] a.tile-trigger-link {
     background: transparent;
     padding: 0px;
     border: 0px;
+}
+
+body[inline-roll-styling="true"] aside.locked-tooltip.link-matches a.content-link[data-uuid^="Compendium"]::before {
+    color: var(--color-text-hyperlink);
+    opacity: 0.6;
+}
+
+body[inline-roll-styling="true"] aside.locked-tooltip.link-matches a.content-link {
+    margin-right: 10px;
 }
 
 body[inline-roll-styling="true"] a.entity-link i,
