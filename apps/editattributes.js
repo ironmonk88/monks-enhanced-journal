@@ -7,7 +7,7 @@ export class EditAttributes extends FormApplication {
 
     /** @override */
     static get defaultOptions() {
-        return mergeObject(super.defaultOptions, {
+        return foundry.utils.mergeObject(super.defaultOptions, {
             id: "edit-attributes",
             classes: ["form", "edit-attributes"],
             title: i18n("MonksEnhancedJournal.EditAttributes"),
@@ -122,7 +122,7 @@ export class EditPersonAttributes extends EditAttributes {
 
     getData(options) {
         this.attributes = this.attributes || setting("person-attributes");
-        return mergeObject(super.getData(options),
+        return foundry.utils.mergeObject(super.getData(options),
             {
                 fields: this.attributes
             }
@@ -148,7 +148,7 @@ export class EditPlaceAttributes extends EditAttributes {
 
     getData(options) {
         this.attributes = this.attributes || setting("place-attributes");
-        return mergeObject(super.getData(options),
+        return foundry.utils.mergeObject(super.getData(options),
             {
                 fields: this.attributes
             }

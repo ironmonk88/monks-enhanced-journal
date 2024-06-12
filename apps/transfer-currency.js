@@ -12,7 +12,7 @@ export class TransferCurrency extends FormApplication {
 
     /** @override */
     static get defaultOptions() {
-        return mergeObject(super.defaultOptions, {
+        return foundry.utils.mergeObject(super.defaultOptions, {
             id: "transfer-currency",
             classes: ["form", "transfer-currency", "monks-journal-sheet", "dialog"],
             title: i18n("MonksEnhancedJournal.TransferCurrency"),

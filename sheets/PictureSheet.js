@@ -7,7 +7,7 @@ export class PictureSheet extends EnhancedJournalSheet {
     }
 
     static get defaultOptions() {
-        return mergeObject(super.defaultOptions, {
+        return foundry.utils.mergeObject(super.defaultOptions, {
             title: i18n("MonksEnhancedJournal.picture"),
             template: "modules/monks-enhanced-journal/templates/sheets/picture.html"
         });
@@ -29,7 +29,7 @@ export class PictureSheet extends EnhancedJournalSheet {
 
     get template() {
         //let settings = this.sheetSettings();
-        //if (!this.object.isOwner && getProperty(settings, "settings.open.value") === true) return ImagePopout.defaultOptions.template;
+        //if (!this.object.isOwner && foundry.utils.getProperty(settings, "settings.open.value") === true) return ImagePopout.defaultOptions.template;
         return this.options.template;
     }
 
@@ -43,10 +43,10 @@ export class PictureSheet extends EnhancedJournalSheet {
     }
 
     _getSubmitData() {
-        let data = expandObject(super._getSubmitData());
+        let data = foundry.utils.expandObject(super._getSubmitData());
 
         data.src = $('.picture-img', this.element).attr('src');
 
-        return flattenObject(data);
+        return foundry.utils.flattenObject(data);
     }
 }

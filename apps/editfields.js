@@ -8,7 +8,7 @@ export class EditFields extends FormApplication {
 
     /** @override */
     static get defaultOptions() {
-        return mergeObject(super.defaultOptions, {
+        return foundry.utils.mergeObject(super.defaultOptions, {
             id: "edit-fields",
             classes: ["form", "edit-fields"],
             title: i18n("MonksEnhancedJournal.EditFields"),
@@ -20,18 +20,18 @@ export class EditFields extends FormApplication {
     }
 
     async _updateObject(event, formData) {
-        let fd = mergeObject({}, formData);
+        let fd = foundry.utils.mergeObject({}, formData);
         for (let attr of Object.values(fd.attributes)) {
             attr.hidden = !attr.shown;
             delete attr.shown;
         }
-        let attributes = mergeObject(this.object.flags['monks-enhanced-journal'].attributes, fd.attributes);
+        let attributes = foundry.utils.mergeObject(this.object.flags['monks-enhanced-journal'].attributes, fd.attributes);
         this.object.update({ "flags.monks-enhanced-journal.attributes": attributes }, { focus: false });
         this.change = true;
     }
 
     getData(options) {
-        return mergeObject(super.getData(options),
+        return foundry.utils.mergeObject(super.getData(options),
             {
                 fields: this.fields
             }

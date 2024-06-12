@@ -11,9 +11,9 @@ export class DistributeCurrency extends FormApplication {
 
         this.loot = loot;
         this.currency = currency;
-        this.original = duplicate(currency);
-        this.totals = duplicate(currency);
-        let playercurrency = duplicate(currency);
+        this.original = foundry.utils.duplicate(currency);
+        this.totals = foundry.utils.duplicate(currency);
+        let playercurrency = foundry.utils.duplicate(currency);
         for (let curr of Object.keys(currency))
             playercurrency[curr] = 0;
         this.characters = characters.map(c => {
@@ -21,16 +21,20 @@ export class DistributeCurrency extends FormApplication {
                 id: c.id,
                 name: c.name,
                 img: c.img,
-                currency: duplicate(playercurrency)
+                currency: foundry.utils.duplicate(playercurrency)
             }
         });
 
         this.currencies = MonksEnhancedJournal.currencies;
+
+        if (setting("loot-auto-distribute"))
+            this.splitCurrency();
+
     }
 
     /** @override */
     static get defaultOptions() {
-        return mergeObject(super.defaultOptions, {
+        return foundry.utils.mergeObject(super.defaultOptions, {
             id: "distribute-currency",
             classes: ["distribute-currency", "monks-journal-sheet", "dialog"],
             title: i18n("MonksEnhancedJournal.DistributeCurrency"),
@@ -44,7 +48,7 @@ export class DistributeCurrency extends FormApplication {
     }
 
     getData(options) {
-        return mergeObject(super.getData(options),
+        return foundry.utils.mergeObject(super.getData(options),
             {
                 characters: this.characters,
                 currencies: this.currencies,
@@ -69,7 +73,7 @@ export class DistributeCurrency extends FormApplication {
     }
 
     resetData() {
-        this.currency = duplicate(this.original);
+        this.currency = foundry.utils.duplicate(this.original);
         for (let character of this.characters) {
             for (let curr of Object.keys(character.currency)) {
                 character.currency[curr] = 0;

@@ -8,7 +8,7 @@ export class OrganizationSheet extends EnhancedJournalSheet {
     }
 
     static get defaultOptions() {
-        return mergeObject(super.defaultOptions, {
+        return foundry.utils.mergeObject(super.defaultOptions, {
             title: i18n("MonksEnhancedJournal.organization"),
             template: "modules/monks-enhanced-journal/templates/sheets/organization.html",
             tabs: [{ navSelector: ".tabs", contentSelector: ".sheet-body", initial: "description" }],
@@ -88,19 +88,19 @@ export class OrganizationSheet extends EnhancedJournalSheet {
     }
 
     _getSubmitData(updateData = {}) {
-        let data = expandObject(super._getSubmitData(updateData));
+        let data = foundry.utils.expandObject(super._getSubmitData(updateData));
 
         if (data.relationships) {
-            data.flags['monks-enhanced-journal'].relationships = duplicate(this.object.getFlag("monks-enhanced-journal", "relationships") || []);
+            data.flags['monks-enhanced-journal'].relationships = foundry.utils.duplicate(this.object.getFlag("monks-enhanced-journal", "relationships") || []);
             for (let relationship of data.flags['monks-enhanced-journal'].relationships) {
                 let dataRel = data.relationships[relationship.id];
                 if (dataRel)
-                    relationship = mergeObject(relationship, dataRel);
+                    relationship = foundry.utils.mergeObject(relationship, dataRel);
             }
             delete data.relationships;
         }
 
-        return flattenObject(data);
+        return foundry.utils.flattenObject(data);
     }
 
     _onDragStart(event) {

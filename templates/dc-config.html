@@ -8,8 +8,7 @@
     <div class="form-group">
         <label for="img">{{localize 'MonksEnhancedJournal.Image'}}</label>
         <div class="form-fields">
-            {{ filePicker type="image" target="img" }}
-            <input class="image" type="text" name="img" placeholder="path/image.png" value="{{object.img}}">
+            <file-picker type="image" name="img" placeholder="path/image.png" value="{{object.img}}" ></file-picker>
         </div>
     </div>
     <div class="form-group">

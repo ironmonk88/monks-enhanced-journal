@@ -2,8 +2,7 @@
     <div class="form-group">
         <label for="audiofile">{{localize 'MonksEnhancedJournal.AudioFile'}}</label>
         <div class="form-fields">
-            {{ filePicker type="audio" target="sound.audiofile" }}
-            <input class="image" style="border-color:#7a7971;" type="text" name="sound.audiofile" placeholder="path/audio.mp3" value="{{sound.audiofile}}">
+            <file-picker class="image" type="audio" name="sound.audiofile" placeholder="path/audio.mp3" value="{{sound.audiofile}}" style="border-color:#7a7971;" ></file-picker>
         </div>
     </div>
     <div class="form-group">

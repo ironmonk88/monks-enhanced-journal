@@ -12,7 +12,7 @@ export class QuestSheet extends EnhancedJournalSheet {
     }
 
     static get defaultOptions() {
-        return mergeObject(super.defaultOptions, {
+        return foundry.utils.mergeObject(super.defaultOptions, {
             title: i18n("MonksEnhancedJournal.quest"),
             template: "modules/monks-enhanced-journal/templates/sheets/quest.html",
             tabs: [{ navSelector: ".tabs", contentSelector: ".sheet-body", initial: "description" }],
@@ -40,7 +40,7 @@ export class QuestSheet extends EnhancedJournalSheet {
             failed: "MonksEnhancedJournal.queststatus.failed"
         };
 
-        data.objectives = await Promise.all(duplicate(this.object.flags["monks-enhanced-journal"].objectives || [])?.filter(o => {
+        data.objectives = await Promise.all(foundry.utils.duplicate(this.object.flags["monks-enhanced-journal"].objectives || [])?.filter(o => {
             return this.object.isOwner || o.available;
         }).map(async (o) => {
             let counter = { counter: ($.isNumeric(o.required) ? (o.done || 0) + '/' + o.required : '') };
@@ -51,7 +51,7 @@ export class QuestSheet extends EnhancedJournalSheet {
                 async: true
             })
 
-            return mergeObject(o, counter);
+            return foundry.utils.mergeObject(o, counter);
         }));
 
         data.useobjectives = setting('use-objectives');
@@ -152,7 +152,7 @@ export class QuestSheet extends EnhancedJournalSheet {
 
         reward.groups = this.getItemGroups(
             reward.items,
-            getProperty(this.object, "flags.monks-enhanced-journal.type")
+            foundry.utils.getProperty(this.object, "flags.monks-enhanced-journal.type")
         );
 
         return reward;
@@ -223,7 +223,7 @@ export class QuestSheet extends EnhancedJournalSheet {
     }
 
     /*async _onSubmit(ev) {
-        let data = expandObject(super._getSubmitData());
+        let data = foundry.utils.expandObject(super._getSubmitData());
 
         let items = null;
         if (data.reward.items) {
@@ -241,7 +241,7 @@ export class QuestSheet extends EnhancedJournalSheet {
         }
 
         //save the reward data
-        let rewards = duplicate(this.getRewardData());
+        let rewards = foundry.utils.duplicate(this.getRewardData());
         let reward = this.getReward(rewards);//rewards.find(r => r.id == this.object.getFlag('monks-enhanced-journal', 'reward'));
         if (reward) {
             if (items) {
@@ -262,7 +262,7 @@ export class QuestSheet extends EnhancedJournalSheet {
                 for (let r of rewards)
                     r.active = false;
             }
-            reward = mergeObject(reward, data.reward);
+            reward = foundry.utils.mergeObject(reward, data.reward);
             //$('.reward-list .journal-tab[data-reward-id="' + reward.id + '"] .tab-content', this.element).html(reward.name);
             await this.object.setFlag("monks-enhanced-journal", "rewards", rewards);
         }
@@ -283,7 +283,7 @@ export class QuestSheet extends EnhancedJournalSheet {
         }
 
         if (objectives) {
-            let oldobjectives = duplicate(this.object.getFlag('monks-enhanced-journal', 'objectives'));
+            let oldobjectives = foundry.utils.duplicate(this.object.getFlag('monks-enhanced-journal', 'objectives'));
             for (let objective of objectives) {
                 let oldobj = oldobjectives.find(i => i.id == objective.id);
                 if (oldobj)
@@ -298,22 +298,22 @@ export class QuestSheet extends EnhancedJournalSheet {
     }*/
 
     _getSubmitData(updateData = {}) {
-        let data = expandObject(super._getSubmitData(updateData));
+        let data = foundry.utils.expandObject(super._getSubmitData(updateData));
 
         if (data.reward) {
             let rewardid = Object.keys(data.reward)[0];
 
-            data.flags['monks-enhanced-journal'].rewards = duplicate(this.getRewardData() || []);
+            data.flags['monks-enhanced-journal'].rewards = foundry.utils.duplicate(this.getRewardData() || []);
             for (let reward of data.flags['monks-enhanced-journal'].rewards) {
                 let dataReward = data.reward[reward.id];
-                let olditems = duplicate(reward.items || []);
-                reward = mergeObject(reward, dataReward);
+                let olditems = foundry.utils.duplicate(reward.items || []);
+                reward = foundry.utils.mergeObject(reward, dataReward);
                 reward.items = olditems;
                 if (reward.items && dataReward) {
                     for (let item of reward.items) {
                         let dataItem = dataReward.items[item._id];
                         if (dataItem)
-                            item = mergeObject(item, dataItem);
+                            item = foundry.utils.mergeObject(item, dataItem);
                         if (!item.assigned && item.received)
                             delete item.received;
                     }
@@ -326,28 +326,28 @@ export class QuestSheet extends EnhancedJournalSheet {
         }
 
         if (data.objectives) {
-            data.flags['monks-enhanced-journal'].objectives = duplicate(this.object.getFlag("monks-enhanced-journal", "objectives") || []);
+            data.flags['monks-enhanced-journal'].objectives = foundry.utils.duplicate(this.object.getFlag("monks-enhanced-journal", "objectives") || []);
             if (data.flags['monks-enhanced-journal'].objectives) {
                 for (let objective of data.flags['monks-enhanced-journal'].objectives) {
                     let dataObj = data.objectives[objective.id];
                     if (dataObj)
-                        objective = mergeObject(objective, dataObj);
+                        objective = foundry.utils.mergeObject(objective, dataObj);
                 }
             }
             delete data.objectives;
         }
 
         if (data.relationships) {
-            data.flags['monks-enhanced-journal'].relationships = duplicate(this.object.getFlag("monks-enhanced-journal", "relationships") || []);
+            data.flags['monks-enhanced-journal'].relationships = foundry.utils.duplicate(this.object.getFlag("monks-enhanced-journal", "relationships") || []);
             for (let relationship of data.flags['monks-enhanced-journal'].relationships) {
                 let dataRel = data.relationships[relationship.id];
                 if (dataRel)
-                    relationship = mergeObject(relationship, dataRel);
+                    relationship = foundry.utils.mergeObject(relationship, dataRel);
             }
             delete data.relationships;
         }
 
-        return flattenObject(data);
+        return foundry.utils.flattenObject(data);
     }
 
     async changeReward(event) {
@@ -360,7 +360,7 @@ export class QuestSheet extends EnhancedJournalSheet {
     }
 
     async addReward() {
-        let rewards = duplicate(this.getRewardData());
+        let rewards = foundry.utils.duplicate(this.getRewardData());
         let currency = MonksEnhancedJournal.currencies.reduce((a, v) => ({ ...a, [v.id]: 0 }), {});
         let reward = {
             id: makeid(),
@@ -383,7 +383,7 @@ export class QuestSheet extends EnhancedJournalSheet {
     async deleteReward(event) {
         let id = $(event.currentTarget).closest('.reward-tab').data('rewardId');
 
-        let rewards = duplicate(this.getRewardData());
+        let rewards = foundry.utils.duplicate(this.getRewardData());
         rewards.findSplice(r => r.id == id);
         await this.object.setFlag('monks-enhanced-journal', 'rewards', rewards);
         //$('.reward-list .journal-tab[data-reward-id="' + id + '"]').remove();
@@ -437,7 +437,7 @@ export class QuestSheet extends EnhancedJournalSheet {
 
     async deleteItem(id, container) {
         if (container == 'items') {
-            let rewards = duplicate(this.object.flags["monks-enhanced-journal"].rewards);
+            let rewards = foundry.utils.duplicate(this.object.flags["monks-enhanced-journal"].rewards);
             let reward = rewards.find(r => r.id == game.user.getFlag("monks-enhanced-journal", `reward${this.object.id}`));
             reward.items.findSplice(i => i.id == id || i._id == id);
             this.object.setFlag('monks-enhanced-journal', "rewards", rewards);
@@ -474,7 +474,7 @@ export class QuestSheet extends EnhancedJournalSheet {
             dragData.rewardId = reward.id;
             dragData.type = "Item";
             dragData.uuid = this.object.uuid;
-            dragData.data = duplicate(item);
+            dragData.data = foundry.utils.duplicate(item);
             MonksEnhancedJournal._dragItem = id;
         } else if (li.dataset.document == 'Objective') {
             dragData.id = id;
@@ -508,7 +508,7 @@ export class QuestSheet extends EnhancedJournalSheet {
             this.addActor(data);
         } else if (data.type == 'Objective') {
             //re-order objectives
-            let objectives = duplicate(this.object.flags['monks-enhanced-journal']?.objectives || []);
+            let objectives = foundry.utils.duplicate(this.object.flags['monks-enhanced-journal']?.objectives || []);
 
             let from = objectives.findIndex(a => a.id == data.id);
             let to = objectives.length - 1;
@@ -561,7 +561,7 @@ export class QuestSheet extends EnhancedJournalSheet {
                 itemData = await QuestSheet.createScrollFromSpell(itemData);
             }
 
-            let rewards = duplicate(this.getRewardData());
+            let rewards = foundry.utils.duplicate(this.getRewardData());
             let reward = rewards.find(r => r.id == id);
             if (reward == undefined) {
                 reward = rewards[0];
@@ -572,7 +572,7 @@ export class QuestSheet extends EnhancedJournalSheet {
             if (!reward.items) reward.items = [];
             let items = reward.items;
 
-            let sysPrice = MEJHelpers.getSystemPrice(item, pricename()); //MEJHelpers.getPrice(getProperty(item, "flags.monks-enhanced-journal.price"));
+            let sysPrice = MEJHelpers.getSystemPrice(item, pricename()); //MEJHelpers.getPrice(foundry.utils.getProperty(item, "flags.monks-enhanced-journal.price"));
             let price = MEJHelpers.getPrice(sysPrice);
             let update = {
                 _id: makeid(),
@@ -586,10 +586,10 @@ export class QuestSheet extends EnhancedJournalSheet {
                 }
             };
             if (game.system.id == "dnd5e") {
-                setProperty(update, "system.equipped", false);
+                foundry.utils.setProperty(update, "system.equipped", false);
             }
 
-            items.push(mergeObject(itemData, update));
+            items.push(foundry.utils.mergeObject(itemData, update));
             await this.object.setFlag('monks-enhanced-journal', 'rewards', rewards);
         }
     }
@@ -615,10 +615,10 @@ export class QuestSheet extends EnhancedJournalSheet {
             if (items) {
                 let item = items.find(i => i._id == id);
                 if (item) {
-                    let max = getProperty(item, "flags.monks-enhanced-journal.remaining");
+                    let max = foundry.utils.getProperty(item, "flags.monks-enhanced-journal.remaining");
                     let result = await QuestSheet.confirmQuantity(item, max, "transfer", false);
                     if ((result?.quantity ?? 0) > 0) {
-                        if (getProperty(item, "flags.monks-enhanced-journal.remaining") < result?.quantity) {
+                        if (foundry.utils.getProperty(item, "flags.monks-enhanced-journal.remaining") < result?.quantity) {
                             ui.notifications.warn(i18n("MonksEnhancedJournal.msg.CannotTransferItemQuantity"));
                             return false;
                         }
@@ -699,7 +699,7 @@ export class QuestSheet extends EnhancedJournalSheet {
     }
 
     refillItems(event) {
-        let rewards = duplicate(this.getRewardData());
+        let rewards = foundry.utils.duplicate(this.getRewardData());
         let reward = this.getReward(rewards) || rewards[0];
         if (reward == undefined)
             return;
@@ -707,21 +707,21 @@ export class QuestSheet extends EnhancedJournalSheet {
 
         if (event == 'all') {
             for (let item of items) {
-                setProperty(item, "flags.monks-enhanced-journal.remaining", getProperty(item, "flags.monks-enhanced-journal.quantity"));
+                foundry.utils.setProperty(item, "flags.monks-enhanced-journal.remaining", foundry.utils.getProperty(item, "flags.monks-enhanced-journal.quantity"));
             }
             this.object.setFlag('monks-enhanced-journal', 'rewards', rewards);
         } else {
             let li = $(event.currentTarget).closest('li')[0];
             let item = items.find(i => i._id == li.dataset.id);
             if (item) {
-                setProperty(item, "flags.monks-enhanced-journal.remaining", getProperty(item, "flags.monks-enhanced-journal.quantity"));
+                foundry.utils.setProperty(item, "flags.monks-enhanced-journal.remaining", foundry.utils.getProperty(item, "flags.monks-enhanced-journal.quantity"));
                 this.object.setFlag('monks-enhanced-journal', 'rewards', rewards);
             }
         }
     }
 
     static async assignItems() {
-        let rewards = duplicate(this.getFlag('monks-enhanced-journal', 'rewards'));
+        let rewards = foundry.utils.duplicate(this.getFlag('monks-enhanced-journal', 'rewards'));
         let reward = rewards.find(r => r.active) || rewards[0];
         if (reward == undefined)
             return;
@@ -745,7 +745,7 @@ export class QuestSheet extends EnhancedJournalSheet {
             return;
 
         let item = new CONFIG.Item.documentClass(itemData);
-        let chatData = getProperty(item, "system.description");
+        let chatData = foundry.utils.getProperty(item, "system.description");
         if (item.getChatData)
             chatData = item.getChatData({ secrets: false });
 

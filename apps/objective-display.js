@@ -8,7 +8,7 @@ export class ObjectiveDisplay extends Application {
     /** @override */
     static get defaultOptions() {
         let pos = game.user.getFlag("monks-enhanced-journal", "objectivePos");
-        return mergeObject(super.defaultOptions, {
+        return foundry.utils.mergeObject(super.defaultOptions, {
             id: "objective-display",
             title: i18n("MonksEnhancedJournal.Quests"),
             template: "modules/monks-enhanced-journal/templates/objective-display.html",
@@ -32,17 +32,17 @@ export class ObjectiveDisplay extends Application {
             if (j.pages.size != 1)
                 return false;
             let page = j.pages.contents[0];
-            return getProperty(page, 'flags.monks-enhanced-journal.type') == 'quest' &&
+            return foundry.utils.getProperty(page, 'flags.monks-enhanced-journal.type') == 'quest' &&
                 j.testUserPermission(game.user, "OBSERVER") &&
                 page.getFlag('monks-enhanced-journal', 'display');
         }).map(q => {
             let page = q.pages.contents[0];
-            let status = getProperty(page, 'flags.monks-enhanced-journal.status') || (getProperty(page, 'flags.monks-enhanced-journal.completed') ? 'completed' : 'inactive');
+            let status = foundry.utils.getProperty(page, 'flags.monks-enhanced-journal.status') || (foundry.utils.getProperty(page, 'flags.monks-enhanced-journal.completed') ? 'completed' : 'inactive');
             let data = {
                 id: page.id,
                 uuid: page.uuid,
                 completed: page.getFlag('monks-enhanced-journal', 'completed'),
-                status: getProperty(page, 'flags.monks-enhanced-journal.status') || (getProperty(page, 'flags.monks-enhanced-journal.completed') ? 'completed' : 'inactive'),
+                status: foundry.utils.getProperty(page, 'flags.monks-enhanced-journal.status') || (foundry.utils.getProperty(page, 'flags.monks-enhanced-journal.completed') ? 'completed' : 'inactive'),
                 name: page.name,
                 icon: icons[status]
             };
@@ -68,7 +68,7 @@ export class ObjectiveDisplay extends Application {
             return indexA - indexB;
         });
 
-        return mergeObject(super.getData(options), { quests: quests } );
+        return foundry.utils.mergeObject(super.getData(options), { quests: quests } );
     }
 
     async _render(force, options) {

@@ -7,7 +7,7 @@ export class PlaceSheet extends EnhancedJournalSheet {
     }
 
     static get defaultOptions() {
-        return mergeObject(super.defaultOptions, {
+        return foundry.utils.mergeObject(super.defaultOptions, {
             title: i18n("MonksEnhancedJournal.place"),
             template: "modules/monks-enhanced-journal/templates/sheets/place.html",
             tabs: [{ navSelector: ".tabs", contentSelector: ".sheet-body", initial: "description" }],
@@ -42,7 +42,7 @@ export class PlaceSheet extends EnhancedJournalSheet {
             this.object.unsetFlag('monks-enhanced-journal', 'townsfolk');
         }
 
-        if (hasProperty(data, "data.flags.monks-enhanced-journal.attributes")) {
+        if (foundry.utils.hasProperty(data, "data.flags.monks-enhanced-journal.attributes")) {
             // check to make sure the attributes are formatted correctly
             let changedObjectValues = false;
             let sheetSettings = {};
@@ -58,12 +58,12 @@ export class PlaceSheet extends EnhancedJournalSheet {
                 await this.object.update({ 'monks-enhanced-journal.flags.sheet-settings.attributes': sheetSettings });
                 await this.object.setFlag('monks-enhanced-journal', 'attributes', attributes);
             }
-        } else if (hasProperty(data, "data.flags.monks-enhanced-journal.fields")) {
+        } else if (foundry.utils.hasProperty(data, "data.flags.monks-enhanced-journal.fields")) {
             // convert fields to attributes
-            let fields = getProperty(data, "data.flags.monks-enhanced-journal.fields");
+            let fields = foundry.utils.getProperty(data, "data.flags.monks-enhanced-journal.fields");
             let attributes = {};
             let sheetSettings = {};
-            let flags = getProperty(data, "data.flags.monks-enhanced-journal") || {};
+            let flags = foundry.utils.getProperty(data, "data.flags.monks-enhanced-journal") || {};
             let defaultSettings = this.object.constructor.sheetSettings() || {};
 
             for (let attr of Object.keys(defaultSettings.attributes)) {
@@ -71,8 +71,8 @@ export class PlaceSheet extends EnhancedJournalSheet {
                 if (fields[attr] != undefined)
                     sheetSettings[attr].shown = !!fields[attr]?.value;
             }
-            setProperty(data, "data.flags.monks-enhanced-journal.attributes", attributes);
-            setProperty(data, "data.flags.monks-enhanced-journal.sheet-settings.attributes", sheetSettings);
+            foundry.utils.setProperty(data, "data.flags.monks-enhanced-journal.attributes", attributes);
+            foundry.utils.setProperty(data, "data.flags.monks-enhanced-journal.sheet-settings.attributes", sheetSettings);
             await this.object.setFlag('monks-enhanced-journal', 'attributes', attributes);
             await this.object.update({ 'monks-enhanced-journal.flags.sheet-settings.attributes': sheetSettings });
         }
@@ -98,7 +98,7 @@ export class PlaceSheet extends EnhancedJournalSheet {
                 continue;
             if (entity && entity.testUserPermission(game.user, "LIMITED") && (game.user.isGM || !item.hidden)) {
                 let page = (entity instanceof JournalEntryPage ? entity : entity.pages.contents[0]);
-                let type = getProperty(page, "flags.monks-enhanced-journal.type");
+                let type = foundry.utils.getProperty(page, "flags.monks-enhanced-journal.type");
                 item.name = page.name;
                 item.img = page.src;
                 item.type = type;
@@ -181,23 +181,23 @@ export class PlaceSheet extends EnhancedJournalSheet {
     }
 
     _getSubmitData(updateData = {}) {
-        let data = expandObject(super._getSubmitData(updateData));
+        let data = foundry.utils.expandObject(super._getSubmitData(updateData));
 
         if (data.relationships) {
-            data.flags['monks-enhanced-journal'].relationships = duplicate(this.object.getFlag("monks-enhanced-journal", "relationships") || []);
+            data.flags['monks-enhanced-journal'].relationships = foundry.utils.duplicate(this.object.getFlag("monks-enhanced-journal", "relationships") || []);
             for (let relationship of data.flags['monks-enhanced-journal'].relationships) {
                 let dataRel = data.relationships[relationship.id];
                 if (dataRel)
-                    relationship = mergeObject(relationship, dataRel);
+                    relationship = foundry.utils.mergeObject(relationship, dataRel);
             }
             delete data.relationships;
         }
 
         if (data.flags['monks-enhanced-journal']?.attributes) {
-            data.flags['monks-enhanced-journal'].attributes = mergeObject((this.object?.flags['monks-enhanced-journal']?.attributes || {}), (data.flags['monks-enhanced-journal']?.attributes || {}));
+            data.flags['monks-enhanced-journal'].attributes = foundry.utils.mergeObject((this.object?.flags['monks-enhanced-journal']?.attributes || {}), (data.flags['monks-enhanced-journal']?.attributes || {}));
         }
 
-        return flattenObject(data);
+        return foundry.utils.flattenObject(data);
     }
 
     _canDragDrop(selector) {

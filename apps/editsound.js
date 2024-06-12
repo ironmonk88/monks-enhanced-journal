@@ -8,7 +8,7 @@ export class EditSound extends FormApplication {
     }
 
     static get defaultOptions() {
-        return mergeObject(super.defaultOptions, {
+        return foundry.utils.mergeObject(super.defaultOptions, {
             id: "journal-editsound",
             title: i18n("MonksEnhancedJournal.EditSound"),
             classes: ["edit-sound"],
@@ -21,14 +21,14 @@ export class EditSound extends FormApplication {
     }
 
     getData(options) {
-        let sound = mergeObject({volume: 1, loop: true, autoplay: true}, (this.object.getFlag("monks-enhanced-journal", "sound") || {}));
+        let sound = foundry.utils.mergeObject({volume: 1, loop: true, autoplay: true}, (this.object.getFlag("monks-enhanced-journal", "sound") || {}));
         return {
             sound: sound
         };
     }
 
     _updateObject(event, formData) {
-        let data = expandObject(formData);
+        let data = foundry.utils.expandObject(formData);
 
         if (this.soundfile) {
             let oldData = this.object.getFlag('monks-enhanced-journal', 'sound');
@@ -40,11 +40,11 @@ export class EditSound extends FormApplication {
                 this.soundfile.loop = data.sound.loop;
             if (oldData.audiofile != data.sound.audiofile) {
                 let isPlaying = this.soundfile.playing;
-                if (this.soundfile?.container?.playing)
-                    this.soundfile.container.stop();
+                if (this.soundfile?.playing)
+                    this.soundfile.stop();
                 if (data.sound.audiofile) {
-                    this.soundfile.container = new AudioContainer(data.sound.audiofile);
-                    this.soundfile.src = data.sound.audiofile;
+                    this.soundfile = new foundry.audio.Sound(data.sound.audiofile);
+                    //this.soundfile.src = data.sound.audiofile;
                     this.soundfile.load({ autoplay: isPlaying, autoplayOptions: { loop: data.sound.loop, volume: data.sound.volume } });
                 } else
                     this.soundfile = null;

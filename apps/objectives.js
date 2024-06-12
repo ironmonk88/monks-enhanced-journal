@@ -8,7 +8,7 @@ export class Objectives extends FormApplication {
 
     /** @override */
     static get defaultOptions() {
-        return mergeObject(super.defaultOptions, {
+        return foundry.utils.mergeObject(super.defaultOptions, {
             id: "objectives",
             classes: ["form", "objective-sheet"],
             title: i18n("MonksEnhancedJournal.Objectives"),
@@ -36,8 +36,8 @@ export class Objectives extends FormApplication {
     /** @override */
     async _updateObject(event, formData) {
         log('updating objective', event, formData, this.object);
-        mergeObject(this.object, formData);
-        let objectives = duplicate(this.journalentry.object.flags["monks-enhanced-journal"].objectives || []);
+        foundry.utils.mergeObject(this.object, formData);
+        let objectives = foundry.utils.duplicate(this.journalentry.object.flags["monks-enhanced-journal"].objectives || []);
         if (this.object.id == undefined) {
             this.object.id = makeid();
             objectives.push(this.object);

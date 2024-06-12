@@ -11,7 +11,7 @@ export class EncounterSheet extends EnhancedJournalSheet {
     }
 
     static get defaultOptions() {
-        return mergeObject(super.defaultOptions, {
+        return foundry.utils.mergeObject(super.defaultOptions, {
             title: i18n("MonksEnhancedJournal.encounter"),
             template: "modules/monks-enhanced-journal/templates/sheets/encounter.html",
             tabs: [{ navSelector: ".tabs", contentSelector: ".sheet-body", initial: "description" }],
@@ -46,7 +46,7 @@ export class EncounterSheet extends EnhancedJournalSheet {
         }
 
         data.actors = await Promise.all((data.data.flags["monks-enhanced-journal"].actors || []).map(async (ea) => {
-            let result = duplicate(ea);
+            let result = foundry.utils.duplicate(ea);
             let actor = await EnhancedJournalSheet.getDocument(ea);
 
             if (actor) {
@@ -68,10 +68,10 @@ export class EncounterSheet extends EnhancedJournalSheet {
 
         let config = MonksEnhancedJournal.system;
 
-        let dcs = getProperty(data, "data.flags.monks-enhanced-journal.dcs");
+        let dcs = foundry.utils.getProperty(data, "data.flags.monks-enhanced-journal.dcs");
         if (dcs) {
             data.dcs = dcs.map(dc => {
-                let data = duplicate(dc);
+                let data = foundry.utils.duplicate(dc);
                 if (!data.label) {
                     if (data.attribute == undefined || data.attribute.indexOf(':') < 0)
                         data.label = 'Invalid';
@@ -87,8 +87,8 @@ export class EncounterSheet extends EnhancedJournalSheet {
         }
 
         data.groups = this.getItemGroups(
-            getProperty(data, "data.flags.monks-enhanced-journal.items"),
-            getProperty(data, "data.flags.monks-enhanced-journal.type"));
+            foundry.utils.getProperty(data, "data.flags.monks-enhanced-journal.items"),
+            foundry.utils.getProperty(data, "data.flags.monks-enhanced-journal.type"));
 
         data.showLocation = game.modules.get("tagger")?.active && game.modules.get("monks-active-tiles")?.active;
 
@@ -98,9 +98,9 @@ export class EncounterSheet extends EnhancedJournalSheet {
         });
 
         data.has = {
-            monsters: getProperty(data, "data.flags.monks-enhanced-journal.actors")?.length,
-            items: getProperty(data, "data.flags.monks-enhanced-journal.items")?.length,
-            dcs: getProperty(data, "data.flags.monks-enhanced-journal.dcs")?.length
+            monsters: foundry.utils.getProperty(data, "data.flags.monks-enhanced-journal.actors")?.length,
+            items: foundry.utils.getProperty(data, "data.flags.monks-enhanced-journal.items")?.length,
+            dcs: foundry.utils.getProperty(data, "data.flags.monks-enhanced-journal.dcs")?.length
         }
 
         data.canShow = {
@@ -160,14 +160,14 @@ export class EncounterSheet extends EnhancedJournalSheet {
     }
 
     _getSubmitData(updateData = {}) {
-        let data = expandObject(super._getSubmitData(updateData));
+        let data = foundry.utils.expandObject(super._getSubmitData(updateData));
 
         if (data.items) {
-            data.flags['monks-enhanced-journal'].items = duplicate(this.object.getFlag("monks-enhanced-journal", "items") || []);
+            data.flags['monks-enhanced-journal'].items = foundry.utils.duplicate(this.object.getFlag("monks-enhanced-journal", "items") || []);
             for (let item of data.flags['monks-enhanced-journal'].items) {
                 let dataItem = data.items[item._id];
                 if (dataItem)
-                    item = mergeObject(item, dataItem);
+                    item = foundry.utils.mergeObject(item, dataItem);
                 if (!item.assigned && item.received)
                     delete item.received;
             }
@@ -175,16 +175,16 @@ export class EncounterSheet extends EnhancedJournalSheet {
         }
 
         if (data.actors) {
-            data.flags['monks-enhanced-journal'].actors = duplicate(this.object.getFlag("monks-enhanced-journal", "actors") || []);
+            data.flags['monks-enhanced-journal'].actors = foundry.utils.duplicate(this.object.getFlag("monks-enhanced-journal", "actors") || []);
             for (let actor of data.flags['monks-enhanced-journal'].actors) {
                 let dataActor = data.actors[actor.id];
                 if (dataActor)
-                    actor = mergeObject(actor, dataActor);
+                    actor = foundry.utils.mergeObject(actor, dataActor);
             }
             delete data.actors;
         }
 
-        return flattenObject(data);
+        return foundry.utils.flattenObject(data);
     }
 
     _canDragDrop(selector) {
@@ -211,7 +211,7 @@ export class EncounterSheet extends EnhancedJournalSheet {
             }
             dragData.itemId = id;
             dragData.uuid = this.object.uuid;
-            dragData.data = duplicate(item);
+            dragData.data = foundry.utils.duplicate(item);
 
             MonksEnhancedJournal._dragItem = id;
         } else if (type == "Actor") {
@@ -277,7 +277,7 @@ export class EncounterSheet extends EnhancedJournalSheet {
         let actor = await this.getItemData(data);
 
         if (actor) {
-            let actors = duplicate(this.object.getFlag("monks-enhanced-journal", "actors") || []);
+            let actors = foundry.utils.duplicate(this.object.getFlag("monks-enhanced-journal", "actors") || []);
             if (!actors.find(a => a.uuid == actor.uuid)) {
                 actors.push(actor);
                 await this.object.setFlag("monks-enhanced-journal", "actors", actors);
@@ -296,14 +296,14 @@ export class EncounterSheet extends EnhancedJournalSheet {
 
         if (item) {
             if (getValue(item.system, quantityname()) || (item.type == "spell" && game.system.id == 'dnd5e')) {
-                let items = duplicate(this.object.flags["monks-enhanced-journal"].items || []);
+                let items = foundry.utils.duplicate(this.object.flags["monks-enhanced-journal"].items || []);
 
                 let itemData = item.toObject();
                 if ((itemData.type === "spell") && game.system.id == 'dnd5e') {
                     itemData = await EncounterSheet.createScrollFromSpell(itemData);
                 }
 
-                let sysPrice = MEJHelpers.getSystemPrice(item, pricename()); //MEJHelpers.getPrice(getProperty(item, "flags.monks-enhanced-journal.price"));
+                let sysPrice = MEJHelpers.getSystemPrice(item, pricename()); //MEJHelpers.getPrice(foundry.utils.getProperty(item, "flags.monks-enhanced-journal.price"));
                 let price = MEJHelpers.getPrice(sysPrice);
                 let update = {
                     _id: makeid(),
@@ -317,10 +317,10 @@ export class EncounterSheet extends EnhancedJournalSheet {
                     }
                 };
                 if (game.system.id == "dnd5e") {
-                    setProperty(update, "system.equipped", false);
+                    foundry.utils.setProperty(update, "system.equipped", false);
                 }
 
-                items.push(mergeObject(itemData, update));
+                items.push(foundry.utils.mergeObject(itemData, update));
                 await this.object.setFlag('monks-enhanced-journal', 'items', items);
             } else {
                 ui.notifications.warn(i18n("MonksEnhancedJournal.msg.CannotAddItemType"));
@@ -433,7 +433,7 @@ export class EncounterSheet extends EnhancedJournalSheet {
                 for (let i = 0; i < (quantity || 1); i++) {
                     let data = templates;
                     if (templates instanceof Array) data = templates[parseInt(Math.random() * templates.length)];
-                    let template = duplicate(data);
+                    let template = foundry.utils.duplicate(data);
 
                     if (!(template instanceof MeasuredTemplate)) {
                         const cls = CONFIG.MeasuredTemplate.documentClass;
@@ -442,7 +442,7 @@ export class EncounterSheet extends EnhancedJournalSheet {
 
                         let { x, y, direction, distance, angle, width } = template.document;
                         let d = canvas.dimensions;
-                        distance *= (d.size / d.distance);
+                        //distance *= (d.size / d.distance);
                         width *= (d.size / d.distance);
                         direction = Math.toRadians(direction);
 
@@ -504,7 +504,7 @@ export class EncounterSheet extends EnhancedJournalSheet {
     }
 
     static async assignItems() {
-        let items = duplicate(this.flags["monks-enhanced-journal"].items || []);
+        let items = foundry.utils.duplicate(this.flags["monks-enhanced-journal"].items || []);
         let currency = this.flags["monks-enhanced-journal"].currency || {};
         items = await super.assignItems(items, currency);
         await this.setFlag('monks-enhanced-journal', 'items', items);
@@ -518,10 +518,10 @@ export class EncounterSheet extends EnhancedJournalSheet {
     static async itemDropped(id, actor, entry) {
         let item = (entry.getFlag('monks-enhanced-journal', 'items') || []).find(i => i._id == id);
         if (item) {
-            let max = getProperty(item, "flags.monks-enhanced-journal.remaining");
+            let max = foundry.utils.getProperty(item, "flags.monks-enhanced-journal.remaining");
             let result = await EncounterSheet.confirmQuantity(item, max, "transfer", false);
             if ((result?.quantity ?? 0) > 0) {
-                if (getProperty(item, "flags.monks-enhanced-journal.remaining") < result?.quantity) {
+                if (foundry.utils.getProperty(item, "flags.monks-enhanced-journal.remaining") < result?.quantity) {
                     ui.notifications.warn(i18n("MonksEnhancedJournal.msg.CannotTransferItemQuantity"));
                     return false;
                 }
@@ -535,18 +535,18 @@ export class EncounterSheet extends EnhancedJournalSheet {
     }
 
     refillItems(event) {
-        let items = duplicate(this.object.flags["monks-enhanced-journal"].items || []);
+        let items = foundry.utils.duplicate(this.object.flags["monks-enhanced-journal"].items || []);
 
         if (event == 'all') {
             for (let item of items) {
-                setProperty(item, "flags.monks-enhanced-journal.remaining", getProperty(item, "flags.monks-enhanced-journal.quantity"));
+                foundry.utils.setProperty(item, "flags.monks-enhanced-journal.remaining", foundry.utils.getProperty(item, "flags.monks-enhanced-journal.quantity"));
             }
             this.object.setFlag('monks-enhanced-journal', 'items', items);
         } else {
             let li = $(event.currentTarget).closest('li')[0];
             let item = items.find(i => i._id == li.dataset.id);
             if (item) {
-                setProperty(item, "flags.monks-enhanced-journal.remaining", getProperty(item, "flags.monks-enhanced-journal.quantity"));
+                foundry.utils.setProperty(item, "flags.monks-enhanced-journal.remaining", foundry.utils.getProperty(item, "flags.monks-enhanced-journal.quantity"));
                 this.object.setFlag('monks-enhanced-journal', 'items', items);
             }
         }

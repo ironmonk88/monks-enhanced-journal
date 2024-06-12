@@ -14,7 +14,7 @@ export class ShopSheet extends EnhancedJournalSheet {
     }
 
     static get defaultOptions() {
-        return mergeObject(super.defaultOptions, {
+        return foundry.utils.mergeObject(super.defaultOptions, {
             title: i18n("MonksEnhancedJournal.shop"),
             template: "modules/monks-enhanced-journal/templates/sheets/shop.html",
             tabs: [{ navSelector: ".tabs", contentSelector: ".sheet-body", initial: "description" }],
@@ -36,8 +36,8 @@ export class ShopSheet extends EnhancedJournalSheet {
     async getData() {
         let data = await super.getData();
 
-        if (!hasProperty(data, "data.flags.monks-enhanced-journal.sheet-settings.adjustment") && hasProperty(data, "data.flags.monks-enhanced-journal.adjustment")) {
-            await this.object.update({ 'monks-enhanced-journal.flags.sheet-settings.adjustment': getProperty(data, "data.flags.monks-enhanced-journal.adjustment") });
+        if (!foundry.utils.hasProperty(data, "data.flags.monks-enhanced-journal.sheet-settings.adjustment") && foundry.utils.hasProperty(data, "data.flags.monks-enhanced-journal.adjustment")) {
+            await this.object.update({ 'monks-enhanced-journal.flags.sheet-settings.adjustment': foundry.utils.getProperty(data, "data.flags.monks-enhanced-journal.adjustment") });
         }
 
         data.purchaseOptions = {
@@ -60,9 +60,9 @@ export class ShopSheet extends EnhancedJournalSheet {
 
         //get shop items
         data.groups = await this.getItemGroups(
-            getProperty(data, "data.flags.monks-enhanced-journal.items"),
-            getProperty(data, "data.flags.monks-enhanced-journal.type"),
-            getProperty(data, "data.flags.monks-enhanced-journal.purchasing"), this.object._sort);
+            foundry.utils.getProperty(data, "data.flags.monks-enhanced-journal.items"),
+            foundry.utils.getProperty(data, "data.flags.monks-enhanced-journal.type"),
+            foundry.utils.getProperty(data, "data.flags.monks-enhanced-journal.purchasing"), this.object._sort);
 
         let purchasing = data.data.flags['monks-enhanced-journal']?.purchasing || 'confirm';
         let hasGM = (game.users.find(u => u.isGM && u.active) != undefined);
@@ -84,15 +84,15 @@ export class ShopSheet extends EnhancedJournalSheet {
         data.relationships = await this.getRelationships();
 
         data.has = {
-            items: getProperty(data, "data.flags.monks-enhanced-journal.items")?.length,
+            items: foundry.utils.getProperty(data, "data.flags.monks-enhanced-journal.items")?.length,
             relationships: Object.keys(data.relationships || {})?.length
         }
 
         data.hasRollTables = !!game.packs.get("monks-enhanced-journal.shop-names");
 
         let getTime = (prop) => {
-            let twentyfour = getProperty(data, `data.flags.monks-enhanced-journal.twentyfour`);
-            let time = getProperty(data, `data.flags.monks-enhanced-journal.${prop}`);
+            let twentyfour = foundry.utils.getProperty(data, `data.flags.monks-enhanced-journal.twentyfour`);
+            let time = foundry.utils.getProperty(data, `data.flags.monks-enhanced-journal.${prop}`);
             let hours = Math.floor(time / 60);
             let minutes = Math.trunc(time - (hours * 60));
             return time ? `${twentyfour || hours < 13 ? hours : hours - 12}:${String(minutes).padStart(2, '0')}${!twentyfour ? ' ' + (hours >= 12 ? "PM" : "AM") : ''}` : "";
@@ -103,7 +103,7 @@ export class ShopSheet extends EnhancedJournalSheet {
 
         data.hours = (data.opening && data.closing ? `${data.opening} - ${data.closing}, ` : '');
 
-        let state = getProperty(data, "data.flags.monks-enhanced-journal.state");
+        let state = foundry.utils.getProperty(data, "data.flags.monks-enhanced-journal.state");
         let newstate = MonksEnhancedJournal.getOpenState(data.data);
         if (newstate != state)
             this.object.setFlag("monks-enhanced-journal", "state", newstate);
@@ -111,7 +111,7 @@ export class ShopSheet extends EnhancedJournalSheet {
 
         data.hideitems = !data.open && !this.object.isOwner;
 
-        data.log = (getProperty(data, "data.flags.monks-enhanced-journal.log") || []).map(l => {
+        data.log = (foundry.utils.getProperty(data, "data.flags.monks-enhanced-journal.log") || []).map(l => {
             let date = new Date(l.time);
             return Object.assign({}, l, { time: date.toLocaleDateString()});
         });
@@ -192,24 +192,24 @@ export class ShopSheet extends EnhancedJournalSheet {
     }
 
     _getSubmitData(updateData = {}) {
-        let data = expandObject(super._getSubmitData(updateData));
+        let data = foundry.utils.expandObject(super._getSubmitData(updateData));
 
         if (data.items) {
-            data.flags['monks-enhanced-journal'].items = duplicate(this.object.getFlag("monks-enhanced-journal", "items") || []);
+            data.flags['monks-enhanced-journal'].items = foundry.utils.duplicate(this.object.getFlag("monks-enhanced-journal", "items") || []);
             for (let item of data.flags['monks-enhanced-journal'].items) {
                 let dataItem = data.items[item._id];
                 if (dataItem)
-                    item = mergeObject(item, dataItem);
+                    item = foundry.utils.mergeObject(item, dataItem);
             }
             delete data.items;
         }
 
         if (data.relationships) {
-            data.flags['monks-enhanced-journal'].relationships = duplicate(this.object.getFlag("monks-enhanced-journal", "relationships") || []);
+            data.flags['monks-enhanced-journal'].relationships = foundry.utils.duplicate(this.object.getFlag("monks-enhanced-journal", "relationships") || []);
             for (let relationship of data.flags['monks-enhanced-journal'].relationships) {
                 let dataRel = data.relationships[relationship.id];
                 if (dataRel)
-                    relationship = mergeObject(relationship, dataRel);
+                    relationship = foundry.utils.mergeObject(relationship, dataRel);
             }
             delete data.relationships;
         }
@@ -231,7 +231,7 @@ export class ShopSheet extends EnhancedJournalSheet {
         let state = MonksEnhancedJournal.getOpenState(data);
         data.flags['monks-enhanced-journal'].state = state;
 
-        return flattenObject(data);
+        return foundry.utils.flattenObject(data);
     }
 
     _canDragStart(selector) {
@@ -282,7 +282,7 @@ export class ShopSheet extends EnhancedJournalSheet {
                 return;
             }
 
-            let qty = getProperty(item, "flags.monks-enhanced-journal.quantity");
+            let qty = foundry.utils.getProperty(item, "flags.monks-enhanced-journal.quantity");
             if (!game.user.isGM && (qty != null && qty <= 0)) {
                 ui.notifications.warn(i18n("MonksEnhancedJournal.msg.NotEnoughRemainsToBeTransferred"));
                 return;
@@ -291,7 +291,7 @@ export class ShopSheet extends EnhancedJournalSheet {
             dragData.itemId = id;
             dragData.uuid = this.object.uuid;
             dragData.type = "Item";
-            dragData.data = duplicate(item);
+            dragData.data = foundry.utils.duplicate(item);
             MonksEnhancedJournal._dragItem = id;
 
             log('Drag Start', dragData);
@@ -324,8 +324,8 @@ export class ShopSheet extends EnhancedJournalSheet {
                         let sysPrice = MEJHelpers.getSystemPrice(item, pricename());
                         let price = MEJHelpers.getPrice(sysPrice);
 
-                        setProperty(itemData, "flags.monks-enhanced-journal.quantity", 1);
-                        setProperty(itemData, "flags.monks-enhanced-journal.price", price.value + " " + price.currency);
+                        foundry.utils.setProperty(itemData, "flags.monks-enhanced-journal.quantity", 1);
+                        foundry.utils.setProperty(itemData, "flags.monks-enhanced-journal.price", price.value + " " + price.currency);
                         items.push({ data: itemData });
                     }
                 }
@@ -362,10 +362,10 @@ export class ShopSheet extends EnhancedJournalSheet {
                         let result = await this.constructor.confirmQuantity(item, max, "sell", true, price);
                         if ((result?.quantity ?? 0) > 0) {
                             let itemData = item.toObject();
-                            setProperty(itemData, "flags.monks-enhanced-journal.quantity", result.quantity);
-                            setProperty(itemData, "flags.monks-enhanced-journal.price", origPrice + " " + price.currency);
-                            setProperty(itemData, "flags.monks-enhanced-journal.lock", true);
-                            setProperty(itemData, "flags.monks-enhanced-journal.from", actor.name);
+                            foundry.utils.setProperty(itemData, "flags.monks-enhanced-journal.quantity", result.quantity);
+                            foundry.utils.setProperty(itemData, "flags.monks-enhanced-journal.price", origPrice + " " + price.currency);
+                            foundry.utils.setProperty(itemData, "flags.monks-enhanced-journal.lock", true);
+                            foundry.utils.setProperty(itemData, "flags.monks-enhanced-journal.from", actor.name);
                             this.addItem({ data: itemData });
 
                             await this.constructor.actorPurchase(actor, { value: -(result.price.value * result.quantity), currency: result.price.currency });
@@ -374,7 +374,7 @@ export class ShopSheet extends EnhancedJournalSheet {
                                 item.delete();
                             else {
                                 let update = { system: {} };
-                                setProperty(update.system, quantityname(), max - result.quantity);
+                                foundry.utils.setProperty(update.system, quantityname(), max - result.quantity);
                                 item.update(update);
                             }
 
@@ -410,10 +410,10 @@ export class ShopSheet extends EnhancedJournalSheet {
 
                                 //add the item to the shop
                                 let itemData = item.toObject();
-                                setProperty(itemData, "flags.monks-enhanced-journal.quantity", result.quantity);
-                                setProperty(itemData, "flags.monks-enhanced-journal.price", origPrice + " " + price.currency);
-                                setProperty(itemData, "flags.monks-enhanced-journal.lock", true);
-                                setProperty(itemData, "flags.monks-enhanced-journal.from", actor.name);
+                                foundry.utils.setProperty(itemData, "flags.monks-enhanced-journal.quantity", result.quantity);
+                                foundry.utils.setProperty(itemData, "flags.monks-enhanced-journal.price", origPrice + " " + price.currency);
+                                foundry.utils.setProperty(itemData, "flags.monks-enhanced-journal.lock", true);
+                                foundry.utils.setProperty(itemData, "flags.monks-enhanced-journal.from", actor.name);
 
                                 MonksEnhancedJournal.emit("sellItem", { shopid: this.object.uuid, itemdata: itemData });
 
@@ -422,17 +422,17 @@ export class ShopSheet extends EnhancedJournalSheet {
                                     await item.delete();
                                 } else {
                                     let update = { system: {} };
-                                    setProperty(update.system, quantityname(), max - result.quantity);
+                                    foundry.utils.setProperty(update.system, quantityname(), max - result.quantity);
                                     item.update(update);
                                 }
 
                                 this.constructor.addLog.call(this.object, { actor: actor.name, item: item.name, quantity: result.quantity, price: price.value + " " + price.currency, type: 'sell' });
                             } else {
                                 let itemData = item.toObject();
-                                setProperty(itemData, "flags.monks-enhanced-journal.quantity", result.quantity);
-                                setProperty(itemData, "flags.monks-enhanced-journal.price", origPrice + " " + price.currency);
-                                setProperty(itemData, "flags.monks-enhanced-journal.lock", true);
-                                setProperty(itemData, "flags.monks-enhanced-journal.from", actor.name);
+                                foundry.utils.setProperty(itemData, "flags.monks-enhanced-journal.quantity", result.quantity);
+                                foundry.utils.setProperty(itemData, "flags.monks-enhanced-journal.price", origPrice + " " + price.currency);
+                                foundry.utils.setProperty(itemData, "flags.monks-enhanced-journal.lock", true);
+                                foundry.utils.setProperty(itemData, "flags.monks-enhanced-journal.from", actor.name);
 
                                 this.createSellMessage(itemData, actor);
                             }
@@ -445,8 +445,8 @@ export class ShopSheet extends EnhancedJournalSheet {
                         let sysPrice = MEJHelpers.getSystemPrice(item, pricename());
                         let price = MEJHelpers.getPrice(sysPrice);
 
-                        setProperty(itemData, "flags.monks-enhanced-journal.quantity", result.quantity);
-                        setProperty(itemData, "flags.monks-enhanced-journal.price", price.value + " " + price.currency);
+                        foundry.utils.setProperty(itemData, "flags.monks-enhanced-journal.quantity", result.quantity);
+                        foundry.utils.setProperty(itemData, "flags.monks-enhanced-journal.price", price.value + " " + price.currency);
                         this.addItem({ data: itemData });
                     }
                 }
@@ -454,11 +454,11 @@ export class ShopSheet extends EnhancedJournalSheet {
         } else if (data.type == 'JournalEntry') {
             if (this._tabs[0].active == "items") {
                 let shop = await fromUuid(data.uuid);
-                if (shop.pages.size == 1 && (getProperty(shop.pages.contents[0], "flags.monks-enhanced-journal.type") == "shop" || getProperty(shop, "flags.monks-enhanced-journal.type") == "shop")) {
+                if (shop.pages.size == 1 && (foundry.utils.getProperty(shop.pages.contents[0], "flags.monks-enhanced-journal.type") == "shop" || foundry.utils.getProperty(shop, "flags.monks-enhanced-journal.type") == "shop")) {
                     let page = shop.pages.contents[0];
-                    let items = duplicate(getProperty(page, "flags.monks-enhanced-journal.items") || []);
+                    let items = foundry.utils.duplicate(foundry.utils.getProperty(page, "flags.monks-enhanced-journal.items") || []);
                     let shopPage = this.object instanceof JournalEntry ? this.object.pages.contents[0] : this.object;
-                    let oldItems = duplicate(getProperty(shopPage, "flags.monks-enhanced-journal.items") || []);
+                    let oldItems = foundry.utils.duplicate(foundry.utils.getProperty(shopPage, "flags.monks-enhanced-journal.items") || []);
 
                     if (oldItems.length) {
                         await Dialog.wait({
@@ -566,7 +566,7 @@ export class ShopSheet extends EnhancedJournalSheet {
             return;
         }
 
-        let data = getProperty(item, "flags.monks-enhanced-journal");
+        let data = foundry.utils.getProperty(item, "flags.monks-enhanced-journal");
 
         if (data.cost && data.cost != '') {
             //check if the player can afford it
@@ -594,8 +594,8 @@ export class ShopSheet extends EnhancedJournalSheet {
 
             if (this.object.flags['monks-enhanced-journal'].purchasing == 'confirm') {
                 //create the chat message informaing the GM that player is trying to sell an item.
-                setProperty(item, "flags.monks-enhanced-journal.quantity", result.quantity);
-                setProperty(item, "flags.monks-enhanced-journal.maxquantity", (max != "" ? parseInt(max) : null));
+                foundry.utils.setProperty(item, "flags.monks-enhanced-journal.quantity", result.quantity);
+                foundry.utils.setProperty(item, "flags.monks-enhanced-journal.maxquantity", (max != "" ? parseInt(max) : null));
 
                 if (!ShopSheet.canAfford((result.quantity * price.value) + " " + price.currency, actor))
                     ui.notifications.error(format("MonksEnhancedJournal.msg.ActorCannotAffordItem", { name: actor.name, quantity: result.quantity, itemname: item.name}));
@@ -608,7 +608,7 @@ export class ShopSheet extends EnhancedJournalSheet {
                 if (!ShopSheet.canAfford((result.quantity * price.value) + " " + price.currency, actor))
                     ui.notifications.error(format("MonksEnhancedJournal.msg.ActorCannotAffordItem", { name: actor.name, quantity: result.quantity, itemname: item.name }));
                 else {
-                    let itemData = duplicate(item);
+                    let itemData = foundry.utils.duplicate(item);
                     delete itemData._id;
                     let itemQty = getValue(itemData, quantityname(), 1);
                     setValue(itemData, quantityname(), result.quantity * itemQty);
@@ -637,7 +637,7 @@ export class ShopSheet extends EnhancedJournalSheet {
     }
 
     async createSellMessage(item, actor) {
-        let data = getProperty(item, "flags.monks-enhanced-journal");
+        let data = foundry.utils.getProperty(item, "flags.monks-enhanced-journal");
         let price = MEJHelpers.getPrice(data.price);
         let adjustment = this.sheetSettings()?.adjustment || {};
         let buy = adjustment[item.type]?.buy ?? adjustment.default.buy ?? 0.5;
@@ -646,7 +646,7 @@ export class ShopSheet extends EnhancedJournalSheet {
         data.maxquantity = data.quantity;
         data.quantity = Math.max(Math.min(data.maxquantity, data.quantity), 1);
         data.total = data.quantity * data.sell;
-        setProperty(item, "flags.monks-enhanced-journal", data);
+        foundry.utils.setProperty(item, "flags.monks-enhanced-journal", data);
 
         let messageContent = {
             action: 'sell',
@@ -664,7 +664,7 @@ export class ShopSheet extends EnhancedJournalSheet {
         let messageData = {
             user: game.user.id,
             speaker: speaker,
-            type: CONST.CHAT_MESSAGE_TYPES.OTHER,
+            style: CONST.CHAT_MESSAGE_STYLES.OTHER,
             content: content,
             flavor: (speaker.alias ? format("MonksEnhancedJournal.ActorWantsToPurchase", { alias: speaker.alias, verb: i18n("MonksEnhancedJournal.Sell").toLowerCase() }) : null),
             whisper: whisper,
@@ -678,7 +678,7 @@ export class ShopSheet extends EnhancedJournalSheet {
 
     async addItem(data) {
         data = data instanceof Array ? data : [data];
-        let items = duplicate(this.object.flags["monks-enhanced-journal"].items || []);
+        let items = foundry.utils.duplicate(this.object.flags["monks-enhanced-journal"].items || []);
         for (let d of data) {
             let item = await this.getDocument(d);
 
@@ -696,7 +696,7 @@ export class ShopSheet extends EnhancedJournalSheet {
                     }*/
                 }
 
-                let sysPrice = MEJHelpers.getSystemPrice(item, pricename()); //MEJHelpers.getPrice(getProperty(item, "flags.monks-enhanced-journal.price"));
+                let sysPrice = MEJHelpers.getSystemPrice(item, pricename()); //MEJHelpers.getPrice(foundry.utils.getProperty(item, "flags.monks-enhanced-journal.price"));
                 let price = MEJHelpers.getPrice(sysPrice);
                 let adjustment = this.sheetSettings()?.adjustment || {};
                 let sell = adjustment[item.type]?.sell ?? adjustment.default.sell ?? 1;
@@ -704,16 +704,16 @@ export class ShopSheet extends EnhancedJournalSheet {
                     hide: false,
                     lock: false,
                     quantity: 1
-                }, getProperty(itemData, "flags.monks-enhanced-journal"), {
+                }, foundry.utils.getProperty(itemData, "flags.monks-enhanced-journal"), {
                     parentId: item.id,
                     price: `${price.value} ${price.currency}`,
                     cost: (price.value * sell) + " " + price.currency
                 });
                 let update = { _id: makeid(), flags: { 'monks-enhanced-journal': flags } };
                 if (game.system.id == "dnd5e") {
-                    setProperty(update, "system.equipped", false);
+                    foundry.utils.setProperty(update, "system.equipped", false);
                 }
-                items.push(mergeObject(itemData, update));
+                items.push(foundry.utils.mergeObject(itemData, update));
             }
         }
 
@@ -740,7 +740,7 @@ export class ShopSheet extends EnhancedJournalSheet {
 
     static canAfford(item, actor) {
         //find the currency
-        let price = MEJHelpers.getPrice(getProperty(item, "flags.monks-enhanced-journal.cost"));
+        let price = MEJHelpers.getPrice(typeof item == "string" ? item : foundry.utils.getProperty(item, "flags.monks-enhanced-journal.cost"));
         if (price.value == 0)
             return true;
 
@@ -781,13 +781,13 @@ export class ShopSheet extends EnhancedJournalSheet {
     static async itemDropped(id, actor, entry) {
         let item = (entry.getFlag('monks-enhanced-journal', 'items') || []).find(i => i._id == id);
         if (item) {
-            let max = getProperty(item, "flags.monks-enhanced-journal.quantity");
+            let max = foundry.utils.getProperty(item, "flags.monks-enhanced-journal.quantity");
             if (!game.user.isGM && (max != null && max <= 0)) {
                 ui.notifications.warn(i18n("MonksEnhancedJournal.msg.CannotTransferItemQuantity"));
                 return false;
             }
 
-            let cost = getProperty(item, "flags.monks-enhanced-journal.cost");
+            let cost = foundry.utils.getProperty(item, "flags.monks-enhanced-journal.cost");
             if (cost && cost != '') {
                 //check if the player can afford it
                 if (!this.canAfford(item, actor)) {
@@ -810,15 +810,15 @@ export class ShopSheet extends EnhancedJournalSheet {
                 if (game.user.isGM) {
                     ShopSheet.actorPurchase.call(entry, actor, { value: (price.value * result.quantity), currency: price.currency });
                     ShopSheet.purchaseItem.call(this, entry, id, result.quantity, { actor, purchased: true });
-                    if (getProperty(item, "flags.monks-enhanced-journal.consumable"))
+                    if (foundry.utils.getProperty(item, "flags.monks-enhanced-journal.consumable"))
                         result.quantity = 0;
                     this.addLog.call(entry, { actor: actor.name, item: item.name, quantity: result.quantity, price: result.price.value + " " + result.price.currency, type: 'purchase' });
                     return result;
                 } else {
-                    if (getProperty(entry, "flags.monks-enhanced-journal.purchasing") == 'confirm') {
+                    if (foundry.utils.getProperty(entry, "flags.monks-enhanced-journal.purchasing") == 'confirm') {
                         //create the chat message informaing the GM that player is trying to sell an item.
-                        setProperty(item, "flags.monks-enhanced-journal.quantity", result.quantity);
-                        setProperty(item, "flags.monks-enhanced-journal.maxquantity", (max != "" ? parseInt(max) : null));
+                        foundry.utils.setProperty(item, "flags.monks-enhanced-journal.quantity", result.quantity);
+                        foundry.utils.setProperty(item, "flags.monks-enhanced-journal.maxquantity", (max != "" ? parseInt(max) : null));
 
                         if (!ShopSheet.canAfford((result.quantity * price.value) + " " + price.currency, actor))
                             ui.notifications.error(format("MonksEnhancedJournal.msg.ActorCannotAffordItem", { name: actor.name, quantity: result.quantity, itemname: item.name}));
@@ -900,11 +900,11 @@ export class ShopSheet extends EnhancedJournalSheet {
 
                         return result;
                     }).map(i => {
-                        return mergeObject(i.toObject(), { cost: getValue(i.data, pricename(), "") });
+                        return foundry.utils.mergeObject(i.toObject(), { cost: getValue(i.data, pricename(), "") });
                     });
 
                 if (items.length > 0) {
-                    let shopitems = duplicate(this.object.getFlag('monks-enhanced-journal', 'items'));
+                    let shopitems = foundry.utils.duplicate(this.object.getFlag('monks-enhanced-journal', 'items'));
                     shopitems = shopitems.concat(items);
                     this.object.setFlag('monks-enhanced-journal', 'items', shopitems);
                 }

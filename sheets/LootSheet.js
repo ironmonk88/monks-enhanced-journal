@@ -10,7 +10,7 @@ export class LootSheet extends EnhancedJournalSheet {
     }
 
     static get defaultOptions() {
-        return mergeObject(super.defaultOptions, {
+        return foundry.utils.mergeObject(super.defaultOptions, {
             title: i18n("MonksEnhancedJournal.loot"),
             template: "modules/monks-enhanced-journal/templates/sheets/loot.html",
             dragDrop: [
@@ -62,11 +62,11 @@ export class LootSheet extends EnhancedJournalSheet {
         });
 
         data.groups = this.getItemGroups(
-            getProperty(data, "data.flags.monks-enhanced-journal.items"),
-            getProperty(data, "data.flags.monks-enhanced-journal.type"),
-            getProperty(data, "data.flags.monks-enhanced-journal.purchasing"));
+            foundry.utils.getProperty(data, "data.flags.monks-enhanced-journal.items"),
+            foundry.utils.getProperty(data, "data.flags.monks-enhanced-journal.type"),
+            foundry.utils.getProperty(data, "data.flags.monks-enhanced-journal.purchasing"));
 
-        data.canGrant = game.user.isGM && ((data.data.flags['monks-enhanced-journal'].items || []).find(i => (Object.values(getProperty(i, "flags.monks-enhanced-journal.requests") || {}).find(r => r) != undefined)) != undefined);
+        data.canGrant = game.user.isGM && ((data.data.flags['monks-enhanced-journal'].items || []).find(i => (Object.values(foundry.utils.getProperty(i, "flags.monks-enhanced-journal.requests") || {}).find(r => r) != undefined)) != undefined);
         data.canRequest = (data.data.flags['monks-enhanced-journal'].purchasing == "locked");
 
         data.characters = (data.data.flags['monks-enhanced-journal'].actors || []).map(a => {
@@ -150,7 +150,7 @@ export class LootSheet extends EnhancedJournalSheet {
             return;
         }
 
-        let currency = duplicate(this.object.getFlag('monks-enhanced-journal', 'currency') || {});
+        let currency = foundry.utils.duplicate(this.object.getFlag('monks-enhanced-journal', 'currency') || {});
         if (Object.values(currency).find(v => v > 0) == undefined) {
             ui.notifications.warn(i18n("MonksEnhancedJournal.msg.ThereAreNoMoneyToDistribute"));
             return;
@@ -186,21 +186,21 @@ export class LootSheet extends EnhancedJournalSheet {
     }
 
     _getSubmitData(updateData = {}) {
-        let data = expandObject(super._getSubmitData(updateData));
+        let data = foundry.utils.expandObject(super._getSubmitData(updateData));
 
         if (this.object.isOwner) {
-            data.flags['monks-enhanced-journal'].items = duplicate(this.object.getFlag("monks-enhanced-journal", "items") || []);
+            data.flags['monks-enhanced-journal'].items = foundry.utils.duplicate(this.object.getFlag("monks-enhanced-journal", "items") || []);
             for (let item of data.flags['monks-enhanced-journal'].items) {
                 let dataItem = data.items[item._id];
                 if (dataItem)
-                    item = mergeObject(item, dataItem);
+                    item = foundry.utils.mergeObject(item, dataItem);
             }
             delete data.items;
 
             data.flags['monks-enhanced-journal'].items = data.flags['monks-enhanced-journal'].items.filter(i => getValue(i, quantityname()) > 0);
         }
 
-        return flattenObject(data);
+        return foundry.utils.flattenObject(data);
     }
 
     _canDragStart(selector) {
@@ -234,7 +234,7 @@ export class LootSheet extends EnhancedJournalSheet {
         dragData.itemId = id;
         dragData.uuid = this.object.uuid;
         dragData.type = "Item";
-        dragData.data = duplicate(item);
+        dragData.data = foundry.utils.duplicate(item);
         MonksEnhancedJournal._dragItem = id;
 
         log('Drag Start', dragData);
@@ -269,7 +269,7 @@ export class LootSheet extends EnhancedJournalSheet {
                 let actor = game.actors.get(event.currentTarget.id);
                 if (actor) {
                     let item = await this.getDocument(data);
-                    let max = getProperty(item, "flags.monks-enhanced-journal.quantity");
+                    let max = foundry.utils.getProperty(item, "flags.monks-enhanced-journal.quantity");
                     let result = await LootSheet.confirmQuantity(item, max, "transfer", false);
                     if ((result?.quantity ?? 0) > 0) {
                         let itemData = item.toObject();
@@ -318,7 +318,7 @@ export class LootSheet extends EnhancedJournalSheet {
                     let result = await LootSheet.confirmQuantity(item, max, "transfer", false);
                     if ((result?.quantity ?? 0) > 0) {
                         let itemData = item.toObject();
-                        setProperty(itemData, "flags.monks-enhanced-journal.quantity", result.quantity);
+                        foundry.utils.setProperty(itemData, "flags.monks-enhanced-journal.quantity", result.quantity);
                         setValue(itemData, quantityname(), 1);
 
                         if (game.user.isGM || this.object.isOwner) {
@@ -368,7 +368,7 @@ export class LootSheet extends EnhancedJournalSheet {
                 for (let item of folder.contents) {
                     if (item instanceof Item) {
                         let itemData = item.toObject();
-                        setProperty(itemData, "flags.monks-enhanced-journal.quantity", 1);
+                        foundry.utils.setProperty(itemData, "flags.monks-enhanced-journal.quantity", 1);
                         await this.addItem({ data: itemData });
                     }
                 }
@@ -376,7 +376,7 @@ export class LootSheet extends EnhancedJournalSheet {
         } else if (data.type == 'Actor') {
             //Add this actor to the list
             let hasChanged = false;
-            let actors = duplicate(this.object.getFlag('monks-enhanced-journal', 'actors'));
+            let actors = foundry.utils.duplicate(this.object.getFlag('monks-enhanced-journal', 'actors'));
 
             if (data.groupSelect) {
                 for (let actor of data.groupSelect) {
@@ -415,7 +415,7 @@ export class LootSheet extends EnhancedJournalSheet {
             return;
         }
 
-        let max = getProperty(item, "flags.monks-enhanced-journal.quantity");
+        let max = foundry.utils.getProperty(item, "flags.monks-enhanced-journal.quantity");
         if (!game.user.isGM && (max != null && max <= 0)) {
             ui.notifications.warn(i18n("MonksEnhancedJournal.msg.CannotTransferItemQuantity"));
             return false;
@@ -439,10 +439,10 @@ export class LootSheet extends EnhancedJournalSheet {
             let result = await LootSheet.confirmQuantity(item, max, "take", false);
             if ((result?.quantity ?? 0) > 0) {
                 //create the chat message informaing the GM that player is trying to sell an item.
-                item = duplicate(item);
-                setProperty(item, "flags.monks-enhanced-journal.quantity", result.quantity);
-                setProperty(item, "flags.monks-enhanced-journal.maxquantity", max);
-                setProperty(item, "flags.monks-enhanced-journal.cost", null);
+                item = foundry.utils.duplicate(item);
+                foundry.utils.setProperty(item, "flags.monks-enhanced-journal.quantity", result.quantity);
+                foundry.utils.setProperty(item, "flags.monks-enhanced-journal.maxquantity", max);
+                foundry.utils.setProperty(item, "flags.monks-enhanced-journal.cost", null);
 
                 LootSheet.createRequestMessage.call(this, this.object, item, actor, false);
                 MonksEnhancedJournal.emit("notify", { actor: actor.name, item: item.name });
@@ -451,7 +451,7 @@ export class LootSheet extends EnhancedJournalSheet {
             let result = await LootSheet.confirmQuantity(item, max, "take", false);
             if ((result?.quantity ?? 0) > 0) {
                 // Create the owned item
-                let itemData = duplicate(item);
+                let itemData = foundry.utils.duplicate(item);
                 delete itemData._id;
                 let itemQty = getValue(itemData, quantityname(), 1);
                 setValue(itemData, quantityname(), result.quantity * itemQty);
@@ -482,27 +482,27 @@ export class LootSheet extends EnhancedJournalSheet {
 
         let item;
         let id = li.dataset.id;
-        let items = duplicate(this.object.flags['monks-enhanced-journal'].items || []);
+        let items = foundry.utils.duplicate(this.object.flags['monks-enhanced-journal'].items || []);
         item = items.find(o => o._id == id);
 
-        if (!item || getProperty(item, "flags.monks-enhanced-journal.requests").length == 0)
+        if (!item || foundry.utils.getProperty(item, "flags.monks-enhanced-journal.requests").length == 0)
             return;
 
-        let userid = Object.entries(getProperty(item, "flags.monks-enhanced-journal.requests") || {}).find(([k, v]) => v)[0];
+        let userid = Object.entries(foundry.utils.getProperty(item, "flags.monks-enhanced-journal.requests") || {}).find(([k, v]) => v)[0];
         let user = game.users.get(userid);
         if (!user) return;
 
         const actor = user.character;
         if (!actor) return;
 
-        let max = getProperty(item, "flags.monks-enhanced-journal.quantity");
+        let max = foundry.utils.getProperty(item, "flags.monks-enhanced-journal.quantity");
         let result = await LootSheet.confirmQuantity(item, max, format("MonksEnhancedJournal.GrantToActor", { name: actor.name }), false);
         if ((result?.quantity ?? 0) > 0) {
-            setProperty(item, "flags.monks-enhanced-journal.requests." + userid, false);
+            foundry.utils.setProperty(item, "flags.monks-enhanced-journal.requests." + userid, false);
             await this.object.setFlag('monks-enhanced-journal', 'items', items);
 
             // Create the owned item
-            let itemData = duplicate(item);
+            let itemData = foundry.utils.duplicate(item);
             delete itemData._id;
             let itemQty = getValue(itemData, quantityname(), 1);
             setValue(itemData, quantityname(), result.quantity * itemQty);
@@ -514,7 +514,7 @@ export class LootSheet extends EnhancedJournalSheet {
 
             await this.constructor.purchaseItem.call(this.constructor, this.object, id, result.quantity, { actor, user });
         } else if (result?.quantity === 0) {
-            setProperty(item, "flags.monks-enhanced-journal.requests." + userid, false);
+            foundry.utils.setProperty(item, "flags.monks-enhanced-journal.requests." + userid, false);
             await this.object.setFlag('monks-enhanced-journal', 'items', items);
         }
     }
@@ -523,24 +523,24 @@ export class LootSheet extends EnhancedJournalSheet {
         let item = await this.getDocument(data);
 
         if (item) {
-            let items = duplicate(this.object.flags["monks-enhanced-journal"].items || []);
+            let items = foundry.utils.duplicate(this.object.flags["monks-enhanced-journal"].items || []);
 
             let itemData = item.toObject();
             if ((itemData.type === "spell") && game.system.id == 'dnd5e') {
                 itemData = await LootSheet.createScrollFromSpell(itemData);
             }
 
-            let sysPrice = MEJHelpers.getSystemPrice(item, pricename()); //MEJHelpers.getPrice(getProperty(item, "flags.monks-enhanced-journal.price"));
+            let sysPrice = MEJHelpers.getSystemPrice(item, pricename()); //MEJHelpers.getPrice(foundry.utils.getProperty(item, "flags.monks-enhanced-journal.price"));
             let price = MEJHelpers.getPrice(sysPrice);
-            let flags = Object.assign({quantity: 1}, getProperty(itemData, "flags.monks-enhanced-journal"), {
+            let flags = Object.assign({ quantity: 1 }, foundry.utils.getProperty(itemData, "flags.monks-enhanced-journal"), {
                 parentId: item.id,
                 price: `${price.value} ${price.currency}`
             });
             let update = { _id: makeid(), flags: { 'monks-enhanced-journal': flags } };
             if (game.system.id == "dnd5e") {
-                setProperty(update, "system.equipped", false);
+                foundry.utils.setProperty(update, "system.equipped", false);
             }
-            items.push(mergeObject(itemData, update));
+            items.push(foundry.utils.mergeObject(itemData, update));
             this.object.flags["monks-enhanced-journal"].items = items;
             await this.object.setFlag('monks-enhanced-journal', 'items', items);
             return true;
@@ -571,7 +571,7 @@ export class LootSheet extends EnhancedJournalSheet {
         let action = target.dataset.action;
         $(target).toggleClass('active');
 
-        let items = duplicate(this.object.flags["monks-enhanced-journal"]?.items || []);
+        let items = foundry.utils.duplicate(this.object.flags["monks-enhanced-journal"]?.items || []);
 
         let item = items.find(i => i._id == li.dataset.id);
         if (item) {
@@ -583,7 +583,7 @@ export class LootSheet extends EnhancedJournalSheet {
     static async itemDropped(id, actor, entry) {
         let item = (entry.getFlag('monks-enhanced-journal', 'items') || []).find(i => i._id == id);
         if (item) {
-            let max = getProperty(item, "flags.monks-enhanced-journal.quantity");
+            let max = foundry.utils.getProperty(item, "flags.monks-enhanced-journal.quantity");
             if (!game.user.isGM && (max != null && max <= 0)) {
                 ui.notifications.warn(i18n("MonksEnhancedJournal.msg.CannotTransferItemQuantity"));
                 return false;
@@ -603,9 +603,9 @@ export class LootSheet extends EnhancedJournalSheet {
                 } else {
                     if (entry.data.flags["monks-enhanced-journal"].purchasing == 'confirm') {
                         //create the chat message informaing the GM that player is trying to sell an item.
-                        item = duplicate(item);
-                        setProperty(item, "flags.monks-enhanced-journal.quantity", result.quantity);
-                        setProperty(item, "flags.monks-enhanced-journal.maxquantity", (max != "" ? parseInt(max) : null));
+                        item = foundry.utils.duplicate(item);
+                        foundry.utils.setProperty(item, "flags.monks-enhanced-journal.quantity", result.quantity);
+                        foundry.utils.setProperty(item, "flags.monks-enhanced-journal.maxquantity", (max != "" ? parseInt(max) : null));
                         delete item.cost;
 
                         LootSheet.createRequestMessage.call(this, entry, item, actor, false);
@@ -641,7 +641,7 @@ export class LootSheet extends EnhancedJournalSheet {
         let itemData = items.find(i => i._id == id);
 
         const item = new CONFIG.Item.documentClass(itemData);
-        let chatData = getProperty(item, "data.data.description");
+        let chatData = foundry.utils.getProperty(item, "data.data.description");
         if (item.getChatData)
             chatData = item.getChatData({ secrets: false });
 
@@ -675,7 +675,7 @@ export class LootSheet extends EnhancedJournalSheet {
 
     removeActor(id) {
         if (id) {
-            let actors = duplicate(this.object.getFlag('monks-enhanced-journal', 'actors'));
+            let actors = foundry.utils.duplicate(this.object.getFlag('monks-enhanced-journal', 'actors'));
             actors.findSplice(a => a === id);
             this.object.setFlag('monks-enhanced-journal', 'actors', actors);
         }

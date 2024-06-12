@@ -3,7 +3,7 @@ import { log, setting, i18n, MonksEnhancedJournal } from '../monks-enhanced-jour
 export class NoteHUD extends BasePlaceableHUD {
     /** @override */
     static get defaultOptions() {
-        return mergeObject(super.defaultOptions, {
+        return foundry.utils.mergeObject(super.defaultOptions, {
             id: "terrain-hud",
             template: "modules/monks-enhanced-journal/templates/note-hud.html"
         });
@@ -21,7 +21,7 @@ export class NoteHUD extends BasePlaceableHUD {
 
         const visible = document.ownership.default >= CONST.DOCUMENT_OWNERSHIP_LEVELS.LIMITED;
 
-        return mergeObject(data, {
+        return foundry.utils.mergeObject(data, {
             visibilityClass: visible ? "" : "active",
             type: type,
         });
@@ -55,7 +55,7 @@ export class NoteHUD extends BasePlaceableHUD {
 
         let document = this.object.document.page || this.entry;
         if (document instanceof JournalEntryPage) {
-            let type = getProperty(document, "flags.monks-enhanced-journal.type");
+            let type = foundry.utils.getProperty(document, "flags.monks-enhanced-journal.type");
             if (type == "base" || type == "oldentry") type = "journalentry";
             let types = MonksEnhancedJournal.getDocumentTypes();
             if (types[type]) {

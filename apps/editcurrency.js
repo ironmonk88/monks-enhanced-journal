@@ -8,7 +8,7 @@ export class EditCurrency extends FormApplication {
     }
 
     static get defaultOptions() {
-        return mergeObject(super.defaultOptions, {
+        return foundry.utils.mergeObject(super.defaultOptions, {
             id: "journal-editcurrency",
             title: i18n("MonksEnhancedJournal.EditCurrency"),
             classes: ["edit-currency"],

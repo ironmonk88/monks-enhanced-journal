@@ -8,7 +8,7 @@ export class TrapConfig extends FormApplication {
 
     /** @override */
     static get defaultOptions() {
-        return mergeObject(super.defaultOptions, {
+        return foundry.utils.mergeObject(super.defaultOptions, {
             id: "trap-config",
             classes: ["form", "trap-sheet"],
             title: i18n("MonksEnhancedJournal.TrapConfiguration"),
@@ -18,7 +18,7 @@ export class TrapConfig extends FormApplication {
     }
 
     getData(options) {
-        return mergeObject(super.getData(options),
+        return foundry.utils.mergeObject(super.getData(options),
             {}, { recursive: false }
         );
     }
@@ -29,8 +29,8 @@ export class TrapConfig extends FormApplication {
     async _updateObject(event, formData) {
         log('updating trap', event, formData, this.object);
 
-        mergeObject(this.object, formData);
-        let traps = duplicate(this.journalentry.object.flags["monks-enhanced-journal"].traps || []);
+        foundry.utils.mergeObject(this.object, formData);
+        let traps = foundry.utils.duplicate(this.journalentry.object.flags["monks-enhanced-journal"].traps || []);
         if (this.object.id == undefined) {
             this.object.id = makeid();
             traps.push(this.object);

@@ -22,7 +22,7 @@ export class TextEntrySheet extends EnhancedJournalSheet {
     }
 
     static get defaultOptions() {
-        return mergeObject(super.defaultOptions, {
+        return foundry.utils.mergeObject(super.defaultOptions, {
             title: i18n("MonksEnhancedJournal.journalentry"),
             template: "modules/monks-enhanced-journal/templates/sheets/textentry.html",
             tabs: [],
@@ -74,7 +74,7 @@ export class TextImageEntrySheet extends TextEntrySheet {
     }
 
     static get defaultOptions() {
-        return mergeObject(super.defaultOptions, {
+        return foundry.utils.mergeObject(super.defaultOptions, {
             title: i18n("MonksEnhancedJournal.journalentry"),
             template: "modules/monks-enhanced-journal/templates/sheets/textimageentry.html",
             tabs: [{ navSelector: ".tabs", contentSelector: ".sheet-body", initial: 'description' }],
@@ -157,10 +157,10 @@ export class TextImageEntrySheet extends TextEntrySheet {
     }
 
     _getSubmitData() {
-        let data = expandObject(super._getSubmitData());
+        let data = foundry.utils.expandObject(super._getSubmitData());
 
         data.src = $('.picture-img', this.element).attr('src');
 
-        return flattenObject(data);
+        return foundry.utils.flattenObject(data);
     }
 }

@@ -10,7 +10,7 @@ export class SlideConfig extends FormApplication {
 
     /** @override */
     static get defaultOptions() {
-        return mergeObject(super.defaultOptions, {
+        return foundry.utils.mergeObject(super.defaultOptions, {
             id: "slide-config",
             classes: ["form", "slide-sheet"],
             title: i18n("MonksEnhancedJournal.SlideConfiguration"),
@@ -24,7 +24,7 @@ export class SlideConfig extends FormApplication {
     }
 
     getData(options) {
-        let data = mergeObject(super.getData(options),
+        let data = foundry.utils.mergeObject(super.getData(options),
             {
                 sizingOptions: {
                     contain: "MonksEnhancedJournal.Contain",
@@ -39,15 +39,15 @@ export class SlideConfig extends FormApplication {
         let windowFont = $(".window-content").css("font-family");
 
         data.texts = this.object.texts.map(t => {
-            let text = duplicate(t);
+            let text = foundry.utils.duplicate(t);
             let x = (((t.left || 0) / 100) * 600).toFixed(2);
             let y = (((t.top || 0) / 100) * 400).toFixed(2);
             let x2 = (((t.right || 0) / 100) * 600).toFixed(2);
             let y2 = (((t.bottom || 0) / 100) * 400).toFixed(2);
             let bgcolor = Color.from(t.background || '#000000');
-            let color = t.color || getProperty(this.journalentry, "flags.monks-enhanced-journal.font.color") || "#FFFFFF";
-            let font = t.font || getProperty(this.journalentry, "flags.monks-enhanced-journal.font.name") || windowFont;
-            let size = t.size || getProperty(this.journalentry, "flags.monks-enhanced-journal.font.size") || windowSize;
+            let color = t.color || foundry.utils.getProperty(this.journalentry, "flags.monks-enhanced-journal.font.color") || "#FFFFFF";
+            let font = t.font || foundry.utils.getProperty(this.journalentry, "flags.monks-enhanced-journal.font.name") || windowFont;
+            let size = t.size || foundry.utils.getProperty(this.journalentry, "flags.monks-enhanced-journal.font.size") || windowSize;
             size = (size / windowSize) * 100;
             let style = {
                 'font-size': size + "%",
@@ -84,7 +84,7 @@ export class SlideConfig extends FormApplication {
 
     /** @override */
     _getSubmitData() {
-        let data = expandObject(super._getSubmitData());
+        let data = foundry.utils.expandObject(super._getSubmitData());
 
         let texts = this.object.texts;
 
@@ -100,22 +100,22 @@ export class SlideConfig extends FormApplication {
 
         data.texts = texts;
 
-        return flattenObject(data);
+        return foundry.utils.flattenObject(data);
     }
 
     async _updateObject(event, formData) {
         log('updating slide', event, formData, this.object);
-        let slides = duplicate(this.journalentry.flags["monks-enhanced-journal"].slides || []);
+        let slides = foundry.utils.duplicate(this.journalentry.flags["monks-enhanced-journal"].slides || []);
 
         if (this.object.id == undefined) {
             this.object.id = makeid();
-            mergeObject(this.object, formData);
+            foundry.utils.mergeObject(this.object, formData);
             slides.push(this.object);
             this.journalentry._thumbnails[this.slideid] = this.journalentry._thumbnails.new;
             delete this.journalentry._thumbnails.new;
         } else {
             let slide = slides.find(s => s.id == this.object.id);
-            mergeObject(slide, formData);
+            foundry.utils.mergeObject(slide, formData);
         }
 
         this.journalentry.setFlag('monks-enhanced-journal', 'slides', slides);
@@ -273,9 +273,9 @@ export class SlideConfig extends FormApplication {
         let x2 = (((text.right || 0) / 100) * 600).toFixed(2);
         let y2 = (((text.bottom || 0) / 100) * 400).toFixed(2);
         let bgcolor = Color.from(text.background || '#000000');
-        let color = text.color || getProperty(this.journalentry, "flags.monks-enhanced-journal.font.color") || "#FFFFFF";
-        let font = text.font || getProperty(this.journalentry, "flags.monks-enhanced-journal.font.name") || windowFont;
-        let size = text.size || getProperty(this.journalentry, "flags.monks-enhanced-journal.font.size") || windowSize;
+        let color = text.color || foundry.utils.getProperty(this.journalentry, "flags.monks-enhanced-journal.font.color") || "#FFFFFF";
+        let font = text.font || foundry.utils.getProperty(this.journalentry, "flags.monks-enhanced-journal.font.name") || windowFont;
+        let size = text.size || foundry.utils.getProperty(this.journalentry, "flags.monks-enhanced-journal.font.size") || windowSize;
         size = (size / windowSize) * 100;
         let style = {
             'font-size': size + "%",
@@ -314,9 +314,9 @@ export class SlideConfig extends FormApplication {
             let x2 = (((t.right || 0) / 100) * 600);
             let y2 = (((t.bottom || 0) / 100) * 400);
             let bgcolor = Color.from(t.background || '#000000');
-            let color = t.color || getProperty(this.journalentry, "flags.monks-enhanced-journal.font.color") || "#FFFFFF";
-            let font = t.font || getProperty(this.journalentry, "flags.monks-enhanced-journal.font.name") || windowFont;
-            let size = t.size || getProperty(this.journalentry, "flags.monks-enhanced-journal.font.size") || windowSize;
+            let color = t.color || foundry.utils.getProperty(this.journalentry, "flags.monks-enhanced-journal.font.color") || "#FFFFFF";
+            let font = t.font || foundry.utils.getProperty(this.journalentry, "flags.monks-enhanced-journal.font.name") || windowFont;
+            let size = t.size || foundry.utils.getProperty(this.journalentry, "flags.monks-enhanced-journal.font.size") || windowSize;
             size = (size / windowSize) * 100;
             let style = {
                 'font-size': size + "%",

@@ -21,7 +21,7 @@ export class MEJHelpers {
         name = name || pricename();
         if (!item)
             return defvalue;
-        let value = (item.system != undefined ? getProperty(item?.system, name) : getProperty(item, name));
+        let value = (item.system != undefined ? foundry.utils.getProperty(item?.system, name) : foundry.utils.getProperty(item, name));
         
         if (value && typeof value === 'object' && game.system.id == "pf2e") {
             value = Object.values(value)[0];
@@ -33,8 +33,8 @@ export class MEJHelpers {
 
     static setValue(item, name, value = 1, options = {}) {
         let prop = (item.system != undefined ? item.system : item);
-        let data = getProperty(prop, name);
-        setProperty(prop, name, (data && data.hasOwnProperty("value") && !value.hasOwnProperty("value") && !options.overwrite ? Object.assign(data, { value: value }) : value));
+        let data = foundry.utils.getProperty(prop, name);
+        foundry.utils.setProperty(prop, name, (data && data.hasOwnProperty("value") && !value.hasOwnProperty("value") && !options.overwrite ? Object.assign(data, { value: value }) : value));
     }
 
     static defaultCurrency() {
@@ -130,10 +130,10 @@ export class MEJHelpers {
     }
 
     static setPrice(item, name, price) {
-        if (game.system.id == "dnd5e" && isNewerVersion(game.system.version, "2.0.3")) {
+        if (game.system.id == "dnd5e" && foundry.utils.isNewerVersion(game.system.version, "2.0.3")) {
             setValue(item, name, { value: price.value, denomination: price.currency });
         } else if (game.system.id == "wfrp4e") {
-            setProperty(item, `system.price.${price.currency}`, price.value);
+            foundry.utils.setProperty(item, `system.price.${price.currency}`, price.value);
         } else if (game.system.id == "pf2e") {
             let value = {};
             value[price.currency] = price.value;

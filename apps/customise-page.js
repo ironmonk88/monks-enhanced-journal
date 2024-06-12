@@ -2,7 +2,7 @@ import { MonksEnhancedJournal, log, setting, i18n, makeid } from '../monks-enhan
 
 export class CustomisePage extends FormApplication {
     static get defaultOptions() {
-        return mergeObject(super.defaultOptions, {
+        return foundry.utils.mergeObject(super.defaultOptions, {
             id: "customise-page",
             classes: ["form"],
             title: "Customise Page",
@@ -15,7 +15,7 @@ export class CustomisePage extends FormApplication {
     }
 
     async _renderInner(...args) {
-        delete _templateCache[`modules/monks-enhanced-journal/templates/customise/${this.object.constructor.type}.html`];
+        delete Handlebars.partials[`modules/monks-enhanced-journal/templates/customise/${this.object.constructor.type}.html`];
         await loadTemplates({
             page: `modules/monks-enhanced-journal/templates/customise/${this.object.constructor.type}.html`,
         });
@@ -53,7 +53,7 @@ export class CustomisePage extends FormApplication {
     }
 
     async _updateObject(event, formData) {
-        let data = expandObject(formData);
+        let data = foundry.utils.expandObject(formData);
 
         let defaultSettings = this.object.constructor.sheetSettings() || {};
         let settings = data.sheetSettings[this.object.constructor.type] || {};
@@ -108,9 +108,9 @@ export class CustomisePage extends FormApplication {
 
         for (let item of items) {
             let sell = adjustment[item.type]?.sell ?? adjustment.default.sell ?? 1;
-            let price = MEJHelpers.getPrice(getProperty(item, "flags.monks-enhanced-journal.price"));
+            let price = MEJHelpers.getPrice(foundry.utils.getProperty(item, "flags.monks-enhanced-journal.price"));
             let cost = Math.max(Math.ceil((price.value * sell), 1)) + " " + price.currency;
-            setProperty(item, "flags.monks-enhanced-journal.cost", cost);
+            foundry.utils.setProperty(item, "flags.monks-enhanced-journal.cost", cost);
         }
 
         await this.object.update({ "flags.monks-enhanced-journal.items": items }, { focus: false });

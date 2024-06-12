@@ -11,7 +11,7 @@ export class JournalEntrySheet extends DocumentSheet {
     static get defaultOptions() {
         let defOptions = super.defaultOptions;
         let classes = defOptions.classes.concat(['monks-journal-sheet', 'monks-enhanced-journal', `${game.system.id}`]);
-        return mergeObject(defOptions, {
+        return foundry.utils.mergeObject(defOptions, {
             title: i18n("MonksEnhancedJournal.journalentry"),
             template: "modules/monks-enhanced-journal/templates/sheets/journalentry.html",
             classes: classes,

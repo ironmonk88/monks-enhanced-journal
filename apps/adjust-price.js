@@ -10,7 +10,7 @@ export class AdjustPrice extends FormApplication {
 
     /** @override */
     static get defaultOptions() {
-        return mergeObject(super.defaultOptions, {
+        return foundry.utils.mergeObject(super.defaultOptions, {
             id: "adjust-price",
             classes: ["adjust-price", "monks-journal-sheet", "dialog"],
             title: i18n("MonksEnhancedJournal.AdjustPrices"),
@@ -24,7 +24,7 @@ export class AdjustPrice extends FormApplication {
     }
 
     getData(options) {
-        const original = game.system?.documentTypes?.Item || [];
+        const original = Object.keys(game.system?.documentTypes?.Item || {});
         let types = original.filter(x => MonksEnhancedJournal.includedTypes.includes(x));
         types = types.reduce((obj, t) => {
             const label = CONFIG.Item?.typeLabels?.[t] ?? t;
@@ -32,7 +32,7 @@ export class AdjustPrice extends FormApplication {
             return obj;
         }, {});
         let defaultAdjustment = setting("adjustment-defaults");
-        let adjustment = duplicate(defaultAdjustment);
+        let adjustment = foundry.utils.duplicate(defaultAdjustment);
         if (this.object)
             adjustment = this.object.getFlag('monks-enhanced-journal', 'adjustment') || {};
         else
@@ -44,7 +44,7 @@ export class AdjustPrice extends FormApplication {
         }
         data.showConvert = !!this.object;
 
-        return mergeObject(super.getData(options), data );
+        return foundry.utils.mergeObject(super.getData(options), data );
     }
 
     activateListeners(html) {
@@ -115,9 +115,9 @@ export class AdjustPrice extends FormApplication {
 
         for (let item of items) {
             let sell = adjustment[item.type]?.sell ?? adjustment.default.sell ?? 1;
-            let price = MEJHelpers.getPrice(getProperty(item, "flags.monks-enhanced-journal.price"));
+            let price = MEJHelpers.getPrice(foundry.utils.getProperty(item, "flags.monks-enhanced-journal.price"));
             let cost = Math.max(Math.ceil((price.value * sell), 1)) + " " + price.currency;
-            setProperty(item, "flags.monks-enhanced-journal.cost", cost);
+            foundry.utils.setProperty(item, "flags.monks-enhanced-journal.cost", cost);
         }
 
         await this.object.update({ "flags.monks-enhanced-journal.items": items }, { focus: false });

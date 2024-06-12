@@ -15,7 +15,7 @@ export class SelectPlayer extends FormApplication {
 
     /** @override */
     static get defaultOptions() {
-        return mergeObject(super.defaultOptions, {
+        return foundry.utils.mergeObject(super.defaultOptions, {
             id: "select-player",
             classes: ["form", "select-sheet"],
             title: i18n("MonksEnhancedJournal.SelectPlayer"),
@@ -36,7 +36,7 @@ export class SelectPlayer extends FormApplication {
                 selected: false
             };
         }).filter(u => u.id != game.user.id);
-        return mergeObject(super.getData(options),
+        return foundry.utils.mergeObject(super.getData(options),
             {
                 users: this.users,
                 picchoice: this.canShowPic(),

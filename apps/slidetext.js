@@ -4,12 +4,12 @@ export class SlideText extends FormApplication {
     constructor(object, config, options = {}) {
         super(object, options);
         this.config = config;
-        this.tempdata = duplicate(object);
+        this.tempdata = foundry.utils.duplicate(object);
     }
 
     /** @override */
     static get defaultOptions() {
-        return mergeObject(super.defaultOptions, {
+        return foundry.utils.mergeObject(super.defaultOptions, {
             id: "slide-text",
             classes: ["form", "slide-sheet"],
             title: i18n("MonksEnhancedJournal.SlideText"),
@@ -21,13 +21,13 @@ export class SlideText extends FormApplication {
 
     getData(options) {
         let windowSize = 25;
-        let fontOptions = mergeObject({ "": "" }, MonksEnhancedJournal.fonts);
-        return mergeObject(super.getData(options),
+        let fontOptions = foundry.utils.mergeObject({ "": "" }, MonksEnhancedJournal.fonts);
+        return foundry.utils.mergeObject(super.getData(options),
             {
                 alignOptions: { left: "MonksEnhancedJournal.Left", center: "MonksEnhancedJournal.Center", right: "MonksEnhancedJournal.Right" },
                 fontOptions,
-                fontPlaceholder: getProperty(this.config.journalentry, "flags.monks-enhanced-journal.font.size") || windowSize,
-                colorPlaceholder: getProperty(this.config.journalentry, "flags.monks-enhanced-journal.font.color") || "#FFFFFF"
+                fontPlaceholder: foundry.utils.getProperty(this.config.journalentry, "flags.monks-enhanced-journal.font.size") || windowSize,
+                colorPlaceholder: foundry.utils.getProperty(this.config.journalentry, "flags.monks-enhanced-journal.font.color") || "#FFFFFF"
             }, { recursive: false }
         );
     }
@@ -38,12 +38,12 @@ export class SlideText extends FormApplication {
     }
 
     async _onChangeInput(event) {
-        const formData = expandObject(this._getSubmitData());
+        const formData = foundry.utils.expandObject(this._getSubmitData());
 
         if (Object.keys(formData).length == 0)
             return;
 
-        mergeObject(this.tempdata, formData);
+        foundry.utils.mergeObject(this.tempdata, formData);
         this.config.refreshText(this.tempdata);
     }
 
@@ -53,6 +53,6 @@ export class SlideText extends FormApplication {
     }
 
     _updateObject(event, formData) {
-        this.object = mergeObject(this.object, formData);
+        this.object = foundry.utils.mergeObject(this.object, formData);
     }
 }

@@ -7,7 +7,7 @@ export class ListEdit extends FormApplication {
     }
 
     static get defaultOptions() {
-        return mergeObject(super.defaultOptions, {
+        return foundry.utils.mergeObject(super.defaultOptions, {
             title: "Edit Item",
             classes: ["list-edit"],
             template: "./modules/monks-enhanced-journal/templates/sheets/listitem.html",
@@ -37,8 +37,8 @@ export class ListEdit extends FormApplication {
     }
 
     _updateObject(event, formData) {
-        mergeObject(this.object.data, formData);
-        let items = duplicate(this.sheet.object.flags["monks-enhanced-journal"].items || []);
+        foundry.utils.mergeObject(this.object.data, formData);
+        let items = foundry.utils.duplicate(this.sheet.object.flags["monks-enhanced-journal"].items || []);
         if (this.object.id == undefined) {
             this.object.data.id = makeid();
             items.push(this.object.data);

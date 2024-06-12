@@ -7,7 +7,7 @@ export class EventSheet extends EnhancedJournalSheet {
     }
 
     static get defaultOptions() {
-        return mergeObject(super.defaultOptions, {
+        return foundry.utils.mergeObject(super.defaultOptions, {
             title: i18n("MonksEnhancedJournal.Event"),
             template: "modules/monks-enhanced-journal/templates/sheets/event.html",
             tabs: [{ navSelector: ".tabs", contentSelector: ".sheet-body", initial: "description" }],
@@ -29,7 +29,7 @@ export class EventSheet extends EnhancedJournalSheet {
                 continue;
             if (entity && entity.testUserPermission(game.user, "LIMITED") && (game.user.isGM || !item.hidden)) {
                 let page = (entity instanceof JournalEntryPage ? entity : entity.pages.contents[0]);
-                let type = getProperty(page, "flags.monks-enhanced-journal.type");
+                let type = foundry.utils.getProperty(page, "flags.monks-enhanced-journal.type");
                 if (!data.relationships[type])
                     data.relationships[type] = { type: type, name: i18n(`MonksEnhancedJournal.${type.toLowerCase()}`), documents: [] };
 
@@ -83,19 +83,19 @@ export class EventSheet extends EnhancedJournalSheet {
     }
 
     _getSubmitData(updateData = {}) {
-        let data = expandObject(super._getSubmitData(updateData));
+        let data = foundry.utils.expandObject(super._getSubmitData(updateData));
 
         if (data.relationships) {
-            data.flags['monks-enhanced-journal'].relationships = duplicate(this.object.getFlag("monks-enhanced-journal", "relationships") || []);
+            data.flags['monks-enhanced-journal'].relationships = foundry.utils.duplicate(this.object.getFlag("monks-enhanced-journal", "relationships") || []);
             for (let relationship of data.flags['monks-enhanced-journal'].relationships) {
                 let dataRel = data.relationships[relationship.id];
                 if (dataRel)
-                    relationship = mergeObject(relationship, dataRel);
+                    relationship = foundry.utils.mergeObject(relationship, dataRel);
             }
             delete data.relationships;
         }
 
-        return flattenObject(data);
+        return foundry.utils.flattenObject(data);
     }
 
     _canDragDrop(selector) {

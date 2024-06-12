@@ -185,7 +185,7 @@ export class MonksEnhancedJournal {
     }
 
     static getMEJType(journal) {
-        let type = getProperty(journal?.pages?.contents[0], "flags.monks-enhanced-journal.type") || getProperty(journal, "flags.monks-enhanced-journal.type");
+        let type = foundry.utils.getProperty(journal?.pages?.contents[0], "flags.monks-enhanced-journal.type") || foundry.utils.getProperty(journal, "flags.monks-enhanced-journal.type");
         if (((journal instanceof JournalEntry && journal?.pages?.size == 1) || journal instanceof JournalEntryPage) && !!type) {
             if (type == "base" || type == "oldentry") type = "journalentry";
             let types = MonksEnhancedJournal.getDocumentTypes();
@@ -393,13 +393,13 @@ export class MonksEnhancedJournal {
                 if (entry.pages.size == 1) {
                     let page = entry.pages.contents[0];
                     MonksEnhancedJournal.fixType(page);
-                    let type = getProperty(page, "flags.monks-enhanced-journal.type");
+                    let type = foundry.utils.getProperty(page, "flags.monks-enhanced-journal.type");
                     if (type == "base" || type == "oldentry") type = "journalentry";
                     let types = MonksEnhancedJournal.getDocumentTypes();
                     if (types[type]) {
                         if (type == "picture" && !entry.testUserPermission(game.user, "OWNER")) {
                             let defaultSettings = setting("sheet-settings");
-                            if (getProperty(page, "flags.monks-enhanced-journal.sheet-settings.settings.open.value") === true || getProperty(defaultSettings, "picture.settings.open.value") === true) {
+                            if (foundry.utils.getProperty(page, "flags.monks-enhanced-journal.sheet-settings.settings.open.value") === true || foundry.utils.getProperty(defaultSettings, "picture.settings.open.value") === true) {
                                 new ImagePopout(page.src, { title: page?.name, caption: page?.image.caption }).render(true);
                                 return;
                             }
@@ -443,7 +443,7 @@ export class MonksEnhancedJournal {
             return macro;
         });
 
-        let dragStart = function (...args) {
+        patchFunc("JournalDirectory.prototype._onDragStart", function (...args) {
             let event = args[0];
             event.stopPropagation();
             if (ui.context) ui.context.close({ animate: false });
@@ -457,13 +457,7 @@ export class MonksEnhancedJournal {
             const dragData = page ? page.toDragData() : doc.toDragData();
             if (isFolder) foundry.utils.mergeObject(dragData, { documentName });
             event.dataTransfer.setData("text/plain", JSON.stringify(dragData));
-        }
-
-        if (game.modules.get("lib-wrapper")?.active) {
-            libWrapper.register("monks-enhanced-journal", "JournalDirectory.prototype._onDragStart", dragStart, "OVERRIDE");
-        } else {
-            JournalDirectory.prototype._onDragStart = dragStart;
-        }
+        }, "OVERRIDE");
 
         if (game.modules.get("lib-wrapper")?.active) {
             libWrapper.ignore_conflicts("monks-enhanced-journal", "monks-active-tiles", "JournalDirectory.prototype._onClickEntryName");
@@ -499,7 +493,7 @@ export class MonksEnhancedJournal {
                 if (entry.pages.size == 1) {
                     let page = entry.pages.contents[0];
                     MonksEnhancedJournal.fixType(page);
-                    let type = getProperty(page, "flags.monks-enhanced-journal.type");
+                    let type = foundry.utils.getProperty(page, "flags.monks-enhanced-journal.type");
                     if (type == "base" || type == "oldentry") type = "journalentry";
                     let types = MonksEnhancedJournal.getDocumentTypes();
                     if (types[type]) {
@@ -566,7 +560,7 @@ export class MonksEnhancedJournal {
                     if (fd.ownership > -2) {
                         let entity = doc;
                         let types = MonksEnhancedJournal.getDocumentTypes();
-                        if (entity instanceof JournalEntryPage && entity.parent.pages.size == 1 && types[getProperty(entity, "flags.monks-enhanced-journal.type")])
+                        if (entity instanceof JournalEntryPage && entity.parent.pages.size == 1 && types[foundry.utils.getProperty(entity, "flags.monks-enhanced-journal.type")])
                             entity = entity.parent;
 
                         const ownership = entity.ownership;
@@ -592,7 +586,7 @@ export class MonksEnhancedJournal {
                         let messageData = {
                             user: game.user.id,
                             speaker: null,
-                            type: CONST.CHAT_MESSAGE_TYPES.OTHER,
+                            style: CONST.CHAT_MESSAGE_STYLES.OTHER,
                             content: content,
                             flavor: doc.name,
                             whisper: whisper
@@ -704,7 +698,7 @@ export class MonksEnhancedJournal {
                     if (doc.documentName == 'JournalEntry') {
                         if (doc.pages.size == 1) {
                             let page = doc.pages.contents[0];
-                            let type = getProperty(page, "flags.monks-enhanced-journal.type");
+                            let type = foundry.utils.getProperty(page, "flags.monks-enhanced-journal.type");
                             if (type == "base" || type == "oldentry") type = "journalentry";
                             let types = MonksEnhancedJournal.getDocumentTypes();
                             if (types[type]) {
@@ -750,7 +744,7 @@ export class MonksEnhancedJournal {
             if (event.altKey || setting('open-outside') || !MonksEnhancedJournal.openJournalEntry(this, { newtab: event.ctrlKey && !setting("open-new-tab"), anchor: target.dataset.hash })) {
                 if (this.pages.size == 1) {
                     let page = this.pages.contents[0];
-                    let type = getProperty(page, "flags.monks-enhanced-journal.type");
+                    let type = foundry.utils.getProperty(page, "flags.monks-enhanced-journal.type");
                     if (type == "base" || type == "oldentry") type = "journalentry";
 
                     let types = MonksEnhancedJournal.getDocumentTypes();
@@ -766,7 +760,7 @@ export class MonksEnhancedJournal {
             const target = event.currentTarget;
 
             if (event.altKey || setting('open-outside') || !MonksEnhancedJournal.openJournalEntry(this.parent, { newtab: event.ctrlKey && !setting("open-new-tab"), pageId: this.id, anchor: target.dataset.hash })) {
-                let type = getProperty(this, "flags.monks-enhanced-journal.type");
+                let type = foundry.utils.getProperty(this, "flags.monks-enhanced-journal.type");
                 if (type == "base" || type == "oldentry") type = "journalentry";
 
                 let types = MonksEnhancedJournal.getDocumentTypes();
@@ -797,7 +791,7 @@ export class MonksEnhancedJournal {
                     if (document.pages.size == 1) {
                         let page = document.pages.contents[0];
                         MonksEnhancedJournal.fixType(page);
-                        let type = getProperty(page, "flags.monks-enhanced-journal.type");
+                        let type = foundry.utils.getProperty(page, "flags.monks-enhanced-journal.type");
                         if (type == "base" || type == "oldentry") type = "journalentry";
                         let types = MonksEnhancedJournal.getDocumentTypes();
                         if (types[type]) {
@@ -834,27 +828,27 @@ export class MonksEnhancedJournal {
         }
         patchFunc("JournalEntryPage.prototype.update", updateJournalEntryPage, "WRAPPER");
 
-        let getEmbedded = function (wrapped, ...args) {
+        patchFunc("JournalEntryPage.prototype.getEmbeddedDocument", function (wrapped, ...args) {
             let [embeddedName, id] = args;
 
             MonksEnhancedJournal.fixType(this);
-            let type = getProperty(this, "flags.monks-enhanced-journal.type");
+            let type = foundry.utils.getProperty(this, "flags.monks-enhanced-journal.type");
             if (type == "base" || type == "oldentry") type = "journalentry";
             let types = MonksEnhancedJournal.getDocumentTypes();
 
             if (types[type]) {
                 if (embeddedName == "Items") {
-                    let items = getProperty(this, "flags.monks-enhanced-journal.items");
+                    let items = foundry.utils.getProperty(this, "flags.monks-enhanced-journal.items");
                     let item = items.find(i => i._id == id);
                     if (item) {
                         return new Item(item);
                     }
                 } else if (embeddedName == "Rewards") {
-                    let rewards = getProperty(this, "flags.monks-enhanced-journal.rewards");
+                    let rewards = foundry.utils.getProperty(this, "flags.monks-enhanced-journal.rewards");
                     let reward = rewards.find(r => r.id == id);
                     if (reward) {
-                        return mergeObject({
-                            getEmbeddedDocument: function (embeddedName, id){
+                        return foundry.utils.mergeObject({
+                            getEmbeddedDocument: function (embeddedName, id) {
                                 if (embeddedName == "Items") {
                                     let item = this.items.find(i => i._id == id);
                                     if (item) {
@@ -868,18 +862,9 @@ export class MonksEnhancedJournal {
             }
 
             return wrapped(...args);
-        }
+        }, "MIXED");
 
-        if (game.modules.get("lib-wrapper")?.active) {
-            libWrapper.register("monks-enhanced-journal", "JournalEntryPage.prototype.getEmbeddedDocument", getEmbedded, "MIXED");
-        } else {
-            const oldGetEmbeddedDocument = JournalEntryPage.prototype.getEmbeddedDocument;
-            JournalEntryPage.prototype.getEmbeddedDocument = function (event) {
-                return getEmbedded.call(this, oldGetEmbeddedDocument.bind(this), ...arguments);
-            }
-        }
-
-        let createJournalEntry = async function (wrapped, ...args) {
+        patchFunc("JournalEntry.prototype._onCreate", async function (wrapped, ...args) {
             let [data, options, userid] = args;
             if (game.user.id !== userid)
                 return;
@@ -887,7 +872,7 @@ export class MonksEnhancedJournal {
             let document = this;// game.journal.get(data._id);
 
             // Pre create a new page
-            let type = getProperty(data, "flags.monks-enhanced-journal.pagetype");
+            let type = foundry.utils.getProperty(data, "flags.monks-enhanced-journal.pagetype");
             if (game.modules.get("storyteller")?.active) {
                 let types = game.StoryTeller.constructor.types;
                 if (types[type] != undefined) {
@@ -901,62 +886,39 @@ export class MonksEnhancedJournal {
                     let types = MonksEnhancedJournal.getDocumentTypes();
                     if (type == "base" || type == "oldentry") type = "journalentry";
                     if (types[type]) {
-                        setProperty(pageData, "flags.monks-enhanced-journal.type", type);
-
+                        foundry.utils.setProperty(pageData, "flags.monks-enhanced-journal.type", type);
+                        pageData.type = "text";
                     }
                     await document.setFlag("monks-enhanced-journal", "img", `modules/monks-enhanced-journal/assets/${type}.png`);
-                    await JournalEntryPage.create(pageData, { parent: document });
+                    let page = await JournalEntryPage.create(pageData, { parent: document });
+                    if (types[type]) {
+                        page.type = type;
+                    }
                 } else {
                     window.setTimeout(async () => {
                         await MonksEnhancedJournal.fixPage(document);
                         ui.journal.render();
                     }, 500);
                 }
-            } 
-            if (!!getProperty(this, "flags.forien-quest-log") || (options.renderSheet !== false && !MonksEnhancedJournal.openJournalEntry(this, options)))
-                return wrapped(...args);
-        }
-
-        if (game.modules.get("lib-wrapper")?.active) {
-            libWrapper.register("monks-enhanced-journal", "JournalEntry.prototype._onCreate", createJournalEntry, "MIXED");
-        } else {
-            const oldOnCreate = JournalEntry.prototype._onCreate;
-            JournalEntry.prototype._onCreate = function (event) {
-                return createJournalEntry.call(this, oldOnCreate.bind(this), ...arguments);
             }
-        }
+            if (!!foundry.utils.getProperty(this, "flags.forien-quest-log") || (options.renderSheet !== false && !MonksEnhancedJournal.openJournalEntry(this, options)))
+                return wrapped(...args);
+        }, "MIXED");
 
         /*
-        let createJournalEntryPage = async function (wrapped, ...args) {
+        patchFunc("JournalEntryPage.prototype._onCreate". async function (wrapped, ...args) {
             let [data, options, userid] = args;
             if (game.user.id !== userid)
                 return;
 
-            if (!!getProperty(this, "flags.forien-quest-log") || (MonksEnhancedJournal.compendium !== true && !MonksEnhancedJournal.openJournalEntry(this, options)))
+            if (!!foundry.utils.getProperty(this, "flags.forien-quest-log") || (MonksEnhancedJournal.compendium !== true && !MonksEnhancedJournal.openJournalEntry(this, options)))
                 return wrapped(...args);
-        }
+        }, "MIXED");
+        */
 
-        if (game.modules.get("lib-wrapper")?.active) {
-            libWrapper.register("monks-enhanced-journal", "JournalEntryPage.prototype._onCreate", createJournalEntryPage, "MIXED");
-        } else {
-            const oldOnCreate = JournalEntryPage.prototype._onCreate;
-            JournalEntryPage.prototype._onCreate = function (event) {
-                return createJournalEntryPage.call(this, oldOnCreate.bind(this), ...arguments);
-            }
-        }*/
-
-        let onAutosave = function (...args) {
+        patchFunc("JournalTextPageSheet.prototype.onAutosave", function (...args) {
             this.object.parent?._sheet?.render(false);
-        }
-
-        if (game.modules.get("lib-wrapper")?.active) {
-            if (JournalTextPageSheet.prototype.onAutosave)
-                libWrapper.register("monks-enhanced-journal", "JournalTextPageSheet.prototype.onAutosave", onAutosave, "OVERRIDE");
-        } else {
-            JournalTextPageSheet.prototype.onAutosave = function (event) {
-                return onAutosave.call(this, ...arguments);
-            }
-        }
+        }, "OVERRIDE");
 
         let getPageData = function (wrapped, ...args) {
             let pages = wrapped(...args);
@@ -986,8 +948,8 @@ export class MonksEnhancedJournal {
             let appendixAt = 'A';
             let pageAt = 1;
             for (let i = start; i < pages.length; i++) {
-                pages[i].number = (getProperty(pages[i], "flags.monks-enhanced-journal.appendix") ? appendixAt : pageAt++);
-                if (getProperty(pages[i], "flags.monks-enhanced-journal.appendix"))
+                pages[i].number = (foundry.utils.getProperty(pages[i], "flags.monks-enhanced-journal.appendix") ? appendixAt : pageAt++);
+                if (foundry.utils.getProperty(pages[i], "flags.monks-enhanced-journal.appendix"))
                     appendixAt = nextChar(appendixAt);
             }
 
@@ -1121,13 +1083,13 @@ export class MonksEnhancedJournal {
         let oldImportDocument = CompendiumCollection.prototype.importDocument;
         CompendiumCollection.prototype.importDocument = function (document, options = {}) {
             options.renderSheet = false;
-            if (document instanceof JournalEntry && document.pages.size == 1 && !!getProperty(document.pages.contents[0], "flags.monks-enhanced-journal.type")) {
-                let type = getProperty(document.pages.contents[0], "flags.monks-enhanced-journal.type");
+            if (document instanceof JournalEntry && document.pages.size == 1 && !!foundry.utils.getProperty(document.pages.contents[0], "flags.monks-enhanced-journal.type")) {
+                let type = foundry.utils.getProperty(document.pages.contents[0], "flags.monks-enhanced-journal.type");
                 if (type == "base" || type == "oldentry") type = "journalentry";
                 let types = MonksEnhancedJournal.getDocumentTypes();
                 if (types[type]) {
-                    setProperty(document, "_source.flags.monks-enhanced-journal.pagetype", type);
-                    setProperty(document, "_source.flags.monks-enhanced-journal.img", document.pages.contents[0].src);
+                    foundry.utils.setProperty(document, "_source.flags.monks-enhanced-journal.pagetype", type);
+                    foundry.utils.setProperty(document, "_source.flags.monks-enhanced-journal.img", document.pages.contents[0].src);
                 }
             }
 
@@ -1152,7 +1114,7 @@ export class MonksEnhancedJournal {
             if (this.page) {
                 options.mode = JournalSheet.VIEW_MODES.SINGLE;
                 options.pageId = this.page.id;
-                options.anchor = (getProperty(this.document, "flags.monks-enhanced-journal.anchor") || "").slugify().replace(/["']/g, "").substring(0, 64);
+                options.anchor = (foundry.utils.getProperty(this.document, "flags.monks-enhanced-journal.anchor") || "").slugify().replace(/["']/g, "").substring(0, 64);
             }
 
             const allowed = Hooks.call("activateNote", this, options);
@@ -1165,7 +1127,7 @@ export class MonksEnhancedJournal {
                         page = this.entry.pages.contents[0];
                         MonksEnhancedJournal.fixType(page);
                     }
-                    let type = getProperty(page, "flags.monks-enhanced-journal.type");
+                    let type = foundry.utils.getProperty(page, "flags.monks-enhanced-journal.type");
                     if (type == "base" || type == "oldentry") type = "journalentry";
                     let types = MonksEnhancedJournal.getDocumentTypes();
 
@@ -1201,7 +1163,7 @@ export class MonksEnhancedJournal {
             if (game.user.isGM) return true;
             if (this.page?.testUserPermission(game.user, "LIMITED", { exact: true })) {
                 // Special-case handling for image pages.
-                return this.page?.type === "image" || getProperty(this.page, "flags.monks-enhanced-journal.type") == "picture";
+                return this.page?.type === "image" || foundry.utils.getProperty(this.page, "flags.monks-enhanced-journal.type") == "picture";
             }
             const accessTest = this.page ? this.page : this.entry;
             return accessTest.testUserPermission(game.user, "OBSERVER");
@@ -1320,15 +1282,15 @@ export class MonksEnhancedJournal {
                 MonksEnhancedJournal.fixType(page);
 
                 if (page.type == 'shop')
-                    noteData.icon = "icons/svg/hanging-sign.svg";
+                    noteData.texture = { src: "icons/svg/hanging-sign.svg" };
                 else if (page.type == 'loot')
-                    noteData.icon = page.src || "icons/svg/chest.svg";
+                    noteData.texture = { src: page.src || "icons/svg/chest.svg" };
                 else if (page.type == 'encounter')
-                    noteData.icon = "icons/svg/sword.svg";
+                    noteData.texture = { src: "icons/svg/sword.svg" };
                 else if (page.type == 'place')
-                    noteData.icon = "icons/svg/village.svg";
+                    noteData.texture = { src: "icons/svg/village.svg" };
                 else if (page.type == 'person')
-                    noteData.icon = "icons/svg/cowled.svg";
+                    noteData.texture = { src: "icons/svg/cowled.svg" };
 
             }
 
@@ -1355,7 +1317,7 @@ export class MonksEnhancedJournal {
             }
             if (setting("hide-inline")) {
                 let doc;
-                if (CONST.DOCUMENT_TYPES.includes(type)) {
+                if (CONST.WORLD_DOCUMENT_TYPES.includes(type)) {
                     const collection = game.collections.get(type);
 
                     doc = /^[a-zA-Z0-9]{16}$/.test(parts[0]) ? collection.get(parts[0]) : collection.getName(parts[0]);
@@ -1507,9 +1469,9 @@ export class MonksEnhancedJournal {
                                 content: "This Journal has no pages.  Monk's Enhanced Journal requires at least one page, so a page will be created. <br><br>Are you sure you wish to continue?"
                             });
                             if (isGood) {
-                                let type = getProperty(journal, "flags.monks-enhanced-journal.type") || "journalentry";
+                                let type = foundry.utils.getProperty(journal, "flags.monks-enhanced-journal.type") || "journalentry";
                                 let pageData = { type: type, name: journal.name };
-                                setProperty(pageData, "flags.monks-enhanced-journal.type", type);
+                                foundry.utils.setProperty(pageData, "flags.monks-enhanced-journal.type", type);
                                 await JournalEntryPage.create(pageData, { parent: journal });
                             }
                         }
@@ -1519,7 +1481,7 @@ export class MonksEnhancedJournal {
                                 await journal.pages.contents[1].delete();
                             }
                             let page = journal.pages.contents[0];
-                            let type = getProperty(page, "flags.monks-enhanced-journal.type");
+                            let type = foundry.utils.getProperty(page, "flags.monks-enhanced-journal.type");
                             if (type == "base" || type == "oldentry") type = "journalentry";
                             let types = MonksEnhancedJournal.getDocumentTypes();
                             if (!types[type])
@@ -1610,14 +1572,14 @@ export class MonksEnhancedJournal {
                 const entry = await JournalEntry.implementation.fromDropData(data);
 
                 const createData = [];
-                if (entry.pages.size == 1 && (!!getProperty(entry.pages.contents[0], "flags.monks-enhanced-journal.type") || !!getProperty(entry, "flags.monks-enhanced-journal.type"))) {
-                    let type = getProperty(entry.pages.contents[0], "flags.monks-enhanced-journal.type") || getProperty(entry, "flags.monks-enhanced-journal.type");
+                if (entry.pages.size == 1 && (!!foundry.utils.getProperty(entry.pages.contents[0], "flags.monks-enhanced-journal.type") || !!foundry.utils.getProperty(entry, "flags.monks-enhanced-journal.type"))) {
+                    let type = foundry.utils.getProperty(entry.pages.contents[0], "flags.monks-enhanced-journal.type") || foundry.utils.getProperty(entry, "flags.monks-enhanced-journal.type");
                     if (type == "base" || type == "oldentry") type = "journalentry";
                     let types = MonksEnhancedJournal.getDocumentTypes();
                     if (types[type]) {
                         let pageData = entry.pages.contents[0].toObject();
                         if (pageData.src && pageData.type == "text") {
-                            let imgPage = duplicate(pageData);
+                            let imgPage = foundry.utils.duplicate(pageData);
                             imgPage.type = "image";
                             imgPage.name = imgPage.name + " Image";
                             delete imgPage._id;
@@ -1686,7 +1648,7 @@ export class MonksEnhancedJournal {
                 let messageData = {
                     user: game.user.id,
                     speaker: null,
-                    type: CONST.CHAT_MESSAGE_TYPES.OTHER,
+                    style: CONST.CHAT_MESSAGE_STYLES.OTHER,
                     content: content,
                     whisper: whisper,
                     flags: { "journal-chat-card": true }
@@ -1757,7 +1719,7 @@ export class MonksEnhancedJournal {
                 isFix = false;
                 if (type == "quest") {
                     let rewardFix = false;
-                    let rewards = duplicate(journal.getFlag('monks-enhanced-journal', 'rewards') || []);
+                    let rewards = foundry.utils.duplicate(journal.getFlag('monks-enhanced-journal', 'rewards') || []);
                     for (let reward of rewards) {
                         isFix = false;
 
@@ -1835,7 +1797,7 @@ export class MonksEnhancedJournal {
                     for (let relationship of relationships) {
                         let other = game.journal.get(relationship.id);
                         if (other) {
-                            let refs = duplicate(other.getFlag("monks-enhanced-journal", "relationships") || []);
+                            let refs = foundry.utils.duplicate(other.getFlag("monks-enhanced-journal", "relationships") || []);
                             if (!refs.find(r => r.id == journal.id)) {
                                 log(`Fixing ${other.name}, adding relationship with ${journal.name}`);
                                 refs.push({ id: journal.id, hidden: relationship.hidden });
@@ -1855,7 +1817,7 @@ export class MonksEnhancedJournal {
             let parts = t.entityId.split(".");
             return parts[parts.length - 1];
         }).filter(t => !!t);
-        let pagestate = duplicate(game.user.getFlag("monks-enhanced-journal", "pagestate") || {});
+        let pagestate = foundry.utils.duplicate(game.user.getFlag("monks-enhanced-journal", "pagestate") || {});
         let deleteIds = [];
         for (let [k, v] of Object.entries(pagestate)) {
             if (!tabs.includes(k))
@@ -1872,7 +1834,7 @@ export class MonksEnhancedJournal {
 
     static async fixPages() {
         for (let journal of game.journal) {
-            if (getProperty(journal, "flags.monks-enhanced-journal.type") != undefined) {
+            if (foundry.utils.getProperty(journal, "flags.monks-enhanced-journal.type") != undefined) {
                 MonksEnhancedJournal.fixPage(journal);
             }
         }
@@ -1882,7 +1844,7 @@ export class MonksEnhancedJournal {
             let entity = game[sheet == "monks-enhanced-journal" ? journal : actors].get(setting("loot-entity"));
             if (entity) {
                 if (entity instanceof JournalEntry) {
-                    let page = entity.pages.find(p => getProperty(p, "flags.monks-enahnced-journal.type") == "loot");
+                    let page = entity.pages.find(p => foundry.utils.getProperty(p, "flags.monks-enahnced-journal.type") == "loot");
                     entity = page || entity;
                 }
                 game.settings.set("monks-enhanced-journal", "loot-entity", entity?.uuid);
@@ -1900,8 +1862,8 @@ export class MonksEnhancedJournal {
         let types = MonksEnhancedJournal.getDocumentTypes();
 
         // fix the splitting of Journal Entry pages
-        let type = getProperty(document, "flags.monks-enhanced-journal.type");
-        let flags = getProperty(document, "flags.monks-enhanced-journal");
+        let type = foundry.utils.getProperty(document, "flags.monks-enhanced-journal.type");
+        let flags = foundry.utils.getProperty(document, "flags.monks-enhanced-journal");
         if (type == "base") {
             type = "journalentry";
             flags.type = type;
@@ -1934,7 +1896,7 @@ export class MonksEnhancedJournal {
                         item.system = data;
                         let quantity = getValue(item, quantityname()) ?? getValue(item.system, quantityname());
                         let price = MEJHelpers.getPrice(MEJHelpers.getSystemPrice(item, "price"));
-                        item.flags = mergeObject((item.flags || {}), {
+                        item.flags = foundry.utils.mergeObject((item.flags || {}), {
                             "monks-enhanced-journal": {
                                 remaining: item.system?.remaining,
                                 received: item.received,
@@ -1947,7 +1909,7 @@ export class MonksEnhancedJournal {
                                 quantity: quantity
                             }
                         });
-                        setProperty(item, "system." + quantityname(), 1);
+                        foundry.utils.setProperty(item, "system." + quantityname(), 1);
                     }
                 }
             }
@@ -1960,7 +1922,7 @@ export class MonksEnhancedJournal {
                             item.system = data;
                             let quantity = getValue(item, quantityname()) ?? getValue(item.system, quantityname());
                             let price = MEJHelpers.getPrice(MEJHelpers.getSystemPrice(item, "price"));
-                            item.flags = mergeObject((item.flags || {}), {
+                            item.flags = foundry.utils.mergeObject((item.flags || {}), {
                                 "monks-enhanced-jorunal": {
                                     remaining: item.system.remaining,
                                     received: item.received,
@@ -1973,7 +1935,7 @@ export class MonksEnhancedJournal {
                                     quantity: quantity
                                 }
                             });
-                            setProperty(item, "system." + quantityname(), 1);
+                            foundry.utils.setProperty(item, "system." + quantityname(), 1);
                         }
                     }
                 }
@@ -1999,7 +1961,7 @@ export class MonksEnhancedJournal {
                 if (MonksEnhancedJournal.getMEJType(journal) == "person") {
                     let page = journal.pages.contents[0];
 
-                    let attributes = getProperty(page, "flags.monks-enhanced-journal.attributes") || {};
+                    let attributes = foundry.utils.getProperty(page, "flags.monks-enhanced-journal.attributes") || {};
                     if (attributes.race && !attributes.race?.hidden && attributes.race?.value && !attributes.ancestry) {
                         attributes.ancestry = { value: attributes.race.value };
                         if (attributes.race.hidden === false)
@@ -2015,15 +1977,15 @@ export class MonksEnhancedJournal {
     static async fixAdjustments() {
         if (setting('fix-adjustment')) {
             let defaultAdjustments = setting('adjustment-defaults');
-            defaultAdjustments.default = mergeObject({ sell: 1, buy: 0.5 }, defaultAdjustments.default);
+            defaultAdjustments.default = foundry.utils.mergeObject({ sell: 1, buy: 0.5 }, defaultAdjustments.default);
             for (let journal of game.journal) {
                 if (MonksEnhancedJournal.getMEJType(journal) == "shop") {
                     let page = journal.pages.contents[0];
 
-                    let adjustment = getProperty(page, "flags.monks-enhanced-journal.adjustment") || {};
+                    let adjustment = foundry.utils.getProperty(page, "flags.monks-enhanced-journal.adjustment") || {};
                     let defValue = {
-                        sell: adjustment.default?.sell ?? getProperty(page, "flags.monks-enhanced-journal.sell"),
-                        buy: adjustment.default?.buy ?? getProperty(page, "flags.monks-enhanced-journal.buy")
+                        sell: adjustment.default?.sell ?? foundry.utils.getProperty(page, "flags.monks-enhanced-journal.sell"),
+                        buy: adjustment.default?.buy ?? foundry.utils.getProperty(page, "flags.monks-enhanced-journal.buy")
                     };
 
                     if (defValue.sell || defValue.buy) {
@@ -2045,7 +2007,7 @@ export class MonksEnhancedJournal {
             let settings = setting('sheet-settings');
 
             let adjustmentDefaults = setting('adjustment-defaults');
-            setProperty(settings, "shop.adjustment", mergeObject((settings?.shop?.adjustment || {}), adjustmentDefaults));
+            foundry.utils.setProperty(settings, "shop.adjustment", foundry.utils.mergeObject((settings?.shop?.adjustment || {}), adjustmentDefaults));
 
             let personDefaults = setting('person-attributes');
             //use reduce to turn the array into an object
@@ -2059,7 +2021,7 @@ export class MonksEnhancedJournal {
                 };
                 return obj;
             }, {});
-            setProperty(settings, "person.attributes", mergeObject(settings.person.attributes, changes));
+            foundry.utils.setProperty(settings, "person.attributes", foundry.utils.mergeObject(settings.person.attributes, changes));
 
             let placeDefaults = setting('place-attributes');
             //use reduce to turn the array into an object
@@ -2073,21 +2035,21 @@ export class MonksEnhancedJournal {
                 };
                 return obj;
             }, {});
-            setProperty(settings, "place.attributes", mergeObject(settings.place.attributes, changes));
+            foundry.utils.setProperty(settings, "place.attributes", foundry.utils.mergeObject(settings.place.attributes, changes));
 
             await game.settings.set("monks-enhanced-journal", "sheet-settings", settings);
 
-            let defaultSettings = mergeObject(duplicate((game.settings.settings.get("monks-enhanced-journal.sheet-settings")?.default || {}) || {}), duplicate((setting("sheet-settings") || {}) || {}));
+            let defaultSettings = foundry.utils.mergeObject(foundry.utils.duplicate((game.settings.settings.get("monks-enhanced-journal.sheet-settings")?.default || {}) || {}), foundry.utils.duplicate((setting("sheet-settings") || {}) || {}));
 
             for (let journal of game.journal) {
                 let type = MonksEnhancedJournal.getMEJType(journal);
                 let page = journal.pages.contents[0];
                 if (["person", "place"].includes(type)) {
-                    if (hasProperty(page, "flags.monks-enhanced-journal.attributes")) {
+                    if (foundry.utils.hasProperty(page, "flags.monks-enhanced-journal.attributes")) {
                         // check to make sure the attributes are formatted correctly
                         let changedObjectValues = false;
                         let sheetSettings = {};
-                        let attributes = getProperty(page, "flags.monks-enhanced-journal.attributes") || {};
+                        let attributes = foundry.utils.getProperty(page, "flags.monks-enhanced-journal.attributes") || {};
                         for (let [k, v] of Object.entries(attributes)) {
                             if (typeof v == "object") {
                                 if (v.hidden != undefined && defaultSettings[type].attributes[k].shown == v.hidden)
@@ -2103,8 +2065,8 @@ export class MonksEnhancedJournal {
                         }
                     }
                 } else if (type == "shop") {
-                    if (hasProperty(page, "flags.monks-enhanced-journal.adjustment")) {
-                        let adjustment = getProperty(page, "flags.monks-enhanced-journal.adjustment") || {};
+                    if (foundry.utils.hasProperty(page, "flags.monks-enhanced-journal.adjustment")) {
+                        let adjustment = foundry.utils.getProperty(page, "flags.monks-enhanced-journal.adjustment") || {};
                         await page.update({ 'monks-enhanced-journal.flags.sheet-settings.adjustment': adjustment });
                     }
                 }
@@ -2148,8 +2110,9 @@ export class MonksEnhancedJournal {
             label: "Progress"
         });
 
-        game.system.documentTypes.JournalEntryPage = game.system.documentTypes.JournalEntryPage.concat(Object.keys(types)).sort();
-        CONFIG.JournalEntryPage.typeLabels = mergeObject((CONFIG.JournalEntryPage.typeLabels || {}), labels);
+        CONFIG.JournalEntryPage.dataModels = foundry.utils.mergeObject((CONFIG.JournalEntryPage.dataModels || {}), {});
+        //game.system.documentTypes.JournalEntryPage = game.system.documentTypes.JournalEntryPage.concat(Object.keys(types)).sort();
+        CONFIG.JournalEntryPage.typeLabels = foundry.utils.mergeObject((CONFIG.JournalEntryPage.typeLabels || {}), labels);
     }
 
     static showAsChatBubble(object, journal, pageId) {
@@ -2169,8 +2132,8 @@ export class MonksEnhancedJournal {
             return;
 
         let text = '';
-        if (getProperty(page, "flags.monks-enhanced-journal.type") == "list") {
-            let items = getProperty(page, "flags.monks-enhanced-journal.items");
+        if (foundry.utils.getProperty(page, "flags.monks-enhanced-journal.type") == "list") {
+            let items = foundry.utils.getProperty(page, "flags.monks-enhanced-journal.items");
             if (items.length) {
                 let idx = Math.floor(Math.random() * items.length);
                 text = items[idx].text;
@@ -2188,7 +2151,7 @@ export class MonksEnhancedJournal {
                 } else {
                     idx = object.flags['monks-enhanced-journal']?.chatbubbleidx || 0;
                     idx = (idx + 1) % items.length;
-                    idx = Math.clamped(idx, 0, items.length - 1);
+                    idx = Math.clamp(idx, 0, items.length - 1);
                     if (game.user.isGM)
                         object.document.setFlag('monks-enhanced-journal', 'chatbubbleidx', idx);
                     else
@@ -2290,7 +2253,7 @@ export class MonksEnhancedJournal {
             let page = doc.pages.contents[0];
             if (MonksEnhancedJournal.getMEJType(page) == "picture" && !doc.testUserPermission(game.user, "OWNER")) {
                 let defaultSettings = setting("sheet-settings");
-                if (getProperty(page, "flags.monks-enhanced-journal.sheet-settings.settings.open.value") === true || getProperty(defaultSettings, "picture.settings.open.value") === true) {
+                if (foundry.utils.getProperty(page, "flags.monks-enhanced-journal.sheet-settings.settings.open.value") === true || foundry.utils.getProperty(defaultSettings, "picture.settings.open.value") === true) {
                     return false;
                 }
             }
@@ -2322,7 +2285,7 @@ export class MonksEnhancedJournal {
         }
 
         //if the enhanced journal is already open, then just pass it the new object, if not then let it render as normal
-        options = mergeObject(options, { force: options?.tempOwnership, autoPage: true });
+        options = foundry.utils.mergeObject(options, { force: options?.tempOwnership, autoPage: true });
         if (MonksEnhancedJournal.journal) {
             if (doc)
                 MonksEnhancedJournal.journal.open(doc, options.newtab, options);
@@ -2545,7 +2508,10 @@ export class MonksEnhancedJournal {
 
         let sheetSettings = game.settings.settings.get("monks-enhanced-journal.sheet-settings");
         if (sheetSettings) {
-            const original = game.system?.documentTypes?.Item || [];
+            let original = Object.keys(game.system?.documentTypes?.Item || {});
+            if (!(original instanceof Array)) {
+                original = Object.keys(original);
+            }
             let types = original.filter(x => MonksEnhancedJournal.includedTypes.includes(x));
             types = types.reduce((obj, t) => {
                 const label = CONFIG.Item?.typeLabels?.[t] ?? t;
@@ -2554,7 +2520,7 @@ export class MonksEnhancedJournal {
                 }
                 return obj;
             }, {});
-            mergeObject(sheetSettings.default.shop.adjustment, types);
+            foundry.utils.mergeObject(sheetSettings.default.shop.adjustment, types);
         }
 
         let chatbubbles = game.settings.settings.get("monks-enhanced-journal.show-chat-bubbles");
@@ -2620,7 +2586,7 @@ export class MonksEnhancedJournal {
         //});
         //Andale Mono=andale mono,times; Arial=arial,helvetica,sans-serif; Arial Black=arial black,avant garde; Book Antiqua=book antiqua,palatino; Comic Sans MS=comic sans ms,sans-serif; Courier New=courier new,courier; Georgia=georgia,palatino; Helvetica=helvetica; Impact=impact,chicago; Oswald=oswald; Symbol=symbol; Tahoma=tahoma,arial,helvetica,sans-serif; Terminal=terminal,monaco; Times New Roman=times new roman,times; Trebuchet MS=trebuchet ms,geneva; Verdana=verdana,geneva; Webdings=webdings; Wingdings=wingdings,zapf dingbats
         let font_formats = (CONFIG.TinyMCE.font_formats || '').split(';').reduce((obj, f, index) => { let parts = f.split('='); if (parts[0] && parts[1]) obj[parts[0]] = parts[1]; return obj; }, {});
-        mergeObject(font_formats, {
+        foundry.utils.mergeObject(font_formats, {
             'Andale Mono':'andale mono, times',
             'Arial':'arial, helvetica, sans- serif',
             'Arial Black':'arial black, avant garde',
@@ -2653,7 +2619,7 @@ export class MonksEnhancedJournal {
 
         // Preload fonts for polyglot so there isn't a delay in showing them, and possibly revealing something
         /*
-        if (game.modules.get("polyglot")?.active && !isNewerVersion(game.modules.get("polyglot")?.version, "1.7.30")) {
+        if (game.modules.get("polyglot")?.active && !foundry.utils.isNewerVersion(game.modules.get("polyglot")?.version, "1.7.30")) {
             let root = $('<div>').attr('id', 'enhanced-journal-fonts').appendTo('body');
             for (let [k, v] of Object.entries(polyglot.polyglot.LanguageProvider.alphabets)) {
                 $('<span>').attr('lang', k).css({ font: v }).appendTo(root);
@@ -2765,7 +2731,7 @@ export class MonksEnhancedJournal {
             let original = await fromUuid(data.uuid);
             let orgPage = original.pages.contents[0];
             if (original.isOwner && orgPage.isOwner) {
-                let pageData = duplicate(getProperty(orgPage, "flags.monks-enhanced-journal.relationships") || {});
+                let pageData = foundry.utils.duplicate(foundry.utils.getProperty(orgPage, "flags.monks-enhanced-journal.relationships") || {});
                 pageData.findSplice(i => i.id == data.id || i._id == data.id);
                 orgPage.setFlag('monks-enhanced-journal', "relationships", pageData);
             }
@@ -2775,7 +2741,7 @@ export class MonksEnhancedJournal {
     /*
     static startSlideshow(id) {
         let journal = game.journal.get(id);
-        if (journal && journal.pages.size == 1 && getProperty(journal.pages.contents[0], "flags.monks-enhanced-journal.type") == "slideshow") {
+        if (journal && journal.pages.size == 1 && foundry.utils.getProperty(journal.pages.contents[0], "flags.monks-enhanced-journal.type") == "slideshow") {
             let page = journal.pages.contents[0];
             page.type = "slideshow";
             return page.sheet.render(true, { play: true });
@@ -2784,7 +2750,7 @@ export class MonksEnhancedJournal {
 
     static endSlideshow(id) {
         let journal = game.journal.get(id);
-        if (journal && journal.pages.size == 1 && getProperty(journal.pages.contents[0], "flags.monks-enhanced-journal.type") == "slideshow") {
+        if (journal && journal.pages.size == 1 && foundry.utils.getProperty(journal.pages.contents[0], "flags.monks-enhanced-journal.type") == "slideshow") {
             let page = journal.pages.contents[0];
             let sheet = page.sheet;
             sheet.stopSlideshow();
@@ -2845,7 +2811,7 @@ export class MonksEnhancedJournal {
 
                 if (MonksEnhancedJournal.slideshow.content.audiofile != undefined && MonksEnhancedJournal.slideshow.content.audiofile != '' && MonksEnhancedJournal.slideshow.sound == undefined) {
                     let volume = MonksEnhancedJournal.slideshow.content.volume ?? 1;
-                    AudioHelper.play({
+                    foundry.audio.AudioHelper.play({
                         src: MonksEnhancedJournal.slideshow.content.audiofile,
                         loop: MonksEnhancedJournal.slideshow.content.loopaudio,
                         volume: volume //game.settings.get("core", "globalInterfaceVolume")
@@ -2928,7 +2894,7 @@ export class MonksEnhancedJournal {
                                     }
                                     if (MonksEnhancedJournal.slideshow.slide.audiofile != undefined && MonksEnhancedJournal.slideshow.slide.audiofile != '') {
                                         let volume = MonksEnhancedJournal.slideshow.slide.volume ?? 1;
-                                        AudioHelper.play({
+                                        foundry.audio.AudioHelper.play({
                                             src: MonksEnhancedJournal.slideshow.slide.audiofile,
                                             loop: false,
                                             volume: volume //game.settings.get("core", "globalInterfaceVolume")
@@ -2950,7 +2916,7 @@ export class MonksEnhancedJournal {
                             }
                             if (MonksEnhancedJournal.slideshow.slide.audiofile != undefined && MonksEnhancedJournal.slideshow.slide.audiofile != '') {
                                 let volume = MonksEnhancedJournal.slideshow.slide.volume ?? 1;
-                                AudioHelper.play({
+                                foundry.audio.AudioHelper.play({
                                     src: MonksEnhancedJournal.slideshow.slide.audiofile,
                                     loop: false,
                                     volume: volume //game.settings.get("core", "globalInterfaceVolume")
@@ -3029,9 +2995,9 @@ export class MonksEnhancedJournal {
         let textarea = $('<div>').addClass('slide-textarea');
         for (let t of slide.texts) {
             let bgcolor = Color.from(t.background || '#000000');
-            let color = t.color || getProperty(slideshow, "font.color") || "#FFFFFF";
-            let font = t.font || getProperty(slideshow, "font.name") || windowFont;
-            let size = t.size || getProperty(slideshow, "font.size") || windowSize;
+            let color = t.color || foundry.utils.getProperty(slideshow, "font.color") || "#FFFFFF";
+            let font = t.font || foundry.utils.getProperty(slideshow, "font.name") || windowFont;
+            let size = t.size || foundry.utils.getProperty(slideshow, "font.size") || windowSize;
             size = (size / windowSize) * 100;
             let style = {
                 'font-size': size + "%",
@@ -3199,7 +3165,7 @@ export class MonksEnhancedJournal {
                 //let ownership = entry.ownership.default;
                 //let completed = entry.getFlag('monks-enhanced-journal', 'completed');
                 let page = document.pages.contents[0];
-                let status = getProperty(page, 'flags.monks-enhanced-journal.status') || (getProperty(page, 'flags.monks-enhanced-journal.completed') ? 'completed' : 'inactive');
+                let status = foundry.utils.getProperty(page, 'flags.monks-enhanced-journal.status') || (foundry.utils.getProperty(page, 'flags.monks-enhanced-journal.completed') ? 'completed' : 'inactive');
                 $(this).attr('status', status);
             }
 
@@ -3247,11 +3213,11 @@ export class MonksEnhancedJournal {
     }
 
     static getOpenState(data) {
-        let state = getProperty(data, "flags.monks-enhanced-journal.state");
+        let state = foundry.utils.getProperty(data, "flags.monks-enhanced-journal.state");
 
-        let autoopen = getProperty(data, "flags.monks-enhanced-journal.autoopen");
-        let opening = getProperty(data, "flags.monks-enhanced-journal.opening");
-        let closing = getProperty(data, "flags.monks-enhanced-journal.closing");
+        let autoopen = foundry.utils.getProperty(data, "flags.monks-enhanced-journal.autoopen");
+        let opening = foundry.utils.getProperty(data, "flags.monks-enhanced-journal.opening");
+        let closing = foundry.utils.getProperty(data, "flags.monks-enhanced-journal.closing");
         if (autoopen && opening && closing) {
             let dayTime = MonksEnhancedJournal.getWorldTime();
             // Check to see that a time keeping program is active and determine if the store is open from time.
@@ -3272,7 +3238,7 @@ export class MonksEnhancedJournal {
                 if (cls && cls.purchaseItem) {
                     cls.purchaseItem.call(cls, entry, data.itemid, data.quantity, { actor, user: data.user, chatmessage: data.chatmessage, purchased: data.purchased, remaining: data.remaining });
                     let item = (entry.getFlag('monks-enhanced-journal', 'items') || []).find(i => i._id == data.itemid);
-                    let price = MEJHelpers.getPrice(getProperty(item, "flags.monks-enhanced-journal.cost"));
+                    let price = MEJHelpers.getPrice(foundry.utils.getProperty(item, "flags.monks-enhanced-journal.cost"));
                     if (data.purchase === true && item) {
                         price.value = price.value * (data.quantity ?? 1);
                         cls.actorPurchase(actor, price);
@@ -3289,12 +3255,12 @@ export class MonksEnhancedJournal {
             let actor = game.actors.get(data.actorid);
 
             if (entry && actor) {
-                let items = duplicate(entry.getFlag('monks-enhanced-journal', 'items') || []);
+                let items = foundry.utils.duplicate(entry.getFlag('monks-enhanced-journal', 'items') || []);
                 let item = items.find(i => i._id == data.itemid);
                 if (item) {
-                    let requests = getProperty(item, "flags.monks-enhanced-journal.requests") || {};
+                    let requests = foundry.utils.getProperty(item, "flags.monks-enhanced-journal.requests") || {};
                     requests[data.senderId] = !requests[data.senderId];
-                    setProperty(item, "flags.monks-enhanced-journal.requests", requests);
+                    foundry.utils.setProperty(item, "flags.monks-enhanced-journal.requests", requests);
                 }
                 entry.setFlag('monks-enhanced-journal', 'items', items);
             }
@@ -3351,7 +3317,7 @@ export class MonksEnhancedJournal {
 
         let wallCollide = function (ray) {
             for (let wall of canvas.scene.walls) {
-                if (lineSegmentIntersects(ray.A, ray.B, { x: wall.c[0], y: wall.c[1] }, { x: wall.c[2], y: wall.c[3] }))
+                if (foundry.utils.lineSegmentIntersects(ray.A, ray.B, { x: wall.c[0], y: wall.c[1] }, { x: wall.c[2], y: wall.c[3] }))
                     return true;
             }
             return false
@@ -3367,7 +3333,7 @@ export class MonksEnhancedJournal {
                 p.y = template.y + (dy * canvas.scene.dimensions.size);
                 return p;
             }).filter((p) => {
-                return canvas.grid.grid._testShape(p.x - template.x, p.y - template.y, template.shape)
+                return canvas.grid._testShape(p.x - template.x, p.y - template.y, template.shape)
             });
         }
         /*
@@ -3421,7 +3387,7 @@ export class MonksEnhancedJournal {
     }
 
     static _getGridHighlightPositions(template) {
-        const grid = canvas.grid.grid;
+        const grid = canvas.grid;
         const d = canvas.dimensions;
         const { x, y, distance } = template;
 
@@ -3461,7 +3427,7 @@ export class MonksEnhancedJournal {
         if (game.user.isGM) {
             let entry = await fromUuid(data.listId);
             if (entry) {
-                let items = duplicate(getProperty(entry, "flags.monks-enhanced-journal.items"));
+                let items = foundry.utils.duplicate(foundry.utils.getProperty(entry, "flags.monks-enhanced-journal.items"));
                 let item = items.find(i => i.id == data.itemId);
 
                 if (item) {
@@ -3509,7 +3475,7 @@ export class MonksEnhancedJournal {
                 //find the item
                 let msgitems = message.getFlag('monks-enhanced-journal', 'items');
                 for (let msgitem of msgitems) {
-                    let data = getProperty(msgitem, "flags.monks-enhanced-journal")
+                    let data = foundry.utils.getProperty(msgitem, "flags.monks-enhanced-journal")
                     let purchaseQty = data.quantity;
                     if (purchaseQty == 0)
                         continue;
@@ -3523,7 +3489,7 @@ export class MonksEnhancedJournal {
                     MonksEnhancedJournal.fixType(entry);
                     const cls = (entry._getSheetClass ? entry._getSheetClass() : null);
 
-                    let remaining = getProperty(item, "flags.monks-enhanced-journal.quantity");
+                    let remaining = foundry.utils.getProperty(item, "flags.monks-enhanced-journal.quantity");
                     if (remaining && remaining < purchaseQty) {
                         //check to see if there's enough quantity
                         ui.notifications.warn(i18n("MonksEnhancedJournal.msg.CannotTransferItemQuantity"));
@@ -3541,7 +3507,7 @@ export class MonksEnhancedJournal {
                     }
 
                     //Add it to the actor
-                    let itemData = duplicate(item);
+                    let itemData = foundry.utils.duplicate(item);
                     if ((itemData.type === "spell") && game.system.id == 'dnd5e') {
                         itemData = await cls.createScrollFromSpell(itemData);
                     }
@@ -3586,7 +3552,7 @@ export class MonksEnhancedJournal {
 
                     let msgitems = message.getFlag('monks-enhanced-journal', 'items');
                     for (let msgitem of msgitems) {
-                        let data = getProperty(msgitem, "flags.monks-enhanced-journal")
+                        let data = foundry.utils.getProperty(msgitem, "flags.monks-enhanced-journal")
                         let purchaseQty = data.quantity;
 
                         if (purchaseQty == 0)
@@ -3623,7 +3589,7 @@ export class MonksEnhancedJournal {
                         data.lock = true;
                         data.from = actor.name;
 
-                        setProperty(msgitem, "flags.monks-enhanced-journal", data);
+                        foundry.utils.setProperty(msgitem, "flags.monks-enhanced-journal", data);
 
                         if (!game.user.isGM)
                             MonksEnhancedJournal.emit("sellItem", { shopid: msgshop.uuid, itemdata: msgitem, actorId: actor.uuid, quantity: data.quantity, price: (data.sell * purchaseQty) + " " + data.currency, type: 'sell' });
@@ -3659,7 +3625,7 @@ export class MonksEnhancedJournal {
         let content = $(message.content);
         let id = $(event.currentTarget).closest('li').attr('data-id');
 
-        let items = duplicate(message.getFlag('monks-enhanced-journal', 'items') || []);
+        let items = foundry.utils.duplicate(message.getFlag('monks-enhanced-journal', 'items') || []);
         let item = items.find(i => i._id == id);
         if (item == undefined)
             return;
@@ -3667,11 +3633,11 @@ export class MonksEnhancedJournal {
         let html = $(event.currentTarget).closest('ol.item-list');
 
         let quantity = parseInt($(`li[data-id="${id}"] input[name="flags.monks-enhanced-journal.quantity"]`, html).val());
-        setProperty(item, "flags.monks-enhanced-journal.quantity", quantity);
+        foundry.utils.setProperty(item, "flags.monks-enhanced-journal.quantity", quantity);
         $(`li[data-id="${id}"] .item-quantity span`, content).html(quantity);
 
         if ($(`li[data-id="${id}"] input[name="flags.monks-enhanced-journal.sell"]`, html).length) {
-            let data = getProperty(item, "flags.monks-enhanced-journal");
+            let data = foundry.utils.getProperty(item, "flags.monks-enhanced-journal");
 
             let sell = $(`li[data-id="${id}"] input[name="flags.monks-enhanced-journal.sell"]`, html).val();
             let price = MEJHelpers.getPrice(sell);
@@ -3680,7 +3646,7 @@ export class MonksEnhancedJournal {
             data.currency = price.currency;
             data.total = data.quantity * data.sell;
 
-            setProperty(item, "flags.monks-enhanced-journal", data);
+            foundry.utils.setProperty(item, "flags.monks-enhanced-journal", data);
 
             $(`li[data-id="${id}"] input[name="sell"]`, html).val(data.sell + ' ' + price.currency);
 
@@ -3703,14 +3669,14 @@ export class MonksEnhancedJournal {
                 return;
 
             // if it's a journal entry, then check to see if it's an MEJ sheet, then switch to the page
-            if (document instanceof JournalEntry && document.pages.size == 1 && !!getProperty(this.object.pages.contents[0], "flags.monks-enhanced-journal.type")) {
+            if (document instanceof JournalEntry && document.pages.size == 1 && !!foundry.utils.getProperty(this.object.pages.contents[0], "flags.monks-enhanced-journal.type")) {
                 document = this.object.pages.contents[0];
             }
 
             if (document instanceof JournalEntryPage) {
                 // Fix the page, and confirm that it's an MEJ type, otherwise switch to the parent, with the page as a link
                 MonksEnhancedJournal.fixType(document);
-                let type = getProperty(document, "flags.monks-enhanced-journal.type");
+                let type = foundry.utils.getProperty(document, "flags.monks-enhanced-journal.type");
                 if (type == "base" || type == "oldentry") type = "journalentry";
                 let types = MonksEnhancedJournal.getDocumentTypes();
                 if (!types[type]) {
@@ -3737,7 +3703,7 @@ export class MonksEnhancedJournal {
         if (game.user.isGM) {
             let entry = await fromUuid(data.uuid);
             if (entry) {
-                let offerings = duplicate(entry.getFlag("monks-enhanced-journal", "offerings") || []);
+                let offerings = foundry.utils.duplicate(entry.getFlag("monks-enhanced-journal", "offerings") || []);
                 data.offering.id = makeid();
                 offerings.unshift(data.offering);
                 await entry.setFlag("monks-enhanced-journal", "offerings", offerings);
@@ -3758,7 +3724,7 @@ export class MonksEnhancedJournal {
         if (game.user.isGM) {
             let entry = await fromUuid(data.uuid);
             if (entry) {
-                let offerings = duplicate(entry.getFlag("monks-enhanced-journal", "offerings"));
+                let offerings = foundry.utils.duplicate(entry.getFlag("monks-enhanced-journal", "offerings"));
                 let offering = offerings.find(r => r.id == data.id);
                 offering.hidden = true;
                 offering.state = "cancelled";
@@ -3863,7 +3829,7 @@ export class MonksEnhancedJournal {
             let result = [$('<li>').addClass('journal-item create-item').attr('data-uuid', folderID || "root").html($('<div>').addClass('journal-title').toggleClass('selected', uuid == undefined).html("-- create entry here --")).click(selectItem.bind())];
             return result.concat((contents || [])
                 .filter(c => {
-                    return (c instanceof JournalEntry && c.pages.size == 1 && getProperty(c.pages.contents[0], "flags.monks-enhanced-journal.type") == "loot") || (c instanceof Actor)
+                    return (c instanceof JournalEntry && c.pages.size == 1 && foundry.utils.getProperty(c.pages.contents[0], "flags.monks-enhanced-journal.type") == "loot") || (c instanceof Actor)
                 })
                 .sort((a, b) => { return a.sort < b.sort ? -1 : a.sort > b.sort ? 1 : 0; })
                 .map(e => {
@@ -4024,8 +3990,8 @@ export class MonksEnhancedJournal {
                 object.unsetFlag("monks-enhanced-journal", "type");
 
             return type;
-        } else if (["blank", "folder"].includes(getProperty(object, "flags.monks-enhanced-journal.type"))) {
-            object.type = getProperty(object, "flags.monks-enhanced-journal.type");
+        } else if (["blank", "folder"].includes(foundry.utils.getProperty(object, "flags.monks-enhanced-journal.type"))) {
+            object.type = foundry.utils.getProperty(object, "flags.monks-enhanced-journal.type");
         }
     }
 
@@ -4218,13 +4184,13 @@ Hooks.on("preCreateJournalEntryPage", (entry, data, options, userId) => {
 
             let types = MonksEnhancedJournal.getDocumentTypes();
             if (types[type]) {
-                let flags = getProperty("flags.monks-enhanced-journal") || {};
+                let flags = foundry.utils.getProperty("flags.monks-enhanced-journal") || {};
                 flags.type = type;
 
                 MonksEnhancedJournal.fixType(entry);
                 const cls = (entry._getSheetClass ? entry._getSheetClass() : null);
                 if (cls && cls.defaultObject)
-                    flags = mergeObject(flags, cls.defaultObject);
+                    flags = foundry.utils.mergeObject(flags, cls.defaultObject);
 
                 entry._source.flags['monks-enhanced-journal'] = flags;
             }
@@ -4233,7 +4199,7 @@ Hooks.on("preCreateJournalEntryPage", (entry, data, options, userId) => {
 });
 
 Hooks.on("createJournalEntryPage", (entry, data, options, userId) => {
-    let type = getProperty(entry, "flags.monks-enhanced-journal.type");
+    let type = foundry.utils.getProperty(entry, "flags.monks-enhanced-journal.type");
     if (type) {
         if (type == "base" || type == "oldentry") type = "journalentry";
         let types = MonksEnhancedJournal.getDocumentTypes();
@@ -4248,14 +4214,14 @@ Hooks.on("createJournalEntryPage", (entry, data, options, userId) => {
 });
 
 Hooks.on("preCreateJournalEntry", (document, data, options, userId) => {
-    let type = getProperty(data, "flags.monks-enhanced-journal.pagetype");
+    let type = foundry.utils.getProperty(data, "flags.monks-enhanced-journal.pagetype");
     let types = MonksEnhancedJournal.getDocumentTypes();
     if (types[type]) {
-        let flags = getProperty(data, "flags.monks-enhanced-journal") || {};
+        let flags = foundry.utils.getProperty(data, "flags.monks-enhanced-journal") || {};
         flags.img = `modules/monks-enhanced-journal/assets/${type}.png`;
 
-        setProperty(data, "flags.monks-enhanced-journal", flags);
-        setProperty(document, "flags.monks-enhanced-journal", flags);
+        foundry.utils.setProperty(data, "flags.monks-enhanced-journal", flags);
+        foundry.utils.setProperty(document, "flags.monks-enhanced-journal", flags);
     }
 });
 
@@ -4271,7 +4237,7 @@ Hooks.on("updateJournalEntry", (document, data, options, userId) => {
 });
 
 Hooks.on("updateJournalEntryPage", (document, data, options, userId) => {
-    let type = getProperty(document, 'flags.monks-enhanced-journal.type');
+    let type = foundry.utils.getProperty(document, 'flags.monks-enhanced-journal.type');
     if (type == 'quest')
         MonksEnhancedJournal.refreshObjectives(true);
 
@@ -4279,11 +4245,11 @@ Hooks.on("updateJournalEntryPage", (document, data, options, userId) => {
         document.parent.update({name: data.name});
     }
 
-    if (getProperty(data, "flags.monks-enhanced-journal.status") != undefined) {
-        $(`.journalentry[data-entry-id="${document.parent.id}"]`).attr("status", getProperty(data, "flags.monks-enhanced-journal.status"));
+    if (foundry.utils.getProperty(data, "flags.monks-enhanced-journal.status") != undefined) {
+        $(`.journalentry[data-entry-id="${document.parent.id}"]`).attr("status", foundry.utils.getProperty(data, "flags.monks-enhanced-journal.status"));
     }
 
-    let flags = getProperty(data, "flags.monks-enhanced-journal") || {};
+    let flags = foundry.utils.getProperty(data, "flags.monks-enhanced-journal") || {};
     let renderUpdateKeys = ["actor", "actors", "relationships", "currency", "items", "type", "attributes", "slides", "font", "dcs", "traps", "objectives", "folders", "reward", "rewards", "sound", "offerings", "state", "opening", "closing", "log"];
 
     let renderUpdate = renderUpdateKeys.some(d => {
@@ -4299,7 +4265,7 @@ Hooks.on("updateJournalEntryPage", (document, data, options, userId) => {
             (data.text?.content != undefined ||
                 data.ownership != undefined ||
                 renderUpdate ||
-                getProperty(data, "flags.core.sheetClass") != undefined))
+            foundry.utils.getProperty(data, "flags.core.sheetClass") != undefined))
         {
             MonksEnhancedJournal.journal.render(MonksEnhancedJournal.journal.tempOwnership, { reload: true, focus: options?.focus !== false });
         }
@@ -4307,7 +4273,7 @@ Hooks.on("updateJournalEntryPage", (document, data, options, userId) => {
         if (data.content != undefined ||
             data.ownership != undefined ||
             renderUpdate ||
-            getProperty(data, "flags.core.sheetClass") != undefined)
+            foundry.utils.getProperty(data, "flags.core.sheetClass") != undefined)
         {
             if (document._sheet && document._sheet.rendered)
                 document._sheet.render(true, { reload: true });
@@ -4449,8 +4415,8 @@ Hooks.on('renderNoteConfig', (app, html, data) => {
 
         let mejSheet = false;
         let journal = game.journal.get(id);
-        if (journal?.pages?.size == 1 && (!!getProperty(journal?.pages?.contents[0], "flags.monks-enhanced-journal.type") || !!getProperty(journal, "flags.monks-enhanced-journal.type"))) {
-            let type = getProperty(journal?.pages?.contents[0], "flags.monks-enhanced-journal.type") || getProperty(journal, "flags.monks-enhanced-journal.type");
+        if (journal?.pages?.size == 1 && (!!foundry.utils.getProperty(journal?.pages?.contents[0], "flags.monks-enhanced-journal.type") || !!foundry.utils.getProperty(journal, "flags.monks-enhanced-journal.type"))) {
+            let type = foundry.utils.getProperty(journal?.pages?.contents[0], "flags.monks-enhanced-journal.type") || foundry.utils.getProperty(journal, "flags.monks-enhanced-journal.type");
             if (type == "base" || type == "oldentry") type = "journalentry";
             let types = MonksEnhancedJournal.getDocumentTypes();
             if (types[type]) {
@@ -4490,8 +4456,8 @@ Hooks.on('renderNoteConfig', (app, html, data) => {
 
     let mejSheet = false;
     let journal = data.entry;
-    if (journal?.pages?.size == 1 && (!!getProperty(journal?.pages?.contents[0], "flags.monks-enhanced-journal.type") || !!getProperty(journal, "flags.monks-enhanced-journal.type"))) {
-        let type = getProperty(journal?.pages?.contents[0], "flags.monks-enhanced-journal.type") || getProperty(journal, "flags.monks-enhanced-journal.type");
+    if (journal?.pages?.size == 1 && (!!foundry.utils.getProperty(journal?.pages?.contents[0], "flags.monks-enhanced-journal.type") || !!foundry.utils.getProperty(journal, "flags.monks-enhanced-journal.type"))) {
+        let type = foundry.utils.getProperty(journal?.pages?.contents[0], "flags.monks-enhanced-journal.type") || foundry.utils.getProperty(journal, "flags.monks-enhanced-journal.type");
         if (type == "base" || type == "oldentry") type = "journalentry";
         let types = MonksEnhancedJournal.getDocumentTypes();
         if (types[type]) {
@@ -4507,7 +4473,7 @@ Hooks.on('renderNoteConfig', (app, html, data) => {
 
 Hooks.on("renderTokenConfig", (app, html, data) => {
     if (game.user.isGM) {
-        let ctrl = $('<input>').attr('type', 'text').attr('name', 'flags.monks-enhanced-journal.chatbubble').val(getProperty(data, 'object.flags.monks-enhanced-journal.chatbubble'));
+        let ctrl = $('<input>').attr('type', 'text').attr('name', 'flags.monks-enhanced-journal.chatbubble').val(foundry.utils.getProperty(data, 'object.flags.monks-enhanced-journal.chatbubble'));
         let group = $('<div>').addClass('form-group')
             .append($('<label>').html(i18n("MonksEnhancedJournal.TokenDialogJournalEntry")))
             .append(ctrl);
@@ -4539,8 +4505,8 @@ Hooks.on("renderSceneConfig", (app, html, data) => {
         MonksEnhancedJournal.journalListing(ctrl, html, journal?.id, journal?.name, 'journal', (id, name) => {
             let mejSheet = false;
             let journal = game.journal.get(id);
-            if (journal?.pages?.size == 1 && (!!getProperty(journal?.pages?.contents[0], "flags.monks-enhanced-journal.type") || !!getProperty(journal, "flags.monks-enhanced-journal.type"))) {
-                let type = getProperty(journal?.pages?.contents[0], "flags.monks-enhanced-journal.type") || getProperty(journal, "flags.monks-enhanced-journal.type");
+            if (journal?.pages?.size == 1 && (!!foundry.utils.getProperty(journal?.pages?.contents[0], "flags.monks-enhanced-journal.type") || !!foundry.utils.getProperty(journal, "flags.monks-enhanced-journal.type"))) {
+                let type = foundry.utils.getProperty(journal?.pages?.contents[0], "flags.monks-enhanced-journal.type") || foundry.utils.getProperty(journal, "flags.monks-enhanced-journal.type");
                 if (type == "base" || type == "oldentry") type = "journalentry";
                 let types = MonksEnhancedJournal.getDocumentTypes();
                 if (types[type]) {
@@ -4585,8 +4551,8 @@ Hooks.on("renderChatMessage", (message, html, data) => {
 
         let items = message.getFlag('monks-enhanced-journal', 'items') || [];
         for (let item of items) {
-            $(`li[data-id="${item._id}"] input[name="flags.monks-enhanced-journal.quantity"]`, html).val(getProperty(item, "flags.monks-enhanced-journal.quantity"));
-            $(`li[data-id="${item._id}"] input[name="flags.monks-enhanced-journal.sell"]`, html).val(getProperty(item, "flags.monks-enhanced-journal.sell") + " " + getProperty(item, "flags.monks-enhanced-journal.currency"));
+            $(`li[data-id="${item._id}"] input[name="flags.monks-enhanced-journal.quantity"]`, html).val(foundry.utils.getProperty(item, "flags.monks-enhanced-journal.quantity"));
+            $(`li[data-id="${item._id}"] input[name="flags.monks-enhanced-journal.sell"]`, html).val(foundry.utils.getProperty(item, "flags.monks-enhanced-journal.sell") + " " + foundry.utils.getProperty(item, "flags.monks-enhanced-journal.currency"));
         }
 
         $('.chat-actor-icon', html).click(MonksEnhancedJournal.openRequestItem.bind(message, 'actor')).attr('onerror', "$(this).attr('src', 'icons/svg/mystery-man.svg');");
@@ -4708,7 +4674,7 @@ Hooks.on("polyglot.ready", () => {
 Hooks.on("renderItemSheet", (sheet, html, data) => {
     //Change the price so we can specify the currency type
     if (data.options?.alterprice == true) {
-        $('input[name="system.price"]', html).attr("name", "flags.monks-enhanced-journal.price").attr('data-dtype', 'String').attr('type', 'text').val(getProperty(data, "item.flags.monks-enhanced-journal.price"))
+        $('input[name="system.price"]', html).attr("name", "flags.monks-enhanced-journal.price").attr('data-dtype', 'String').attr('type', 'text').val(foundry.utils.getProperty(data, "item.flags.monks-enhanced-journal.price"))
     }
 
     /*
@@ -4716,7 +4682,7 @@ Hooks.on("renderItemSheet", (sheet, html, data) => {
         let quantityGroup = $('input[name="system.quantity"]', html).closest('.form-group');
         $('<div>').addClass('form-group')
             .append($('<label>').html(i18n("MonksEnhancedJournal.Remaining")))
-            .append($('<input>').attr('type', 'text').attr('name', 'flags.monks-enhanced-journal.remaining').attr('data-dtype', 'String').val(getProperty(data, "item.flags.monks-enhanced-journal.remaining")))
+            .append($('<input>').attr('type', 'text').attr('name', 'flags.monks-enhanced-journal.remaining').attr('data-dtype', 'String').val(foundry.utils.getProperty(data, "item.flags.monks-enhanced-journal.remaining")))
             .insertAfter(quantityGroup);
     }
     */
@@ -4725,7 +4691,7 @@ Hooks.on("renderItemSheet", (sheet, html, data) => {
         let priceGroup = $('input[name="system.price"]', html).closest('.form-group');
         $('<div>').addClass('form-group')
             .append($('<label>').html(i18n("MonksEnhancedJournal.Cost")))
-            .append($('<input>').attr('type', 'text').attr('name', 'flags.monks-enhanced-journal.cost').attr('data-dtype', 'String').val(getProperty(data, "item.flags.monks-enhanced-journal.cost")))
+            .append($('<input>').attr('type', 'text').attr('name', 'flags.monks-enhanced-journal.cost').attr('data-dtype', 'String').val(foundry.utils.getProperty(data, "item.flags.monks-enhanced-journal.cost")))
             .insertAfter(priceGroup);
     }
 });
@@ -4838,7 +4804,7 @@ Hooks.on("renderJournalPageSheet", (sheet, html, data) => {
         let opt = $("<option>").attr("value", -1).html("Appendix");
         $('select[name="title.level"]').append(opt);
     }
-    if (getProperty(data, "flags.monks-enhanced-journal.appendix"))
+    if (foundry.utils.getProperty(data, "flags.monks-enhanced-journal.appendix"))
         $('select[name="title.level"]').val(-1);
     if (data.isCharacter == undefined && (data.data.type == "video" || data.data.type == "image")) {
         if (!sheet.isEditable) {
@@ -4858,8 +4824,8 @@ Hooks.on("renderCompendium", async (app, html, data) => {
         await app.collection.getIndex({ fields: ["img", "flags.monks-enhanced-journal"] });
         for (let index of app.collection.index) {
             let img = $(`li[data-document-id="${index._id}"] > img.thumbnail`, html);
-            let pagetype = getProperty(index, "flags.monks-enhanced-journal.pagetype");
-            let imgFile = index.img || getProperty(index, "flags.monks-enhanced-journal.img") || (pagetype && types[pagetype] != undefined ? `modules/monks-enhanced-journal/assets/${pagetype}.png` : "icons/svg/book.svg");
+            let pagetype = foundry.utils.getProperty(index, "flags.monks-enhanced-journal.pagetype");
+            let imgFile = index.img || foundry.utils.getProperty(index, "flags.monks-enhanced-journal.img") || (pagetype && types[pagetype] != undefined ? `modules/monks-enhanced-journal/assets/${pagetype}.png` : "icons/svg/book.svg");
             if (img.length) {
                 img.attr("src", imgFile)
             } else {
@@ -4879,7 +4845,7 @@ Hooks.on('updateWorldTime', async (worldTime) => {
             if (MonksEnhancedJournal.getMEJType(journal) == "shop") {
                 let shop = journal.pages.contents[0];
 
-                let state = getProperty(shop, "flags.monks-enhanced-journal.state");
+                let state = foundry.utils.getProperty(shop, "flags.monks-enhanced-journal.state");
                 let newstate = MonksEnhancedJournal.getOpenState(shop);
                 if (state != newstate) {
                     await shop.setFlag("monks-enhanced-journal", "state", newstate);
@@ -5077,7 +5043,7 @@ Hooks.on("setupTileActions", (app) => {
                             if (/^JournalEntry.[a-zA-Z0-9]{16}$/.test(value)) {
                                 let entity = await fromUuid(value);
 
-                                if (entity && !(entity.pages.size == 1 && !!getProperty(entity.pages.contents[0], "flags.monks-enhanced-journal.type"))) {
+                                if (entity && !(entity.pages.size == 1 && !!foundry.utils.getProperty(entity.pages.contents[0], "flags.monks-enhanced-journal.type"))) {
                                     let list = { "": "" };
                                     for (let p of entity.pages)
                                         list[p._id] = p.name;

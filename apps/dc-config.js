@@ -8,7 +8,7 @@ export class DCConfig extends FormApplication {
 
     /** @override */
     static get defaultOptions() {
-        return mergeObject(super.defaultOptions, {
+        return foundry.utils.mergeObject(super.defaultOptions, {
             id: "dc-config",
             classes: ["form", "dc-sheet"],
             title: i18n("MonksEnhancedJournal.DCConfiguration"),
@@ -28,15 +28,15 @@ export class DCConfig extends FormApplication {
 
         let attributeOptions = [
             { id: "ability", text: "MonksEnhancedJournal.Ability", groups: config.abilities || config.scores || config.atributos },
-            { id: "save", text: "MonksTokenBar.SavingThrow", groups: config.savingThrows || config.saves || config.saves_long || config.resistencias || config.abilities },
+            { id: "save", text: "MonksEnhancedJournal.SavingThrow", groups: config.savingThrows || config.saves || config.saves_long || config.resistencias || config.abilities },
             { id: "skill", text: "MonksEnhancedJournal.Skill", groups: config.skills || config.pericias || skills }
         ];
         if (game.system.id == "pf2e")
-            attributeOptions.push({ id: "attribute", text: i18n("MonksTokenBar.Attribute"), groups: { perception: i18n("PF2E.PerceptionLabel") } });
+            attributeOptions.push({ id: "attribute", text: i18n("MonksEnhancedJournal.Attribute"), groups: { perception: i18n("PF2E.PerceptionLabel") } });
 
         attributeOptions = attributeOptions.filter(g => g.groups);
         for (let attr of attributeOptions) {
-            attr.groups = duplicate(attr.groups);
+            attr.groups = foundry.utils.duplicate(attr.groups);
             for (let [k, v] of Object.entries(attr.groups)) {
                 attr.groups[k] = v?.label || v;
             }
@@ -46,7 +46,7 @@ export class DCConfig extends FormApplication {
     }
 
     getData(options) {
-        return mergeObject(super.getData(options),
+        return foundry.utils.mergeObject(super.getData(options),
             {
                 attributeOptions: DCConfig.optionList()
             }, { recursive: false }
@@ -59,8 +59,8 @@ export class DCConfig extends FormApplication {
     async _updateObject(event, formData) {
         log('updating dc', event, formData, this.object);
 
-        mergeObject(this.object, formData);
-        let dcs = duplicate(this.journalentry.object.flags["monks-enhanced-journal"].dcs || []);
+        foundry.utils.mergeObject(this.object, formData);
+        let dcs = foundry.utils.duplicate(this.journalentry.object.flags["monks-enhanced-journal"].dcs || []);
         if (this.object.id == undefined) {
             this.object.id = makeid();
             dcs.push(this.object);

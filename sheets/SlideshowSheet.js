@@ -15,7 +15,7 @@ export class SlideshowSheet extends EnhancedJournalSheet {
     }
 
     static get defaultOptions() {
-        return mergeObject(super.defaultOptions, {
+        return foundry.utils.mergeObject(super.defaultOptions, {
             title: i18n("MonksEnhancedJournal.slideshow"),
             template: "modules/monks-enhanced-journal/templates/sheets/slideshow.html",
             tabs: [{ navSelector: ".tabs", contentSelector: ".sheet-body", initial: "entry-details" }],
@@ -42,7 +42,7 @@ export class SlideshowSheet extends EnhancedJournalSheet {
         if (this.object._thumbnails == undefined && (game.user.isGM || this.object.testUserPermission(game.user, "OBSERVER")))
             this.loadThumbnails();
 
-        data.fontOptions = mergeObject({ "": "" }, MonksEnhancedJournal.fonts);
+        data.fontOptions = foundry.utils.mergeObject({ "": "" }, MonksEnhancedJournal.fonts);
 
         let flags = (data.data.flags["monks-enhanced-journal"]);
         if (flags == undefined) {
@@ -65,7 +65,7 @@ export class SlideshowSheet extends EnhancedJournalSheet {
         let idx = 0;
         if (flags.slides) {
             let changed = false;
-            let slides = duplicate(flags.slides);
+            let slides = foundry.utils.duplicate(flags.slides);
             for (let slide of slides) {
                 if (slide.text != undefined && slide.texts == undefined) {
                     changed = true;
@@ -95,7 +95,7 @@ export class SlideshowSheet extends EnhancedJournalSheet {
             let windowFont = $(".window-content").css('font-family');
 
             data.slides = flags.slides.map(s => {
-                let slide = duplicate(s);
+                let slide = foundry.utils.duplicate(s);
 
                 slide.thumbnail = s.img ? (this.object._thumbnails && this.object._thumbnails[slide.id]) || "/modules/monks-enhanced-journal/assets/loading.gif" : ""; //slide.img;
 
@@ -105,11 +105,11 @@ export class SlideshowSheet extends EnhancedJournalSheet {
                     slide.background = `background-color:${slide.background.color || "#ffffff"}`;
 
                 slide.texts = slide.texts.map(t => {
-                    let text = duplicate(t);
+                    let text = foundry.utils.duplicate(t);
                     let bgcolor = Color.from(t.background || '#000000');
-                    let color = t.color || getProperty(flags, "font.color") || '#FFFFFF';
-                    let font = t.font || getProperty(flags, "font.name") || windowFont;
-                    let size = t.size || getProperty(flags, "font.size") || windowSize;
+                    let color = t.color || foundry.utils.getProperty(flags, "font.color") || '#FFFFFF';
+                    let font = t.font || foundry.utils.getProperty(flags, "font.name") || windowFont;
+                    let size = t.size || foundry.utils.getProperty(flags, "font.size") || windowSize;
                     size = (size  / windowSize) * 100;
                     let style = {
                         color,
@@ -280,7 +280,7 @@ export class SlideshowSheet extends EnhancedJournalSheet {
         if (this.object.flags["monks-enhanced-journal"].state == 'playing')
             return;
 
-        let slides = duplicate(this.object.flags['monks-enhanced-journal']?.slides || []);
+        let slides = foundry.utils.duplicate(this.object.flags['monks-enhanced-journal']?.slides || []);
 
         let from = slides.findIndex(a => a.id == data.slideId);
         let to = slides.length - 1;
@@ -308,7 +308,7 @@ export class SlideshowSheet extends EnhancedJournalSheet {
         if (this.object.flags["monks-enhanced-journal"].slides == undefined)
             this.object.flags["monks-enhanced-journal"].slides = [];
 
-        let slide = mergeObject({
+        let slide = foundry.utils.mergeObject({
             sizing: 'contain',
             background: { color: '' },
             texts: [],//{ color: '#FFFFFF', background: '#000000', align: 'center', valign: 'middle' },
@@ -319,12 +319,12 @@ export class SlideshowSheet extends EnhancedJournalSheet {
         if (options.showdialog)
             new SlideConfig(slide, this.object).render(true);
         else {
-            let slides = duplicate(this.object.flags["monks-enhanced-journal"].slides || []);
+            let slides = foundry.utils.duplicate(this.object.flags["monks-enhanced-journal"].slides || []);
             slide.id = makeid();
             slides.push(slide);
             this.object.setFlag("monks-enhanced-journal", 'slides', slides);
 
-            let newSlide = MonksEnhancedJournal.createSlide(slide, getProperty(this.object, "flags.monks-enhanced-journal"));
+            let newSlide = MonksEnhancedJournal.createSlide(slide, foundry.utils.getProperty(this.object, "flags.monks-enhanced-journal"));
             let size = $('.slide-textarea', newSlide).outerWidth() / 50;
             $('.slide-textarea', newSlide).css({ 'font-size': `${size}px` });
         }
@@ -347,14 +347,14 @@ export class SlideshowSheet extends EnhancedJournalSheet {
     }
 
     deleteSlide(id, html) {
-        let slides = duplicate(this.object.flags["monks-enhanced-journal"].slides || []);
+        let slides = foundry.utils.duplicate(this.object.flags["monks-enhanced-journal"].slides || []);
         slides.findSplice(s => s.id == id);
         this.object.setFlag("monks-enhanced-journal", 'slides', slides);
     }
 
     cloneSlide(id) {
         let slide = this.object.flags["monks-enhanced-journal"].slides.find(s => s.id == id);
-        let data = duplicate(slide);
+        let data = foundry.utils.duplicate(slide);
         this.addSlide(data, { showdialog: false });
     }
 
@@ -401,7 +401,7 @@ export class SlideshowSheet extends EnhancedJournalSheet {
 
             if (flags.audiofile != undefined && flags.audiofile != '') {
                 let volume = flags.volume ?? 1;
-                AudioHelper.play({
+                foundry.audio.AudioHelper.play({
                     src: flags.audiofile,
                     loop: flags.loopaudio,
                     volume: volume //game.settings.get("core", "globalInterfaceVolume")
@@ -538,7 +538,7 @@ export class SlideshowSheet extends EnhancedJournalSheet {
     showSlide() {
         let idx = this.object.flags["monks-enhanced-journal"].slideAt;
         let slide = this.object.flags["monks-enhanced-journal"].slides[idx];
-        let newSlide = MonksEnhancedJournal.createSlide(slide, getProperty(this.object, "flags.monks-enhanced-journal"));
+        let newSlide = MonksEnhancedJournal.createSlide(slide, foundry.utils.getProperty(this.object, "flags.monks-enhanced-journal"));
         $('.slide-showing', this.element).append(newSlide);
         let size = $('.slide-textarea', newSlide).outerWidth() / 50;
         $('.slide-textarea', newSlide).css({ 'font-size': `${size}px` });
@@ -566,7 +566,7 @@ export class SlideshowSheet extends EnhancedJournalSheet {
         $('.slide-showing .slide', this.element).addClass('out');
 
         //bring in the new slide
-        let newSlide = MonksEnhancedJournal.createSlide(slide, getProperty(this.object, "flags.monks-enhanced-journal"));
+        let newSlide = MonksEnhancedJournal.createSlide(slide, foundry.utils.getProperty(this.object, "flags.monks-enhanced-journal"));
         $('.slide-showing', this.element).append(newSlide);
         let size = $('.slide-showing', this.element).outerWidth() / 50;
         $('.slide-textarea', newSlide).css({ 'font-size': `${size}px` });
@@ -604,7 +604,7 @@ export class SlideshowSheet extends EnhancedJournalSheet {
                         }
                         if (slide.audiofile != undefined && slide.audiofile != '') {
                             let volume = slide.volume ?? 1;
-                            AudioHelper.play({
+                            foundry.audio.AudioHelper.play({
                                 src: slide.audiofile,
                                 loop: false,
                                 volume: volume //game.settings.get("core", "globalInterfaceVolume")
@@ -628,7 +628,7 @@ export class SlideshowSheet extends EnhancedJournalSheet {
                 }
                 if (slide.audiofile != undefined && slide.audiofile != '') {
                     let volume = slide.volume ?? 1;
-                    AudioHelper.play({
+                    foundry.audio.AudioHelper.play({
                         src: slide.audiofile,
                         loop: false,
                         volume: volume //game.settings.get("core", "globalInterfaceVolume")

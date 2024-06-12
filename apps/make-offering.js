@@ -6,7 +6,7 @@ export class MakeOffering extends FormApplication {
         super(object, options);
 
         this.journalsheet = journalsheet;
-        this.offering = mergeObject({
+        this.offering = foundry.utils.mergeObject({
             currency: {},
             items: []
         }, options.offering || {});
@@ -22,7 +22,7 @@ export class MakeOffering extends FormApplication {
 
     /** @override */
     static get defaultOptions() {
-        return mergeObject(super.defaultOptions, {
+        return foundry.utils.mergeObject(super.defaultOptions, {
             id: "make-offering",
             classes: ["form", "make-offering", "monks-journal-sheet", "dialog"],
             title: i18n("MonksEnhancedJournal.MakeOffering"),
@@ -136,7 +136,7 @@ export class MakeOffering extends FormApplication {
         this.offering.state = "offering";
 
         if (game.user.isGM || this.object.isOwner) {
-            let offerings = duplicate(this.object.getFlag("monks-enhanced-journal", "offerings") || []);
+            let offerings = foundry.utils.duplicate(this.object.getFlag("monks-enhanced-journal", "offerings") || []);
             this.offering.id = makeid();
             offerings.unshift(this.offering);
             await this.object.setFlag("monks-enhanced-journal", "offerings", offerings);

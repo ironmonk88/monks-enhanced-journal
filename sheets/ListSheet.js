@@ -14,7 +14,7 @@ export class ListSheet extends EnhancedJournalSheet {
     }
 
     get sheetTemplates() {
-        delete _templateCache["modules/monks-enhanced-journal/templates/sheets/list-template.html"];
+        delete Handlebars.partials["modules/monks-enhanced-journal/templates/sheets/list-template.html"];
         return {
             listItemTemplate: "modules/monks-enhanced-journal/templates/sheets/list-template.html"
         };
@@ -29,7 +29,7 @@ export class ListSheet extends EnhancedJournalSheet {
     }
 
     static get defaultOptions() {
-        return mergeObject(super.defaultOptions, {
+        return foundry.utils.mergeObject(super.defaultOptions, {
             title: i18n("MonksEnhancedJournal.list"),
             template: "modules/monks-enhanced-journal/templates/sheets/list.html",
             dragDrop: [
@@ -224,7 +224,7 @@ export class ListSheet extends EnhancedJournalSheet {
 
     collapseAll() {
         $(this.element).find('li.folder').addClass("collapsed");
-        let folders = duplicate(this.object.flags['monks-enhanced-journal'].folders || []);
+        let folders = foundry.utils.duplicate(this.object.flags['monks-enhanced-journal'].folders || []);
         for (let f of folders) {
             f.expanded = false;
         }
@@ -337,13 +337,13 @@ export class ListSheet extends EnhancedJournalSheet {
 
                 this.updateData(data);
 
-                let collection = duplicate((options.type == 'folder' ? that.object.flags['monks-enhanced-journal']?.folders : that.object.flags['monks-enhanced-journal']?.items) || []);
+                let collection = foundry.utils.duplicate((options.type == 'folder' ? that.object.flags['monks-enhanced-journal']?.folders : that.object.flags['monks-enhanced-journal']?.items) || []);
                 if (data.id == undefined) {
                     data.id = makeid();
                     collection.push(data);
                 } else {
                     let document = collection.find(i => i.id == data.id);
-                    document = mergeObject(document, data);
+                    document = foundry.utils.mergeObject(document, data);
                 }
 
                 that.object.setFlag('monks-enhanced-journal', (options.type == 'folder' ? 'folders' : 'items'), collection);
@@ -356,7 +356,7 @@ export class ListSheet extends EnhancedJournalSheet {
     async _toggleFolder(event) {
         let elem = $(event.currentTarget.parentElement);
         let collapsed = elem.hasClass("collapsed");
-        let folders = duplicate(this.object.flags['monks-enhanced-journal']?.folders || []);
+        let folders = foundry.utils.duplicate(this.object.flags['monks-enhanced-journal']?.folders || []);
         let id = elem.attr("data-folder-id");
         let folder = folders.find(f => f.id == id);
         if (folder) folder.expanded = collapsed;
@@ -442,7 +442,7 @@ export class ListSheet extends EnhancedJournalSheet {
     }
 
     async _handleDroppedDocument(target, data) {
-        let items = duplicate(this.object.flags['monks-enhanced-journal'].items || []);
+        let items = foundry.utils.duplicate(this.object.flags['monks-enhanced-journal'].items || []);
         // Determine the closest folder ID
         const closestFolder = target ? target.closest(".folder") : null;
         if (closestFolder) closestFolder.classList.remove("droptarget");
@@ -480,7 +480,7 @@ export class ListSheet extends EnhancedJournalSheet {
     }
 
     async _handleDroppedFolder(target, data) {
-        let folders = duplicate(this.object.flags['monks-enhanced-journal'].folders || []);
+        let folders = foundry.utils.duplicate(this.object.flags['monks-enhanced-journal'].folders || []);
 
         // Determine the closest folder ID
         const closestFolder = target ? target.closest(".folder") : null;
@@ -519,8 +519,8 @@ export class ListSheet extends EnhancedJournalSheet {
     }
 
     async _deleteFolder(folder, options, userId) {
-        let folders = duplicate(this.object.flags['monks-enhanced-journal']?.folders || []);
-        let items = duplicate(this.object.flags['monks-enhanced-journal']?.items || []);
+        let folders = foundry.utils.duplicate(this.object.flags['monks-enhanced-journal']?.folders || []);
+        let items = foundry.utils.duplicate(this.object.flags['monks-enhanced-journal']?.items || []);
         const parentId = folder.data.parent || null;
         const { deleteSubfolders, deleteContents } = options;
 
@@ -670,8 +670,8 @@ export class ListSheet extends EnhancedJournalSheet {
                 callback: li => {
                     let items = (that.object.flags['monks-enhanced-journal'].items || []);
                     const original = items.find(i => i.id == li.data("documentId"));
-                    let newItem = duplicate(original);
-                    newItem.id = randomID();
+                    let newItem = foundry.utils.duplicate(original);
+                    newItem.id = foundry.utils.randomID();
                     items.push(newItem);
                     that.object.setFlag('monks-enhanced-journal', 'items', items);
                 }
@@ -725,7 +725,7 @@ export class ListSheet extends EnhancedJournalSheet {
 
 export class CheckListSheet extends ListSheet {
     get sheetTemplates() {
-        delete _templateCache["modules/monks-enhanced-journal/templates/sheets/list-template-checklist.html"];
+        delete Handlebars.partials["modules/monks-enhanced-journal/templates/sheets/list-template-checklist.html"];
         return {
             listItemTemplate: "modules/monks-enhanced-journal/templates/sheets/list-template-checklist.html"
         };
@@ -744,7 +744,7 @@ export class CheckListSheet extends ListSheet {
         const element = event.currentTarget;
         let li = $(element).closest('li')[0];
 
-        let items = duplicate(this.object.flags['monks-enhanced-journal']?.items || []);
+        let items = foundry.utils.duplicate(this.object.flags['monks-enhanced-journal']?.items || []);
         let item = items.find(i => i.id == li.dataset.documentId);
 
         if (item) {
@@ -766,7 +766,7 @@ export class PollListSheet extends ListSheet {
     }
 
     get sheetTemplates() {
-        delete _templateCache["modules/monks-enhanced-journal/templates/sheets/list-template-poll.html"];
+        delete Handlebars.partials["modules/monks-enhanced-journal/templates/sheets/list-template-poll.html"];
         return {
             listItemTemplate: "modules/monks-enhanced-journal/templates/sheets/list-template-poll.html"
         };
@@ -788,7 +788,7 @@ export class PollListSheet extends ListSheet {
 
             for (let item of folder.content) {
                 let count = parseInt(item.data.count || 0);
-                item.percent = count == 0 ? 0 : Math.clamped(count / max, 0, 1) * 100;
+                item.percent = count == 0 ? 0 : Math.clamp(count / max, 0, 1) * 100;
 
                 item.voted = (item.data.players || []).includes(game.user.id);
 
@@ -873,7 +873,7 @@ export class PollListSheet extends ListSheet {
         let li = ev.currentTarget.closest(".list-item");
         let id = li.dataset.documentId;
 
-        let items = duplicate(getProperty(this.object, "flags.monks-enhanced-journal.items"));
+        let items = foundry.utils.duplicate(foundry.utils.getProperty(this.object, "flags.monks-enhanced-journal.items"));
         let item = items.find(i => i.id == id);
 
         let ownershipLevels = CONST.DOCUMENT_OWNERSHIP_LEVELS;
@@ -916,7 +916,7 @@ export class ProgressListSheet extends ListSheet {
     }
 
     get sheetTemplates() {
-        delete _templateCache["modules/monks-enhanced-journal/templates/sheets/list-template-progress.html"];
+        delete Handlebars.partials["modules/monks-enhanced-journal/templates/sheets/list-template-progress.html"];
         return {
             listItemTemplate: "modules/monks-enhanced-journal/templates/sheets/list-template-progress.html"
         };
@@ -964,11 +964,11 @@ export class ProgressListSheet extends ListSheet {
         let li = ev.currentTarget.closest(".list-item");
         let id = li.dataset.documentId;
 
-        let items = duplicate(getProperty(this.object, "flags.monks-enhanced-journal.items"));
+        let items = foundry.utils.duplicate(foundry.utils.getProperty(this.object, "flags.monks-enhanced-journal.items"));
         let item = items.find(i => i.id == id);
 
         if (item) {
-            item.count = Math.clamped((item.count || 0) + value, 0, item.max);
+            item.count = Math.clamp((item.count || 0) + value, 0, item.max);
             await this.object.update({ "flags.monks-enhanced-journal.items": items });
         }
     }
@@ -980,7 +980,7 @@ export class ProgressListSheet extends ListSheet {
         if (data.count != "" && data.count != undefined) {
             data.count = parseInt(data.count);
             if (data.max != "" && data.max != undefined)
-                data.count = Math.clamped(data.count, 0, data.max);
+                data.count = Math.clamp(data.count, 0, data.max);
         }
     }
 }

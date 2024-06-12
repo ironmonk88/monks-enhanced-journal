@@ -70,6 +70,23 @@ export class EncounterTemplate extends MeasuredTemplate {
         return object;
     }
 
+    static getSnappedPosition(x, y, interval = 1) {
+        if (interval === 0) return { x: Math.round(x), y: Math.round(y) };
+        let x0 = x.toNearest(canvas.grid.size);
+        let y0 = y.toNearest(canvas.grid.size);
+        let dx = 0;
+        let dy = 0;
+        if (interval !== 1) {
+            let delta = canvas.grid.size / interval;
+            dx = Math.round((x - x0) / delta) * delta;
+            dy = Math.round((y - y0) / delta) * delta;
+        }
+        return {
+            x: Math.round(x0 + dx),
+            y: Math.round(y0 + dy)
+        };
+    }
+
     /* -------------------------------------------- */
 
     /**
@@ -134,7 +151,7 @@ export class EncounterTemplate extends MeasuredTemplate {
         let now = Date.now(); // Apply a 20ms throttle
         if (now - this.#moveTime <= 20) return;
         const center = event.data.getLocalPosition(this.layer);
-        const snapped = canvas.grid.getSnappedPosition(center.x, center.y, 2);
+        const snapped = EncounterTemplate.getSnappedPosition(center.x, center.y, 2);
         this.document.updateSource({ x: snapped.x, y: snapped.y });
         this.refresh();
         this.#moveTime = now;
@@ -154,7 +171,7 @@ export class EncounterTemplate extends MeasuredTemplate {
         event.data.createState = 0;
 
         const center = event.data.getLocalPosition(this.layer);
-        const snapped = canvas.grid.getSnappedPosition(center.x, center.y, this.gridPrecision);
+        const snapped = EncounterTemplate.getSnappedPosition(center.x, center.y, this.gridPrecision);
 
         // Compute the ray
         const ray = new Ray(origin, snapped);
@@ -191,7 +208,7 @@ export class EncounterTemplate extends MeasuredTemplate {
      */
     async _onConfirmPlacement(event) {
         await this._finishPlacement(event);
-        const destination = canvas.grid.getSnappedPosition(this.document.x, this.document.y, 2);
+        const destination = EncounterTemplate.getSnappedPosition(this.document.x, this.document.y, 2);
         const distance = this.document.distance;
 
         this.#events.resolve({ x: destination.x, y: destination.y, distance: distance });

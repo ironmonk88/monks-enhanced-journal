@@ -84,6 +84,8 @@
   "MonksEnhancedJournal.use-generic-price.hint": "After purchasing, set price of purchased item back to the original non-adjusted price.  I would not recommend this.  USE AT YOUR OWN RISK!",
   "MonksEnhancedJournal.editor-engine.name": "Editor Engine",
   "MonksEnhancedJournal.editor-engine.hint": "Which editor should be used for editing journal entries",
+  "MonksEnhancedJournal.loot-auto-distribute.name": "Auto Distribute Loot",
+  "MonksEnhancedJournal.loot-auto-distribute.hint": "When opening the distribute dialog, automatically distribute currency",
 
   "MonksEnhancedJournal.SlideConfiguration": "Slide Configuration",
   "MonksEnhancedJournal.DCConfiguration": "DC Configuration",
@@ -438,6 +440,7 @@
   "MonksEnhancedJournal.OpenOutsideEnhancedBrowser": "Open outside Enhanced Browser",
   "MonksEnhancedJournal.OpenInNewTab": "Open in New Tab",
   "MonksEnhancedJournal.OpenAsPicture": "Open as Picture",
+  "MonksEnhancedJournal.SavingThrow": "Saving Throw",
 
   "MonksEnhancedJournal.msg.NoPlayersSelected": "No players selected to send this entry to",
   "MonksEnhancedJournal.msg.CannotAddItemType": "Cannot add item of this type",

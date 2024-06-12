@@ -1,3 +1,9 @@
+# Version 12.01
+
+v12 compatibility
+
+Added the option to automatically distribute coins between players when opening the distribute dialog
+
 # Version 11.11
 
 Fixed link styling for the link list that appears when selecting the text that matches the name of a document.

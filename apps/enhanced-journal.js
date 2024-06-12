@@ -13,7 +13,7 @@ export class EnhancedJournal extends Application {
     constructor(object, options = {}) {
         super(options);
 
-        this.tabs = duplicate(game.user.getFlag('monks-enhanced-journal', 'tabs') || [{ "id": makeid(), "text": i18n("MonksEnhancedJournal.NewTab"), "active": true, "history": [] }]);
+        this.tabs = foundry.utils.duplicate(game.user.getFlag('monks-enhanced-journal', 'tabs') || [{ "id": makeid(), "text": i18n("MonksEnhancedJournal.NewTab"), "active": true, "history": [] }]);
         this.tabs = this.tabs.map(t => { delete t.entity; return t; })
         this.tabs.active = (findone = true) => {
             let tab = this.tabs.find(t => t.active);
@@ -23,7 +23,7 @@ export class EnhancedJournal extends Application {
             }
             return tab;
         };
-        this.bookmarks = duplicate(game.user.getFlag('monks-enhanced-journal', 'bookmarks') || []);
+        this.bookmarks = foundry.utils.duplicate(game.user.getFlag('monks-enhanced-journal', 'bookmarks') || []);
 
         this._tabs;// = new Tabs({ navSelector: ".tabs", contentSelector: ".sheet-body", initial: null, callback: this.tabChange });
 
@@ -54,7 +54,7 @@ export class EnhancedJournal extends Application {
             classes.push('rpg-styled-ui');
         if (!setting("show-bookmarkbar"))
             classes.push('hide-bookmark');
-        return mergeObject(super.defaultOptions, {
+        return foundry.utils.mergeObject(super.defaultOptions, {
             id: "MonksEnhancedJournal",
             template: "modules/monks-enhanced-journal/templates/main.html",
             title: i18n("MonksEnhancedJournal.Title"),
@@ -87,8 +87,8 @@ export class EnhancedJournal extends Application {
 
     get isEditable() {
         let object = this.object;
-        if (object instanceof JournalEntryPage && !!getProperty(object, "flags.monks-enhanced-journal.type")) {
-            let type = getProperty(object, "flags.monks-enhanced-journal.type");
+        if (object instanceof JournalEntryPage && !!foundry.utils.getProperty(object, "flags.monks-enhanced-journal.type")) {
+            let type = foundry.utils.getProperty(object, "flags.monks-enhanced-journal.type");
             if (type == "base" || type == "oldentry") type = "journalentry";
             let types = MonksEnhancedJournal.getDocumentTypes();
             if (types[type]) {
@@ -109,7 +109,7 @@ export class EnhancedJournal extends Application {
         let canBack = this.canBack();
         let canForward = this.canForward();
 
-        return mergeObject(super.getData(options),
+        return foundry.utils.mergeObject(super.getData(options),
             {
                 tabs: this.tabs,
                 bookmarks: this.bookmarks.sort((a, b) => a.sort - b.sort),
@@ -217,7 +217,7 @@ export class EnhancedJournal extends Application {
                 else
                     currentTab = this.addTab();
             }
-            if (!currentTab.entity && !["blank", "folder"].includes(getProperty(currentTab, "flags.monks-enhanced-journal.type")))
+            if (!currentTab.entity && !["blank", "folder"].includes(foundry.utils.getProperty(currentTab, "flags.monks-enhanced-journal.type")))
                 currentTab.entity = await this.findEntity(currentTab.entityId);
             if (this.object?.id != currentTab.entity?.id || currentTab.entity instanceof Promise || currentTab.entity?.id == undefined)
                 this.object = currentTab.entity;
@@ -230,12 +230,12 @@ export class EnhancedJournal extends Application {
                 collapsed: setting("start-toc-collapsed")
             };
 
-            options = mergeObject(options, mergeObject(defaultOptions, game.user.getFlag("monks-enhanced-journal", `pagestate.${this.object.id}`) || {}), { overwrite: false });
+            options = foundry.utils.mergeObject(options, foundry.utils.mergeObject(defaultOptions, game.user.getFlag("monks-enhanced-journal", `pagestate.${this.object.id}`) || {}), { overwrite: false });
 
             let contentform = $('.content > section', this.element);
 
-            if (this.object instanceof JournalEntry && this.object.pages.size == 1 && (!!getProperty(this.object.pages.contents[0], "flags.monks-enhanced-journal.type") || !!getProperty(this.object, "flags.monks-enhanced-journal.type"))) {
-                let type = getProperty(this.object.pages.contents[0], "flags.monks-enhanced-journal.type") || getProperty(this.object, "flags.monks-enhanced-journal.type");
+            if (this.object instanceof JournalEntry && this.object.pages.size == 1 && (!!foundry.utils.getProperty(this.object.pages.contents[0], "flags.monks-enhanced-journal.type") || !!foundry.utils.getProperty(this.object, "flags.monks-enhanced-journal.type"))) {
+                let type = foundry.utils.getProperty(this.object.pages.contents[0], "flags.monks-enhanced-journal.type") || foundry.utils.getProperty(this.object, "flags.monks-enhanced-journal.type");
                 if (type == "base" || type == "oldentry") type = "journalentry";
                 let types = MonksEnhancedJournal.getDocumentTypes();
                 if (types[type]) {
@@ -253,7 +253,7 @@ export class EnhancedJournal extends Application {
 
             if (force != true) {
                 let testing = this.object;
-                if (testing instanceof JournalEntryPage && !!getProperty(testing, "flags.monks-enhanced-journal.type"))
+                if (testing instanceof JournalEntryPage && !!foundry.utils.getProperty(testing, "flags.monks-enhanced-journal.type"))
                     testing = testing.parent;
 
                 if (!game.user.isGM && testing && ((!testing.compendium && testing.testUserPermission && !testing.testUserPermission(game.user, "OBSERVER")) || (testing.compendium && !testing.compendium.visible))) {
@@ -485,8 +485,8 @@ export class EnhancedJournal extends Application {
 
             if (this.subsheet.options.scrollY && !options.anchor) {
                 let resetScrollPos = () => {
-                    let savedScroll = flattenObject(game.user.getFlag("monks-enhanced-journal", `pagestate.${this.object.id}.scrollPositions`) || {});
-                    this._scrollPositions = flattenObject(mergeObject(this._scrollPositions || {}, savedScroll));
+                    let savedScroll = foundry.utils.flattenObject(game.user.getFlag("monks-enhanced-journal", `pagestate.${this.object.id}.scrollPositions`) || {});
+                    this._scrollPositions = foundry.utils.flattenObject(foundry.utils.mergeObject(this._scrollPositions || {}, savedScroll));
                     /*
                     for (let [k, v] of Object.entries(this.subsheet._scrollPositions || {})) {
                         this._scrollPositions[k] = v || this._scrollPositions[k];
@@ -550,7 +550,7 @@ export class EnhancedJournal extends Application {
                 return pos;
             }, (this._scrollPositions || {}));
 
-            game.user.setFlag("monks-enhanced-journal", `pagestate.${this.object.id}.scrollPositions`, flattenObject(this._scrollPositions));
+            game.user.setFlag("monks-enhanced-journal", `pagestate.${this.object.id}.scrollPositions`, foundry.utils.flattenObject(this._scrollPositions));
         }
     }
 
@@ -564,9 +564,9 @@ export class EnhancedJournal extends Application {
                 return pos;
             }, {});
 
-            let oldScrollPosition = flattenObject(game.user.getFlag("monks-enhanced-journal", `pagestate.${this.object.id}.scrollPositions`) || {});
+            let oldScrollPosition = foundry.utils.flattenObject(game.user.getFlag("monks-enhanced-journal", `pagestate.${this.object.id}.scrollPositions`) || {});
 
-            game.user.setFlag("monks-enhanced-journal", `pagestate.${this.object.id}.scrollPositions`, flattenObject(mergeObject(oldScrollPosition, newScrollPositions)));
+            game.user.setFlag("monks-enhanced-journal", `pagestate.${this.object.id}.scrollPositions`, foundry.utils.flattenObject(foundry.utils.mergeObject(oldScrollPosition, newScrollPositions)));
         }
     }
 
@@ -626,7 +626,7 @@ export class EnhancedJournal extends Application {
                     case 'input':
                         div = $('<input>')
                             .addClass('nav-input ' + ctrl.id)
-                            .attr(mergeObject({ 'type': 'text', 'autocomplete': 'off', 'placeholder': ctrl.text }, (ctrl.attributes || {})))
+                            .attr(foundry.utils.mergeObject({ 'type': 'text', 'autocomplete': 'off', 'placeholder': ctrl.text }, (ctrl.attributes || {})))
                             .on('keyup', function (event) {
                                 ctrl.callback.call(that.subsheet, this.value, event);
                             });
@@ -656,7 +656,7 @@ export class EnhancedJournal extends Application {
     }
 
     get getDocumentTypes() {
-        return mergeObject(MonksEnhancedJournal.getDocumentTypes(), {
+        return foundry.utils.mergeObject(MonksEnhancedJournal.getDocumentTypes(), {
             blank: EnhancedJournalSheet
         });
     }
@@ -917,7 +917,7 @@ export class EnhancedJournal extends Application {
         if (!this.rendered)
             return;
 
-        this.render(true, mergeObject({ focus: true }, options));
+        this.render(true, foundry.utils.mergeObject({ focus: true }, options));
     }
 
     removeTab(tab, event) {
@@ -948,7 +948,7 @@ export class EnhancedJournal extends Application {
         let update = this.tabs.map(t => {
             let entity = t.entity;
             delete t.entity;
-            let tab = duplicate(t);
+            let tab = foundry.utils.duplicate(t);
             t.entity = entity;
             delete tab.element;
             delete tab.entity;
@@ -1005,7 +1005,7 @@ export class EnhancedJournal extends Application {
 
     async changeHistory(idx) {
         let tab = this.tabs.active();
-        tab.historyIdx = Math.clamped(idx, 0, (tab.history.length - 1));
+        tab.historyIdx = Math.clamp(idx, 0, (tab.history.length - 1));
 
         tab.entityId = tab.history[tab.historyIdx];
         tab.entity = await this.findEntity(tab.entityId, tab.text);
@@ -1068,7 +1068,7 @@ export class EnhancedJournal extends Application {
             if (entity instanceof Actor)
                 return 'actor';
 
-            let type = getProperty(entity, "flags.monks-enhanced-journal.type") || 'journalentry';
+            let type = foundry.utils.getProperty(entity, "flags.monks-enhanced-journal.type") || 'journalentry';
 
             return type;
         }
@@ -1106,7 +1106,7 @@ export class EnhancedJournal extends Application {
 
     saveBookmarks() {
         let update = this.bookmarks.map(b => {
-            let bookmark = duplicate(b);
+            let bookmark = foundry.utils.duplicate(b);
             return bookmark;
         });
         game.user.setFlag('monks-enhanced-journal', 'bookmarks', update);
@@ -1268,7 +1268,7 @@ export class EnhancedJournal extends Application {
 
             if (data.tabid) {
                 const target = event.target.closest(".journal-tab") || null;
-                let tabs = duplicate(this.tabs);
+                let tabs = foundry.utils.duplicate(this.tabs);
 
                 if (data.tabid === target.dataset.tabid) return; // Don't drop on yourself
 
@@ -1297,7 +1297,7 @@ export class EnhancedJournal extends Application {
                 }, { render: false });
             } else if (data.bookmarkId) {
                 const target = event.target.closest(".bookmark-button") || null;
-                let bookmarks = duplicate(this.bookmarks);
+                let bookmarks = foundry.utils.duplicate(this.bookmarks);
 
                 if (data.bookmarkId === target.dataset.bookmarkId) return; // Don't drop on yourself
 
@@ -1389,7 +1389,7 @@ export class EnhancedJournal extends Application {
             this.element.addClass("maximized");
             $('.toggle-fullscreen', this.element).html(`<i class="fas fa-compress-arrows-alt"></i>${i18n("MonksEnhancedJournal.Restore")}`);
             
-            this._previousPosition = duplicate(this.position);
+            this._previousPosition = foundry.utils.duplicate(this.position);
             this.setPosition({ left: 0, top: 0 });
             this.setPosition({ height: $('body').height(), width: $('body').width() - $('#sidebar').width() });
         }

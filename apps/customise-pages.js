@@ -30,7 +30,7 @@ export class CustomisePages extends FormApplication {
             tabs.push({ navSelector: `.${page}-tabs`, contentSelector: `.${page}-body`, initial: "tabs" });
         }
 
-        return mergeObject(super.defaultOptions, {
+        return foundry.utils.mergeObject(super.defaultOptions, {
             id: "customise-pages",
             classes: ["form"],
             title: "Customise Pages",
@@ -48,7 +48,7 @@ export class CustomisePages extends FormApplication {
         for (let page of CustomisePages.typeList) {
             let template = `modules/monks-enhanced-journal/templates/customise/${page}.html`;
             load_templates[page] = template;
-            delete _templateCache[template];
+            delete Handlebars.partials[template];
         }
         await loadTemplates(load_templates);
         const html = await super._renderInner(...args);
@@ -58,7 +58,7 @@ export class CustomisePages extends FormApplication {
     getData(options) {
         let data = super.getData(options);
         data.generalEdit = true;
-        data.sheetSettings = duplicate(this.sheetSettings);
+        data.sheetSettings = foundry.utils.duplicate(this.sheetSettings);
 
         for (let page of CustomisePages.typeList) {
             data.sheetSettings[page] = MonksEnhancedJournal.convertObjectToArray(data.sheetSettings[page]);
@@ -84,7 +84,7 @@ export class CustomisePages extends FormApplication {
 
     addAttribute(event) {
         let attribute = event.currentTarget.dataset.attribute;
-        let attributes = getProperty(this, attribute);
+        let attributes = foundry.utils.getProperty(this, attribute);
 
         if (!attributes) return;
 
@@ -94,16 +94,16 @@ export class CustomisePages extends FormApplication {
             maxOrder = Math.max(maxOrder, attr.order);
         }
 
-        attributes[randomID()] = { id: randomID(), name: "", shown: true, full: false, order: maxOrder + 1 };
+        attributes[foundry.utils.randomID()] = { id: foundry.utils.randomID(), name: "", shown: true, full: false, order: maxOrder + 1 };
 
         this.render(true);
     }
 
     changeData(event) {
         let prop = $(event.currentTarget).attr("name");
-        if (hasProperty(this, prop)) {
+        if (foundry.utils.hasProperty(this, prop)) {
             let val = $(event.currentTarget).attr("type") == "checkbox" ? $(event.currentTarget).prop('checked') : $(event.currentTarget).val();
-            setProperty(this, prop, val);
+            foundry.utils.setProperty(this, prop, val);
         }
     }
 
@@ -158,10 +158,10 @@ export class CustomisePages extends FormApplication {
             if (data.id === target.dataset.id) return; // Don't drop on yourself
 
             let property = event.target.dataset.attribute;
-            let attributes = getProperty(this, property);
+            let attributes = foundry.utils.getProperty(this, property);
 
-            let from = (getProperty(this, data.id) || {}).order ?? 0;
-            let to = (getProperty(this, target.dataset.id) || {}).order ?? 0;
+            let from = (foundry.utils.getProperty(this, data.id) || {}).order ?? 0;
+            let to = (foundry.utils.getProperty(this, target.dataset.id) || {}).order ?? 0;
             log('from', from, 'to', to);
 
             if (from < to) {
@@ -179,7 +179,7 @@ export class CustomisePages extends FormApplication {
                 }
                 $('.item-list .item[data-id="' + data.id + '"]', this.element).insertBefore(target);
             }
-            (getProperty(this, data.id) || {}).order = to;
+            (foundry.utils.getProperty(this, data.id) || {}).order = to;
         }
     }
 

@@ -5,8 +5,7 @@
     <div class="form-group">
         <label for="img">{{localize 'MonksEnhancedJournal.SlideImage'}}</label>
         <div class="form-fields">
-            {{ filePicker type="image" target="img" }}
-            <input class="image" type="text" name="img" placeholder="path/image.png" value="{{object.img}}">
+            <file-picker class="image" type="image" name="img" placeholder="path/image.png" value="{{object.img}}" ></file-picker>
         </div>
     </div>
     <div class="form-group">
@@ -30,8 +29,7 @@
     <div class="form-group">
         <label for="audiofile">{{localize 'MonksEnhancedJournal.AudioFile'}}</label>
         <div class="form-fields">
-            {{ filePicker type="audio" target="audiofile" }}
-            <input class="image" style="border-color:#7a7971;" type="text" name="audiofile" placeholder="path/audio.mp3" value="{{object.audiofile}}">
+            <file-picker class="image" style="border-color:#7a7971;" type="audio" name="audiofile" placeholder="path/audio.mp3" value="{{object.audiofile}}" ></file-picker>
         </div>
     </div>
     <div class="form-group">
