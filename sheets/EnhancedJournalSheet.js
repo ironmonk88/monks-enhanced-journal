@@ -487,9 +487,26 @@ export class EnhancedJournalSheet extends JournalPageSheet {
         let relationships = {};
         for (let item of (this.object.flags['monks-enhanced-journal']?.relationships || [])) {
             let entity = item.uuid ? await fromUuid(item.uuid) : game.journal.get(item.id);
-            if (!(entity instanceof JournalEntry || entity instanceof JournalEntryPage))
-                continue;
-            if (entity && entity.testUserPermission(game.user, "LIMITED") && (game.user.isGM || !item.hidden)) {
+            if (!(entity instanceof JournalEntry || entity instanceof JournalEntryPage)) {
+                if (game.user.isGM) {
+                    let type = "defunct";
+
+                    item.img = `modules/monks-enhanced-journal/assets/loading.gif`;
+                    item.shoptype = "";
+                    item.role = "";
+                    item.defunct = true;
+                    item.name = item.name || i18n("MonksEnhancedJournal.Unknown");
+                    
+                    if (!relationships[type])
+                        relationships[type] = {
+                            type: type,
+                            name: i18n("MonksEnhancedJournal.Unknown"),
+                            documents: []
+                        };
+
+                    relationships[type].documents.push(item);
+                }
+            } else if (entity && entity.testUserPermission(game.user, "LIMITED") && (game.user.isGM || !item.hidden)) {
                 let page = (entity instanceof JournalEntryPage ? entity : entity.pages.contents[0]);
                 MonksEnhancedJournal.fixType(page);
                 let type = foundry.utils.getProperty(page, "flags.monks-enhanced-journal.type");
@@ -508,6 +525,7 @@ export class EnhancedJournalSheet extends JournalPageSheet {
                 item.type = type;
                 item.shoptype = page.getFlag("monks-enhanced-journal", "shoptype");
                 item.role = page.getFlag("monks-enhanced-journal", "role");
+                delete item.defunct;
 
                 relationships[type].documents.push(item);
             }
