@@ -153,6 +153,12 @@
                         {{#if reward}}
                         <div class="details-section no-border">
                             <div class="form-group">
+                                {{#if owner}}
+                                <label style="flex: 0 0 100px;">{{localize 'MonksEnhancedJournal.Visible'}}</label>
+                                <div class="form-fields" style="flex: 0 0 36px;">
+                                    <input type="checkbox" class="select-reward" name="reward.{{reward.id}}.visible" {{checked reward.visible}} />
+                                </div>
+                                {{/if}}
                                 <label>{{localize 'MonksEnhancedJournal.Name'}}</label>
                                 <div class="form-fields">
                                     <input type="text" name="reward.{{reward.id}}.name" value="{{reward.name}}" />
@@ -177,20 +183,6 @@
                                         <input type="text" name="reward.{{reward.id}}.additional" value="{{reward.additional}}" />
                                     </div>
                                 </div>
-                                {{#if owner}}
-                                <div class="flexcol" style="flex: 0 0 100px; text-align: center; margin-right: 10px;">
-                                    <label data-tooltip="Enhanced Journal will use this to determine what the default reward is when assigning items from the Notes layer">Default</label>
-                                    <div class="form-fields" style="justify-content: center;">
-                                        <input type="checkbox" class="select-reward" name="reward.{{reward.id}}.active" {{checked reward.active}} />
-                                    </div>
-                                </div>
-                                <div class="flexcol" style="flex: 0 0 100px; text-align: center;">
-                                    <label data-tooltip="Enhanced Journals will reveal this reward to your players">{{localize 'MonksEnhancedJournal.Visible'}}</label>
-                                    <div class="form-fields" style="justify-content: center;">
-                                        <input type="checkbox" class="select-reward" name="reward.{{reward.id}}.visible" {{checked reward.visible}} />
-                                    </div>
-                                </div>
-                                {{/if}}
                             </div>
                         </div>
                         {{#if currency}}

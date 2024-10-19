@@ -1,3 +1,29 @@
+# Version 12.02
+
+Fixing issues with unidentified items being revealed when purchased
+
+Fixed issues with APS Journal templates listing in the drop down list
+
+Fixing issues with slide transition naming collisions
+
+Fixed issues with opening Scene Journal entry directing to the correct page
+
+Fixed issues with dataModel conflicts
+
+Fixed issue with displaying a hazard in MEJ
+
+Fixed issues encountered in Burning Wheel system
+
+Fixed issues with clamping the slideshow index
+
+Added Im Progress to the list of statuses available when using MATT to set an Objective
+
+Fixed issues when trying to save a Journal and trying to get Foundry to recognise the correct type of the Journal
+
+Switched assigning items in a quest to ask which one to assign instead of using a flag
+
+Fixed the slideshow to get a thumbnail from a video slide
+
 # Version 12.01
 
 v12 compatibility

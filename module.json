@@ -1,7 +1,7 @@
 {
   "title": "Monk's Enhanced Journal",
   "description": "Treat the journal like it's going to be popped out and used as a digital guide book.  Add extra information to summarize an encounter.  Show summaries of people and places.  Allow for bookmarking of commonly used pages",
-  "version": "12.01",
+  "version": "12.02",
   "authors": [
     {
       "name": "IronMonk",
@@ -95,16 +95,50 @@
     "css/apsjournal.css"
   ],
   "url": "https://github.com/ironmonk88/monks-enhanced-journal",
-  "download": "https://github.com/ironmonk88/monks-enhanced-journal/archive/12.01.zip",
+  "download": "https://github.com/ironmonk88/monks-enhanced-journal/archive/12.02.zip",
   "manifest": "https://github.com/ironmonk88/monks-enhanced-journal/releases/latest/download/module.json",
   "bugs": "https://github.com/ironmonk88/monks-enhanced-journal/issues",
-  "allowBugReporter": true,
   "id": "monks-enhanced-journal",
   "compatibility": {
     "minimum": "12",
     "verified": "12"
   },
+  "documentTypes": {
+    "JournalEntry": {
+      "encounter": {},
+      "event": {},
+      "journalentry": {},
+      "list": {},
+      "loot": {},
+      "organization": {},
+      "person": {},
+      "picture": {},
+      "place": {},
+      "poi": {},
+      "quest": {},
+      "shop": {},
+      "slideshow": {}
+    },
+    "JournalEntryPage": {
+      "encounter": {},
+      "event": {},
+      "journalentry": {},
+      "list": {},
+      "loot": {},
+      "organization": {},
+      "person": {},
+      "picture": {},
+      "place": {},
+      "poi": {},
+      "quest": {},
+      "shop": {},
+      "slideshow": {}
+    }
+  },
   "name": "monks-enhanced-journal",
   "minimumCoreVersion": "12",
-  "compatibleCoreVersion": "12"
+  "compatibleCoreVersion": "12",
+  "flags": {
+    "allowBugReporter": true
+  }
 }

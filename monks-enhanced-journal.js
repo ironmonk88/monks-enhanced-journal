@@ -184,6 +184,22 @@ export class MonksEnhancedJournal {
         return MEJHelpers.getPrice(price);
     }
 
+    static getItemDetails(item) {
+        let name = item.name;
+        let img = item.img;
+
+        let identifiedName = name;
+        if (item.system?.identification?.status == "unidentified") {
+            name = item.system?.identification.unidentified.name || name;
+            img = item.system?.identification.unidentified.img || img;
+        } else if (item.system?.identified === false) {
+            name = item.system?.unidentified?.name || name;
+        }
+
+        return { name, img, identifiedName };
+    }
+
+
     static getMEJType(journal) {
         let type = foundry.utils.getProperty(journal?.pages?.contents[0], "flags.monks-enhanced-journal.type") || foundry.utils.getProperty(journal, "flags.monks-enhanced-journal.type");
         if (((journal instanceof JournalEntry && journal?.pages?.size == 1) || journal instanceof JournalEntryPage) && !!type) {
@@ -1248,8 +1264,9 @@ export class MonksEnhancedJournal {
                 menu.callback = (li) => {
                     const scene = game.scenes.get(li.data("sceneId"));
                     const entry = scene.journal;
+                    const pageId = scene.journalEntryPage;
                     if (entry) {
-                        if (!MonksEnhancedJournal.openJournalEntry(entry)) {
+                        if (!MonksEnhancedJournal.openJournalEntry(entry, { pageId })) {
                             const sheet = entry.sheet;
                             sheet.options.sheetMode = "text";
                             sheet.render(true);
@@ -2110,7 +2127,8 @@ export class MonksEnhancedJournal {
             label: "Progress"
         });
 
-        CONFIG.JournalEntryPage.dataModels = foundry.utils.mergeObject((CONFIG.JournalEntryPage.dataModels || {}), {});
+        if (!CONFIG.JournalEntryPage.dataModels)
+            CONFIG.JournalEntryPage.dataModels = {};
         //game.system.documentTypes.JournalEntryPage = game.system.documentTypes.JournalEntryPage.concat(Object.keys(types)).sort();
         CONFIG.JournalEntryPage.typeLabels = foundry.utils.mergeObject((CONFIG.JournalEntryPage.typeLabels || {}), labels);
     }
@@ -2269,6 +2287,9 @@ export class MonksEnhancedJournal {
             if (allowed === false)
                 return false;
         }
+        if (doc instanceof Actor && doc.type == "hazard") {
+            return false;
+        }
 
         if (!game.user.isGM && doc?.getUserLevel(game.user) === CONST.DOCUMENT_OWNERSHIP_LEVELS.LIMITED) {
             if (doc.img) {
@@ -2325,7 +2346,12 @@ export class MonksEnhancedJournal {
                 html += `</optgroup>`;
             }
         } else {
-            Object.entries(group.groups).forEach(e => option(...e));
+            if (game.system.id == "burningwheel") {
+				const a = RegExp.escape(Handlebars.escapeExpression(choices))
+					, s = new RegExp(` value=["']${a}["']`);
+				return options.fn(this).replace(s, "$& selected")
+			} else
+				Object.entries(choices).forEach(e => option(...e));
         }
         return new Handlebars.SafeString(html);
     }
@@ -2846,8 +2872,10 @@ export class MonksEnhancedJournal {
                 if (MonksEnhancedJournal.slideshow.slideAt == data.idx)
                     return;
 
-                MonksEnhancedJournal.slideshow.slideAt = data.idx;
-                let slide = MonksEnhancedJournal.slideshow.slide = MonksEnhancedJournal.slideshow.content.slides[data.idx];
+                let slides = MonksEnhancedJournal.slideshow.content.slides;
+                let idx = Math.clamp(data.idx, 0, slides.length - 1);
+                MonksEnhancedJournal.slideshow.slideAt = idx;
+                let slide = MonksEnhancedJournal.slideshow.slide = MonksEnhancedJournal.slideshow.content.slides[idx];
 
                 //remove any that are still on the way out
                 $('.slide-showing .slide.out', MonksEnhancedJournal.slideshow.element).remove();
@@ -2928,6 +2956,7 @@ export class MonksEnhancedJournal {
                                 });
                             }
                         }
+
 
                         for (let text of slide.texts) {
                             if ($.isNumeric(text.fadein)) {
@@ -4883,6 +4912,7 @@ Hooks.on("setupTileActions", (app) => {
             'status': {
                 "inactive": "MonksEnhancedJournal.queststatus.unavailable",
                 "available": "MonksEnhancedJournal.queststatus.available",
+                "inprogress": "MonksEnhancedJournal.queststatus.inprogress",
                 "completed": "MonksEnhancedJournal.queststatus.completed",
                 "failed": "MonksEnhancedJournal.queststatus.failed"
             }

@@ -648,6 +648,11 @@ export class ShopSheet extends EnhancedJournalSheet {
         data.total = data.quantity * data.sell;
         foundry.utils.setProperty(item, "flags.monks-enhanced-journal", data);
 
+        let detail = MonksEnhancedJournal.getItemDetails(item);
+
+        item.name = detail.name;
+        item.img = detail.img;
+
         let messageContent = {
             action: 'sell',
             actor: { id: actor.id, name: actor.name, img: actor.img },

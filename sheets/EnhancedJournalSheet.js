@@ -1453,6 +1453,10 @@ export class EnhancedJournalSheet extends JournalPageSheet {
         data.total = (price ? data.quantity * data.sell : null);
         foundry.utils.setProperty(item, "flags.monks-enhanced-journal", data);
 
+        let detail = MonksEnhancedJournal.getItemDetails(item);
+        item.img = detail.img;
+        item.name = detail.name;
+
         let messageContent = {
             action: 'buy',
             actor: { id: actor.id, name: actor.name, img: actor.img },
@@ -1489,12 +1493,14 @@ export class EnhancedJournalSheet extends JournalPageSheet {
         if (maxquantity == 1 && !showTotal)
             return { quantity: 1, price: price };
 
+        let details = MonksEnhancedJournal.getItemDetails(item);
+
         let quantity = 1;
         let content = await renderTemplate('/modules/monks-enhanced-journal/templates/confirm-purchase.html',
             {
                 msg: format("MonksEnhancedJournal.HowManyWouldYouLike", { verb: verb }),
-                img: item.img,
-                name: item.name,
+                img: details.img,
+                name: details.name,
                 quantity: quantity,
                 price: price?.value + " " + price?.currency,
                 maxquantity: maxquantity,
@@ -1575,9 +1581,11 @@ export class EnhancedJournalSheet extends JournalPageSheet {
         if (setting('chat-message')) {
             let speaker = ChatMessage.getSpeaker({ actor });
 
+            let details = MonksEnhancedJournal.getItemDetails(item);
+
             let messageContent = {
                 actor: { id: actor.id, name: actor.name, img: actor.img },
-                items: [{ id: item.id, name: item.name, img: item.img, quantity: quantity }]
+                items: [{ id: item.id, name: details.name, img: details.img, quantity: quantity }]
             }
 
             //create a chat message
@@ -2816,8 +2824,8 @@ export class EnhancedJournalSheet extends JournalPageSheet {
                 if (type == "base" || type == "oldentry") type = "journalentry";
                 let types = MonksEnhancedJournal.getDocumentTypes();
                 if (types[type]) {
-                    let newentry = await JournalEntry.create({ name: title, folder: this.object.parent.folder }, { render: false });
-                    let data = { name: title, type: 'journalentry', text: { content: `<p>${selectedHTML.html()}</p>` } };
+                    let newentry = await JournalEntry.create({ name: title, folder: this.object.parent.folder, flags: { 'monks-enhanced-journal': { type: 'journalentry' } } }, { render: false });
+                    let data = { name: title, type: 'text', text: { content: `<p>${selectedHTML.html()}</p>` }, flags: { 'monks-enhanced-journal': { type: 'journalentry' } } };
                     await JournalEntryPage.create(data, { parent: newentry });
                     ui.journal.render();
                     MonksEnhancedJournal.emit("refreshDirectory", { name: "journal" });

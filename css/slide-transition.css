@@ -1,12 +1,12 @@
 :root {
-    --animate-duration: 1s;
-    --animate-delay: 1s;
-    --animate-repeat: 1;
+    --mej-slide-animate-duration: 1s;
+    --mej-slide-animate-delay: 1s;
+    --mej-slide-animate-repeat: 1;
 }
 
 .animate-slide {
     animation-duration: 1s;
-    animation-duration: var(--animate-duration);
+    animation-duration: var(--mej-slide-animate-duration);
     animation-fill-mode: both;
     animation-iteration-count: 1;
 }

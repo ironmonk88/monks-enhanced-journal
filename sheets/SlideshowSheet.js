@@ -162,18 +162,24 @@ export class SlideshowSheet extends EnhancedJournalSheet {
     static async createSlideThumbnail(src) {
         if (!src) return null;
         try {
-            const texture = await loadTexture(src);
-            let sprite = PIXI.Sprite.from(texture);
+            if (VideoHelper.hasVideoExtension(src)) {
+                const t = await ImageHelper.createThumbnail(src, { format: "image/jpeg", quality: 0.5, width: 200, height: 150 });
 
-            // Reduce to the smaller thumbnail texture
-            let ratio = 400 / sprite.width;
-            let width = sprite.width * ratio;
-            let height = sprite.height * ratio;
-            const reduced = ImageHelper.compositeCanvasTexture(sprite, { width: width, height: height });
-            const thumb = ImageHelper.textureToImage(reduced, { format: "image/jpeg", quality: 0.5 });
-            reduced.destroy(true);
+                return t.thumb;
+            } else {
+                const texture = await loadTexture(src);
+                let sprite = PIXI.Sprite.from(texture);
 
-            return thumb;
+                // Reduce to the smaller thumbnail texture
+                let ratio = 400 / sprite.width;
+                let width = sprite.width * ratio;
+                let height = sprite.height * ratio;
+                const reduced = ImageHelper.compositeCanvasTexture(sprite, { width: width, height: height });
+                const thumb = ImageHelper.textureToImage(reduced, { format: "image/jpeg", quality: 0.5 });
+                reduced.destroy(true);
+
+                return thumb;
+            }
         } catch (err) {
             log('error', err);
         }
@@ -547,7 +553,7 @@ export class SlideshowSheet extends EnhancedJournalSheet {
     playSlide(idx, animate = true) {
         let that = this;
         if (idx == undefined)
-            idx = this.object.flags["monks-enhanced-journal"].slideAt;
+            idx = this.object.flags["monks-enhanced-journal"].slideAt || 0;
         else { //if (idx != this.object.flags["monks-enhanced-journal"].slideAt)
             if (this.object.isOwner)
                 this.object.setFlag("monks-enhanced-journal", "slideAt", idx);
@@ -555,7 +561,14 @@ export class SlideshowSheet extends EnhancedJournalSheet {
                 this.object.flags['monks-enhanced-journal'].slideAt = idx;
         }
 
+        let slides = this.object.flags["monks-enhanced-journal"].slides;
+        idx = Math.clamp(idx, 0, slides.length - 1);
+
         let slide = this.object.flags["monks-enhanced-journal"].slides[idx];
+        if (slide == undefined) {
+            this.stopSlideshow();
+            return;
+        }
 
         //remove any that are still on the way out
         $('.slide-showing .slide.out', this.element).remove();
@@ -649,7 +662,11 @@ export class SlideshowSheet extends EnhancedJournalSheet {
                 window.clearTimeout(this.object?._currentSlide?.transition?.timer);
 
             let duration = slide.transition?.duration || this.object.flags['monks-enhanced-journal'].transition?.duration || 0;
-            if (duration > 0) {
+            duration = parseFloat(duration);
+            if (isNaN(duration) || duration <= 0) {
+                $('.slide-showing .duration', this.element).append($('<div>').addClass('duration-label').html(i18n("MonksEnhancedJournal.ClickForNext")));
+            } else {
+                duration = Math.min(duration, )
                 //set up the transition
                 let time = duration * 1000;
                 slide.transition.startTime = (new Date()).getTime();
@@ -658,8 +675,6 @@ export class SlideshowSheet extends EnhancedJournalSheet {
                         that.advanceSlide.call(that, 1);
                 }, time);
                 $('.slide-showing .duration', this.element).append($('<div>').addClass('duration-bar').css({ width: '0' }).show().animate({ width: '100%' }, time, 'linear'));
-            } else {
-                $('.slide-showing .duration', this.element).append($('<div>').addClass('duration-label').html(i18n("MonksEnhancedJournal.ClickForNext")));
             }
 
             for (let text of slide.texts) {

@@ -52,10 +52,12 @@ export class MakeOffering extends FormApplication {
             if (!item)
                 return null;
 
+            let details = MonksEnhancedJournal.getDetails(item);
+
             return {
                 id: i.id,
-                name: item.name,
-                img: item.img,
+                name: game.user.isGM ? details.identifiedName : details.name,
+                img: details.img,
                 qty: i.qty
             }
         }).filter(i => !!i);

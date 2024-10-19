@@ -330,9 +330,9 @@ export class APSJMenu extends ProseMirror.ProseMirrorMenu {
                     children: APSJ.panelList.map((c) => {
                         return {
                             action: `${c}Panel`,
-                            title: i18n('APSJournal.panel-bonus.name'),
+                            title: i18n(`APSJournal.panel-${c}.name`),
                             cmd: async () => {
-                                this.addElement(await APSJ.getPanel('bonus'));
+                                this.addElement(await APSJ.getPanel(c));
                             },
                         };
                     }),

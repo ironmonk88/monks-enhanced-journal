@@ -33,7 +33,7 @@
   "MonksEnhancedJournal.loot-folder.name": "Loot Folder",
   "MonksEnhancedJournal.loot-folder.hint": "If the loot entity is being created, which folder should it be created in",
   "MonksEnhancedJournal.open-new-tab.name": "Open in New Tab",
-  "MonksEnhancedJournal.open-new-tab.hint": "Open Sidebar directory links in a new tab rather than overwriting current tab",
+  "MonksEnhancedJournal.open-new-tab.hint": "Open links in a new tab rather than overwriting current tab",
   "MonksEnhancedJournal.hide-inline.name": "Hide Inline Links",
   "MonksEnhancedJournal.hide-inline.hint": "Hide Inline Links for documents that players don't have access to.",
   "MonksEnhancedJournal.hide-rolltables.name": "Hide Compendium Rolltables",

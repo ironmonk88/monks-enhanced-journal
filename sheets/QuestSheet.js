@@ -200,7 +200,7 @@ export class QuestSheet extends EnhancedJournalSheet {
         $('.reward-list .journal-tab .tab-content', html).click(this.changeReward.bind(this));
         $('.reward-list .journal-tab .close', html).click(this.deleteReward.bind(this));
         $('.reward-list .tab-add', html).click(this.addReward.bind(this));
-        $('.assign-items', html).click(this.constructor.assignItems.bind(this.object));
+        $('.assign-items', html).click(this.assignItems.bind(this.object));
 
         $('.item-refill', html).click(this.refillItems.bind(this));
         $('.item-edit', html).on('click', this.editItem.bind(this));
@@ -721,13 +721,52 @@ export class QuestSheet extends EnhancedJournalSheet {
     }
 
     static async assignItems() {
+        let rewards = foundry.utils.duplicate(this.getFlag('monks-enhanced-journal', 'rewards') || []);
+        if (rewards.length == 0)
+            return;
+
+        let reward = rewards[0];
+
+        if (rewards.length > 1) {
+            let rewardClick = (rewardId, html) => {
+                return rewardId;
+            };
+
+            let buttons = rewards.map(r => {
+                return {
+                    label: r.name,
+                    callback: rewardClick.bind(this, r.id)
+                }
+            });
+            let rewardId = await Dialog.wait({
+                title: `Which reward are you assigning?`,
+                content: `Please pick a reward to assign:</br></br>`,
+                buttons,
+                close: () => { return null; },
+                render: (html) => {
+                    $(html[2]).css("flex-direction", "column");
+                }
+            });
+            reward = rewards.find(r => r.id == rewardId);
+            if (!reward)
+                return;
+        }
+
+        reward.items = await super.assignItems(reward.items || [], reward.currency) || [];
+        for(let key of Object.keys(reward.currency))
+            reward.currency[key] = 0;
+
+        this.setFlag('monks-enhanced-journal', 'rewards', rewards);
+    }
+
+    async assignItems() {
         let rewards = foundry.utils.duplicate(this.getFlag('monks-enhanced-journal', 'rewards'));
         let reward = rewards.find(r => r.active) || rewards[0];
         if (reward == undefined)
             return;
 
         reward.items = await super.assignItems(reward.items || [], reward.currency) || [];
-        for(let key of Object.keys(reward.currency))
+        for (let key of Object.keys(reward.currency))
             reward.currency[key] = 0;
 
         this.setFlag('monks-enhanced-journal', 'rewards', rewards);
