@@ -103,39 +103,6 @@
     "minimum": "12",
     "verified": "12"
   },
-  "documentTypes": {
-    "JournalEntry": {
-      "encounter": {},
-      "event": {},
-      "journalentry": {},
-      "list": {},
-      "loot": {},
-      "organization": {},
-      "person": {},
-      "picture": {},
-      "place": {},
-      "poi": {},
-      "quest": {},
-      "shop": {},
-      "slideshow": {}
-    },
-    "JournalEntryPage": {
-      "encounter": {},
-      "event": {},
-      "journalentry": {},
-      "list": {},
-      "loot": {},
-      "organization": {},
-      "person": {},
-      "picture": {},
-      "place": {},
-      "poi": {},
-      "quest": {},
-      "shop": {},
-      "slideshow": {}
-    }
-  },
-  "name": "monks-enhanced-journal",
   "minimumCoreVersion": "12",
   "compatibleCoreVersion": "12",
   "flags": {
